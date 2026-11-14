@@ -54,7 +54,7 @@ interface OptionState { readonly key: number; readonly id?: string; text: string
 interface Saved { readonly prompt: boolean; readonly speaker: string; readonly promptText: string; readonly picked: string; readonly pickedChanged: boolean; readonly options: readonly { readonly key: number; readonly id?: string; readonly text: string; readonly policy: "hide" | "showDisabled"; readonly guardOpen: boolean; readonly builder: unknown }[] }
 
 export function buildChoiceEditor(payload: Choice, context: EditorContext, choice: ChoiceHost): BeatEditor {
-  const { model } = context, variables = model.authoring.variables;
+  const { model } = context; let variables = model.authoring.variables;
   const host = element("div", "beat-fields story-fields story-choice-editor");
   // The prompt: narration or a Character line shown with the options. Empty text is no prompt.
   let hasPrompt = !!payload.prompt;
@@ -296,6 +296,9 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
   const primary = list.querySelector<HTMLElement>('input[aria-label="Choice option text"]') ?? host;
   return {
     host, controls: [promptText], primary, read, internals, focus: () => focusFirst(host),
-    refresh: () => { options.forEach((option, index) => drawStructure(option, index)); drawNone(); },
+    refresh: () => {
+      const next = context.current?.().authoring.variables; if (next) { variables = next; options.forEach(option => option.builder.refresh(next)); }
+      options.forEach((option, index) => drawStructure(option, index)); drawNone();
+    },
   };
 }

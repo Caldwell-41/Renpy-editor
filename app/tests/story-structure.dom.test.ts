@@ -11,8 +11,9 @@ const tick = async (): Promise<void> => { await new Promise(resolve => setTimeou
 function setup(apply?: (command: SceneCommand) => Promise<SceneWorkspace>, fixture = storyFixture(3), extra: Partial<SceneActions> = {}) {
   const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });
   document.body.innerHTML = '<main></main><aside></aside>'; const host = document.querySelector<HTMLElement>("main")!; const model = fixture; const calls: { command: SceneCommand; expected: unknown }[] = []; const status: string[] = []; const navigation: StoryTarget[] = []; const continuations: unknown[] = [];
-  const view = renderStoryView(host, document.querySelector("aside")!, model, { apply: async (command, expected) => { calls.push({ command, expected }); return apply ? apply(command) : model; }, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); }, status: text => status.push(text), viewScene: target => navigation.push(target), viewContinuation: (...args) => continuations.push(args), viewSource: () => {}, ...extra }); const dispose = view.dispose;
-  return { browser, host, model, calls, status, navigation, continuations, view, close: async () => { dispose(); await browser.happyDOM.close(); } };
+  const actions: SceneActions = { apply: async (command, expected) => { calls.push({ command, expected }); return apply ? apply(command) : model; }, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); }, status: text => status.push(text), viewScene: target => navigation.push(target), viewContinuation: (...args) => continuations.push(args), viewSource: () => {}, ...extra };
+  const view = renderStoryView(host, document.querySelector("aside")!, model, actions); const dispose = view.dispose;
+  return { browser, host, model, actions, calls, status, navigation, continuations, view, close: async () => { dispose(); await browser.happyDOM.close(); } };
 }
 function button(host: ParentNode, text: string): HTMLButtonElement { const found = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === text); assert.ok(found, text); return found; }
 function choose(host: ParentNode, aria: string, value: string): HTMLSelectElement { const control = host.querySelector<HTMLSelectElement>(`select[aria-label="${aria}"]`)!; assert.ok(control, aria); control.value = value; control.dispatchEvent(new Event("change", { bubbles: true })); return control; }
@@ -84,6 +85,41 @@ test("+ New variable creates a project variable in place and the rule uses it", 
   button(panel, "Add Condition").click(); await tick();
   assert.deepEqual(s.calls[0]!.command.type === "insertCondition" && s.calls[0]!.command.condition, { status: "supported", expression: { type: "compare", operator: "equal", left: { type: "variable", variableId: "late", variableType: "bool" }, right: { type: "bool", value: true } } });
   assert.deepEqual(s.calls[0]!.expected, { projectRevision: "project-2", sourceMapRevision: "map" });
+  await s.close();
+});
+
+test("a kept condition draft's variable lists follow the project's variables after an Undo removes one", async () => {
+  let created: SceneWorkspace | undefined;
+  const s = setup(undefined, storyFixture(3), { createVariable: async request => {
+    created = withBodies({ ...s.model, projectRevision: "project-2", authoring: { ...s.model.authoring, variables: [...s.model.authoring.variables, { id: "late", technicalName: request.technicalName, variableType: request.variableType, defaultValue: false }] } });
+    return created;
+  } });
+  button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>(".story-editor .new-beat")!;
+  const summaries = (): HTMLElement[] => [...panel.querySelectorAll<HTMLElement>(".story-variable-picker > summary")];
+  const offered = (rule: number): string[] => { summaries()[rule]!.click(); const names = [...panel.querySelectorAll(".story-rule")[rule]!.querySelectorAll(".story-variable-name")].map(item => item.textContent!); summaries()[rule]!.click(); return names; };
+  summaries()[0]!.click(); press(panel, "+ New variable…");
+  type(s.host.querySelector<HTMLInputElement>('.story-new-variable input[aria-label="Variable name"]')!, "late_tram"); press(s.host.querySelector(".story-new-variable")!, "Create variable"); await tick();
+  press(panel, "+ Add rule"); assert.ok(offered(1).includes("late_tram"));
+  // Undo of "+ New variable…" removes it from the project; Story shows the kept draft again.
+  s.view.update({ ...created!, projectRevision: "project-3", authoring: s.model.authoring }, s.actions); await tick();
+  assert.ok(!offered(1).includes("late_tram"), "the list offers only the project's variables");
+  assert.equal(panel.querySelector(".story-rule .field-error")?.textContent, "This variable is no longer in the project. Choose another.");
+  await s.close();
+});
+
+test("a kept Choice draft's option rules follow the project's variables", async () => {
+  const s = setup(); selectBeat(s.host, "choice");
+  const editor = (): HTMLElement => storyEditor(s.host);
+  type(editor().querySelector<HTMLInputElement>('input[aria-label="Choice option text"]')!, "Ask about the late tram");
+  const offered = (): string[] => {
+    const open = editor().querySelector<HTMLElement>('[aria-label="Option 1 only when"]') ?? (editor().querySelector<HTMLButtonElement>(".story-guard-group .story-guard > button")!.click(), editor().querySelector<HTMLElement>('[aria-label="Option 1 only when"]')!);
+    const summary = open.querySelector<HTMLElement>(".story-variable-picker > summary")!; summary.click();
+    const names = [...open.querySelectorAll(".story-variable-name")].map(item => item.textContent!); summary.click(); return names;
+  };
+  assert.ok(offered().includes("name"));
+  s.view.update({ ...s.model, projectRevision: "project-2", authoring: { ...s.model.authoring, variables: s.model.authoring.variables.filter(item => item.id !== "name") } }, s.actions); await tick();
+  assert.equal(trackColumn(s.host, "choice")!.dataset.beatDraft, "true");
+  assert.ok(!offered().includes("name"), "the option's list offers only the project's variables");
   await s.close();
 });
 

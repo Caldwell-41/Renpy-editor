@@ -187,6 +187,9 @@ export interface RuleBuilder {
   readonly restore: (saved: unknown) => void;
   /** Renames the rules for screen readers, as when an option moves. */
   readonly relabel: (label: string) => void;
+  /** Story shows a kept draft again: the variable lists follow the project's variables now,
+   *  so a variable an Undo removed leaves them and a rule on it says it is gone. */
+  readonly refresh: (projectVariables: Variables) => void;
 }
 
 /** The rule builder for one condition. `initial` is the condition in source, if any. */
@@ -196,7 +199,7 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
   const host = element("div", "story-rules");
   const parsed = initial?.status === "supported" ? rulesOf(initial.expression, variables) : initial ? undefined : { join: "and" as const, rules: [] };
   if (!parsed) {
-    const problem = conditionProblem(initial), done = { host, read: () => initial, summary: () => options.caption ?? "", editable: false, capture: () => undefined, restore: () => undefined, relabel: () => undefined };
+    const problem = conditionProblem(initial), done = { host, read: () => initial, summary: () => options.caption ?? "", editable: false, capture: () => undefined, restore: () => undefined, relabel: () => undefined, refresh: () => undefined };
     if (problem && initial?.status === "unknown") {
       // A test core could not read: its line in an error box, why, and what to do (story-release-fixes / a-v2).
       const code = element("code", "story-rule-code story-rule-invalid", `${options.keyword} ${initial.source}:`), error = element("p", "story-rule-error", problemText(problem, options.subject ?? "branch"));
@@ -311,5 +314,9 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
     capture: () => state,
     restore: saved => { if (saved) { state = saved as State; draw(); } },
     relabel: next => { if (next !== label) { label = next; draw(); } },
+    refresh: next => {
+      const shape = (list: Variables): string => JSON.stringify(list.map(item => [item.id, item.technicalName, item.variableType]));
+      if (shape(next) !== shape(variables)) { variables = next; draw(); }
+    },
   };
 }

@@ -1625,7 +1625,7 @@ export function renderStoryView(
     if (!condition) builder.host.querySelector<HTMLButtonElement>(".story-add-rule")?.click();
     return builder;
   };
-  const builderEditor = (panel: HTMLElement, builder?: RuleBuilder): DraftEditor => ({ focus: () => focusFirst(panel), ...builder ? { internals: { capture: builder.capture, restore: builder.restore } } : {} });
+  const builderEditor = (panel: HTMLElement, builder?: RuleBuilder): DraftEditor => ({ focus: () => focusFirst(panel), ...builder ? { internals: { capture: builder.capture, restore: builder.restore }, refresh: () => builder.refresh(model.authoring.variables) } : {} });
   const branchNow = (sceneId: string, id: string): { current?: SceneDocument; node?: SceneBeat } => { const current = model.scenes.find(item => item.id === sceneId); return { current, node: current?.beats.find(item => item.id === id) }; };
   const redrawEditor = (): void => { const current = storyScene(model, selectedSceneId); if (current && editorHost?.isConnected) { drawEditor(current); markDrafts(); } };
   // Commit writes one condition draft. A refused write keeps it, with focus in it.
