@@ -45,9 +45,13 @@ export function openPlaceTree(options: PlaceTreeOptions): void {
   index(options.tree);
   const expanded = new Set(options.expanded);
   let chosen = options.chosen && nodes.get(options.chosen)?.place ? options.chosen : undefined;
-  let focusId = chosen ?? options.expanded.at(-1) ?? options.tree.id;
+  // With nothing chosen, focus starts on the beat's own place, or on the position right
+  // before protected Custom Code there, nearest the beat (story-release-fixes / a-v2).
+  const own = nodes.get(options.expanded.at(-1) ?? options.tree.id), rows = own?.children ?? [], here = rows.findIndex(row => row.note === "here");
+  const beforeRegion = rows.filter((row, at) => row.place && rows[at + 1]?.note === "locked").sort((a, b) => Math.abs(rows.indexOf(a) - here) - Math.abs(rows.indexOf(b) - here))[0];
+  let focusId = chosen ?? beforeRegion?.id ?? own?.id ?? options.tree.id;
   // The place the summary names while no position is chosen.
-  let pickedPlace = chosen ? parents.get(chosen)! : focusId, idle = chosen ? undefined : options.idle;
+  let pickedPlace = chosen ? parents.get(chosen)! : own?.id ?? options.tree.id, idle = chosen ? undefined : options.idle;
   let busy = false;
   const backdrop = element("div", "story-dialog-backdrop");
   const dialog = element("div", "story-dialog story-move"); dialog.role = "dialog"; dialog.setAttribute("aria-modal", "true"); dialog.setAttribute("aria-label", options.title); dialog.tabIndex = -1;

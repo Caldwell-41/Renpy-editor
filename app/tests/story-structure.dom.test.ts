@@ -597,6 +597,8 @@ test("Move to lists the place before protected Custom Code, shows the region and
     "-04 Custom Code · protected, stays in place", "-05 Eli's line · here now", " End of scene"]);
   assert.equal(dialog.querySelector(".story-dialog-note")!.textContent, "Moves this beat to the chosen scene, branch or option. Protected Custom Code stays where it is.");
   assert.equal(dialog.querySelector(".story-summary")!.textContent, "05 Eli's line is after 04 Custom Code now. Choose where to move it.");
+  // Focus starts on the place across the region, right before it.
+  assert.equal(document.activeElement!.textContent, "○Before 04 Custom Code");
   // A row that can't be chosen stays unchosen, by click and by keyboard.
   const row = (text: string): HTMLElement => [...dialog.querySelectorAll<HTMLElement>("[role=treeitem]")].find(item => item.lastElementChild!.textContent === text)!;
   row("04 Custom Code · protected, stays in place").click();

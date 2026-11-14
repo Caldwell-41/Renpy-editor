@@ -628,7 +628,9 @@ a beat follow `story-combined-editor` / `replace-v2`
   beat's own place show in order as rows that can't be chosen: "04 Custom Code ·
   protected, stays in place" and "05 Eli's line · here now". A beat may move past
   protected Custom Code, and the note adds "Protected Custom Code stays where it is."
-  (`story-release-fixes` / `a-v2`).
+  When protected Custom Code is in the beat's own place, focus starts on the position
+  right before it, nearest the beat ("Before 04 Custom Code"); otherwise it starts on
+  that place (`story-release-fixes` / `a-v2`).
 
 ### Beat drafts
 
