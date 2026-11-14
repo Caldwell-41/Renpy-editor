@@ -89,6 +89,32 @@ try {
  await page.locator('.recent-open').click();await page.getByRole('button',{name:'+ Add beat',exact:true}).waitFor();
  for(const theme of ['light','dark']){await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);for(const surface of ['Story','Source','Branches','Characters','Assets','Variables']){await page.getByRole('button',{name:surface,exact:true}).click();await page.locator('#app-status').filter({hasText:'Saved'}).waitFor().catch(async error=>{throw new Error(`${theme}/${surface}: ${await page.locator('#app-status').textContent()}`,{cause:error});});if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.story-track-beat').nth(2).click();await page.waitForFunction(()=>[...document.querySelectorAll('.catalog-thumbnail')].every(i=>(i.getAttribute('src')&&i.complete)||i.alt==='Preview unavailable'));await page.screenshot({path:output+surface.toLowerCase()+'-'+theme+'.png'});}}
 
+ // The shared header is one row of 40 to 48 px in every workspace (combined-v1, header-v2). At
+ // 560 px it keeps one row with the save status, Undo, Redo and a refused Story Save, whose full
+ // line and scene links move to the bottom status bar.
+ const headerRow=()=>page.evaluate(()=>{const header=document.querySelector('.app-header'),box=header.getBoundingClientRect();
+  const parts=[...header.querySelectorAll('.brand,.header-project,.app-status,.app-status .status-link,button')].filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden').map(e=>{const r=e.getBoundingClientRect();return {name:e.getAttribute('aria-label')||e.textContent.trim().slice(0,24)||e.className,top:r.top,bottom:r.bottom,right:r.right};});
+  return {height:box.height,parts,oneRow:parts.every(p=>p.top>=box.top-0.5&&p.bottom<=box.bottom+0.5),overflow:document.documentElement.scrollWidth>innerWidth||parts.some(p=>p.right>box.right+0.5)};});
+ const headerHeights=[];
+ const checkHeader=async label=>{const row=await headerRow();headerHeights.push([label,row.height]);assert.ok(row.height>=40&&row.height<=48,`${label}: header is ${row.height} px`);assert.ok(row.oneRow,`${label}: header wraps ${JSON.stringify(row.parts)}`);assert.equal(row.overflow,false,`${label}: header overflows ${JSON.stringify(row.parts)}`);};
+ const sizes=[[1440,900],[1100,720],[560,640]],setTheme=theme=>page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);
+ for(const theme of ['light','dark'])for(const [width,height] of sizes)for(const surface of ['Story','Source','Variables','Branches']){
+  await setTheme(theme);await page.setViewportSize({width,height});await page.getByRole('button',{name:surface,exact:true}).click();
+  if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.story-track-column').first().waitFor();
+  await checkHeader(`${surface} ${width}x${height} ${theme}`);await page.screenshot({path:output+`header-${surface.toLowerCase()}-${width}x${height}-${theme}.png`,clip:{x:0,y:0,width,height:80}});
+ }
+ await page.setViewportSize({width:1440,height:900});await page.getByRole('button',{name:'Story',exact:true}).click();
+ await page.locator('.story-track-beat[data-beat-kind=dialogue]').first().click();await page.locator('.expanded-beat textarea').first().press('End');await page.keyboard.type(' {i}');
+ await page.locator('.app-header').getByRole('button',{name:'Save',exact:true}).click();await page.locator('#app-status').filter({hasText:'Nothing saved'}).waitFor();
+ for(const theme of ['light','dark'])for(const [width,height] of sizes){
+  await setTheme(theme);await page.setViewportSize({width,height});
+  await checkHeader(`Story Save refusal ${width}x${height} ${theme}`);await page.screenshot({path:output+`header-refusal-${width}x${height}-${theme}.png`,clip:{x:0,y:0,width,height:80}});
+  const line=await page.evaluate(()=>{const visible=e=>!!e&&e.getClientRects().length>0&&getComputedStyle(e).fontSize!=='0px';const header=document.querySelector('#app-status'),footer=document.querySelector('.app-refusal');return {header:visible(header.querySelector('.status-link'))?header.textContent:getComputedStyle(header,'::before').content,footer:visible(footer)?footer.textContent:''};});
+  if(width===560)assert.deepEqual(line,{header:'"Nothing saved"',footer:'Nothing saved. 1 of 1 draft needs changes:The Apartment 1'},`560 px refusal: ${JSON.stringify(line)}`);
+  else assert.equal(line.header,'Nothing saved. 1 of 1 draft needs changes:The Apartment 1',`${width} px refusal: ${JSON.stringify(line)}`);
+ }
+ console.log('header heights',JSON.stringify(headerHeights));
+ await page.setViewportSize({width:1440,height:900});await page.locator('.expanded-beat').getByRole('button',{name:'Cancel',exact:true}).click();
 
  // Long accepted Choice captions remain reachable inside a short preview.
  await page.getByRole('button',{name:'Story',exact:true}).click();
@@ -107,7 +133,7 @@ try {
  const storyAt=async(width,height)=>{await page.setViewportSize({width,height});await page.getByRole('button',{name:'Source',exact:true}).click();await page.getByRole('button',{name:'Story',exact:true}).click();await page.locator('.story-track-column').first().waitFor();return storyLayout();};
  const laptop=await storyAt(1100,720);
  assert.equal(Math.round(laptop.nav),64,'Story opens with the icon rail below 1200 px');assert.equal(laptop.listOpen,false,'Story opens with the scene list closed below 1200 px');assert.equal(laptop.title,'false');
- assert.ok(Math.abs(laptop.stage.width-599)<=2&&Math.abs(laptop.stage.height-337)<=2,`1100 x 720 stage: ${JSON.stringify(laptop.stage)}`);
+ assert.ok(Math.abs(laptop.stage.width-617)<=2&&Math.abs(laptop.stage.height-347)<=2,`1100 x 720 stage: ${JSON.stringify(laptop.stage)}`);
  assert.deepEqual(laptop.tools.map(tool=>tool.text),['Writing focus','+ Add beat','More']);assert.equal(new Set(laptop.tools.map(tool=>tool.top)).size,1);
  // header-v2 / compact-v2: Cancel and Commit Beat show only while the beat has a draft.
  await page.locator('.story-track-beat[data-beat-kind=dialogue]').first().click();

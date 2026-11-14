@@ -389,7 +389,8 @@ its state. When space runs short, secondary panels collapse before the main edit
 shrinks. The footer and warning regions keep a fixed height so editing content never
 moves.
 
-The header save status sits before Undo, Redo and Save. It shows the number of
+The shared header is one 44 px row in every workspace (`story-revamp` / `combined-v1`
+and `header-v2` show 40 to 48 px). The header save status sits before Undo, Redo and Save. It shows the number of
 pending beat drafts ("5 unsaved beat drafts") as well as Saved, Saving, Unsaved Source
 draft, Conflict or Recovery required. The bottom status bar shows "Ready" and the
 "Undone: …" and "Redone: …" notices. The approved placement is `story-combined-status`
@@ -514,7 +515,7 @@ covers moving, unwrapping and deleting branches.
 - Below 1200 px, Story opens with the icon rail and the
   scene list closed. Like the scene list's other defaults, this is set when Story
   opens; resizing the window keeps the current state, and the toggles still work.
-  A 16:9 stage measures 599 × 337 at 1100 × 720.
+  A 16:9 stage measures 617 × 347 at 1100 × 720.
 - Below 900 px the scene list opens over the workspace. The workspace scrolls: stage,
   editor, Branch path, then Tracks or Reel, with the scene toolbar pinned at the top. A 16:9
   stage measures 480 × 270 at 560 × 640.
