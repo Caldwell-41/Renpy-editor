@@ -121,17 +121,19 @@ export interface ConditionProblem {
   readonly reason: string;
   readonly next: string;
   readonly create?: VariableDraft;
-  /** False when `next` already says what holds until then. */
-  readonly until?: false;
 }
 const symbolOf = (op: Operator): string => operators.find(item => item.op === op)!.symbol;
 /** The line with = ≠ ≤ ≥ for its comparisons. Quoted text stays as written. */
 const symbolLine = (source: string): string => source.trim().replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|==|!=|<=|>=/g, (match, quoted?: string) => quoted ?? operators.find(item => item.python === match)!.symbol);
 
-/** The problem with a test core could not read, or undefined for a test it read. */
+/** A test core could not read, as its line reads with = ≠ ≤ ≥. */
+export const unknownTest = (condition: Condition & { status: "unknown" }): string => symbolLine(condition.source);
+
+/** The problem with a test core could not read, or undefined for a test it read. Custom
+ *  Python the builder can't show is not a problem: the builder says so as a hint. */
 export function conditionProblem(condition: Condition | undefined): ConditionProblem | undefined {
   if (condition?.status !== "unknown") return undefined;
-  const test = symbolLine(condition.source), detail = condition.detail;
+  const test = unknownTest(condition), detail = condition.detail;
   const problem = (short: string, reason: string, next: string, create?: VariableDraft): ConditionProblem => ({ test, short, reason, next, ...create ? { create } : {} });
   switch (condition.diagnostic) {
     case "missingVariable":
@@ -146,12 +148,12 @@ export function conditionProblem(condition: Condition | undefined): ConditionPro
     }
     case "invalidValue": return problem("invalid number", "A number in this line is out of range.", "Change this line in Source.");
     case "limitExceeded": return problem("too long", "This line is too long for the builder.", "Shorten it in Source.");
-    case "unsupportedSyntax": return { ...problem("can't show", "The builder can't show this Python.", "Until then, edit it in Source."), until: false };
+    case "unsupportedSyntax": return undefined;
   }
 }
 /** The builder's message for a problem: why, what to do, and what it can't do until then. */
 export function problemText(problem: ConditionProblem, subject: "branch" | "option"): string {
-  return `${problem.reason} ${problem.next}${problem.until === false ? "" : ` Until then, the builder can't edit this ${subject}.`}`;
+  return `${problem.reason} ${problem.next} Until then, the builder can't edit this ${subject}.`;
 }
 
 export interface RuleBuilderOptions {
@@ -210,9 +212,10 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
       host.append(code, error, ...fixes.children.length ? [fixes] : []);
       return done;
     }
-    // Mixed All and Any, or another test that is not variable-against-value, such as trust > fare.
+    // Custom Python, mixed All and Any, or another test that is not variable-against-value,
+    // such as trust > fare. Information, not an error: its line and a hint.
     const note = initial?.status === "supported" && mixesJoins(initial.expression) ? "This mixes All and Any. The builder can't edit it. Edit it in Source." : "The builder can't show this Python. Until then, edit it in Source.";
-    host.append(element("code", "story-rule-code", options.caption ?? ""), element("p", "story-field-hint", note));
+    host.append(element("code", "story-rule-code", initial?.status === "unknown" ? `${options.keyword} ${initial.source}:` : options.caption ?? ""), element("p", "story-field-hint", note));
     if (options.source) host.append(button("Edit in Source", "button secondary", options.source));
     return done;
   }

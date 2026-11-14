@@ -1,5 +1,5 @@
 import { assignmentCaption, type ValidateAssignment } from "./story-arithmetic-editor.ts";
-import { buildRuleBuilder, conditionProblem, type ConditionProblem, type NewVariable, type RuleBuilder, type RuleBuilderOptions } from "./story-condition-editor.ts";
+import { buildRuleBuilder, conditionProblem, unknownTest, type ConditionProblem, type NewVariable, type RuleBuilder, type RuleBuilderOptions } from "./story-condition-editor.ts";
 import { openNewVariable, type NewVariableRequest } from "./story-new-variable.ts";
 import { addKindName, openAddBeat, type AddKind, type Placement } from "./story-add-beat.ts";
 import { beatLabels, buildBeatEditor, defaultPayload, type BeatEditor, type EditorContext, type EditorInternals } from "./story-beat-editors.ts";
@@ -192,8 +192,7 @@ export function conditionCaption(condition: Condition, variables?: SceneWorkspac
 
 /** A branch's test as text: its typed condition, its line when core could not read it, or its Variable for older sources. */
 function branchTest(branch: ConditionalBranch, model: SceneWorkspace): string {
-  const problem = conditionProblem(branch.condition);
-  return problem ? problem.test : branch.condition ? conditionCaption(branch.condition, model.authoring.variables)
+  return branch.condition?.status === "unknown" ? unknownTest(branch.condition) : branch.condition ? conditionCaption(branch.condition, model.authoring.variables)
     : model.authoring.variables.find(variable => variable.id === branch.variableId)?.technicalName ?? "Unknown condition";
 }
 function branchCaption(branch: ConditionalBranch, model: SceneWorkspace): string {

@@ -306,7 +306,9 @@ the editor cannot read stay read-only with Edit in Source; the builder never wri
 raw Python. A test that joins with both All and Any says "This mixes All and Any.
 The builder can't edit it. Edit it in Source." Another test the builder can't take,
 such as `trust > fare`, `3 < trust` or a bare `True`, says "The builder can't show
-this Python. Until then, edit it in Source." Screen readers name each rule's test a
+this Python. Until then, edit it in Source." So does a test core reads as custom Python.
+Each shows its line and that hint in the neutral hint style. It is information, not a
+problem: it gets no `!` and no count. Screen readers name each rule's test a
 comparison ("If rule 1 comparison", "Option 2 rule 1 comparison").
 
 A test core could not read (`story-release-fixes` / `a-v2`) keeps its line in a
@@ -325,8 +327,6 @@ side it sits in; the renderer never reads the test's Python:
   in Source."
 - Each of these ends "Until then, the builder can't edit this branch." ("this option"
   in a Choice's Only when).
-- Python the builder can't show: "The builder can't show this Python. Until then, edit
-  it in Source."
 
 The condition's editor lists each such branch under its summary, "Else if ticket_count
 = 2: ticket_count is not a project variable.", and marks its name with `!`. Its Tracks

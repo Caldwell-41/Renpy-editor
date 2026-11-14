@@ -574,13 +574,38 @@ test("a condition names each branch the builder can't edit, why, and what to do,
   await s.close();
 });
 
+test("a branch whose test is custom Python gets no ! and is not counted as a branch to fix", async () => {
+  const s = mountStory(brokenCondition({ status: "unknown", source: "renpy.seen_label('depot')", diagnostic: "unsupportedSyntax" }));
+  const flow = (): HTMLElement => [...s.host.querySelectorAll<HTMLElement>(".story-route [data-beat-id]")].find(column => column.dataset.beatId === "if")!.querySelector<HTMLElement>(".story-lane-5")!;
+  assert.equal(flow().textContent, "1 branch to fix");
+  const editor = selectBeat(s.host, "if");
+  assert.deepEqual(texts(editor, ".story-condition-problems li > span"), ["Else if destination ≥ 3: destination is text, and ≥ only compares numbers."]);
+  const branch = (id: string): HTMLElement => editor.querySelector<HTMLElement>(`.story-branch-editor[data-branch-id="${id}"]`)!;
+  assert.deepEqual(["if", "missing", "type", "else"].map(id => branch(id).querySelector(".story-branch-head > strong")!.textContent), ["If", "Else if", "Else if !", "Otherwise"]);
+  assert.equal(branch("missing").querySelector(".story-rule-error"), null);
+  assert.equal(branch("missing").querySelector(".story-rule-code")!.textContent, "elif renpy.seen_label('depot'):");
+  assert.equal(branch("missing").querySelector(".story-field-hint")!.textContent, "The builder can't show this Python. Until then, edit it in Source.");
+  assert.deepEqual(texts(s.host, ".story-branch-segment"), ["If", "Else if", "Else if !", "Otherwise"]);
+  const segment = [...s.host.querySelectorAll<HTMLButtonElement>(".story-branch-segment")].find(item => item.dataset.branchId === "missing")!;
+  assert.equal(segment.title, "Show Else if renpy.seen_label('depot')"); assert.equal(segment.classList.contains("story-branch-warn"), false);
+  press(branch("missing"), "Open");
+  const caption = s.host.querySelector<HTMLElement>(".story-branch-test")!;
+  assert.equal(caption.textContent, "renpy.seen_label('depot')"); assert.equal(caption.classList.contains("story-branch-warn"), false);
+  await s.close();
+});
+
 test("the rule builder words each problem for a branch or an option, and names its comparisons", async () => {
   const s = mountStory(brokenCondition()), variables = editorFixture().authoring.variables;
   const flag = { type: "variable" as const, variableId: "flag", variableType: "bool" as const };
   const shown = (condition: Condition, subject?: "branch" | "option"): HTMLElement => { const builder = buildRuleBuilder(variables, condition, { keyword: "if", label: "Option 1", empty: "", required: false, newVariable: async () => undefined, source: () => {}, ...subject ? { subject } : {} }); document.body.append(builder.host); return builder.host; };
   const missing = shown({ status: "unknown", source: "ticket_count == 2", diagnostic: "missingVariable", detail: { variable: "ticket_count", operator: "equal", other: "2", otherType: "int" } }, "option");
   assert.equal(missing.querySelector(".story-rule-error")!.textContent, "ticket_count is not a project variable. Create it, or change this line in Source. Until then, the builder can't edit this option.");
-  assert.equal(shown({ status: "unknown", source: "renpy.seen_label('x')", diagnostic: "unsupportedSyntax" }).querySelector(".story-rule-error")!.textContent, "The builder can't show this Python. Until then, edit it in Source.");
+  // Custom Python is information, not an error: its line and the note, in the neutral hint style.
+  const python = shown({ status: "unknown", source: "renpy.seen_label('x')", diagnostic: "unsupportedSyntax" });
+  assert.equal(python.querySelector(".story-rule-error"), null); assert.equal(python.querySelector("[aria-invalid]"), null);
+  assert.equal(python.querySelector(".story-rule-code")!.textContent, "if renpy.seen_label('x'):");
+  assert.equal(python.querySelector(".story-field-hint")!.textContent, "The builder can't show this Python. Until then, edit it in Source.");
+  assert.deepEqual(texts(python, "button"), ["Edit in Source"]);
   assert.equal(shown({ status: "supported", expression: { type: "and", left: flag, right: { type: "or", left: flag, right: flag } } }).querySelector(".story-field-hint")!.textContent, "This mixes All and Any. The builder can't edit it. Edit it in Source.");
   // A test that mixes nothing but is not variable-against-value, such as trust > fare, 3 < trust or True, is Python the builder can't show.
   const trust = { type: "variable" as const, variableId: "trust", variableType: "int" as const }, fare = { type: "variable" as const, variableId: "fare", variableType: "decimal" as const };

@@ -996,9 +996,9 @@ export const storyCases={
    await select(c,id);c.assert.equal(card(c,id).querySelector('textarea').value,value,`${name} keeps its draft`);}
   await openScene(c,'Variables');await select(c,fare.id);c.assert.equal(formula().value,'fare +');
   c.assert.equal(writes(),0);c.assert.deepEqual(await c.snapshot(),initial,'Drafts write nothing');
-  // The Code scene's tests that the builder cannot show give their reason in the Branch path (story-release-fixes / a-v2).
+  // The Code scene's broken tests give their reason in the Branch path (story-release-fixes / a-v2). Custom Python is not a problem.
   await openScene(c,'Code');const segments=[...c.document.querySelectorAll('.scene-workspace .story-branch-segment')].map(x=>x.title);
-  for(const caption of ["Show If trust in (1, 2), needs changes: The builder can't show this Python.",'Show If missing_flag = 4, needs changes: missing_flag is not a project variable.','Show Else if mood, needs changes: mood is text, not yes/no.'])
+  for(const caption of ['Show If trust in (1, 2)','Show If missing_flag = 4, needs changes: missing_flag is not a project variable.','Show Else if mood, needs changes: mood is text, not yes/no.'])
    c.assert(segments.includes(caption),`The Branch path shows ${caption}`);
   // The main Save refuses while the Set variable draft is invalid, writes nothing and
   // reveals that draft.
