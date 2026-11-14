@@ -227,15 +227,21 @@ fn main() {
     let evidence = PathBuf::from(args.get(evidence_index + 1).unwrap());
     let reopen = args.iter().any(|a| a == "--reopen");
     let retain = args.iter().any(|a| a == "--retain");
+    // `--seed example` opens the public Story example (tests/fixtures/story-example).
+    let example = args.windows(2).any(|pair| pair == ["--seed", "example"]);
     let service = if reopen {
         assert!(root.is_dir());
         LifecycleService::new(root.clone()).unwrap()
+    } else if example {
+        assert!(!root.exists());
+        let repository = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        LifecycleService::prepare_story_example_probe(root.clone(), &repository).unwrap()
     } else {
         assert!(!root.exists());
         LifecycleService::prepare_source_foundation_probe(root.clone()).unwrap()
     };
     let host = ApplicationHost::new(service);
-    if !reopen {
+    if !reopen && !example {
         let p = host
             .with_service(|s| s.open_path(&root.join("synthetic-project")).unwrap())
             .unwrap();
@@ -339,6 +345,10 @@ fn main() {
                 | "history.draftStep"
                 | "scene.list"
                 | "scene.apply"
+                | "scene.validateAssignment"
+                | "media.present"
+                | "screens.list"
+                | "screens.resolveTarget"
                 | "scene.saveDrafts"
                 | "scene.recovery"
                 | "scene.resolveRecovery"

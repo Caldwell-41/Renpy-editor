@@ -11,6 +11,9 @@ comments/formatting, dialogue/narration, labels, menus/conditions, variables,
 calls/jumps/returns, screens, ATL, media, translations, embedded Python, custom and
 malformed/incomplete syntax, non-ASCII text and mixed newlines. Assert byte-identical
 no-op round trips and smallest safe source patches, including opaque regions.
+Story qualification uses the public [Story example](../../tests/fixtures/story-example/README.md),
+which Story can open. Its one builder serves a routine core test, the Story release
+journey and the Phase 3A SDK gate.
 
 Retain save/reopen/Undo/Redo, clean/draft state, ordinary external in-place and
 replace-on-save conflicts, non-crashing interrupted-save recovery, `.rpyc` ghost

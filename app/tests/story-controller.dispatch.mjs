@@ -40,15 +40,16 @@ const ownedProjectSnapshot=fixture=>{
  if(existsSync(base))visit(base);return snapshot;
 };
 
-export async function qualifyStoryController(executable,{output,caseModule,selection='full'}={}) {
+// `seed: 'example'` opens the public Story example with the named `cases` instead.
+export async function qualifyStoryController(executable,{output,caseModule,selection='full',seed,cases:chosen}={}) {
  assert(executable&&output&&caseModule,'Explicit driver, evidence output and reviewed DOM case module required');
- assert(['full','narrow'].includes(selection));
+ assert(['full','narrow'].includes(selection));assert(!seed===!chosen&&[undefined,'example'].includes(seed));
  const cases=await import(pathToFileURL(resolve(caseModule)).href);
- const required=selection==='full'?STORY_CASES:NARROW;
+ const required=chosen??(selection==='full'?STORY_CASES:NARROW);
  for(const name of required)assert.equal(typeof cases.storyCases?.[name],'function',`Required actual DOM case not implemented: ${name}`);
  const fixture=join(tmpdir(),`loomlight-phase3a-controller-${randomUUID()}`);
  assert(!existsSync(fixture));
- const evidence={selection,passed:false,cases:[],driverStarts:0,driverExits:[],cleanupComplete:false,
+ const evidence={selection,seed:seed??'source-foundation',passed:false,cases:[],driverStarts:0,driverExits:[],cleanupComplete:false,
   sdkCommands:0,credentialOperations:0,aiOperations:0,packagedUi:'not exercised',humanAcceptance:'not claimed',fixtureId:basename(fixture),ownedFixtureRemoved:false,failureSnapshotRetained:false};
  let child,session,latestWorkspace,lastMutation,saveBefore,saveAfter;
  let domSequence=0,lastEvent,caseActive=false,caseEventStart=0;
@@ -192,7 +193,9 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
  };
  const start=async reopen=>{
   evidence.driverStarts++;
-  child=driverProcess(executable,['--root',fixture,'--seed-evidence',join(output,'seed'),...(reopen?['--reopen']:['--retain'])]);
+  child=driverProcess(executable,['--root',fixture,'--seed-evidence',join(output,'seed'),...(reopen?['--reopen']:['--retain']),...(seed&&!reopen?['--seed',seed]:[])],
+   // Building the example through the ordinary handlers takes several seconds.
+   seed&&!reopen?{startupTimeout:120000}:{});
   const ready=await child.next();evidence.lastDriverReady=ready;assert.equal(ready.fixtureId,basename(fixture));assert.equal(ready.ready,true);assert.equal(ready.reopen,reopen);
  };
  const stop=async()=>{
@@ -242,7 +245,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
     requests:requests.map(r=>r.request.requestId),sceneApplyRequests:requests.filter(r=>r.request.operation==='scene.apply').length});
    if(name===STORY_CASES[2]){saveBefore=before;saveAfter=after;}
   }
-  assert(saveBefore&&saveAfter,'One exact nested transaction required for shared history/reopen proof');
+  assert(chosen||saveBefore&&saveAfter,'One exact nested transaction required for shared history/reopen proof');
   // The DOM cases must leave their last accepted transaction undoable and restore any ordinary conflict.
   const beforeUndo=await snapshot();
   await history('undo');

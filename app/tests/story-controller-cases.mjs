@@ -136,6 +136,8 @@ const treeControls=c=>{
  const controls=[c.document.querySelector('.tree-heading button'),[...c.document.querySelectorAll('.tree-new-scene')].find(b=>b.textContent==='+ New Scene'),[...menu.querySelectorAll('button')].find(b=>b.textContent==='Rename')];
  controls.forEach(control=>c.assert(control?.isConnected&&!control.hidden));return controls;
 };
+// The assembled release journey on the public example (story-release.dispatch.mjs).
+export const RELEASE_JOURNEY='Drafts across scenes and views, refused Save, Commit, Source edit, B conflict, Save and Undo/Redo keep unrelated source';
 export const storyCases={
  [names[0]]:async c=>{
   const before=c.workspace(),s=scene(c),choice=s.beats.find(b=>b.payload.type==='choice');c.assert(choice);
@@ -864,5 +866,121 @@ export const storyCases={
   const saved=await c.snapshot();
   c.assert.equal(c.sourceText(saved,path),replaceOnce(c,c.sourceText(changed,path),'"Override A"','"Saved beside unknown tests"'));
   unchangedOtherSources(c,changed,saved,path);
+ },
+ [RELEASE_JOURNEY]:async c=>{
+  const byName=(c,name)=>c.workspace().scenes.find(s=>s.displayName===name);
+  const beatIn=(c,name,test)=>byName(c,name).beats.find(test);
+  const openScene=async(c,name)=>{const id=byName(c,name).id;
+   [...c.document.querySelectorAll('.tree-scene-open')].find(x=>x.textContent===name).click();
+   await c.wait(()=>shownScene(c)===id&&c.document.querySelector('.scene-workspace .story-track-column'));await c.settle();};
+  const view=async(c,name)=>{await c.click(name,c.document.querySelector('.scene-workspace .story-view-switch'));
+   await c.wait(()=>c.document.querySelector(`.scene-workspace .story-view-option[data-view="${name.toLowerCase()}"]`)?.getAttribute('aria-pressed')==='true');};
+  const focusToggle=c=>c.document.querySelector('.scene-workspace [data-writing-focus-toggle]');
+  const status=c=>c.document.querySelector('#app-status').textContent;
+  const header=c=>c.document.querySelector('.app-header');
+  const path=(c,name)=>byName(c,name).sourcePath;
+  const text=(c,snapshot,name)=>c.sourceText(snapshot,path(c,name));
+  // Every .rpy file but the named scenes'.
+  const others=(c,snapshot,names)=>Object.fromEntries(Object.entries(c.hashes(c.rpy(snapshot))).filter(([p])=>!names.map(n=>path(c,n)).includes(p)));
+  const initial=await c.snapshot(),from=c.requests().length;
+  const writes=()=>c.requests().slice(from).filter(r=>['scene.apply','scene.saveDrafts','source.save'].includes(r.request.operation)).length;
+  // Four drafts in four scenes and four places: a beat two branches deep through the
+  // Branch path in Tracks, a dialogue line in Reel, a Set variable in Writing focus, and
+  // a beat inside a Choice option.
+  const boundary=beatIn(c,'Platform',b=>b.payload.text==='Boundary branch');c.assert(boundary?.owner);
+  await view(c,'Tracks');await select(c,boundary.id);
+  c.assert(c.document.querySelector(`.scene-workspace .story-branch-segment[data-branch-id="${boundary.owner.branchId}"]`)?.ariaPressed==='true','The Branch path opens the Else if');
+  c.enter(card(c,boundary.id).querySelector('textarea'),'Boundary draft');await c.settle();
+  await openScene(c,'Tram');await view(c,'Reel');
+  const line=beatIn(c,'Tram',b=>b.payload.text==='Room for one more?');await select(c,line.id);
+  c.enter(card(c,line.id).querySelector('textarea'),'Room for two?');await c.settle();
+  await openScene(c,'Variables');await view(c,'Tracks');focusToggle(c).click();
+  const fare=beatIn(c,'Variables',b=>b.payload.type==='setVariable'&&b.payload.value?.operation==='add');c.assert(fare);
+  await select(c,fare.id);const formula=()=>card(c,fare.id).querySelector('[aria-label="Formula"]');
+  c.enter(formula(),'fare +');await c.settle();
+  await openScene(c,'Choices');
+  const glass=beatIn(c,'Choices',b=>b.payload.text==='Rain streaks the glass.');c.assert(glass?.owner);
+  await select(c,glass.id);c.enter(card(c,glass.id).querySelector('textarea'),'Rain on the glass.');await c.settle();
+  // Leaving Writing focus, other workspaces and other views keeps all four drafts and writes nothing.
+  focusToggle(c).click();
+  const owner=c.session();await c.click('Source');await c.wait(()=>c.session()===owner&&c.document.querySelector('.source-workspace'));await c.settle();
+  await c.click('Branches');await c.wait(()=>c.document.querySelector('.branches-workspace'));await c.settle();
+  await goStory(c,byName(c,'Choices').id);await view(c,'Reel');await view(c,'Tracks');
+  const kept=[['Platform',boundary.id,'Boundary draft'],['Tram',line.id,'Room for two?'],['Choices',glass.id,'Rain on the glass.']];
+  for(const [name,id,value] of kept){await openScene(c,name);c.assert.equal(row(c,id).dataset.beatDraft,'true');
+   await select(c,id);c.assert.equal(card(c,id).querySelector('textarea').value,value,`${name} keeps its draft`);}
+  await openScene(c,'Variables');await select(c,fare.id);c.assert.equal(formula().value,'fare +');
+  c.assert.equal(writes(),0);c.assert.deepEqual(await c.snapshot(),initial,'Drafts write nothing');
+  // The Code scene's tests that the builder cannot show give their reason in the Branch path.
+  await openScene(c,'Code');const segments=[...c.document.querySelectorAll('.scene-workspace .story-branch-segment')].map(x=>x.title);
+  for(const caption of ['Show If Unknown condition: trust in (1, 2) (unsupported expression)','Show If Unknown condition: missing_flag == 4 (missing Variable)','Show Else if Unknown condition: mood (Variable type mismatch)'])
+   c.assert(segments.includes(caption),`The Branch path shows ${caption}`);
+  // The main Save refuses while the Set variable draft is invalid, writes nothing and
+  // reveals that draft.
+  let at=c.requests().length,was=status(c);await c.click('Save',header(c));
+  await c.wait(()=>status(c)!==was&&/^Nothing saved/.test(status(c)));await c.settle();
+  // Core checks a formula, so the one request is refused whole.
+  c.assert.deepEqual(c.requests().slice(at).filter(r=>r.request.operation==='scene.saveDrafts').map(r=>r.errorCode),['INVALID_ARITHMETIC_SYNTAX']);
+  c.assert.equal(status(c),'Nothing saved. 1 of 4 drafts needs changes:Variables 1');
+  c.assert.equal(shownScene(c),byName(c,'Variables').id);c.assert.equal(row(c,fare.id).dataset.saveRefused,'true');
+  c.assert.deepEqual(await c.snapshot(),initial,'A refused Save writes nothing');
+  // Ordinary external edits: the Boundary line itself, and an unrelated line in Choices.
+  // Story reads them on return from Branches.
+  await c.raw({driver:'externalReplace',path:path(c,'Platform'),remove:'bec "Boundary branch"',insert:'bec "Boundary changed outside"'});
+  await c.raw({driver:'externalReplace',path:path(c,'Choices'),remove:'"The doors close."',insert:'"The doors slide shut."'});
+  const external=await c.snapshot();
+  await c.click('Branches');await c.wait(()=>c.document.querySelector('.branches-workspace'));await c.settle();await goStory(c,byName(c,'Variables').id);
+  // The unrelated edit leaves the option draft as it was; the Boundary draft shows the B conflict.
+  await openScene(c,'Choices');c.assert.equal(row(c,glass.id).dataset.beatConflict,undefined);c.assert.equal(row(c,glass.id).dataset.beatDraft,'true');
+  await openScene(c,'Platform');c.assert.equal(row(c,boundary.id).dataset.beatConflict,'true');
+  await select(c,boundary.id);const conflict=card(c,boundary.id);
+  c.assert.equal(conflict.querySelector('.story-conflict > strong')?.textContent,'Conflict with source');
+  c.assert.equal(conflict.querySelector('.story-conflict-source')?.textContent,'Boundary changed outside');
+  c.assert.equal(c.labelled('Your draft',conflict).value,'Boundary draft');
+  // Override source writes the draft over the changed line, in its own branch.
+  at=c.requests().length;await c.click('Override source',conflict);
+  await c.wait(()=>c.requests().slice(at).some(r=>r.request.operation==='scene.apply'&&r.responseOk));await c.settle();
+  c.assert.deepEqual(c.requests().slice(at).find(r=>r.request.operation==='scene.apply').request.payload.command.expectedBody,{type:'branch',...boundary.owner});
+  const overridden=await c.snapshot();
+  c.assert.equal(text(c,overridden,'Platform'),replaceOnce(c,text(c,external,'Platform'),'bec "Boundary changed outside"','bec "Boundary draft"'));
+  c.assert.deepEqual(others(c,overridden,['Platform']),others(c,external,['Platform']));
+  // Commit saves only the Tram line.
+  await openScene(c,'Tram');await select(c,line.id);
+  await c.click('Commit Beat',card(c,line.id));await c.wait(accepted(c,line.id));await c.settle();
+  const committed=await c.snapshot();
+  c.assert.equal(text(c,committed,'Tram'),replaceOnce(c,text(c,overridden,'Tram'),'eli "Room for one more?"','eli "Room for two?"'));
+  c.assert.deepEqual(others(c,committed,['Tram']),others(c,overridden,['Tram']));
+  // A Source edit in another workspace, between Story edits.
+  const codePath=path(c,'Code'),editor=await openSourceEditor(c,codePath);
+  const edited=replaceOnce(c,editor.value,'"End of the line."','"Last stop."');c.enter(editor,edited);
+  await c.wait(async()=>(await c.call('source.open',{path:codePath})).text===edited);await c.settle();
+  at=c.requests().length;await c.click('Save Source',header(c));
+  await c.wait(()=>c.requests().slice(at).some(r=>r.request.operation==='source.save'&&r.responseOk)&&mountedSourceEditor(c,codePath)?.value===edited);await c.settle();
+  await goStory(c,byName(c,'Tram').id);
+  const sourced=await c.snapshot();c.assert.equal(text(c,sourced,'Code'),edited);
+  c.assert.deepEqual(others(c,sourced,['Code']),others(c,committed,['Code']));
+  // Fixing the Set variable lets the main Save accept both remaining drafts in one request.
+  await openScene(c,'Variables');await select(c,fare.id);c.enter(formula(),'0.5');await c.settle();
+  at=c.requests().length;await c.click('Save',header(c));
+  await c.wait(()=>c.requests().slice(at).some(r=>r.request.operation==='scene.saveDrafts'&&r.responseOk));await c.settle();
+  c.assert.equal(status(c),'Saved');
+  c.assert.equal(c.requests().slice(at).find(r=>r.request.operation==='scene.saveDrafts').request.payload.commands.length,2);
+  const saved=await c.snapshot();
+  c.assert.equal(text(c,saved,'Variables'),replaceOnce(c,text(c,sourced,'Variables'),'$ fare += 0.25','$ fare += 0.5'));
+  c.assert.equal(text(c,saved,'Choices'),replaceOnce(c,text(c,sourced,'Choices'),'"Rain streaks the glass."','"Rain on the glass."'));
+  c.assert.deepEqual(others(c,saved,['Variables','Choices']),others(c,sourced,['Variables','Choices']));
+  // Undo walks back across Story and Source, newest first: the Save's two beats (the
+  // last edited first), the Source edit, the Commit and the override. It ends at the
+  // bytes the external writer left; every other file has its first bytes.
+  const undo=async()=>{await c.history('undo');await c.settle();return c.hashes(c.rpy(await c.snapshot()));};
+  const without=(snapshot,name,from)=>({...c.hashes(c.rpy(snapshot)),[path(c,name)]:c.hashes(c.rpy(from))[path(c,name)]});
+  c.assert.deepEqual(await undo(),without(saved,'Variables',sourced));
+  for(const expected of [sourced,committed,overridden,external])c.assert.deepEqual(await undo(),c.hashes(c.rpy(expected)));
+  c.assert.deepEqual(others(c,external,['Platform','Choices']),others(c,initial,['Platform','Choices']));
+  c.assert.equal(header(c).querySelector('[data-history="undo"]').getAttribute('aria-disabled'),'true','Nothing is left to undo');
+  // Redo replays all five. The harness then undoes and redoes once more, reopens the
+  // project in a new process and checks every source byte.
+  for(let index=0;index<5;index++){await c.history('redo');await c.settle();}
+  c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(saved)));
  },
 };

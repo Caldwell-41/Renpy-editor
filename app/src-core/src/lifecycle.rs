@@ -3,6 +3,7 @@ pub(crate) mod acceptance;
 pub mod runtime;
 pub use crate::renpy::runtime::canvas::CanvasShutdown;
 mod runtime_probe;
+mod story_example;
 use crate::ai_credentials::Records;
 use crate::{
     authoring::{
