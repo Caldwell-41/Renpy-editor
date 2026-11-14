@@ -173,7 +173,7 @@ export function problemText(problem: ConditionProblem, subject: "branch" | "opti
 export interface RuleBuilderOptions {
   /** The Ren'Py keyword its line starts with. */
   readonly keyword: "if" | "elif";
-  /** Names the rules for screen readers: "Option 2", "If". */
+  /** Names the rules for screen readers: "Option 2", "If". `relabel` changes it. */
   readonly label: string;
   /** What the line says with no rules: "Always available", or the reason a test is needed. */
   readonly empty: string;
@@ -201,16 +201,18 @@ export interface RuleBuilder {
   /** Builder state for draft-step Undo. */
   readonly capture: () => unknown;
   readonly restore: (saved: unknown) => void;
+  /** Renames the rules for screen readers, as when an option moves. */
+  readonly relabel: (label: string) => void;
 }
 
 /** The rule builder for one condition. `initial` is the condition in source, if any. */
 export function buildRuleBuilder(projectVariables: Variables, initial: Condition | undefined, options: RuleBuilderOptions): RuleBuilder {
   // The project's variables, and any the author creates from the list.
-  let variables = projectVariables;
+  let variables = projectVariables, label = options.label;
   const host = element("div", "story-rules");
   const parsed = initial?.status === "supported" ? rulesOf(initial.expression, variables) : initial ? undefined : { join: "and" as const, rules: [] };
   if (!parsed) {
-    const problem = conditionProblem(initial, variables), done = { host, read: () => initial, summary: () => options.caption ?? "", editable: false, capture: () => undefined, restore: () => undefined };
+    const problem = conditionProblem(initial, variables), done = { host, read: () => initial, summary: () => options.caption ?? "", editable: false, capture: () => undefined, restore: () => undefined, relabel: () => undefined };
     if (problem && initial?.status === "unknown") {
       // A test core could not read: its line in an error box, why, and what to do (story-release-fixes / a-v2).
       const code = element("code", "story-rule-code story-rule-invalid", `${options.keyword} ${initial.source}:`), error = element("p", "story-rule-error", problemText(problem, options.subject ?? "branch"));
@@ -246,7 +248,7 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
     const focused = document.activeElement instanceof HTMLElement && host.contains(document.activeElement) ? document.activeElement.closest<HTMLElement>("[data-rule-focus]")?.dataset.ruleFocus : undefined;
     checks = []; host.replaceChildren();
     if (state.rules.length > 1) {
-      const match = backingSelect(`${options.label} match`, [{ value: "and", label: "All" }, { value: "or", label: "Any" }], state.join);
+      const match = backingSelect(`${label} match`, [{ value: "and", label: "All" }, { value: "or", label: "Any" }], state.join);
       match.addEventListener("change", () => set({ join: match.value as "and" | "or" }));
       const join = segmented(match, [{ value: "and", label: "All" }, { value: "or", label: "Any" }]); join.dataset.ruleFocus = "join";
       host.append(field("Match", join, match));
@@ -269,7 +271,7 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
   };
   const ruleRow = (rule: Rule, index: number): HTMLElement => {
     const row = element("div", "story-rule"); row.dataset.rule = String(index);
-    const variable = variables.find(item => item.id === rule.variableId), title = `${options.label} rule ${index + 1}`;
+    const variable = variables.find(item => item.id === rule.variableId), title = `${label} rule ${index + 1}`;
     const update = (next: Partial<Rule>, redraw = false, notify = false): void => set({ rules: state.rules.map((item, at) => at === index ? { ...item, ...next, original: undefined } : item) }, redraw, notify);
     // The variable list: name and type, as in Story Combined v1, ending with "+ New variable…".
     const pick = backingSelect(`${title} variable`, variableItems(), rule.variableId);
@@ -323,5 +325,6 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
     summary: () => state.rules.map(rule => ruleWords(rule, variables)).join(` ${state.join} `),
     capture: () => state,
     restore: saved => { if (saved) { state = saved as State; draw(); } },
+    relabel: next => { if (next !== label) { label = next; draw(); } },
   };
 }

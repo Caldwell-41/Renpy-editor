@@ -52,7 +52,7 @@ const unchangedOtherSources=(c,before,after,path)=>{
 const guard=async(c,choice,index,value)=>{
  await select(c,choice.id);const editor=card(c,choice.id);const option=editor.querySelectorAll('.story-option')[index];c.assert(option);
  option.querySelector('.story-guard > button').click();
- c.enter(option.querySelector('[aria-label="Only when rule 1 value"]'),value);
+ c.enter(option.querySelector(`[aria-label="Option ${index+1} rule 1 value"]`),value);
  await c.click('Commit Beat',editor);await c.wait(accepted(c,choice.id));
 };
 // Add a beat: pick a kind in the open dialog; its new beat opens in the editor.

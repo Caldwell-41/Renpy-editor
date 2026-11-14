@@ -533,14 +533,14 @@ test("a condition names each branch the builder can't edit, why, and what to do,
 test("the rule builder words each problem for a branch or an option, and names its comparisons", async () => {
   const s = mountStory(brokenCondition()), variables = editorFixture().authoring.variables;
   const flag = { type: "variable" as const, variableId: "flag", variableType: "bool" as const };
-  const shown = (condition: Condition, subject?: "branch" | "option"): HTMLElement => { const builder = buildRuleBuilder(variables, condition, { keyword: "if", label: "Only when", empty: "", required: false, newVariable: async () => undefined, source: () => {}, ...subject ? { subject } : {} }); document.body.append(builder.host); return builder.host; };
+  const shown = (condition: Condition, subject?: "branch" | "option"): HTMLElement => { const builder = buildRuleBuilder(variables, condition, { keyword: "if", label: "Option 1", empty: "", required: false, newVariable: async () => undefined, source: () => {}, ...subject ? { subject } : {} }); document.body.append(builder.host); return builder.host; };
   const missing = shown({ status: "unknown", source: "ticket_count == 2", diagnostic: "missingVariable" }, "option");
   assert.equal(missing.querySelector(".story-rule-error")!.textContent, "ticket_count is not a project variable. Create it, or change this line in Source. Until then, the builder can't edit this option.");
   assert.equal(shown({ status: "unknown", source: "renpy.seen_label('x')", diagnostic: "unsupportedSyntax" }).querySelector(".story-rule-error")!.textContent, "The builder can't show this Python. Until then, edit it in Source.");
   assert.equal(shown({ status: "supported", expression: { type: "and", left: flag, right: { type: "or", left: flag, right: flag } } }).querySelector(".story-field-hint")!.textContent, "This mixes All and Any. The builder can't edit it. Edit it in Source.");
   // Screen readers name each rule's test a comparison.
   const rule = shown({ status: "supported", expression: { type: "compare", operator: "greaterEqual", left: { type: "variable", variableId: "trust", variableType: "int" }, right: { type: "int", value: "3" } } });
-  chooseIn(rule, "Only when rule 1 comparison", "≤"); assert.ok(rule.querySelector('select[aria-label="Only when rule 1 comparison"]'));
+  chooseIn(rule, "Option 1 rule 1 comparison", "≤"); assert.ok(rule.querySelector('select[aria-label="Option 1 rule 1 comparison"]'));
   await s.close();
 });
 

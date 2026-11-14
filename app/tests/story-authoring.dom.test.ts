@@ -57,13 +57,24 @@ test("Commit on a missing Background marks its row and focuses Change", async ()
 test("guarded Choice validates exact integer at blur/submission; IME and failed writes retain every field", async () => {
   const writes: SceneCommand[] = []; const s = setup([choice, ending], async command => { writes.push(command); throw Error("Map changed. Input retained."); });
   selectBeat(s.host, "choice");
-  const value = openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('input[aria-label="Only when rule 1 value"]')!;
+  const value = openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('input[aria-label="Option 1 rule 1 value"]')!;
   assert.equal(value.value, "5");
   type(value, "9223372036854775808"); assert.equal(value.hasAttribute("aria-invalid"), false);
   value.dispatchEvent(new Event("blur")); assert.equal(value.getAttribute("aria-invalid"), "true"); click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 0); assert.equal(value.value, "9223372036854775808"); assert.equal(document.activeElement, value);
   value.dispatchEvent(new Event("compositionstart", { bubbles: true })); type(value, "9223372036854775807"); click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 0);
   value.dispatchEvent(new Event("compositionend", { bubbles: true })); value.dispatchEvent(new Event("blur")); assert.equal(value.hasAttribute("aria-invalid"), false); click(s.host, "Commit Beat"); await tick();
   const payload = writes[0]!.beat as {options:{condition:{expression:{operator:string;right:{value:string}}}}[]}; assert.equal(payload.options[0]!.condition.expression.right.value, "9223372036854775807"); assert.equal(payload.options[0]!.condition.expression.operator, "greaterEqual"); assert.ok(value.isConnected && !value.disabled && s.view.hasDrafts());
+  await s.close();
+});
+
+test("an option's rules are named for screen readers by its option number, which follows a move", async () => {
+  const two: SceneBeat = { ...choice, payload: { type: "choice", options: [{ text: "Ready", condition: guard }, { text: "Wait", condition: guard }] } };
+  const s = setup([two, ending], async () => { throw Error("No writes"); });
+  selectBeat(s.host, "choice");
+  const rules = openGuard(optionBlocks(s.host)[1]!);
+  assert.ok(rules.querySelector('select[aria-label="Option 2 rule 1 comparison"]')); assert.ok(rules.querySelector('input[aria-label="Option 2 rule 1 value"]'));
+  press(optionBlocks(s.host)[1]!, "Move option 2 up");
+  assert.ok(rules.querySelector('select[aria-label="Option 1 rule 1 comparison"]')); assert.equal(rules.querySelector('[aria-label^="Option 2"]'), null);
   await s.close();
 });
 
@@ -92,7 +103,7 @@ test("guard-only Choice edit preserves raw captions and permits explicit option 
   const s = setup([raw, ending], async command => { saved = command; throw Error("Hold input"); });
   selectBeat(s.host, "choice");
   assert.equal([...s.host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "+ Add option")!.disabled, false);
-  const value = openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('input[aria-label="Only when rule 1 value"]')!; type(value, "6"); click(s.host, "Commit Beat"); await tick();
+  const value = openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('input[aria-label="Option 1 rule 1 value"]')!; type(value, "6"); click(s.host, "Commit Beat"); await tick();
   assert.deepEqual((saved!.beat as {options:{text:string}[]}).options.map(option => option.text), ["  Ready café 雪  ", " Neighbor "]); await s.close();
 });
 
@@ -108,7 +119,7 @@ test("unchanged pending commit blocks another draft and late disposed refusal ca
  const writes:SceneCommand[]=[];
  const decimalChoice:SceneBeat={...choice,payload:{type:"choice",options:[{text:"Ready",condition:{status:"supported",expression:{type:"compare",operator:"greaterEqual",left:{type:"variable",variableId:"money",variableType:"decimal"},right:{type:"decimal",value:"1.25"}}}}]}};
  const s=setup([decimalChoice,ending],async command=>{writes.push(command);throw Error("Keep draft");});
- try{selectBeat(s.host, "choice");const value=openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('[aria-label="Only when rule 1 value"]')!;assert.equal(value.value,"1.25");type(value,"2.75");click(s.host,"Commit Beat");await tick();assert.equal(writes.length,1);assert.equal(value.value,"2.75");
+ try{selectBeat(s.host, "choice");const value=openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('[aria-label="Option 1 rule 1 value"]')!;assert.equal(value.value,"1.25");type(value,"2.75");click(s.host,"Commit Beat");await tick();assert.equal(writes.length,1);assert.equal(value.value,"2.75");
   const condition=(writes[0]!.beat as {options:{condition:{expression:{right:unknown}}}[]}).options[0]!.condition;assert.deepEqual(condition.expression.right,{type:"decimal",value:"2.75"});}finally{await s.close();}
  });
 

@@ -76,7 +76,7 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
   const original = (id?: string): ChoiceOption | undefined => id === undefined ? undefined : payload.options.find(option => option.id === id);
   const newOption = (option: ChoiceOption, key = ++keys): OptionState => ({
     key, ...(option.id ? { id: option.id } : {}), text: option.text, policy: option.unavailablePolicy ?? "hide", guardOpen: false,
-    builder: buildRuleBuilder(variables, option.condition, { keyword: "if", label: "Only when", empty: "Always available", required: false, subject: "option", newVariable: context.newVariable, caption: option.condition?.status === "unknown" ? option.condition.source : undefined, source: () => { const beat = choice.structure()?.scene.beats.find(item => item.id === option.id); if (beat) choice.viewSource(beat); } }),
+    builder: buildRuleBuilder(variables, option.condition, { keyword: "if", label: `Option ${key}`, empty: "Always available", required: false, subject: "option", newVariable: context.newVariable, caption: option.condition?.status === "unknown" ? option.condition.source : undefined, source: () => { const beat = choice.structure()?.scene.beats.find(item => item.id === option.id); if (beat) choice.viewSource(beat); } }),
   });
   let options: OptionState[] = payload.options.map(option => newOption(option));
   if (!options.length) options.push(newOption({ text: "" }));
@@ -225,7 +225,7 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
     const policy = backingSelect(`Option ${index + 1} if false`, policyItems, option.policy);
     policy.addEventListener("change", () => { option.policy = policy.value as OptionState["policy"]; });
     const whenFalse = element("div", "story-when-false"); whenFalse.append(element("span", "story-then-label", "If false"), segmented(policy, policyItems), policy);
-    const builder = option.builder;
+    const builder = option.builder; builder.relabel(`Option ${index + 1}`);
     const close = (): void => { option.guardOpen = false; draw(); group.querySelector<HTMLElement>(".story-guard > button")?.focus(); };
     const draw = (): void => {
       group.replaceChildren();
