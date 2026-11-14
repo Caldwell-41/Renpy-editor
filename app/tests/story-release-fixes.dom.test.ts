@@ -75,3 +75,29 @@ test("the Tracks Characters lane names the character, expression and position", 
   assert.deepEqual(["show", "look", "move", "hide"].map(lane), ["Mara · Concerned · Left", "Eli · Neutral", "Mara → Centre", "Hide Eli"]);
   await s.close();
 });
+
+test("Set variable's list ends with + New variable…, says when there are none, and selects the new variable", async () => {
+  const empty = project([beat("words", { type: "narration", text: "The timetable has not changed in thirty years." })]);
+  const model: SceneWorkspace = { ...empty, authoring: { ...empty.authoring, variables: [] } };
+  const requests: unknown[] = [];
+  const s = mount(model, { createVariable: async request => {
+    requests.push(request);
+    return { ...model, projectRevision: "project-2", authoring: { ...model.authoring, variables: [{ id: "count", technicalName: request.technicalName, variableType: request.variableType, defaultValue: "0" }] } };
+  } });
+  selectBeat(s.host, "words"); press(s.host, "+ Add beat"); const panel = pickKind(s.host, "Set variable");
+  const summary = (): HTMLElement => panel.querySelector<HTMLElement>(".story-variable-picker > summary")!;
+  assert.equal(summary().textContent, "Choose a variable▾");
+  summary().click();
+  assert.deepEqual(texts(panel.querySelector(".story-variable-picker [role=listbox]")!, ":scope > *"), ["No variables yet.", "+ New variable…"]);
+  const value = panel.querySelector<HTMLInputElement>('input[aria-label="Value"]')!;
+  assert.equal(value.disabled, true); assert.equal(value.placeholder, "Choose a variable first");
+  press(panel, "+ New variable…");
+  const dialog = s.host.querySelector<HTMLElement>(".story-new-variable")!;
+  const name = dialog.querySelector<HTMLInputElement>('input[aria-label="Variable name"]')!; name.value = "ticket_count"; name.dispatchEvent(new Event("input", { bubbles: true }));
+  chooseIn(dialog, "Variable type", "Whole number");
+  press(dialog, "Create variable"); await tick();
+  assert.deepEqual(requests, [{ technicalName: "ticket_count", variableType: "int", defaultValue: "0" }]);
+  assert.equal(summary().getAttribute("aria-label"), "Variable: ticket_count"); assert.equal(document.activeElement, summary());
+  assert.ok(panel.querySelector('input[aria-label="Formula"]'), "A whole number takes a calculation");
+  await s.close();
+});

@@ -6,8 +6,8 @@
 import { decimalValue, int64 } from "./numeric-input.ts";
 import { validateField } from "./authoring-input.ts";
 import type { Condition, ConditionExpression } from "./scene-ui.ts";
-import { backingSelect, button, choose, dropdownKeys, element, field, iconButton, segmented, type ChoiceItem } from "./story-editor-controls.ts";
-import type { Variable } from "./story-new-variable.ts";
+import { backingSelect, button, element, field, iconButton, segmented, type ChoiceItem } from "./story-editor-controls.ts";
+import { variableMenu, variableTypeName as typeName, type Variable } from "./story-new-variable.ts";
 
 type Variables = readonly Variable[];
 type Operator = Extract<ConditionExpression, { type: "compare" }>["operator"];
@@ -26,10 +26,6 @@ const operators: readonly { readonly op: Operator; readonly symbol: string; read
   { op: "greater", symbol: ">", words: "is greater than", python: ">" }, { op: "greaterEqual", symbol: "≥", words: "is at least", python: ">=" },
 ];
 const numeric = (variable?: Variable): boolean => variable?.variableType === "int" || variable?.variableType === "decimal";
-const typeName = (variable: Variable): string => ({ bool: "yes/no", int: "whole number", decimal: "decimal", string: "text" })[variable.variableType];
-const badge = (variable?: Variable): HTMLElement => {
-  const node = element("span", "story-type", variable ? ({ bool: "Y/N", int: "#", decimal: "#.#", string: "Aa" })[variable.variableType] : ""); node.setAttribute("aria-hidden", "true"); return node;
-};
 
 /** A number as ADR 0014 carries it: an exact whole number, else a decimal. */
 function numberLiteral(raw: string): { readonly type: "int" | "decimal"; readonly value: string } {
@@ -193,31 +189,17 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
     const row = element("div", "story-rule"); row.dataset.rule = String(index);
     const variable = variables.find(item => item.id === rule.variableId), title = `${options.label} rule ${index + 1}`;
     const update = (next: Partial<Rule>, redraw = false, notify = false): void => set({ rules: state.rules.map((item, at) => at === index ? { ...item, ...next, original: undefined } : item) }, redraw, notify);
-    // The variable list: name and type, as in Story Combined v1.
+    // The variable list: name and type, as in Story Combined v1, ending with "+ New variable…".
     const pick = backingSelect(`${title} variable`, variableItems(), rule.variableId);
-    const menu = element("details", "story-dropdown story-variable-picker"), summary = element("summary", "story-person"); summary.dataset.control = ""; summary.dataset.ruleFocus = `variable-${index}`;
-    summary.append(badge(variable), element("span", "story-variable-name", variable?.technicalName ?? "Choose a variable"), element("span", "story-caret", "▾"));
-    summary.setAttribute("aria-label", `${title} variable: ${variable?.technicalName ?? "none chosen"}`);
-    const list = element("div", "story-dropdown-list"); list.role = "listbox"; list.setAttribute("aria-label", `${title} variable`);
-    for (const item of variables) {
-      const option = button("", "story-dropdown-option", () => { menu.open = false; choose(pick, item.id); summary.focus(); });
-      option.role = "option"; option.tabIndex = -1; option.dataset.value = item.id; option.setAttribute("aria-selected", String(item.id === rule.variableId)); option.setAttribute("aria-label", `${item.technicalName}, ${typeName(item)}`);
-      const text = element("span", "story-variable-text"); text.append(element("span", "story-variable-name", item.technicalName), element("small", "", typeName(item)));
-      option.append(badge(item), text); list.append(option);
-    }
     const newVariable = options.newVariable;
-    if (newVariable) {
-      const create = button("+ New variable…", "story-dropdown-option story-dropdown-create", () => {
-        menu.open = false;
-        void newVariable(summary).then(created => {
-          if (!created || !host.isConnected) return;
-          variables = [...variables.filter(item => item.id !== created.id), created];
-          update(defaultRule(created), true, true); refocus(`variable-${index}`);
-        });
+    const { menu, summary } = variableMenu(pick, { label: `${title} variable`, variables: () => variables, ...newVariable ? { create: (opener: HTMLElement) => {
+      void newVariable(opener).then(created => {
+        if (!created || !host.isConnected) return;
+        variables = [...variables.filter(item => item.id !== created.id), created];
+        update(defaultRule(created), true, true); refocus(`variable-${index}`);
       });
-      create.role = "option"; create.tabIndex = -1; create.setAttribute("aria-selected", "false"); list.append(create);
-    }
-    dropdownKeys(menu, summary, list); menu.append(summary, list);
+    } } : {} });
+    summary.dataset.ruleFocus = `variable-${index}`;
     // A new variable starts a fresh rule of its type.
     pick.addEventListener("change", () => { const chosen = variables.find(item => item.id === pick.value); if (chosen) { update(defaultRule(chosen), true); refocus(`variable-${index}`); } });
     const remove = iconButton("close", `Remove rule ${index + 1}`, () => { set({ rules: state.rules.filter((_item, at) => at !== index) }, true, true); refocus(state.rules.length ? `variable-${Math.max(0, index - 1)}` : "add"); });

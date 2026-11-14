@@ -1057,7 +1057,7 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-avatar>.preview-media-error{display:none}
 .story-dropdown-list{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;display:flex;flex-direction:column;max-height:300px;overflow:auto;padding:4px;border:1px solid var(--border-strong);border-radius:var(--radius-small);background:var(--surface-raised);box-shadow:var(--elevation-preview)}
 .story-dropdown-option{display:flex;align-items:center;gap:10px;min-height:36px;padding:4px 8px;border:0;border-radius:3px;background:transparent;color:var(--text-primary);font:inherit;text-align:left;cursor:pointer}
-.story-dropdown-create{border-top:1px solid var(--border-normal);border-radius:0;color:var(--text-secondary)}
+.story-dropdown-create{border-top:1px solid var(--border-normal);border-radius:0;color:var(--accent-primary)}
 .story-new-variable .story-variable-start>input,.story-new-variable .story-variable-start>select,.story-new-variable .story-field>input{width:100%;box-sizing:border-box}
 .story-dialog .field-error:empty{display:none}
 .story-dropdown-option:hover,.story-dropdown-option:focus-visible{background:var(--surface-hover);outline:0}
@@ -1263,3 +1263,5 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-transition-help>.story-field-hint{line-height:1.5;color:var(--text-secondary)}
 .story-transition-help>.story-lead{color:var(--text-primary)}
 .story-plain-list{margin:0 0 6px;padding-left:16px;font-size:11.5px;line-height:1.6;color:var(--text-primary)}
+.story-dropdown-empty{margin:0;padding:6px 8px;font-size:12px;color:var(--text-muted)}
+.story-variable-picker summary>.story-placeholder{font-family:inherit;color:var(--text-muted)}

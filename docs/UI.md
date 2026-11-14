@@ -303,8 +303,9 @@ Each rule picks a project variable (yes/no, whole number, decimal or text), a pr
 value. Numbers offer `= ≠ < ≤ > ≥`; yes/no and text offer equality only. One All/Any
 switch joins the rules, and each branch shows its Ren'Py line. Mixed groups and Python
 the editor cannot read stay read-only with Edit in Source; the builder never writes
-raw Python. The variable list can create a variable in place, with Undo. Story
-conditions and Choice "Only when" use the same builder.
+raw Python. The variable list can create a variable in place, with Undo: it ends with
+"+ New variable…", says "No variables yet." when the project has none, and selects the
+new variable. Story conditions, Choice "Only when" and Set variable use the same list.
 
 ### Arithmetic equation row
 

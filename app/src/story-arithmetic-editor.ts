@@ -1,4 +1,7 @@
 import { formulaCompletionRange } from "./formula-editing.ts";
+import type { NewVariable } from "./story-condition-editor.ts";
+import { choose } from "./story-editor-controls.ts";
+import { variableMenu } from "./story-new-variable.ts";
 import type { AssignmentDraftValidation, ArithmeticUnknown, BeatPayload, IntegerAdjustment, SceneWorkspace } from "./scene-ui.ts";
 
 type SetVariable = Extract<BeatPayload, { type: "setVariable" }>;
@@ -36,13 +39,24 @@ export function assignmentCaption(payload: SetVariable, variables: SceneWorkspac
 }
 
 /** Only presents core inspection. Formula text never runs or evaluates in the renderer. */
-export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariable, validate?: ValidateAssignment) {
-  const host = node("div", "beat-fields story-arithmetic-editor"), variable = node("select"); variable.setAttribute("aria-label", "Variable");
+export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariable, validate?: ValidateAssignment, newVariable?: NewVariable) {
+  // The variable list writes a hidden select; "+ New variable…" creates one and selects it (story-release-fixes / a-v2).
+  const host = node("div", "beat-fields story-arithmetic-editor"), variable = node("select", "story-backing"); variable.setAttribute("aria-label", "Variable"); variable.hidden = true; variable.tabIndex = -1;
   let variables = model.authoring.variables;
-  for (const v of variables) { const option = node("option", "", `${v.technicalName} · ${typeName(v.variableType)}`); option.value = v.id; variable.append(option); }
-  if (!variables.some(v => v.id === payload.variableId)) { const missing = node("option", "", "Missing Variable"); missing.value = payload.variableId; variable.prepend(missing); }
+  const addOption = (v: (typeof variables)[number]): void => { const option = node("option", "", `${v.technicalName} · ${typeName(v.variableType)}`); option.value = v.id; variable.append(option); };
+  variables.forEach(addOption);
+  if (payload.variableId && !variables.some(v => v.id === payload.variableId)) { const missing = node("option", "", "Missing Variable"); missing.value = payload.variableId; variable.prepend(missing); }
   variable.value = payload.variableId;
-  const editor = node("div"); host.append(field("Variable", variable), editor);
+  const picker = variableMenu(variable, { label: "Variable", variables: () => variables, ...newVariable ? { create: (opener: HTMLElement) => {
+    void newVariable(opener).then(created => {
+      if (!created || !host.isConnected) return;
+      variables = [...variables.filter(v => v.id !== created.id), created]; addOption(created);
+      variable.value = ""; choose(variable, created.id); opener.focus();
+    });
+  } } : {} });
+  // The select comes first, so `[aria-label="Variable"]` names it rather than the list.
+  const chooser = node("div", "field compact-field"); chooser.append(node("span", "", "Variable"), variable, picker.menu);
+  const editor = node("div"); host.append(chooser, editor);
   const drafts = new Map<string, { operation: IntegerAdjustment["operation"]; text: string }>();
   let operation: IntegerAdjustment["operation"] = typeof payload.value === "object" ? payload.value.operation : "assign";
   let text = typeof payload.value === "object" ? payload.value.operand : String(payload.value);
@@ -61,7 +75,7 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
     const target = variables.find(v => v.id === variable.value);
     if (!target || target.variableType === "bool" || target.variableType === "string") {
       if (target?.variableType === "bool") { const choice = node("select"); for (const value of ["false", "true"]) { const option = node("option", "", value === "true" ? "True" : "False"); option.value = value; choice.append(option); } choice.value = text === "true" ? "true" : "false"; primary = choice; }
-      else { primary = node("input"); primary.value = text; }
+      else { primary = node("input"); primary.value = text; if (!variable.value) { primary.disabled = true; primary.placeholder = "Choose a variable first"; } }
       primary.setAttribute("aria-label", "Value"); primary.addEventListener("input", () => text = primary.value); primary.addEventListener("change", () => text = primary.value);
       controls.push(primary); editor.append(field("Value", primary)); return;
     }
@@ -152,7 +166,7 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
     capture: () => ({ variable: variable.value, operation, text, drafts: new Map(drafts) }),
     restore: (saved: unknown) => {
       const kept = saved as { variable: string; operation: IntegerAdjustment["operation"]; text: string; drafts: typeof drafts };
-      variable.value = kept.variable; editor.dataset.variableId = kept.variable; operation = kept.operation; text = kept.text;
+      variable.value = kept.variable; editor.dataset.variableId = kept.variable; operation = kept.operation; text = kept.text; picker.draw();
       drafts.clear(); kept.drafts.forEach((value, key) => drafts.set(key, value)); rebuild();
     },
   };
