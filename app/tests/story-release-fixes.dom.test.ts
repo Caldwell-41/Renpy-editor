@@ -63,3 +63,15 @@ test("Add a beat describes Transition by what it animates, and a new Transition 
   assert.equal(storyEditor(s.host).contains(panel), true);
   await s.close(); void tick;
 });
+
+test("the Tracks Characters lane names the character, expression and position", async () => {
+  const s = mount(project([
+    beat("show", { type: "showCharacter", characterId: "mara", appearanceId: "mara-concerned", placement: "left", transition: "none" }),
+    beat("look", { type: "changeAppearance", characterId: "eli", appearanceId: "eli-neutral", transition: "none" }),
+    beat("move", { type: "placement", characterId: "mara", placement: "centre" }),
+    beat("hide", { type: "hideCharacter", characterId: "eli", transition: "dissolve" }),
+  ]));
+  const lane = (id: string): string => [...s.host.querySelectorAll<HTMLElement>(".story-route [data-beat-id]")].find(column => column.dataset.beatId === id)!.querySelector(".story-lane-2")!.textContent!;
+  assert.deepEqual(["show", "look", "move", "hide"].map(lane), ["Mara · Concerned · Left", "Eli · Neutral", "Mara → Centre", "Hide Eli"]);
+  await s.close();
+});

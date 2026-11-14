@@ -426,6 +426,8 @@ covers moving, unwrapping and deleting branches.
 - Tracks has one column per beat and lanes for Beat, Background, Characters, Words,
   Sound and Flow. Reel shows beat cards in order, including the beats around a branch.
   Neither shows elapsed time, playback or keyframes.
+- The Characters lane names the character, expression and position: "Mara · Smile ·
+  Left", "Eli · Concerned", "Mara → Centre", "Hide Eli" (`story-release-fixes` / `a-v2`).
 - Writing focus hides the stage and keeps the editor and Branch path. The Branch path
   spans the top. From 900 px, Tracks or Reel sits beside the editor with one row per
   beat; Tracks keeps all six lanes and the route line runs down the left. Markers are

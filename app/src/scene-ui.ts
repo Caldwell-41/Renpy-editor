@@ -2596,15 +2596,18 @@ function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
   const character = (id: string): string => model.authoring.characters.find((item) => item.id === id)?.displayName ?? "Unknown Character";
   const asset = (id: string): string => model.authoring.assets.find((item) => item.id === id)?.displayName ?? "Unknown Asset";
   const scene = (id: string): string => model.scenes.find((item) => item.id === id)?.displayName ?? "Unknown Scene";
+  // Tracks names a character beat by character, expression and position (story-release-fixes / a-v2).
+  const appearance = (id: string): string => model.authoring.appearances.find((item) => item.id === id)?.label ?? "Unknown expression";
+  const placementName: Record<PlacementRef, string> = { left: "Left", centre: "Centre", right: "Right" };
   switch (payload.type) {
     case "background": return `${asset(payload.assetId)} · ${payload.transition}`;
-    case "showCharacter": return `${character(payload.characterId)} · ${payload.placement}`;
-    case "hideCharacter": return character(payload.characterId);
+    case "showCharacter": return `${character(payload.characterId)} · ${appearance(payload.appearanceId)} · ${placementName[payload.placement]}`;
+    case "hideCharacter": return `Hide ${character(payload.characterId)}`;
     case "showScreen": return `${payload.target.sourceName} · Dialogue continues`;
     case "hideScreen": return `${payload.target.sourceName} · Removes the panel`;
     case "callScreen": return `${payload.target.sourceName} · Waits for Finish interaction`;
-    case "changeAppearance": return character(payload.characterId);
-    case "placement": return `${character(payload.characterId)} · ${payload.placement}`;
+    case "changeAppearance": return `${character(payload.characterId)} · ${appearance(payload.appearanceId)}`;
+    case "placement": return `${character(payload.characterId)} → ${placementName[payload.placement]}`;
     case "dialogue": return `${character(payload.characterId)}: ${payload.text || "Empty dialogue"}`;
     case "narration": return payload.text || "Empty narration";
     case "playMusic": case "playSfx": return asset(payload.assetId);
