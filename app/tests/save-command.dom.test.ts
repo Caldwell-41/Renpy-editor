@@ -332,7 +332,7 @@ test("Story Save takes one route from toolbar and keyboard, and a refusal never 
   click("Save"); await ticks(10);
   window.dispatchEvent(saveEvent({ ctrl: true })); await ticks(10);
   assert.equal(sent.length, 4); assert.equal(flushes, 0); assert.equal(accepted, "From keyboard");
-  assert.equal(status(), "Nothing saved. 1 of 1 draft needs changes:Scene 1");
+  assert.equal(status(), "Nothing saved. 1 of 1 draft need changes:Scene 1");
   editor = document.querySelector<HTMLTextAreaElement>('.story-editor[data-editor-for="line"] textarea')!;
   assert.equal(editor.value, "Refused draft"); assert.equal(editor.closest<HTMLElement>("[data-beat-draft-key]")?.dataset.saveRefused, "true");
 
@@ -341,7 +341,7 @@ test("Story Save takes one route from toolbar and keyboard, and a refusal never 
   accepted = "Edited elsewhere"; revision += 1;
   click("Save"); await ticks(10);
   assert.equal(sent.length, 5); assert.equal(flushes, 0);
-  assert.equal(status(), "Story changed in source and was refreshed. Nothing saved. 1 of 1 draft needs changes:Scene 1");
+  assert.equal(status(), "Story changed in source and was refreshed. Nothing saved. 1 of 1 draft need changes:Scene 1");
   assert.equal(document.querySelector('.story-editor[data-editor-for="line"] .story-conflict-source')?.textContent, "Edited elsewhere");
   assert.equal(document.querySelector<HTMLTextAreaElement>('.story-editor[data-editor-for="line"] textarea')?.value, "Refused draft");
 
@@ -462,7 +462,7 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
   assert.equal(status(), "Nothing saved. 2 of 5 drafts need changes:Arrival 2");
   await openScene("Arrival");
   [...(await open("g1")).querySelectorAll<HTMLButtonElement>("button")].find(item => item.textContent === "Cancel")!.click(); await ticks(6);
-  assert.equal(status(), "Nothing saved. 1 of 4 drafts needs changes:Arrival 1");
+  assert.equal(status(), "Nothing saved. 1 of 4 drafts need changes:Arrival 1");
   assert.deepEqual(failing(), ["g2"]);
   await pickSpeaker("g2");
   assert.equal(status(), "4 unsaved beat drafts. Ready to save.");assert.equal(header().dataset.short, "4 unsaved");assert.equal(mirror(), "");assert.equal(legendFails(), false);
@@ -475,7 +475,7 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
   refusal = { code: "BEAT_DRAFT_CONFLICT", message: "This beat's place changed in source after the draft began. Draft retained.", actionIndex: 4 };
   click("Save"); await ticks(10);
   assert.equal(sent.length, 1); assert.equal(sent[0]!.commands[4]!.type, "insertBodyBeat");
-  assert.equal(status(), "Nothing saved. 1 of 5 drafts needs changes:Arrival 1");
+  assert.equal(status(), "Nothing saved. 1 of 5 drafts need changes:Arrival 1");
   assert.equal(added.dataset.saveRefused, "true");
   assert.equal(added.querySelector(".story-save-reason")?.textContent, "This beat's place changed in source after the draft began. Draft retained.");
 

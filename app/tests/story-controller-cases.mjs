@@ -510,7 +510,7 @@ export const storyCases={
   await c.click('Called scene, 1 to fix',statusLine);await c.wait(()=>shownScene(c)===called.id&&newBeat());
   c.assert.equal(newBeat().dataset.saveRefused,'true');
   await c.click('Cancel',newBeat());await c.settle();
-  c.assert.equal(status(),`Nothing saved. 1 of 3 drafts needs changes:${entry.displayName} 1`);c.assert.equal(sceneMark('Called scene'),undefined);
+  c.assert.equal(status(),`Nothing saved. 1 of 3 drafts need changes:${entry.displayName} 1`);c.assert.equal(sceneMark('Called scene'),undefined);
   // Fixing the last failing draft clears every mark.
   await c.click(`${entry.displayName}, 1 to fix`,statusLine);await c.wait(()=>shownScene(c)===entry.id&&optionText());
   c.enter(optionText(),choice.payload.options[0].text);await c.settle();
@@ -531,7 +531,7 @@ export const storyCases={
   const conflict=await save();
   c.assert.equal(conflict.find(r=>r.request.operation==='scene.saveDrafts')?.errorCode,'SOURCE_CONFLICT');
   c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(removed)),'A conflicting Story Save writes nothing');
-  c.assert.equal(status(),`Story changed in source and was refreshed. Nothing saved. 1 of 4 drafts needs changes:${entry.displayName} 1`);
+  c.assert.equal(status(),`Story changed in source and was refreshed. Nothing saved. 1 of 4 drafts need changes:${entry.displayName} 1`);
   c.assert.equal(newBeat().dataset.saveRefused,'true');
   c.assert.equal(newBeat().querySelector('.story-save-reason')?.textContent,"This beat's place changed in source after the draft began. Draft retained.");
   await c.click('Cancel',newBeat());await c.settle();c.assert.equal(status(),'3 unsaved beat drafts. Ready to save.');
@@ -719,7 +719,7 @@ export const storyCases={
   const refusedAt=c.requests().length,was=status();await c.click('Save',header());
   await c.wait(()=>status()!==was&&/^Nothing saved/.test(status()));await c.settle();
   c.assert(!c.requests().slice(refusedAt).some(r=>r.request.operation==='scene.saveDrafts'));c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(inserted));
-  c.assert.equal(status(),`Nothing saved. 1 of 2 drafts needs changes:${entry.displayName} 1`);
+  c.assert.equal(status(),`Nothing saved. 1 of 2 drafts need changes:${entry.displayName} 1`);
   c.assert(inReel(choice.id));
   await view('Tracks');await view('Reel');
   c.assert.equal(row(c,choice.id).dataset.saveRefused,'true');c.assert.equal(card(c,choice.id).querySelector('[aria-label="Choice option text"]').value,'','The invalid draft is retained');
@@ -814,7 +814,7 @@ export const storyCases={
    const at=c.requests().length,was=status();await c.click('Save',header());await c.wait(()=>status()!==was&&/^Nothing saved/.test(status()));await c.settle();
    c.assert(!c.requests().slice(at).some(r=>r.request.operation==='scene.saveDrafts'),'The conflict stops Save before any request');
    c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(changed)),'A refused Save writes nothing');
-   c.assert.equal(status(),`Nothing saved. 1 of 1 draft needs changes:${entry.displayName} 1`);
+   c.assert.equal(status(),`Nothing saved. 1 of 1 draft need changes:${entry.displayName} 1`);
    c.assert.equal(panel(id).querySelector('.story-conflict > p')?.textContent,'This beat is no longer in source.');
    c.assert.deepEqual(buttons(panel(id)).filter(x=>['Commit Beat','Override source','Discard draft'].includes(x)),['Discard draft']);
    await c.click('Discard draft',panel(id));await c.settle();c.assert.equal(!!panel(id)?.querySelector('.story-conflict'),false);c.assert.equal(!!c.document.querySelector('.scene-workspace [data-beat-draft="true"]'),false,'Discard draft leaves no draft');
@@ -980,7 +980,7 @@ export const storyCases={
   await c.wait(()=>status(c)!==was&&/^Nothing saved/.test(status(c)));await c.settle();
   // Core checks a formula, so the one request is refused whole.
   c.assert.deepEqual(c.requests().slice(at).filter(r=>r.request.operation==='scene.saveDrafts').map(r=>r.errorCode),['INVALID_ARITHMETIC_SYNTAX']);
-  c.assert.equal(status(c),'Nothing saved. 1 of 4 drafts needs changes:Variables 1');
+  c.assert.equal(status(c),'Nothing saved. 1 of 4 drafts need changes:Variables 1');
   c.assert.equal(shownScene(c),byName(c,'Variables').id);c.assert.equal(row(c,fare.id).dataset.saveRefused,'true');
   c.assert.deepEqual(await c.snapshot(),initial,'A refused Save writes nothing');
   // Ordinary external edits: the Boundary line itself, and an unrelated line in Choices.
