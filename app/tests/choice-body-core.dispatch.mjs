@@ -338,8 +338,8 @@ try {
  promptEditor=await editChoice(pickedId);button('Remove option 3',promptEditor.querySelectorAll('.story-option')[2]);await applied(promptEditor,'Commit Beat');
  const transferOnly=await source(path),sharedAnchor=scene().beats.find(b=>b.payload.text==='Shared once'),finalReturn=scene().beats.at(-1);
  for(const anchor of [sharedAnchor,finalReturn]){
-  // Add a beat starts before the scene's Return; Move to lists every scene place.
-  draft=addBeat('narration');assert.equal(draft.querySelector('.story-where dd').textContent,`Before ${beatNumber(finalReturn.id)} Return`);
+  // With the scene's Return selected, + Add beat starts before it; Move to lists every scene place.
+  column(finalReturn.id).querySelector('.story-track-beat').click();await settle();draft=addBeat('narration');assert.equal(draft.querySelector('.story-where dd').textContent,`Before ${beatNumber(finalReturn.id)} Return`);
   {const tree=placeTree(draft);assert.deepEqual(positionsIn(tree),[`Before ${beatNumber(pickedId)} Choice`,`Before ${beatNumber(sharedAnchor.id)} Narration`,`Before ${beatNumber(finalReturn.id)} Return`]);tree.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));}
   await placeBefore(draft,anchor.id);enter(draft.querySelector('textarea'),'Exhaustion insertion');await applied(draft,'Add Beat');
   const inserted=scene().beats.find(b=>b.payload.text==='Exhaustion insertion');assert(inserted&&!inserted.owner);assert.equal(lastApply.ok,true);
