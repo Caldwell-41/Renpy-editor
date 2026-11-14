@@ -129,6 +129,33 @@ test("a Set variable check waits for Story's own write and never tests the revis
   }finally{view.dispose();await browser.happyDOM.close();}
 });
 
+test("a Set variable draft whose variable left the project shows Missing Variable, with no check or conflict",async()=>{
+  const browser = new Window({url:"http://tauri.localhost"});
+  Object.assign(globalThis, {window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLSelectElement:browser.HTMLSelectElement,KeyboardEvent:browser.KeyboardEvent,Event:browser.Event});
+  document.body.innerHTML='<main></main><aside></aside>';
+  const base=storyFixture(),host=document.querySelector<HTMLElement>("main")!;
+  const beats=[{id:"arithmetic",byteStart:0,byteEnd:30,protected:false,payload:{type:"setVariable" as const,variableId:"trust",value:{operation:"add" as const,operand:"trust + 2"}}},{id:"end",byteStart:30,byteEnd:41,protected:false,payload:{type:"return" as const}}];
+  const model:SceneWorkspace={...base,authoringRevision:"authoring",scenes:[{...base.scenes[0]!,beats,bodies:sceneBodies(beats)},base.scenes[1]!]};
+  // An Undo of "+ New variable…" removes the variable; the scene's source is unchanged.
+  const removed:SceneWorkspace={...model,projectRevision:"project-2",authoringRevision:"authoring-2",authoring:{...model.authoring,variables:model.authoring.variables.filter(item=>item.id!=="trust")}};
+  let checks=0;const statuses:string[]=[],applied:unknown[]=[];
+  const actions={validateAssignment:async()=>{checks++;throw Error("offline");},resolution:{width:1280,height:720},present:async()=>{throw Error("no media");},status:(value:string)=>{statuses.push(value);},apply:async(command:SceneCommand)=>{applied.push(command);throw Error("refused");}};
+  const view=renderStoryView(host,document.querySelector("aside")!,model,actions,"arithmetic");
+  const editor=()=>storyEditor(host),summary=()=>editor().querySelector<HTMLElement>(".story-variable-picker > summary")!;
+  try{
+    const formula=editor().querySelector<HTMLInputElement>('[aria-label="Formula"]')!;
+    formula.value="trust + 3";formula.dispatchEvent(new Event("input",{bubbles:true}));await new Promise(r=>setTimeout(r,200));
+    const sent=checks;view.update(removed,actions,"arithmetic");await new Promise(r=>setTimeout(r,200));
+    assert.equal(summary().getAttribute("aria-label"),"Variable: Missing Variable");
+    summary().click();assert.ok(!texts(editor().querySelector(".story-variable-picker [role=listbox]")!,".story-variable-name").includes("trust"),"The list offers only project variables");summary().click();
+    assert.equal(editor().querySelector('[aria-label="Formula"]'),null);assert.equal(editor().querySelector<HTMLInputElement>('input[aria-label="Value"]')!.value,"trust + 3");
+    assert.equal(checks,sent,"A missing variable sends no check");assert.equal(editor().querySelector(".story-conflict"),null);
+    assert.equal(trackColumn(host,"arithmetic")!.dataset.beatDraft,"true");
+    press(editor(),"Commit Beat");await tick();
+    assert.deepEqual(applied,[]);assert.match(statuses.at(-1)!,/Select a declared Variable/);
+  }finally{view.dispose();await browser.happyDOM.close();}
+});
+
 test("Set variable's list ends with + New variable…, says when there are none, and selects the new variable", async () => {
   const empty = editorProject([storyBeat("words", { type: "narration", text: "The timetable has not changed in thirty years." })]);
   const model: SceneWorkspace = { ...empty, authoring: { ...empty.authoring, variables: [] } };

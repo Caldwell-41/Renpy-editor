@@ -60,6 +60,8 @@ export interface EditorContext {
   readonly preview?: (payload?: BeatPayload) => void;
   /** "+ New variable…" in a rule builder's variable list. */
   readonly newVariable?: NewVariable;
+  /** The workspace Story shows now; a kept draft's lists follow it when Story shows the draft again. */
+  readonly current?: () => SceneWorkspace;
   /** The stage beats a Transition at this beat's place animates: "02 Background · Rainy platform". */
   readonly animates?: () => readonly string[];
 }
@@ -79,7 +81,7 @@ export const narrationItem: ChoiceItem = { value: "narration", label: "Narration
 
 export function buildBeatEditor(payload: BeatPayload, context: EditorContext): BeatEditor {
   const { model } = context;
-  if (payload.type === "setVariable") return buildAssignmentEditor(model, payload, context.validate, context.newVariable);
+  if (payload.type === "setVariable") return buildAssignmentEditor(model, payload, context.validate, context.newVariable, context.current);
   if (payload.type === "showScreen" || payload.type === "hideScreen" || payload.type === "callScreen") return buildScreenBeatEditor(payload, context.existing, context.actions);
   const host = element("div", "beat-fields story-fields"); const controls: HTMLElement[] = [];
   const hint = (text: string): HTMLElement => element("p", "story-field-hint", text);

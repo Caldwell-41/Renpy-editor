@@ -352,7 +352,10 @@ owns the behaviour, the decimal type and the Screens actions.
 
 The production Story equation row validates through revision-bound
 `scene.validateAssignment` and commits through the existing Story transaction.
-Core supplies result types, supported operations, limits and field diagnostics.
+A check waits for any write in flight (Story's own, "+ New variable…", Undo or Redo)
+and sends the revisions that write makes. A draft's variable list follows the
+project's variables, so a variable an Undo removed leaves it, and a chosen variable
+that left the project reads Missing Variable. Core supplies result types, supported operations, limits and field diagnostics.
 Draft feedback folds constants only; a variable-dependent draft says its current
 value is unknown. It never substitutes declaration defaults. Accepted Story state
 stays in the core model and Scene preview. Numeric suggestions support arrows,

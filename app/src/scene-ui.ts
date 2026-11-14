@@ -2029,7 +2029,7 @@ export function renderStoryView(
     editor.append(...lostDrafts(scene));
     if (openOperation) { editor.append(openOperation); return; }
     const fresh = selectedNewDraft ? beatDrafts.get(selectedNewDraft) : undefined;
-    if (fresh) { editor.dataset.editorFor = selectedNewDraft; editor.append(fresh.panel); return; }
+    if (fresh) { editor.dataset.editorFor = selectedNewDraft; editor.append(fresh.panel); for (const kept of fresh.editors()) kept.refresh?.(); return; }
     const beat = scene.beats.find(item => item.id === selectedBeatId);
     if (beat) {
       editor.dataset.editorFor = beat.id;
@@ -2429,7 +2429,7 @@ export function renderStoryView(
   // What every beat editor needs from Story: thumbnails, the stage preview of a picture
   // the author points at in a picker sheet, and #96's backend checks.
   const editorContext = (key: string, existing: boolean, validate: ValidateAssignment, place?: () => { scene: SceneDocument; body: BodyRef; position: Position }): EditorContext => ({
-    model, existing, actions: liveActions, validate, newVariable,
+    model, existing, actions: liveActions, validate, newVariable, current: () => model,
     ...place ? { animates: () => { const { scene, body, position } = place(); return stageBeatsAbove(scene, body, position).map(beat => `${numbers.get(beat.id) ?? ""} ${beatLabels[beat.payload.type]} · ${stageSubject(beat.payload, model)}`); } } : {},
     thumbnail: (assetId, image, errorHost) => void loadImage(assetId, "thumbnail", image, errorHost, false),
     preview: payload => { sheetPreview = payload ? { key, payload } : undefined; refreshPreview(); },

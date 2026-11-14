@@ -1127,6 +1127,7 @@ export const storyCases={
   await c.click('+ Add beat',c.document.querySelector('.scene-workspace'));await pickIn(c,'setVariable');await c.settle();
   const counter=c.document.querySelector('.scene-workspace .new-beat'),variableMenu=()=>counter.querySelector('.story-variable-picker > summary');
   const formula=()=>counter.querySelector('[aria-label="Formula"]'),feedback=()=>counter.querySelector('.story-formula-feedback').textContent;
+  const listed=()=>{variableMenu().click();const names=[...counter.querySelectorAll('.story-variable-picker .story-variable-name')].map(n=>n.textContent);variableMenu().click();return names;};
   variableMenu().click();[...counter.querySelectorAll('.story-variable-picker [role=option]')].find(o=>o.querySelector('.story-variable-name')?.textContent==='trust').click();
   c.enter(formula(),'trust + 1');await c.wait(()=>checks().length);await c.settle();
   // New variable takes focus from the formula, whose check then runs during Create variable.
@@ -1157,7 +1158,7 @@ export const storyCases={
   await c.wait(()=>!/Checking/.test(feedback()));
   c.assert.deepEqual(checks().map(r=>r.errorCode??'ok').filter(code=>code!=='ok'),[],'Every check sends current revisions');
   c.assert.doesNotMatch(feedback(),/outside Loomlight/);
-  c.assert.equal(variableMenu().getAttribute('aria-label'),'Variable: trust');
+  c.assert.equal(variableMenu().getAttribute('aria-label'),'Variable: trust');c.assert(!listed().includes('late_count'),'The draft no longer offers the removed variable');
   await c.click('Cancel',counter);await c.settle();
   c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(before),'The draft and the Undone variable leave every file as it was');
   // The scene tree: a new chapter, a scene in it, moving that scene to the first chapter,

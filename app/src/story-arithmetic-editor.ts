@@ -38,14 +38,18 @@ export function assignmentCaption(payload: SetVariable, variables: SceneWorkspac
 }
 
 /** Only presents core inspection. Formula text never runs or evaluates in the renderer. */
-export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariable, validate?: ValidateAssignment, newVariable?: NewVariable) {
+export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariable, validate?: ValidateAssignment, newVariable?: NewVariable, current?: () => SceneWorkspace) {
   // The variable list writes a hidden select; "+ New variable…" creates one and selects it (story-release-fixes / a-v2).
   const host = node("div", "beat-fields story-arithmetic-editor"), variable = node("select", "story-backing"); variable.setAttribute("aria-label", "Variable"); variable.hidden = true; variable.tabIndex = -1;
   let variables = model.authoring.variables;
   const addOption = (v: (typeof variables)[number]): void => { const option = node("option", "", `${v.technicalName} · ${typeName(v.variableType)}`); option.value = v.id; variable.append(option); };
-  variables.forEach(addOption);
-  if (payload.variableId && !variables.some(v => v.id === payload.variableId)) { const missing = node("option", "", "Missing Variable"); missing.value = payload.variableId; variable.prepend(missing); }
-  variable.value = payload.variableId;
+  // The project's variables, and a chosen one that is not among them as Missing Variable.
+  const listVariables = (chosen: string): void => {
+    variable.replaceChildren(); variables.forEach(addOption);
+    if (chosen && !variables.some(v => v.id === chosen)) { const missing = node("option", "", "Missing Variable"); missing.value = chosen; variable.prepend(missing); }
+    variable.value = chosen;
+  };
+  listVariables(payload.variableId);
   const picker = variableMenu(variable, { label: "Variable", variables: () => variables, ...newVariable ? { create: (opener: HTMLElement) => {
     void newVariable(opener).then(created => {
       if (!created || !host.isConnected) return;
@@ -158,6 +162,16 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
     operationMenu(); menu.append(summary, list); equation.append(node("span", "story-equation-target", target.technicalName), menu, formula, suggestions);
     controls.push(formula); const calculation = node("div", "field compact-field"); calculation.append(node("span", "", "Calculation"), equation); editor.append(calculation, feedback, code); sourceCaption(); schedule();
   }
+  // Story shows a kept draft again: its list follows the project's variables now, so a
+  // variable an Undo removed leaves the list, and a chosen one shows as Missing Variable.
+  const refresh = (): void => {
+    const next = current?.().authoring.variables; if (!next) return;
+    const kind = (list: typeof variables): string | undefined => list.find(v => v.id === variable.value)?.variableType;
+    const shape = (list: typeof variables): string => JSON.stringify(list.map(v => [v.id, v.technicalName, v.variableType]));
+    if (shape(next) === shape(variables)) return;
+    const changed = kind(next) !== kind(variables); variables = next;
+    listVariables(variable.value); picker.draw(); if (changed) rebuild();
+  };
   variable.addEventListener("change", () => { drafts.set(editor.dataset.variableId ?? payload.variableId, { operation, text }); const draft = drafts.get(variable.value); operation = draft?.operation ?? "assign"; text = draft?.text ?? ""; editor.dataset.variableId = variable.value; rebuild(); });
   rebuild();
   // Draft-step Undo restores the variable, the chosen change and the text kept for each variable.
@@ -169,5 +183,5 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
       drafts.clear(); kept.drafts.forEach((value, key) => drafts.set(key, value)); rebuild();
     },
   };
-  return { host, controls, get primary() { return primary; }, read: () => { finishField(); return read(); }, focus: () => primary.focus(), internals };
+  return { host, controls, get primary() { return primary; }, read: () => { finishField(); return read(); }, focus: () => primary.focus(), internals, refresh };
 }
