@@ -68,8 +68,10 @@ export function placeAfter(scene: SceneDocument, beat: SceneBeat): Position | un
 export function firstPlace(scene: SceneDocument, body: BodyRef): Position | undefined {
   return bodyOf(scene, body)?.places[0]?.position;
 }
-/** Beat numbers as Tracks shows them: 06 in the scene, 06.2 and 06.2.1 inside its branches.
- *  A branch or option header shares the number of the condition or Choice that owns it. */
+/** Beat numbers as Tracks shows them: 06 in the scene, and 06.1, 06.2 on through all of a
+ *  condition's branches. A Choice numbers each option's beats by the option: 07.2.1 is
+ *  option 2's first beat (story-combined-editor / replace-v2). A branch or option header
+ *  shares the number of the condition or Choice that owns it. */
 export function beatNumbers(scene: SceneDocument): Map<string, string> {
   const numbers = new Map<string, string>();
   const visit = (body: BodyRef, prefix: string, offset: number, depth: number): void => {
@@ -78,10 +80,12 @@ export function beatNumbers(scene: SceneDocument): Map<string, string> {
       const number = prefix ? `${prefix}.${offset + index + 1}` : String(index + 1).padStart(2, "0");
       numbers.set(node.beatId, number);
       let inner = 0;
-      for (const child of node.bodies ?? []) {
+      (node.bodies ?? []).forEach((child, at) => {
         if (child.type === "branch" && !numbers.has(child.branchId)) numbers.set(child.branchId, number);
-        visit(child, number, inner, depth + 1); inner += bodyOf(scene, child)?.nodes.length ?? 0;
-      }
+        const info = bodyOf(scene, child);
+        if (info?.kind === "option") { visit(child, `${number}.${info.number ?? at + 1}`, 0, depth + 1); return; }
+        visit(child, number, inner, depth + 1); inner += info?.nodes.length ?? 0;
+      });
     });
   };
   visit({ type: "root" }, "", 0, 0);

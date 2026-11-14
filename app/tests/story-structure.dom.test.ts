@@ -284,6 +284,21 @@ test("Tracks insertion markers open Add a beat at the place core lists for them"
   await s.close();
 });
 
+test("a Choice's option beats number by option, as 05.2.1, in Tracks, Reel, the Choice editor and Move to", async () => {
+  const s = setup(undefined, editorFixture());
+  // story-combined-editor / replace-v2: Choice, option, beat. A condition's branches count on (01.1, 01.2).
+  const number = (id: string): string | undefined => trackColumn(s.host, id)?.querySelector(".story-beat-number")?.textContent ?? undefined;
+  openBranch(s.host, "opt1"); assert.deepEqual(["ask", "maybe"].map(number), ["05.1.1", "05.1.2"]);
+  openBranch(s.host, "opt2"); assert.deepEqual(["walk", "leave"].map(number), ["05.2.1", "05.2.2"]);
+  openBranch(s.host, "opt3"); assert.equal(number("code"), "05.3.1");
+  s.host.querySelector<HTMLButtonElement>('.story-view-option[data-view="reel"]')!.click(); assert.equal(number("code"), "05.3.1", "Reel");
+  const editor = selectBeat(s.host, "choice");
+  assert.deepEqual([...editor.querySelectorAll(".story-option-beat-number")].map(item => item.textContent), ["05.1.1", "05.1.2", "05.2.1", "05.3.1"]);
+  button(selectBeat(s.host, "walk", "opt2"), "Move to…").click();
+  assert.equal(s.host.querySelector<HTMLElement>(".story-move")!.getAttribute("aria-label"), "Move 05.2.1 Narration");
+  await s.close();
+});
+
 test("the toolbar's + Add beat adds after the selected beat in its own scene, branch or option, never past its ending", async () => {
   const s = setup();
   // story-revamp / combined-v1: the toolbar adds after the selection, at most at the place before its body's ending.
