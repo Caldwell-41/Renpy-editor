@@ -703,6 +703,10 @@ export function renderStoryView(
   const readQuietly = (read: () => BeatPayload): BeatPayload | undefined => { try { return read(); } catch { return undefined; } };
   // A picture a picker sheet points at, shown on the stage in place of its beat's draft.
   let sheetPreview: { readonly key: string; readonly payload: BeatPayload } | undefined;
+  // A hint about the open editor, such as "Use Cancel…", lasts until the editor redraws for
+  // another beat, scene or result; then the usual status (draft count or Saved) returns.
+  let editorHint = false;
+  const hintEditor = (text: string): void => { editorHint = true; actions.status(text); };
   const withDrafts = (scene: SceneDocument): SceneDocument => {
     const edits = new Map<string, BeatPayload>();
     const unknown = new Set<string>();
@@ -1562,7 +1566,7 @@ export function renderStoryView(
     const close = (): void => { if (pending) return; if (openOperation === panel) openOperation = undefined; panel.remove(); composing = false; draw(); focusColumn(selectedBeatId); };
     cancel.addEventListener("click", close);
     panel.addEventListener("compositionstart", () => { composing = true; }); panel.addEventListener("compositionend", () => { composing = false; });
-    panel.addEventListener("keydown", event => { if (event.key !== "Escape") return; event.preventDefault(); if (pending) return; if (panel.dataset.unsubmitted === "true") { actions.status("Use Cancel to discard this draft, or keep editing."); cancel.focus(); } else close(); });
+    panel.addEventListener("keydown", event => { if (event.key !== "Escape") return; event.preventDefault(); if (pending) return; if (panel.dataset.unsubmitted === "true") { hintEditor("Use Cancel to discard this draft, or keep editing."); cancel.focus(); } else close(); });
     apply.addEventListener("click", () => {
       if (pending || settling || composing) return;
       const save = async (): Promise<boolean> => {
@@ -2023,6 +2027,7 @@ export function renderStoryView(
   // beat, branch or option, or what to do in an empty selection.
   const drawEditor = (scene: SceneDocument): void => {
     const editor = editorHost; if (!editor) return;
+    if (editorHint) { editorHint = false; actions.draftsChanged?.(); }
     // A redraw closes a picker sheet, and with it the picture it previewed.
     if (sheetPreview) sheetPreview = undefined;
     editor.replaceChildren(); delete editor.dataset.editorFor; delete editor.dataset.sheet; effectsHost = undefined;
@@ -2393,10 +2398,11 @@ export function renderStoryView(
     editor.primary.addEventListener("compositionstart",()=>{composing=true;});editor.primary.addEventListener("compositionend",()=>{composing=false;});
     commit.addEventListener("click", () => { if(!settling) { settling=save(false).finally(()=>{settling=undefined;}); } });
     // While the comparison shows, only Discard draft or Override source resolves the draft.
-    const conflicted = (): boolean => { if (panel.dataset.conflict !== "true") return false; actions.status("Choose Discard draft or Override source. Draft retained."); panel.querySelector<HTMLElement>(".story-resolution button")?.focus(); return true; };
+    const conflicted = (): boolean => { if (panel.dataset.conflict !== "true") return false; hintEditor("Choose Discard draft or Override source. Draft retained."); panel.querySelector<HTMLElement>(".story-resolution button")?.focus(); return true; };
     if (beat.payload.type === "setVariable") panel.addEventListener("keydown", event => {
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter" && !event.defaultPrevented) { event.preventDefault(); if (!event.isComposing && !settling && !pendingWrites && !conflicted()) settling = save(false).finally(() => { settling = undefined; }); }
-      else if (event.key === "Escape" && !event.defaultPrevented && !event.isComposing) { event.preventDefault(); if (!pendingWrites && !settling && !conflicted()) { actions.status("Use Cancel to discard this draft, or keep editing."); cancel.focus(); } }
+      // With no draft there is nothing to cancel, and Cancel is hidden.
+      else if (event.key === "Escape" && !event.defaultPrevented && !event.isComposing && panel.dataset.unsubmitted === "true") { event.preventDefault(); if (!pendingWrites && !settling && !conflicted()) { hintEditor("Use Cancel to discard this draft, or keep editing."); cancel.focus(); } }
     });
     // Cmd/Ctrl+Enter commits a line; Shift adds the next line after a scene-level dialogue line.
     if (beat.payload.type === "dialogue" || beat.payload.type === "narration") editor.primary.addEventListener("keydown", (event) => {

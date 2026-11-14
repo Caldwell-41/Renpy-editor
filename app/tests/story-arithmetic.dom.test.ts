@@ -156,6 +156,29 @@ test("a Set variable draft whose variable left the project shows Missing Variabl
   }finally{view.dispose();await browser.happyDOM.close();}
 });
 
+test("Escape in a Set variable editor asks for Cancel only while it has a draft, and the hint ends with its editor",async()=>{
+  const browser = new Window({url:"http://tauri.localhost"});
+  Object.assign(globalThis, {window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLSelectElement:browser.HTMLSelectElement,KeyboardEvent:browser.KeyboardEvent,Event:browser.Event});
+  document.body.innerHTML='<main></main><aside></aside>';
+  const base=storyFixture(),host=document.querySelector<HTMLElement>("main")!;
+  const beats=[{id:"arithmetic",byteStart:0,byteEnd:30,protected:false,payload:{type:"setVariable" as const,variableId:"trust",value:{operation:"add" as const,operand:"trust + 2"}}},{id:"end",byteStart:30,byteEnd:41,protected:false,payload:{type:"return" as const}}];
+  const model:SceneWorkspace={...base,authoringRevision:"authoring",scenes:[{...base.scenes[0]!,beats,bodies:sceneBodies(beats)},base.scenes[1]!]};
+  const statuses:string[]=[];let refreshed=0;
+  const actions={validateAssignment:async()=>{throw Error("offline");},resolution:{width:1280,height:720},present:async()=>{throw Error("no media");},status:(value:string)=>{statuses.push(value);},draftsChanged:()=>{refreshed++;},apply:async()=>{throw Error("refused");}};
+  const view=renderStoryView(host,document.querySelector("aside")!,model,actions,"arithmetic");
+  const escape=():void=>{storyEditor(host).querySelector<HTMLElement>(".story-variable-picker > summary")!.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));};
+  const hint="Use Cancel to discard this draft, or keep editing.";
+  try{
+    escape();
+    assert.ok(!statuses.includes(hint),"Escape with no draft names no draft");
+    const formula=storyEditor(host).querySelector<HTMLInputElement>('[aria-label="Formula"]')!;
+    formula.value="trust + 3";formula.dispatchEvent(new Event("input",{bubbles:true}));await tick();
+    escape();assert.equal(statuses.at(-1),hint);
+    const before=refreshed;selectBeat(host,"end");await tick();
+    assert.ok(refreshed>before,"Leaving the editor restores the usual status");
+  }finally{view.dispose();await browser.happyDOM.close();}
+});
+
 test("Set variable's list ends with + New variable…, says when there are none, and selects the new variable", async () => {
   const empty = editorProject([storyBeat("words", { type: "narration", text: "The timetable has not changed in thirty years." })]);
   const model: SceneWorkspace = { ...empty, authoring: { ...empty.authoring, variables: [] } };
