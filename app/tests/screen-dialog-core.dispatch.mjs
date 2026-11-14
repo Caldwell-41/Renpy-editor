@@ -32,7 +32,7 @@ async function place(host,draft,label){
  const shown=text=>[...draft.querySelectorAll('button')].find(b=>b.textContent===text&&!b.closest('[hidden]'));
  const choose=shown('Choose a place…');if(choose)choose.click();else{draft.querySelector('.story-beat-menu > summary').click();shown('Move to…').click();}
  const places=host.querySelector('.story-move');const item=[...places.querySelectorAll('[role=treeitem]')].find(i=>i.textContent.slice(1)===label);assert(item,label);item.click();
- button(places,'Move').click();await wait(()=>!places.isConnected,'Move to '+label);
+ button(places,choose?'Choose':'Move').click();await wait(()=>!places.isConnected,'Move to '+label);
 }
 async function mountStory(sceneId){storyView?.dispose();document.body.replaceChildren();const model=await call('scene.list');model.lastOpen={chapterId:model.scenes.find(s=>s.id===sceneId).chapterId,sceneId};const host=document.createElement('main'),tree=document.createElement('aside');host.className='scene-workspace';document.body.append(host,tree);
  storyView=renderStoryView(host,tree,model,{resolution:{width:1280,height:720},status:m=>messages.push(m),present:async()=>{throw Error('No media');},screenHintKind:'dialog',screenInsertion:insertion,rememberScreenInsertion:value=>{insertion=structuredClone(value);},screenCatalog:()=>call('screens.list'),resolveScreenTarget:binding=>call('screens.resolveTarget',{binding}),apply:(command,expected)=>call('scene.apply',{expectedProjectRevision:expected.projectRevision,expectedSourceMapRevision:expected.sourceMapRevision,command})});return host;}
@@ -82,7 +82,7 @@ try{
  // The comment-only edit changed the scene, so the retained place must be chosen again.
  assert.equal(goesAt(singleDraft),'Choose a place','Stale insertion must require an actual place choice');
  const refusedAt=messages.length;button(singleDraft,'Add Beat').click();await wait(()=>messages.length>refusedAt,'stale sole-position refusal');
- assert.equal(messages.at(-1),'Choose where this beat goes. Draft retained.');
+ assert.equal(messages.at(-1),'Choose a place for this beat first.');
  assert(singleDraft.isConnected);assert.equal(await source(singleScene.sourcePath),commented);assert.deepEqual(insertion,retained);
  await place(singleHost,singleDraft,'Before 01 Return');button(singleDraft,'Cancel').click();
  assert.deepEqual(insertion,retained);assert.equal(await source(singleScene.sourcePath),commented);

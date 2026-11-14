@@ -182,6 +182,6 @@ export async function choosePlace(host: ParentNode, panel: HTMLElement, position
   const item = (label: string, selector = "[role=treeitem]"): HTMLElement | undefined => [...places.querySelectorAll<HTMLElement>(selector)].find(node => node.textContent!.slice(1) === label);
   for (const branch of branches) item(branch, '[role=treeitem][aria-expanded="false"]')?.click();
   const target = item(position); if (!target) throw Error(`No place ${position} in ${[...places.querySelectorAll("[role=treeitem]")].map(node => node.textContent).join(" | ")}`);
-  target.click(); [...places.querySelectorAll<HTMLButtonElement>("button")].find(node => node.textContent === "Move")!.click();
+  target.click(); [...places.querySelectorAll<HTMLButtonElement>(".story-dialog-actions button")].at(-1)!.click();
   await new Promise(resolve => setTimeout(resolve, 0));
 }

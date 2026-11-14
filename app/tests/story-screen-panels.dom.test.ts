@@ -410,7 +410,15 @@ test("a place picked in Screens that changed reads Choose a place, and Add Beat 
   assert.equal(panel.querySelector(".story-place-note > p")!.textContent, "The scene changed after you picked this place in Screens. Choose where this beat goes.");
   assert.ok(panel.querySelector(".story-where-warn")); assert.equal(panel.querySelector<HTMLElement>(".story-beat-menu")!.hidden, true);
   press(panel, "Add Beat"); await tick();
-  assert.deepEqual(s.calls, []); assert.equal(s.status.at(-1), "Choose where this beat goes. Draft retained.");
+  assert.deepEqual(s.calls, []); assert.equal(s.status.at(-1), "Choose a place for this beat first.");
+  // Choose a place… opens the place tree with nothing chosen.
+  press(panel, "Choose a place…");
+  const dialog = s.host.querySelector<HTMLElement>(".story-move")!;
+  assert.equal(dialog.getAttribute("aria-label"), "Place the new Show screen"); assert.equal(dialog.querySelector("h2")!.textContent, "Place the new Show screen");
+  assert.equal(dialog.querySelector(".story-dialog-note")!.textContent, "Puts the new beat at the chosen place.");
+  assert.equal(dialog.querySelector('[aria-selected="true"]'), null); assert.equal(dialog.querySelector(".story-summary")!.textContent, "Choose where this beat goes.");
+  assert.deepEqual(texts(dialog, ".story-dialog-actions button"), ["Cancel", "Choose"]);
+  press(dialog, "Cancel");
   await choosePlace(s.host, panel, "Before 03 Narration");
   assert.deepEqual(placeRows(panel), ["Goes at", "Before 03 Narration", "In", "The last service", "After", "02 Mara's line"]);
   assert.equal(panel.querySelector<HTMLElement>(".story-place-note")!.hidden, true);

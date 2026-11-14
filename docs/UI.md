@@ -1016,8 +1016,10 @@ waits for Finish interaction. A new screen beat uses Goes at, In, After and ⋯ 
 like other new beats, starting at the place Screens last used. When the scene changed
 after that place was picked, Goes at reads "Choose a place" and one warning block says
 "The scene changed after you picked this place in Screens. Choose where this beat
-goes." with Choose a place…. Add Beat refuses until a place is chosen
-(`story-release-fixes` / `a-v2`). The [Screens contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3b-screens.md)
+goes." with Choose a place…. Choose a place… opens "Place the new Show screen" (or
+Hide or Call screen) with nothing chosen, the note "Puts the new beat at the chosen
+place." and a Choose button. Add Beat refuses with "Choose a place for this beat
+first." until a place is chosen (`story-release-fixes` / `a-v2`). The [Screens contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3b-screens.md)
 owns requirements, including its
 [creation and reuse controls](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3b-screens.md#implemented-creation-and-reuse-controls),
 and [ADR 0021](adr/0021-separate-renpy-canvas-helper.md) owns the canvas helper.
