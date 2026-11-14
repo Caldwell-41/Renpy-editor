@@ -1118,6 +1118,48 @@ export const storyCases={
   await c.click('Cancel',condition);await c.settle();c.assert(!applied(from,'insertCondition'),'Cancel adds no condition');
   after=await c.snapshot();c.assert.match(c.sourceText(after,'game/definitions/variables.rpy'),/^default late_tram = False$/m);
   othersKept(before,after,['game/definitions/variables.rpy']);
+  // A new Set variable's formula check waits for each write in flight, "+ New variable…"
+  // and an Undo alike, and sends the revisions that write makes (B23). The three Undos
+  // after Cancel bring the draft back, then its earlier variable, then remove the variable.
+  before=await c.snapshot();from=c.requests().length;
+  const pause=ms=>new Promise(r=>setTimeout(r,ms)),undoLabel=()=>c.document.querySelector('.app-header [data-history="undo"]').getAttribute('aria-label');
+  const checks=()=>c.requests().slice(from).filter(r=>r.request.operation==='scene.validateAssignment');
+  await c.click('+ Add beat',c.document.querySelector('.scene-workspace'));await pickIn(c,'setVariable');await c.settle();
+  const counter=c.document.querySelector('.scene-workspace .new-beat'),variableMenu=()=>counter.querySelector('.story-variable-picker > summary');
+  const formula=()=>counter.querySelector('[aria-label="Formula"]'),feedback=()=>counter.querySelector('.story-formula-feedback').textContent;
+  variableMenu().click();[...counter.querySelectorAll('.story-variable-picker [role=option]')].find(o=>o.querySelector('.story-variable-name')?.textContent==='trust').click();
+  c.enter(formula(),'trust + 1');await c.wait(()=>checks().length);await c.settle();
+  // New variable takes focus from the formula, whose check then runs during Create variable.
+  variableMenu().click();await c.click('+ New variable…',counter);
+  c.enter(dialog().querySelector('input[aria-label="Variable name"]'),'late_count');await c.click('Whole number',dialog());
+  await c.pendingWrite('variable.create',()=>c.click('Create variable',dialog()),()=>pause(300));
+  await c.wait(()=>!dialog());await c.settle();
+  c.assert.equal(variableMenu().getAttribute('aria-label'),'Variable: late_count');
+  await c.click('Cancel',counter);await c.settle();
+  // Undo of Cancel shows the draft in the editor, selectable from its Tracks column.
+  c.assert.equal(undoLabel(),'Undo cancel of set variable draft in Choices');
+  await c.history('undo');await c.settle();
+  c.assert.equal(c.document.querySelector('.scene-workspace .story-editor .new-beat'),counter,'The restored draft shows in the editor');
+  c.assert.equal(status(),'1 unsaved beat draft');c.assert.equal(variableMenu().getAttribute('aria-label'),'Variable: late_count');
+  await select(c,repeat.id);c.assert(!counter.isConnected);
+  c.document.querySelector(`.scene-workspace .story-track-pending[data-new-beat="${counter.dataset.beatDraftKey}"] > .story-track-beat`).click();
+  await c.wait(()=>c.document.querySelector('.scene-workspace .story-editor .new-beat')===counter);
+  c.assert.equal(undoLabel(),'Undo set variable change in Choices');
+  await c.history('undo');await c.settle();
+  c.assert.equal(variableMenu().getAttribute('aria-label'),'Variable: trust');c.assert.equal(formula().value,'trust + 1');
+  // The Undo button takes focus from the formula, whose check then runs during the Undo.
+  c.assert.equal(undoLabel(),'Undo new variable late_count');
+  formula().focus();c.document.querySelector('.app-header [data-history="undo"]').focus();
+  await c.pendingWrite('history.undo',()=>c.history('undo'),()=>pause(300));await c.settle();
+  c.assert.doesNotMatch(c.sourceText(await c.snapshot(),'game/definitions/variables.rpy'),/late_count/);
+  await c.click('Story',c.document.querySelector('.story-sidebar'));
+  await c.wait(()=>c.document.querySelector('.scene-workspace .story-editor .new-beat')===counter);await c.settle();
+  await c.wait(()=>!/Checking/.test(feedback()));
+  c.assert.deepEqual(checks().map(r=>r.errorCode??'ok').filter(code=>code!=='ok'),[],'Every check sends current revisions');
+  c.assert.doesNotMatch(feedback(),/outside Loomlight/);
+  c.assert.equal(variableMenu().getAttribute('aria-label'),'Variable: trust');
+  await c.click('Cancel',counter);await c.settle();
+  c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(before),'The draft and the Undone variable leave every file as it was');
   // The scene tree: a new chapter, a scene in it, moving that scene to the first chapter,
   // then deleting the scene and the empty chapter. Each is one Story write.
   const tree=()=>c.document.querySelector('.story-tree'),chapterGroup=name=>[...tree().querySelectorAll('.tree-chapter')].find(g=>g.querySelector('.tree-chapter-row strong')?.textContent===name);

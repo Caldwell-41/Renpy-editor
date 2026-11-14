@@ -531,7 +531,12 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
     const transition = controller ? await runAuthoringOperation(project, operationScopes.sourceNavigation, () => controller.prepareTransition("navigation")) : undefined;
     if (controller && !transition) return;
     try {
-      const step = await runAuthoringOperation(project, operationScopes.history, () => projectValue<HistoryStep>(project, direction === "undo" ? "history.undo" : "history.redo"));
+      // Story's formula checks wait for this Undo or Redo and the workspace it brings.
+      const held = storyView?.historyWrite();
+      let step: HistoryStep;
+      try { step = await runAuthoringOperation(project, operationScopes.history, () => projectValue<HistoryStep>(project, direction === "undo" ? "history.undo" : "history.redo")); }
+      catch (error) { held?.(false); throw error; }
+      held?.(true);
       outcome = "committed";
       if (currentProject?.sessionId !== project.sessionId) return;
       if (step.step) storyView?.applyStep(step.step, direction);

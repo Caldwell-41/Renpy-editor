@@ -126,7 +126,8 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   try{
    response=await child.request(request);
    assert(isCoreResponse(response,request.requestId),'Actual Host response must match the exact typed request ID');
-   if(responseBarrier&&operation==='scene.apply'&&payload.command.type===responseBarrier.command){
+   // A held response is a Scene command's, by its type, or another write's, by its operation.
+   if(responseBarrier&&(operation==='scene.apply'?payload.command.type:operation)===responseBarrier.command){
     const barrier=responseBarrier;assert(!barrier.observed,'Only one actual UI response may be held');
     assert(response.ok,'Pending lock proof requires an accepted real Host transaction');barrier.observed=true;
     await barrier.releasePromise;

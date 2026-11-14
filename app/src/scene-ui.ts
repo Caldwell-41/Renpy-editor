@@ -491,6 +491,10 @@ export interface StoryView {
   saveStatus(): StoryStatus | undefined;
   /** Ends an unfinished typing step and resolves once every draft step has reached core. */
   flushSteps(): Promise<void>;
+  /** Holds formula checks from the start of an Undo or Redo, so they send the revisions it
+   *  makes. Call the result with true once it is accepted: the hold then ends with the next
+   *  update. False, for a refused one, ends the hold now. */
+  historyWrite(): (accepted: boolean) => void;
   /** Restores a beat draft to its state before (Undo) or after (Redo) a draft step. False for an unknown step. */
   applyStep(step: DraftStep, direction: HistoryDirection): boolean;
   /** Whether a field belongs to a beat draft, where Cmd/Ctrl+Z runs project Undo. */
@@ -544,8 +548,15 @@ export function renderStoryView(
   let settling: Promise<boolean> | undefined;
   let composing = false;
   let pendingWrites = 0;
-  // Settles when Story's write in flight ends, so a check can wait for the revisions it makes.
-  let writing: Promise<void> | undefined;
+  // Writes in flight whose revisions a formula check must not send: Story's own, "+ New
+  // variable…", and an Undo or Redo until update() brings its workspace. Each settles once
+  // Story holds the revisions it made, so a check waits for all of them (B10, B23).
+  const writes = new Set<Promise<void>>();
+  const holdChecks = (): (() => void) => {
+    let written!: () => void; const write = new Promise<void>(resolve => { written = resolve; });
+    writes.add(write); return () => { writes.delete(write); written(); };
+  };
+  let historyWrite: { readonly release: () => void; accepted: boolean } | undefined;
   // "+ New variable…" in a rule builder: core creates the variable as one edit with Undo.
   // Story takes the new workspace without redrawing, so the open draft keeps its input
   // and commits against the new revisions.
@@ -554,10 +565,14 @@ export function renderStoryView(
     create: async request => {
       if (!actions.createVariable) throw Error("Create the variable in Variables.");
       if (pendingWrites) throw Error("Wait for the current change to finish.");
-      const next = await actions.createVariable(request);
-      if (disposed) throw Error("Story closed.");
-      model = next; actions.status("Saved");
-      const created = next.authoring.variables.find(item => item.technicalName === request.technicalName);
+      const written = holdChecks();
+      try {
+        const next = await actions.createVariable(request);
+        if (disposed) throw Error("Story closed.");
+        model = next;
+      } finally { written(); }
+      actions.status("Saved");
+      const created = model.authoring.variables.find(item => item.technicalName === request.technicalName);
       if (!created) throw Error("Core did not return the new variable. Refresh Story.");
       return created;
     },
@@ -764,8 +779,8 @@ export function renderStoryView(
   const lockStory = (): (() => void) => {
     const locks = [host, treeHost].flatMap(root => [...root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>("input,select,textarea,button")]).map(control => ({ control, disabled: control.disabled }));
     locks.forEach(({ control }) => { control.disabled = true; }); pendingWrites++;
-    let written!: () => void; writing = new Promise(resolve => { written = resolve; });
-    return () => { pendingWrites--; writing = undefined; written(); locks.forEach(({ control, disabled }) => { if (control.isConnected) control.disabled = disabled; }); };
+    const written = holdChecks();
+    return () => { pendingWrites--; written(); locks.forEach(({ control, disabled }) => { if (control.isConnected) control.disabled = disabled; }); };
   };
 
   // Reloads Story after core refuses a stale request, keeping every draft. A failed
@@ -2398,11 +2413,11 @@ export function renderStoryView(
       ...(beat.payload.type === "dialogue" && !beat.owner ? { nextLine: () => { if (!settling && !conflicted()) settling = save(true).finally(() => { settling = undefined; }); } } : {}) });
   };
 
-  // A check is bound to the revisions it sends. While Story's own write is in flight those
-  // revisions are about to be replaced, so the check waits for the write and then tests
-  // the result, or stops when that write removed its editor.
+  // A check is bound to the revisions it sends. While a write is in flight those revisions
+  // are about to be replaced, so the check waits for the write and then tests the result,
+  // or stops when that write removed its editor.
   const assignmentValidation = (base: () => { scene: SceneDocument; captured: ExpectedRevisions }, command: (beat: BeatPayload) => SceneCommand, shown: () => boolean): ValidateAssignment => async beat => {
-    while (writing) await writing;
+    while (writes.size) await Promise.all(writes);
     if (!actions.validateAssignment || disposed || actions.current?.() === false) throw Error("Story session is unavailable.");
     if (!shown()) throw Error("This beat's editor closed.");
     const { scene, captured: expected } = base();
@@ -2597,6 +2612,8 @@ export function renderStoryView(
       if (scene && beatId !== undefined) selectBeat(scene, beatId); else if (beatId !== undefined) selectedBeatId = beatId;
       draw();
       host.closest<HTMLElement>(".project-shell")?.setAttribute("data-writing-focus", String(writingFocus));
+      // The workspace after an accepted Undo or Redo: held checks now send its revisions.
+      if (historyWrite?.accepted) { historyWrite.release(); historyWrite = undefined; }
     },
     hasDrafts: sceneId => pendingDrafts(sceneId).length > 0,
     draftCount: () => pendingDrafts().length,
@@ -2607,10 +2624,18 @@ export function renderStoryView(
     save: () => saveDrafts(),
     saveStatus,
     flushSteps: async () => { closeText(); await recording; },
+    historyWrite: () => {
+      historyWrite?.release();
+      historyWrite = { release: holdChecks(), accepted: false }; const write = historyWrite;
+      return accepted => {
+        if (accepted) { write.accepted = true; return; }
+        write.release(); if (historyWrite === write) historyWrite = undefined;
+      };
+    },
     applyStep,
     ownsDraftField: target => target instanceof HTMLElement && [...beatDrafts.values()].some(draft => draft.panel.contains(target)),
     dispose: () => {
-      disposed = true; closeText(); beatDrafts.clear(); steps.clear(); stopLaneWatch?.();
+      disposed = true; closeText(); beatDrafts.clear(); steps.clear(); stopLaneWatch?.(); historyWrite?.release();
       mediaGeneration += 1;
       pendingImages.clear();
       for (const image of imageCache.values()) URL.revokeObjectURL(image.url);
