@@ -43,6 +43,17 @@ test("missing Call destination stays visible, fails blur and submission, and nev
   await s.close();
 });
 
+test("Commit on a missing Background marks its row and focuses Change", async () => {
+  let writes = 0; const missing: SceneBeat = { id: "bg", byteStart: 10, byteEnd: 30, protected: false, payload: { type: "background", assetId: "missing", transition: "none" } };
+  const s = setup([missing, ending], async () => { writes++; return s.model; });
+  try {
+    selectBeat(s.host, "bg");
+    const row = s.host.querySelector<HTMLElement>(".story-editor .story-asset-row")!, change = row.querySelector<HTMLButtonElement>(".story-change")!;
+    click(s.host, "Commit Beat"); await tick();
+    assert.equal(writes, 0); assert.equal(row.getAttribute("aria-invalid"), "true"); assert.ok(document.activeElement === change, "Commit focuses the marked row's Change");
+  } finally { await s.close(); }
+});
+
 test("guarded Choice validates exact integer at blur/submission; IME and failed writes retain every field", async () => {
   const writes: SceneCommand[] = []; const s = setup([choice, ending], async command => { writes.push(command); throw Error("Map changed. Input retained."); });
   selectBeat(s.host, "choice");

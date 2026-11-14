@@ -62,7 +62,7 @@ export interface EditorContext {
   readonly newVariable?: NewVariable;
 }
 
-export function requiredText(control: HTMLInputElement, name: string): string { if (!control.value.trim()) { control.focus(); throw new Error(`${name} is required.`); } return control.value.trim(); }
+export function requiredText(control: HTMLInputElement, name: string): string { if (!control.value.trim()) throw new Error(`${name} is required.`); return control.value.trim(); }
 
 const transitionItems = (none = true): ChoiceItem[] => [...none ? [{ value: "none", label: "None" }] : [], { value: "dissolve", label: "Dissolve" }, { value: "fade", label: "Fade" }];
 const placementItems: ChoiceItem[] = [{ value: "left", label: "Left" }, { value: "centre", label: "Centre" }, { value: "right", label: "Right" }];
@@ -159,10 +159,10 @@ export function buildBeatEditor(payload: BeatPayload, context: EditorContext): B
       const destination = backingSelect(label, model.scenes.map(scene => ({ value: scene.id, label: scene.displayName })), payload.sceneId);
       destination.hidden = false; destination.tabIndex = 0; destination.className = ""; controls.push(destination);
       host.append(labelled(label, destination));
-      const required = (): string => { if (unavailable(destination)) { destination.focus(); throw new Error("Select an available item first."); } return destination.value; };
+      const required = (): string => { if (unavailable(destination)) throw new Error("Select an available item first."); return destination.value; };
       const validate = validateField(destination, () => { required(); });
       host.append(hint(payload.type === "call" ? "Returns to the next beat. The editor preview does not run the called scene." : "Leaves this scene and does not return."));
-      read = payload.type === "call" ? () => { validate(); return { type: "call", sceneId: required(), returnLabel: payload.returnLabel }; } : () => ({ type: "jump", sceneId: required() }); break;
+      read = payload.type === "call" ? () => { validate(); return { type: "call", sceneId: required(), returnLabel: payload.returnLabel }; } : () => { validate(); return { type: "jump", sceneId: required() }; }; break;
     }
     case "repeatChoice": host.append(hint("Shows its Choice again, with its prompt. Change this with the option's Then.")); read = () => payload; break;
     case "return": host.append(hint("Returns to the caller, or the main menu. Add a beat with Jump or Return in its place to change this ending.")); read = () => ({ type: "return" }); break;

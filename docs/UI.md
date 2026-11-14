@@ -249,7 +249,8 @@ identifies the target, and keep other machine detail in diagnostics.
   updates or clears as the value becomes valid.
 - **When a field is finished.** Validate text and number fields on blur and on an
   explicit field commit. Validate a selection when it is chosen. Enter commits only
-  where it already does; in multiline text it inserts a newline.
+  where it already does; in multiline text it inserts a newline. This check, and any
+  read for a preview, label or step name, marks the field but never moves focus.
 - **On submission.** Revalidate the whole form, including untouched and dependent
   fields. Invalid input writes and sends nothing. Keep every field, mark the errors and
   focus the first one. A disabled button alone never explains why.

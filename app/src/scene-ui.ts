@@ -679,16 +679,8 @@ export function renderStoryView(
     } else { refreshPreview(); if (!draft.beatId) redrawBottom(); }
     return true;
   };
-  // Reads a draft without moving focus or the caret, which a failing field read can do.
-  const keepFocus = <T,>(read: () => T): T => {
-    const active = document.activeElement as (HTMLElement & Partial<Pick<HTMLInputElement, "selectionStart" | "selectionEnd" | "setSelectionRange">>) | null;
-    const caret = active?.setSelectionRange ? { start: active.selectionStart ?? null, end: active.selectionEnd ?? null } : undefined;
-    try { return read(); } finally {
-      if (active && document.activeElement !== active) { active.focus({ preventScroll: true }); if (caret) active.setSelectionRange?.(caret.start, caret.end); }
-    }
-  };
   // Valid beat drafts preview on the stage; invalid input previews the accepted beat.
-  const readQuietly = (read: () => BeatPayload): BeatPayload | undefined => { try { return keepFocus(read); } catch { return undefined; } };
+  const readQuietly = (read: () => BeatPayload): BeatPayload | undefined => { try { return read(); } catch { return undefined; } };
   // A picture a picker sheet points at, shown on the stage in place of its beat's draft.
   let sheetPreview: { readonly key: string; readonly payload: BeatPayload } | undefined;
   const withDrafts = (scene: SceneDocument): SceneDocument => {
@@ -894,7 +886,7 @@ export function renderStoryView(
     const before = statusKey(), live = new Set(pendingDrafts());
     for (const draft of refusal.failing.keys()) if (!live.has(draft)) refusal.failing.delete(draft);
     if (edited && refusal.failing.has(edited)) {
-      try { keepFocus(edited.command); refusal.failing.delete(edited); } catch (error) { refusal.failing.set(edited, friendlyError(error, invalidDraft)); }
+      try { edited.command(); refusal.failing.delete(edited); } catch (error) { refusal.failing.set(edited, friendlyError(error, invalidDraft)); }
     }
     if (!live.size) { refusal = undefined; return; }
     if (statusKey() !== before) showRefusal();
@@ -2533,7 +2525,7 @@ export function renderStoryView(
           drawWhere(); relocate(); focusFirst(panel); return true;
         } });
     };
-    const draft=keepDraft(key,{panel,sceneId:scene.id,place,replaces:()=>replaces,...beatEditor?{read:beatEditor.read}:{},command:savedCommand,kind:()=>{try{return beatEditor?beatLabels[keepFocus(beatEditor.read).type].toLowerCase():"condition";}catch{return addKindName(type).toLowerCase();}},editors:()=>[editor],primary:()=>editor.primary,
+    const draft=keepDraft(key,{panel,sceneId:scene.id,place,replaces:()=>replaces,...beatEditor?{read:beatEditor.read}:{},command:savedCommand,kind:()=>{try{return beatEditor?beatLabels[beatEditor.read().type].toLowerCase():"condition";}catch{return addKindName(type).toLowerCase();}},editors:()=>[editor],primary:()=>editor.primary,
       // A new beat whose scene or branch left source has nowhere to go: only Discard draft resolves it.
       conflict:()=>{
         const current=model.scenes.find(item=>item.id===scene.id),{body:at}=place();
