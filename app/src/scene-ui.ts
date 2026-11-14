@@ -2654,7 +2654,8 @@ function restoreState(panel: HTMLElement, state: DraftState): void {
   for (const [editor, value] of state.editors) editor.restore(value);
 }
 
-function required(control: HTMLSelectElement): string { if (!control.value || control.options[control.selectedIndex]?.dataset.unavailable === "true") { control.focus(); throw new Error("Select an available item first."); } return control.value; }
+/** Reads a required select. An unavailable choice is marked and throws; Apply focuses it. */
+function required(control: HTMLSelectElement): string { if (!control.value || control.options[control.selectedIndex]?.dataset.unavailable === "true") { control.setAttribute("aria-invalid", "true"); throw new Error("Select an available item first."); } control.removeAttribute("aria-invalid"); return control.value; }
 
 export function renderRecoverySurface(host: HTMLElement, report: RecoveryReport, actions: RecoveryActions): void {
   host.replaceChildren(); host.className = "recovery-workspace";

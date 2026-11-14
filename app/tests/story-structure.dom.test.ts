@@ -160,6 +160,16 @@ test("delete whole group and selected unwrap remain distinct; initial If cannot 
   button(storyEditor(s.host), "Delete condition").click(); panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Delete entire condition"]')!; button(panel, "Delete entire condition").click(); await tick(); assert.equal(s.calls[1]!.command.type, "removeStoryNode"); assert.deepEqual(s.calls[1]!.command.node, { type: "condition", groupId: "group" }); await s.close();
 });
 
+test("Unwrap with no branch to keep marks the field, writes nothing, and Apply focuses it", async () => {
+  const s = setup(); selectBeat(s.host, "if");
+  button(storyEditor(s.host), "Unwrap…").click(); const panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Unwrap one branch"]')!;
+  const branch = choose(panel, "Branch to keep", "none"); assert.equal(branch.value, "");
+  button(panel, "Unwrap selected branch").click(); await tick();
+  assert.equal(s.calls.length, 0); assert.equal(branch.getAttribute("aria-invalid"), "true"); assert.equal(document.activeElement, branch);
+  choose(panel, "Branch to keep", "elif"); button(panel, "Unwrap selected branch").click(); await tick();
+  assert.equal(s.calls[0]!.command.branchId, "elif"); await s.close();
+});
+
 test("manual preview never runs sibling bodies and switching branches retains the editing draft", async () => {
   const s = setup(); const scene = s.model.scenes[0]!;
   const preview = deriveScenePreview({ ...scene, beats: scene.beats.filter(beat => ["if", "a", "elif", "maybe", "otherwise", "empty"].includes(beat.id)) }, undefined, new Map([["group", "elif"]])); assert.equal(preview.overlay?.text, "Maybe another time."); assert.equal(preview.partial, false);
