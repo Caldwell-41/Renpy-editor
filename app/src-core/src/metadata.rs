@@ -201,6 +201,21 @@ impl ConditionalBranch {
     pub fn opens_group(&self) -> bool {
         self.ordinal == 0 && !self.choice_option
     }
+
+    /// Whether two mappings put a branch in the same place in the same group. The
+    /// test and its variable are left out: they also depend on the variables the
+    /// line names, which can be created while the source stays the same (#120).
+    pub fn same_place(a: Option<&Self>, b: Option<&Self>) -> bool {
+        match (a, b) {
+            (Some(a), Some(b)) => {
+                a.choice_option == b.choice_option
+                    && a.group_id == b.group_id
+                    && a.otherwise == b.otherwise
+                    && a.ordinal == b.ordinal
+            }
+            (a, b) => a.is_none() && b.is_none(),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]

@@ -909,6 +909,27 @@ export const storyCases={
   c.assert.equal(dialog.querySelector('select[aria-label="Variable type"]').value,'int');
   await c.click('Cancel',dialog);c.assert.equal(c.document.querySelector('.story-new-variable'),null);
   c.assert.equal(c.requests().slice(writes).filter(r=>r.request.operation==='variable.create').length,0);
+  // Create variable makes the test editable in the builder. The scene source and every beat ID stay.
+  const ids=shownBeats(c).map(b=>b.id);
+  [...(await branchBody(c,elseIf.id)).querySelectorAll('button')].find(b=>b.textContent==='Create missing_flag…').click();
+  const create=c.requests().length;await c.click('Create variable',c.document.querySelector('.story-new-variable'));
+  await c.wait(()=>c.requests().slice(create).some(r=>r.request.operation==='variable.create'));await c.settle();
+  // Each read after the creation succeeds; the status names no refusal.
+  const reads=c.requests().slice(create).map(r=>`${r.request.operation} ${r.responseOk?'ok':r.errorCode}`);
+  c.assert.deepEqual(reads.filter(r=>!r.endsWith(' ok')),[],`${reads.join(', ')}; status: ${status()}`);
+  c.assert.equal(c.document.querySelector('.story-new-variable'),null);
+  c.assert.deepEqual(shownBeats(c).map(b=>b.id),ids);c.assert.equal(branchOf('missing_flag == 4'),undefined);
+  c.assert.equal(shownBeats(c).find(b=>b.id===elseIf.id).conditionalBranch.condition.status,'supported');
+  const editable=await branchBody(c,elseIf.id);
+  c.assert.equal(editable.querySelector('.story-rule-code[aria-invalid="true"]'),null);c.assert(editable.querySelector('select[aria-label$=" comparison"]'));
+  c.assert.equal(editable.querySelector(`[data-beat-opener="branch:${elseIf.id}"]`).disabled,false,'+ Beat works once the builder can edit the test');
+  const group=nodeOf(c,elseIf.conditionalBranch.groupId).id;
+  c.assert.equal(card(c,group).querySelector('.story-condition-problems'),null);c.assert(!findRow(c,group).querySelector('.story-lane-5').classList.contains('story-lane-warn'));
+  c.assert.equal(c.sourceText(await c.snapshot(),path),c.sourceText(saved,path));
+  // Undo removes the variable again; the test goes back to unknown on the same beats.
+  await c.history('undo');await c.settle();
+  c.assert.deepEqual(shownBeats(c).map(b=>b.id),ids);c.assert(branchOf('missing_flag == 4'));
+  c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(saved));
  },
  [RELEASE_JOURNEY]:async c=>{
   const view=async(c,name)=>{await c.click(name,c.document.querySelector('.scene-workspace .story-view-switch'));

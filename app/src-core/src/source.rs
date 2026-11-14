@@ -1532,7 +1532,10 @@ fn build_reconciled_mapping(
             .all(|(before, after)| {
                 before.kind == reconciliation_kind(after, bytes)
                     && before.owner == after.owner
-                    && before.conditional_branch == after.conditional_branch
+                    && crate::metadata::ConditionalBranch::same_place(
+                        before.conditional_branch.as_ref(),
+                        after.conditional_branch.as_ref(),
+                    )
                     && (!previous_ids.contains(after.id.as_str()) || before.id == after.id)
             });
     let mut unmatched_before: HashMap<&str, Vec<&crate::metadata::BeatSourceMapping>> =

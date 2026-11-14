@@ -4282,7 +4282,11 @@ fn build_mapping_mode(
     structure::mark_placeholders(&mut beats);
     if let Some(old) = previous.filter(|m| m.source_revision == revision) {
         if old.beats.iter().zip(&mappings).any(|(old, new)| {
-            old.owner != new.owner || old.conditional_branch != new.conditional_branch
+            old.owner != new.owner
+                || !crate::metadata::ConditionalBranch::same_place(
+                    old.conditional_branch.as_ref(),
+                    new.conditional_branch.as_ref(),
+                )
         }) {
             return Err(SceneError::InvalidMetadata);
         }
@@ -8840,5 +8844,113 @@ mod tests {
             fs::read_to_string(&path).unwrap(),
             "label scene_one:\n    scene bg booth\n    bec \"Hello\"\n    $ trust = 3\n    return\n"
         );
+    }
+
+    #[test]
+    fn creating_what_a_condition_or_line_names_makes_it_editable_and_keeps_ids() {
+        let mut fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let path = fixture
+            .root
+            .join(&fixture.workspace().scenes[0].source_path);
+        fs::write(
+            &path,
+            "label scene_one:\n    if ticket_count == 2:\n        \"Two\"\n    elif bec_seen:\n        \"Seen\"\n    else:\n        \"None\"\n    menu:\n        \"Go\" if ticket_count == 2:\n            \"Gone\"\n        \"Stay\":\n            \"Stayed\"\n    show bec happy\n    return\n",
+        )
+        .unwrap();
+        // Each beat's ID, kind and, for a branch or option, whether its test is supported.
+        let rows = |ws: &SceneWorkspace| {
+            ws.scenes[0]
+                .beats
+                .iter()
+                .map(|b| {
+                    let branch = b.conditional_branch.as_ref().and_then(|branch| {
+                        branch
+                            .condition
+                            .as_ref()
+                            .map(|c| matches!(c, crate::conditions::Condition::Supported { .. }))
+                    });
+                    (b.id.clone(), b.payload.kind().to_owned(), branch)
+                })
+                .collect::<Vec<_>>()
+        };
+        let tests = |rows: &[(String, String, Option<bool>)]| {
+            rows.iter()
+                .filter_map(|(_, _, test)| *test)
+                .collect::<Vec<_>>()
+        };
+        let kinds = |rows: &[(String, String, Option<bool>)]| {
+            rows.iter()
+                .map(|(_, kind, _)| kind.clone())
+                .collect::<Vec<_>>()
+        };
+        let before = rows(&fixture.workspace());
+        assert_eq!(tests(&before), [false, false, false]);
+        for (name, variable_type, value) in [
+            ("ticket_count", VariableType::Int, Value::String("0".into())),
+            ("bec_seen", VariableType::Bool, Value::Bool(false)),
+        ] {
+            fixture
+                .service
+                .create_variable(
+                    &fixture.project,
+                    &fixture.project_id,
+                    CreateVariableRequest {
+                        technical_name: name.into(),
+                        variable_type,
+                        default_value: value,
+                    },
+                )
+                .unwrap();
+            fixture.workspace();
+        }
+        // The character and the image that `show bec happy` names.
+        let characters = fixture
+            .service
+            .create_character(
+                &fixture.project,
+                &fixture.project_id,
+                CreateCharacterRequest {
+                    technical_name: "bec".into(),
+                    display_name: "Bec".into(),
+                    dialogue_color: "#ffffff".into(),
+                },
+            )
+            .unwrap();
+        fixture.workspace();
+        let image = fixture.root.join("bec happy.png");
+        fs::write(&image, b"bec raster").unwrap();
+        let choice = fixture
+            .service
+            .select_import(&fixture.project, &image)
+            .unwrap();
+        fixture
+            .service
+            .import_asset(
+                &fixture.project,
+                &fixture.project_id,
+                ImportAssetRequest {
+                    authority_id: choice.authority_id,
+                    kind: AssetKind::CharacterAppearance,
+                    technical_name: "happy".into(),
+                    display_name: "Happy".into(),
+                    character_id: Some(characters.characters[0].id.clone()),
+                    expression: Some("happy".into()),
+                },
+            )
+            .unwrap();
+        let after = rows(&fixture.workspace());
+        assert_eq!(tests(&after), [true, true, true]);
+        // `show bec happy` was Custom Code until its character and image existed.
+        assert_eq!(kinds(&before)[11], "customCode");
+        assert_eq!(kinds(&after)[11], "changeAppearance");
+        // The same lines keep their IDs, so drafts and selection stay on them.
+        assert_eq!(
+            after.iter().map(|(id, ..)| id).collect::<Vec<_>>(),
+            before.iter().map(|(id, ..)| id).collect::<Vec<_>>()
+        );
+        // The stored map still names the old tests, and reopening keeps the same rows.
+        fixture.migrate();
+        assert_eq!(rows(&fixture.workspace()), after);
     }
 }
