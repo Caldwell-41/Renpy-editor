@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { hasSceneDraft, type SceneWorkspace, type SceneBeat, type SceneCommand } from "../src/scene-ui.js";
+import { type SceneWorkspace, type SceneBeat, type SceneCommand } from "../src/scene-ui.js";
 import { chooseIn, openGuard, optionBlocks, pickKind, press, sceneBodies, renderStoryView, selectBeat, type } from "./story-controls-fixture.js";
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 function setup(beats: readonly SceneBeat[], apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision">) => Promise<SceneWorkspace>, steps?: string[]) {
@@ -11,8 +11,8 @@ function setup(beats: readonly SceneBeat[], apply: (command: SceneCommand, expec
     scenes: [{ id: "one", chapterId: "chapter", displayName: "Arrival", technicalLabel: "arrival", sourcePath: "game/arrival.rpy", sourceRevision: "source-open", sourceConflict: false, partial: false, beats, bodies: sceneBodies(beats) }, { id: "two", chapterId: "chapter", displayName: "Conversation", technicalLabel: "conversation", sourcePath: "game/conversation.rpy", sourceRevision: "other", sourceConflict: false, partial: false, beats: [], bodies: [] }],
     authoring: { characters: [], assets: [], appearances: [], variables: [{ id:"money",technicalName:"money",variableType:"decimal",defaultValue:2.5 },{ id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }, { id: "flag", technicalName: "flag", variableType: "bool", defaultValue: true }] } };
   const host = document.querySelector<HTMLElement>("main")!; const statuses: string[] = [];
-  const dispose = renderStoryView(host, document.querySelector("aside")!, model, { apply, status: text => statuses.push(text), ...steps ? { recordStep: async step => { steps.push(step.name); } } : {}, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); } }).dispose;
-  return { browser, host, model, statuses, close: async () => { dispose(); await browser.happyDOM.close(); } };
+  const view = renderStoryView(host, document.querySelector("aside")!, model, { apply, status: text => statuses.push(text), ...steps ? { recordStep: async step => { steps.push(step.name); } } : {}, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); } }); const dispose = view.dispose;
+  return { browser, host, model, statuses, view, close: async () => { dispose(); await browser.happyDOM.close(); } };
 }
 function click(host: ParentNode, label: string): void { const button = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === label); assert.ok(button, label); button.click(); }
 function select(host: ParentNode, label: string, value: string): HTMLSelectElement { const control = host.querySelector<HTMLSelectElement>(`select[aria-label="${label}"]`)!; assert.ok(control, label); control.value = value; control.dispatchEvent(new Event("change", { bubbles: true })); return control; }
@@ -28,9 +28,9 @@ test("Call edit keeps label and captured envelopes; stale refusal keeps fields a
   select(s.host, "Call destination Scene", "one");
   const field = s.host.querySelector<HTMLSelectElement>('select[aria-label="Call destination Scene"]')!;
   field.disabled = true; click(s.host, "Commit Beat"); await tick();
-  assert.equal(field.disabled, true); assert.ok(field.isConnected && hasSceneDraft(s.host)); assert.equal(field.value, "one");
+  assert.equal(field.disabled, true); assert.ok(field.isConnected && s.view.hasDrafts()); assert.equal(field.value, "one");
   assert.deepEqual(writes, [{ command: { type: "updateBodyBeat", sceneId: "one", expectedSourceRevision: "source-open", beatId: "call", expectedBody: { type: "root" }, beat: { type: "call", sceneId: "one", returnLabel: "stable_return" } }, expected: { projectRevision: "project-open", sourceMapRevision: "map-open" } }]);
-  assert.match(s.statuses.at(-1)!, /Source changed/); click(s.host, "Cancel"); assert.equal(hasSceneDraft(s.host), false); await s.close();
+  assert.match(s.statuses.at(-1)!, /Source changed/); click(s.host, "Cancel"); assert.equal(s.view.hasDrafts(), false); await s.close();
 });
 
 test("missing Call destination stays visible, fails blur and submission, and never chooses first Scene", async () => {
@@ -63,7 +63,7 @@ test("guarded Choice validates exact integer at blur/submission; IME and failed 
   value.dispatchEvent(new Event("blur")); assert.equal(value.getAttribute("aria-invalid"), "true"); click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 0); assert.equal(value.value, "9223372036854775808"); assert.equal(document.activeElement, value);
   value.dispatchEvent(new Event("compositionstart", { bubbles: true })); type(value, "9223372036854775807"); click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 0);
   value.dispatchEvent(new Event("compositionend", { bubbles: true })); value.dispatchEvent(new Event("blur")); assert.equal(value.hasAttribute("aria-invalid"), false); click(s.host, "Commit Beat"); await tick();
-  const payload = writes[0]!.beat as {options:{condition:{expression:{operator:string;right:{value:string}}}}[]}; assert.equal(payload.options[0]!.condition.expression.right.value, "9223372036854775807"); assert.equal(payload.options[0]!.condition.expression.operator, "greaterEqual"); assert.ok(value.isConnected && !value.disabled && hasSceneDraft(s.host));
+  const payload = writes[0]!.beat as {options:{condition:{expression:{operator:string;right:{value:string}}}}[]}; assert.equal(payload.options[0]!.condition.expression.right.value, "9223372036854775807"); assert.equal(payload.options[0]!.condition.expression.operator, "greaterEqual"); assert.ok(value.isConnected && !value.disabled && s.view.hasDrafts());
   await s.close();
 });
 
@@ -100,7 +100,7 @@ test("unchanged pending commit blocks another draft and late disposed refusal ca
   let reject!: (error: Error) => void; const pending = new Promise<SceneWorkspace>((_, fail) => { reject = fail; });
   const s = setup([call, ending], async () => pending);
   selectBeat(s.host, "call"); click(s.host, "Commit Beat");
-  assert.equal(hasSceneDraft(s.host), true); click(s.host, "+ Add beat"); assert.equal(s.host.querySelector(".new-beat"), null);
+  assert.equal(s.view.hasDrafts(), true); click(s.host, "+ Add beat"); assert.equal(s.host.querySelector(".new-beat"), null);
   const statusCount = s.statuses.length; await s.close(); reject(Error("Late old-session refusal")); await tick(); assert.equal(s.statuses.length, statusCount);
 });
 
@@ -130,7 +130,7 @@ test("Preview options change only the stage: hidden, disabled, marked and unknow
     press(s.host.querySelector(".story-choice-preview")!, "Assume option 2 was picked earlier in this save");
     press(s.host.querySelector(".story-choice-preview")!, "Assume option 3's condition is true");
     assert.deepEqual(stage().map(item => item.state), ["marked", "marked", "available"]);
-    assert.equal(writes.length, 0); assert.equal(hasSceneDraft(s.host), false, "Preview options are not a draft");
+    assert.equal(writes.length, 0); assert.equal(s.view.hasDrafts(), false, "Preview options are not a draft");
   } finally { await s.close(); }
   // With nothing selectable, the stage says the story continues and records no pick.
   const hidden: SceneBeat = { ...choice, payload: { type: "choice", pickedPolicy: "hidePicked", options: [{ id: "only", text: "Only" }] } };
@@ -154,7 +154,7 @@ test("Choice prompt: + Prompt adds a narration or Character line, an empty promp
   click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 2);
   assert.deepEqual(writes[1]!.beat, { ...choice.payload, prompt: { type: "narration", text: "Which route?" } });
   assert.ok(text.isConnected); assert.equal(text.value, "Which route?");
-  click(s.host, "Cancel"); assert.equal(hasSceneDraft(s.host), false);
+  click(s.host, "Cancel"); assert.equal(s.view.hasDrafts(), false);
   await s.close();
 });
 

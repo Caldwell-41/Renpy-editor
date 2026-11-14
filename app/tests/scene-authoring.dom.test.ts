@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import { Window } from "happy-dom";
-import { deriveScenePreview, hasSceneDraft, renderRecoverySurface, storyScene, type RecoveryReport, type SceneBeat, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.js";
+import { deriveScenePreview, renderRecoverySurface, storyScene, type RecoveryReport, type SceneBeat, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.js";
 import { pickKind, renderStoryView, selectBeat, storyEditor, trackColumn, withBodies } from "./story-controls-fixture.js";
 
 const tick = async (): Promise<void> => { await new Promise((resolve) => setTimeout(resolve, 0)); };
@@ -81,10 +81,10 @@ function foundationModel(): SceneWorkspace {
 test("nested child commits carry owner and retain input on stale/session refusal", async () => {
   const browser = installDom(); const model = foundationModel();
   const calls: SceneCommand[] = [];
-  const dispose = renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+  const view = renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status:()=>{}, resolution:{width:1280,height:720}, present:async()=>{throw Error("unexpected media")},
     apply:async command=>{ calls.push(command); throw Error(calls.length===1 ? "SOURCE_CONFLICT" : "STALE_SESSION"); },
-  }).dispose;
+  }); const dispose = view.dispose;
   const host = document.querySelector<HTMLElement>("#host")!;
   // A nested child shows in Tracks once the Branch path opens its branch.
   assert.equal(trackColumn(host, "child"), undefined);
@@ -102,7 +102,7 @@ test("nested child commits carry owner and retain input on stale/session refusal
     assert.deepEqual(calls[n]!.expectedBody,{type:"branch",groupId:"group",branchId:"if"});
     assert.equal((calls[n]!.beat as {text:string}).text,"Retained café 雪");
     assert.equal(calls[n]!.expectedSourceRevision,model.scenes[0]!.sourceRevision);
-    assert.equal(text.value,"Retained café 雪"); assert.ok(text.isConnected && hasSceneDraft(document.querySelector("#host")!));
+    assert.equal(text.value,"Retained café 雪"); assert.ok(text.isConnected && view.hasDrafts());
     assert.ok(!text.disabled && !card.querySelector<HTMLSelectElement>("select")!.disabled);
   }
   const preview = deriveScenePreview(model.scenes[0]!);
@@ -160,7 +160,7 @@ test("root controls respect nested children and conditional insertion boundaries
 
 test("Scene authoring exposes hierarchy, every Beat and natural dialogue continuation", async () => {
   const browser = installDom(); let model = sceneModel(); const calls: SceneCommand[] = []; let status = "";
-  renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+  const view = renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status: (message) => { status = message; },
     resolution: { width: 1920, height: 1080 },
     present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "a", byteCount: 24, width: 1, height: 1, cacheKey: `${assetId}:a` }),
@@ -176,7 +176,7 @@ test("Scene authoring exposes hierarchy, every Beat and natural dialogue continu
       }
       return model;
     },
-  }).dispose;
+  });
 
   assert.match(document.querySelector("#tree")?.textContent ?? "", /Opening/);
   assert.match(document.querySelector("#tree")?.textContent ?? "", /Garden/);
@@ -187,7 +187,7 @@ test("Scene authoring exposes hierarchy, every Beat and natural dialogue continu
   selectBeat(host, "dialogue");
   const textarea = document.querySelector<HTMLTextAreaElement>("textarea"); assert.ok(textarea);
   textarea.value = "First line\nSecond line"; textarea.dispatchEvent(new window.Event("input", { bubbles: true }));
-  assert.equal(hasSceneDraft(document), true);
+  assert.equal(view.hasDrafts(), true);
   textarea.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, shiftKey:true, bubbles: true }));
   await tick();
   assert.equal(calls.at(-1)?.type, "continueDialogue");

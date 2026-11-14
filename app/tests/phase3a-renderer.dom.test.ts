@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
 import { Window } from "happy-dom";
-import { conditionCaption, deriveScenePreview, hasSceneDraft, type Condition, type SceneBeat, type SceneWorkspace } from "../src/scene-ui.js";
+import { conditionCaption, deriveScenePreview, type Condition, type SceneBeat, type SceneWorkspace } from "../src/scene-ui.js";
 import { renderBranches, type FlowWorkspace } from "../src/branches-ui.js";
 import { routeBranches } from "../src/branches-routing.js";
 import { renderSourceWorkspace, type SourceTarget } from "../src/source-ui.js";
@@ -27,12 +27,12 @@ const choice: SceneBeat = { id: "choice", byteStart: 95, byteEnd: 180, protected
 
 test("Unknown guarded Choice is read-only with exact Source navigation and no mutations", async () => {
   const { browser, host, tree } = setup(); const writes: unknown[] = []; const sources: unknown[] = [];
-  const dispose = renderStoryView(host, tree, model([call, choice]), { apply: async command => { writes.push(command); throw Error("Unexpected write"); }, status: () => {}, present: async () => { throw Error("Unexpected media"); }, resolution: { width: 1280, height: 720 }, viewSource: (...args) => sources.push(args), assist: () => { throw Error("Unexpected AI action"); } }).dispose;
+  const view = renderStoryView(host, tree, model([call, choice]), { apply: async command => { writes.push(command); throw Error("Unexpected write"); }, status: () => {}, present: async () => { throw Error("Unexpected media"); }, resolution: { width: 1280, height: 720 }, viewSource: (...args) => sources.push(args), assist: () => { throw Error("Unexpected AI action"); } }); const dispose = view.dispose;
   for (const beat of [choice]) {
     const card = selectBeat(host, beat.id);
     assert.ok([...card.querySelectorAll<HTMLButtonElement>(".story-beat-menu button")].every(button => button.disabled));
     assert.equal(card.querySelectorAll("input,textarea,select").length, 0);
-    assert.equal(card.querySelector(".scene-draft"), null); assert.equal(hasSceneDraft(host), false);
+    assert.equal(card.querySelector(".scene-draft"), null); assert.equal(view.hasDrafts(), false);
     assert.ok(![...card.querySelectorAll("button")].some(button => button.textContent === "Commit Beat"));
     const source = [...card.querySelectorAll("button")].find(button => button.textContent === "Edit in Source")!; source.click();
     if (beat.id === "call") assert.match(card.textContent!, /Shared conversation · Returns to next Beat/);

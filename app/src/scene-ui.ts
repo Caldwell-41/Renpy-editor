@@ -422,14 +422,6 @@ function dirtyDraft(group: HTMLElement, controls: readonly HTMLElement[]): void 
   for (const event of ["input", "change"]) group.addEventListener(event, event => { if (event.target instanceof HTMLElement && event.target.closest(".scene-draft") === group) group.dataset.unsubmitted = "true"; });
 }
 
-export function hasSceneDraft(root: ParentNode = document): boolean {
-  return root.querySelector('.scene-draft[data-unsubmitted="true"]') !== null;
-}
-
-export function focusSceneDraft(root: ParentNode = document): void {
-  const form = root.querySelector<HTMLElement>('.scene-draft[data-unsubmitted="true"]'); if (form) focusFirst(form);
-}
-
 
 function presentationUrl(media: MediaPresentation): string {
   const binary = atob(media.dataBase64);

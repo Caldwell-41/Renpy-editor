@@ -4,7 +4,6 @@ import test from "node:test";
 import { Window } from "happy-dom";
 import {
   deriveScenePreview,
-  hasSceneDraft,
   renderRecoverySurface,
   renderStoryView,
   type RecoveryReport,

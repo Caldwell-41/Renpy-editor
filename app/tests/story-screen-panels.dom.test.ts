@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { hasSceneDraft, type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
+import { type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenTargetBinding } from "../src/screen-contracts.js";
 import { selectBeat, storyEditor, storyFixture, renderStoryView } from "./story-controls-fixture.js";
 
@@ -268,7 +268,7 @@ test("pending screen placement survives workspace navigation without becoming un
    if(nested){const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="branch";body.dispatchEvent(new Event("change",{bubbles:true}));}
    const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";
    for(const event of ["input","change"])position.dispatchEvent(new Event(event,{bubbles:true}));
-   assert.equal(hasSceneDraft(first.host),false,"Already retained navigation context must not block leaving Story");
+   assert.equal(first.view.hasOpenForm(),false,"Already retained navigation context must not block leaving Story");
    assert.equal(await first.view.settle(),true);
    assert.deepEqual(insertion.body,nested?{type:"branch",groupId:"group",branchId:"branch"}:{type:"root"});
    assert.deepEqual(insertion.position,{type:"before",anchor:{type:"beat",beatId:"line"}});assert.equal(first.commands.length,0);
@@ -278,7 +278,7 @@ test("pending screen placement survives workspace navigation without becoming un
    button(returned.host,"Add screen Beat").click();await tick();const draft=returned.host.querySelector<HTMLElement>(".new-beat")!;
    assert.equal(draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!.value,nested?"branch":"root");
    assert.equal(draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!.value,"line");
-   assert.equal(hasSceneDraft(returned.host),false);assert.equal(returned.commands.length,0);
+   assert.equal(returned.view.hasOpenForm(),false);assert.equal(returned.commands.length,0);
   }finally{await returned.close();}
  }
 });
@@ -291,8 +291,8 @@ test("retained placement does not clear payload edits or a refused Add",async()=
    if(edited==="payload"){const type=draft.querySelector<HTMLSelectElement>("select")!;type.value="showScreen";type.dispatchEvent(new Event("change",{bubbles:true}));await tick();}
    else{button(draft,"Add Beat").click();await tick();}
    const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
-   assert.equal(hasSceneDraft(s.host),true);assert.equal(await s.view.settle(),true);assert.equal(s.view.hasDrafts(),true);
-   button(draft,"Cancel").click();assert.equal(hasSceneDraft(s.host),false);assert.equal(s.view.hasDrafts(),false);
+   assert.equal(await s.view.settle(),true);assert.equal(s.view.hasDrafts(),true);
+   button(draft,"Cancel").click();assert.equal(s.view.hasDrafts(),false);
   }finally{await s.close();}
  }
 });
@@ -307,10 +307,10 @@ test("incomplete placement stays in its retained new beat draft",async()=>{
   button(s.host,"Add screen Beat").click();await tick();const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
   const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.dispatchEvent(new Event("change",{bubbles:true}));
   assert.equal(draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!.value,"");
-  assert.deepEqual(insertion,original);assert.equal(hasSceneDraft(s.host),true);assert.equal(await s.view.settle(),true);assert.equal(s.view.hasDrafts(),true);
+  assert.deepEqual(insertion,original);assert.equal(await s.view.settle(),true);assert.equal(s.view.hasDrafts(),true);
   if(next==="confirm placement"){
    const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
-   assert.equal(hasSceneDraft(s.host),false);assert.equal(await s.view.settle(),true);assert.equal(insertion.expectedSourceRevision,scene.sourceRevision);
+   assert.equal(await s.view.settle(),true);assert.equal(insertion.expectedSourceRevision,scene.sourceRevision);
   }else{
    // An ordinary beat elsewhere is not blocked by the screen draft's incomplete placement.
    s.host.querySelector<HTMLButtonElement>('[data-beat-opener="after:line"]')!.click();s.host.querySelector<HTMLButtonElement>('.story-add-beat [data-insert-kind="narration"]')!.click();

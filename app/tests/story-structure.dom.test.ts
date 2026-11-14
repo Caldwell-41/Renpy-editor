@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import { buildRuleBuilder } from "../src/story-condition-editor.js";
-import { deriveScenePreview, hasSceneDraft, type SceneActions, type SceneCommand, type SceneWorkspace, type StoryTarget } from "../src/scene-ui.js";
+import { deriveScenePreview, type SceneActions, type SceneCommand, type SceneWorkspace, type StoryTarget } from "../src/scene-ui.js";
 import { renderBranches, type FlowBody } from "../src/branches-ui.js";
 import { chooseIn, editorFixture, flagCondition, withBodies, openBranch, pickKind, press, selectBeat, storyEditor, storyFixture, renderStoryView, trackColumn, type } from "./story-controls-fixture.js";
 import { shorten } from "../src/story-tracks.js";
@@ -227,7 +227,7 @@ test("a condition draft waits while tree New works; dirty tree input blocks addi
   button(s.host, "Add Condition").click(); assert.equal(s.host.querySelector(".new-beat"), null); assert.equal(name.value, "Retained chapter name"); assert.ok(name.isConnected);
   button(tree.querySelector<HTMLElement>(".tree-inline")!, "Cancel").click();
   button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>(".story-editor .new-beat")!; chooseIn(panel, "If rule 1 test", "is false");
-  button(tree, "New Chapter").click(); assert.ok(tree.querySelector(".tree-inline")); assert.ok(panel.isConnected && hasSceneDraft(s.host)); assert.equal(s.calls.length, 0); await s.close();
+  button(tree, "New Chapter").click(); assert.ok(tree.querySelector(".tree-inline")); assert.ok(panel.isConnected && s.view.hasDrafts()); assert.equal(s.calls.length, 0); await s.close();
 });
 
 test("unchanged pending condition commit locks tree authoring and cannot admit another tree draft", async () => {
@@ -372,22 +372,22 @@ test("picker sheets preview on hover and focus, apply on click and keep the valu
     // Pointing at or focusing a tile previews it on the stage; nothing becomes a draft.
     tile("depot").dispatchEvent(new Event("pointerenter")); assert.equal(stage()[0], "Depot at night");
     tile("dawn").focus(); assert.equal(stage()[0], "Station at dawn");
-    assert.equal(background().value, "platform"); assert.equal(hasSceneDraft(s.host), false);
+    assert.equal(background().value, "platform"); assert.equal(s.view.hasDrafts(), false);
     // Escape closes the sheet, restores the stage and keeps the value.
     tile("dawn").dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     assert.equal(s.host.querySelector(".story-sheet"), null); assert.equal(document.activeElement, change);
-    assert.equal(stage()[0], "Rainy platform"); assert.equal(background().value, "platform"); assert.equal(hasSceneDraft(s.host), false);
+    assert.equal(stage()[0], "Rainy platform"); assert.equal(background().value, "platform"); assert.equal(s.view.hasDrafts(), false);
     // Click applies the picture to the draft without a write.
     press(editor, "Change background: Rainy platform"); tile("depot").click();
     assert.equal(s.host.querySelector(".story-sheet"), null); assert.equal(background().value, "depot");
-    assert.equal(stage()[0], "Depot at night"); assert.equal(hasSceneDraft(s.host), true); assert.equal(s.calls.length, 0);
+    assert.equal(stage()[0], "Depot at night"); assert.equal(s.view.hasDrafts(), true); assert.equal(s.calls.length, 0);
     press(storyEditor(s.host), "Cancel"); await tick();
     // The expression sheet previews the character's appearance the same way.
     editor = selectBeat(s.host, "show"); assert(stage().includes("Mara — Neutral"));
     press(editor, "Change expression: Neutral"); tile("mara-concerned").dispatchEvent(new Event("pointerenter"));
-    assert(stage().includes("Mara — Concerned")); assert.equal(hasSceneDraft(s.host), false);
+    assert(stage().includes("Mara — Concerned")); assert.equal(s.view.hasDrafts(), false);
     tile("mara-concerned").dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
-    assert(stage().includes("Mara — Neutral")); assert.equal(hasSceneDraft(s.host), false);
+    assert(stage().includes("Mara — Neutral")); assert.equal(s.view.hasDrafts(), false);
   } finally { await s.close(); }
 });
 
