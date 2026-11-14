@@ -1051,7 +1051,11 @@ mod branches_tests {
                 fs::read(root.join(scene["sourcePath"].as_str().unwrap())).unwrap(),
                 [prefix, source.as_bytes()].concat()
             );
-            assert!(result.scenes[0].partial);
+            // Supported tests and bodies leave the Scene whole (#120).
+            assert_eq!(
+                result.scenes[0].partial,
+                condition == "missing" || body.starts_with("$ unknown")
+            );
             service.close().unwrap();
         }
     }
