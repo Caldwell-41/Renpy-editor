@@ -890,7 +890,11 @@ Save. An incomplete or invalid calculation never supplies an invented preview re
 Selecting a beat shows the scene-local state through that beat: background, visible
 characters and appearances, placement, music, simple variables and the current line or
 menu. A new Background clears characters. State the editor cannot prove is labelled
-partial or unknown, never guessed. The branches open in the Branch path are the
+partial or unknown, never guessed. A partial scene shows a banner that names the cause.
+With protected Custom Code it reads "Preview and reference certainty are partial
+because this Scene contains protected Custom Code." When the only cause is a test the
+builder can't read, it reads "Preview and reference certainty are partial because the
+builder can't read a test in this scene." ("2 tests" for more). The branches open in the Branch path are the
 preview route. A condition or Choice before the selected beat with no open branch
 leaves its state unknown, and the preview continues to the selected beat. With no beat
 selected, the preview stops at the first such condition or Choice. Open branches are

@@ -199,6 +199,14 @@ function branchCaption(branch: ConditionalBranch, model: SceneWorkspace): string
   return branch.otherwise ? "Otherwise" : `${branch.ordinal ? "Else If" : "If"} ${branchTest(branch, model)}`;
 }
 
+/** Why a scene's preview is partial: protected Custom Code, or else tests the builder can't read. */
+function partialReason(scene: SceneDocument): string {
+  const tests = scene.beats.filter(beat => beat.conditionalBranch?.condition?.status === "unknown").length;
+  const code = scene.beats.some(beat => beat.protected && !beat.conditionalBranch && !beat.structuralPlaceholder);
+  return code || !tests ? "Preview and reference certainty are partial because this Scene contains protected Custom Code."
+    : `Preview and reference certainty are partial because the builder can't read ${tests === 1 ? "a test" : `${tests} tests`} in this scene.`;
+}
+
 function readOnlyLogic(beat: SceneBeat): boolean {
   return beat.payload.type === "choice" && beat.payload.options.some(option => option.condition?.status === "unknown");
 }
@@ -1936,7 +1944,7 @@ export function renderStoryView(
       const copy = document.createElement("p"); copy.textContent = "The current Source is invalid, missing, or unreconciled. The previous visual projection is stale; Scene writes and history remain blocked until the exact source revision is reconciled.";
       conflict.append(heading, copy); host.append(conflict);
     } else if (scene.partial) {
-      const partial = document.createElement("p"); partial.className = "state-banner partial-state"; partial.textContent = "Preview and reference certainty are partial because this Scene contains protected Custom Code."; host.append(partial);
+      const partial = document.createElement("p"); partial.className = "state-banner partial-state"; partial.textContent = partialReason(scene); host.append(partial);
     }
     // Story Combined v1: the stage beside the selected-beat editor, the Branch path and Tracks below.
     const combined = document.createElement("div"); combined.className = "story-combined";
