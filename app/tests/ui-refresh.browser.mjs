@@ -109,6 +109,23 @@ try {
  assert.equal(Math.round(laptop.nav),64,'Story opens with the icon rail below 1200 px');assert.equal(laptop.listOpen,false,'Story opens with the scene list closed below 1200 px');assert.equal(laptop.title,'false');
  assert.ok(Math.abs(laptop.stage.width-599)<=2&&Math.abs(laptop.stage.height-337)<=2,`1100 x 720 stage: ${JSON.stringify(laptop.stage)}`);
  assert.deepEqual(laptop.tools.map(tool=>tool.text),['Writing focus','+ Add beat','More']);assert.equal(new Set(laptop.tools.map(tool=>tool.top)).size,1);
+ // header-v2 / compact-v2: Cancel and Commit Beat show only while the beat has a draft.
+ await page.locator('.story-track-beat[data-beat-kind=dialogue]').first().click();
+ const beatActions=page.locator('.expanded-beat > .row-actions');
+ assert.equal(await beatActions.isVisible(),false,'Commit Beat shows with no draft');
+ await page.locator('.expanded-beat textarea').first().press('End');await page.keyboard.type('!');
+ assert.equal(await beatActions.isVisible(),true,'Commit Beat hidden while the beat has a draft');
+ await beatActions.getByRole('button',{name:'Cancel',exact:true}).click();
+ assert.equal(await beatActions.isVisible(),false,'Commit Beat shows after Cancel');
+ // Writing focus fills the window whatever the scene list and navigation state.
+ const focusWidth=()=>page.evaluate(()=>({columns:getComputedStyle(document.querySelector('.project-shell')).gridTemplateColumns.split(' ').length,workspace:Math.round(document.querySelector('.scene-workspace').getBoundingClientRect().width)}));
+ for(const listOpen of [false,true]){
+  if(listOpen)await page.locator('.story-scene-toggle').click();
+  await page.getByRole('button',{name:'Writing focus',exact:true}).click();
+  assert.deepEqual(await focusWidth(),{columns:1,workspace:1100},`Writing focus at 1100 x 720 with the scene list ${listOpen?'open':'closed'}`);
+  await page.getByRole('button',{name:'Show game window',exact:true}).click();
+  if(listOpen)await page.locator('.story-scene-toggle').click();
+ }
  await page.locator('.navigation-toggle').click();await page.locator('.story-scene-toggle').click();
  const opened=await storyLayout();
  assert.equal(Math.round(opened.nav),180);assert.equal(opened.listOpen,true,'the scene title opens the scene list');assert.equal(opened.title,'true');
@@ -246,7 +263,6 @@ try {
  await page.getByRole('button',{name:'Toggle navigation size'}).click();
  await page.locator('.story-track-beat').nth(3).click();
  await page.screenshot({path:output+'choice-corrections.png'});
- await page.locator('.expanded-beat>.row-actions').getByRole('button',{name:'Cancel',exact:true}).click();
  await page.getByRole('button',{name:'Assets',exact:true}).click();
  assert.equal(await page.locator('.asset-drop-target').isVisible(),true);
  await page.evaluate(()=>window.__loomlightAssetDragState(true));
@@ -475,7 +491,6 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
  await audit.locator('.story-track-beat').nth(3).click();
  await hide.click();await audit.getByRole('button',{name:'Writing focus',exact:true}).click();await audit.locator('.expanded-beat').scrollIntoViewIfNeeded();await audit.screenshot({path:output+'audit-fixed-choice-compact.png'});
  await audit.getByRole('button',{name:'Show game window',exact:true}).click();await audit.setViewportSize({width:1440,height:900});
- await audit.locator('.expanded-beat > .row-actions').getByRole('button',{name:'Cancel',exact:true}).click();
  // Alt+Arrow on a Tracks column moves the beat to the next core-listed place; Undo puts it back.
  await audit.locator('.story-track-column[data-beat-id="background"] > .story-track-beat').focus();await audit.keyboard.press('Alt+ArrowRight');
  await audit.waitForFunction(()=>document.querySelectorAll('.story-track-column')[1]?.dataset.beatId==='background'&&document.activeElement?.closest('.story-track-column')?.dataset.beatId==='background');

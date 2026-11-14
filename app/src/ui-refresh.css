@@ -21,8 +21,8 @@ html,body,#app{height:100%;margin:0}html,body{font-size:var(--ui-size)}button,in
 
 /* Shared controls also cover Settings and catalogue tools outside labelled forms. */
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),select,textarea{background:var(--surface-raised);color:var(--text-primary);border:1px solid var(--border-normal);border-radius:5px;padding:10px 12px;min-height:40px}input[type="search"]{appearance:none}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}.recent-time{display:block;margin-top:6px;font-weight:400}.recent-section{border-top:0}.recent-section h2{border-bottom:0}.settings-content select{min-width:200px}.setting-row input[type="checkbox"]{appearance:none;border-radius:20px;background:var(--border-strong);width:40px;height:24px;position:relative;cursor:pointer}.setting-row input[type="checkbox"]::after{content:"";position:absolute;width:18px;height:18px;top:3px;left:3px;background:var(--surface-raised);border-radius:50%}.setting-row input[type="checkbox"]:checked{background:var(--accent-primary)}.setting-row input[type="checkbox"]:checked::after{left:19px;background:var(--on-accent)}
-.project-shell.with-tree{grid-template-columns:180px 230px minmax(0,1fr)}.project-shell.with-tree[data-navigation-collapsed="true"]{grid-template-columns:64px 230px minmax(0,1fr)}.project-tree-panel{background:var(--surface-panel);border-right:1px solid var(--border-normal);min-height:0;overflow:auto;padding:18px 14px}.project-tree-panel .story-tree{border:0;margin:0;padding:0}.project-shell.with-tree[data-tree-collapsed="true"]{grid-template-columns:180px minmax(0,1fr)}.project-shell.with-tree[data-tree-collapsed="true"][data-navigation-collapsed="true"]{grid-template-columns:64px minmax(0,1fr)}.project-shell[data-tree-collapsed="true"] .project-tree-panel{display:none}.project-tree-toggle{margin-top:12px}.navigation-icon{width:20px;height:20px;vertical-align:middle;margin-right:12px;flex:none}.tree-item::before{display:none}.tree-item{display:flex;align-items:center}.project-shell[data-navigation-collapsed="true"] .navigation-icon{margin:0}.brand::before{display:none}.brand .navigation-icon{color:var(--accent-primary)}
-@media(max-width:1100px){.project-shell.with-tree{grid-template-columns:64px 190px minmax(0,1fr)}.project-shell.with-tree[data-navigation-collapsed="true"]>.story-sidebar>.tree-item{font-size:0}.project-shell.with-tree .story-sidebar>h2,.project-shell.with-tree .story-sidebar>.eyebrow{display:none}.project-shell.with-tree .close-project,.project-shell.with-tree .navigation-toggle,.project-shell.with-tree .project-tree-toggle{font-size:10px;padding:5px}.project-shell.with-tree[data-tree-collapsed="true"]{grid-template-columns:64px minmax(0,1fr)}}
+.project-tree-panel{background:var(--surface-panel);border-right:1px solid var(--border-normal);min-height:0;overflow:auto;padding:18px 14px}.project-tree-panel .story-tree{border:0;margin:0;padding:0}.project-shell[data-tree-collapsed="true"] .project-tree-panel{display:none}.project-tree-toggle{margin-top:12px}.navigation-icon{width:20px;height:20px;vertical-align:middle;margin-right:12px;flex:none}.tree-item::before{display:none}.tree-item{display:flex;align-items:center}.project-shell[data-navigation-collapsed="true"] .navigation-icon{margin:0}.brand::before{display:none}.brand .navigation-icon{color:var(--accent-primary)}
+@media(max-width:1100px){.project-shell.with-tree[data-navigation-collapsed="true"]>.story-sidebar>.tree-item{font-size:0}.project-shell.with-tree .story-sidebar>h2,.project-shell.with-tree .story-sidebar>.eyebrow{display:none}.project-shell.with-tree .close-project,.project-shell.with-tree .navigation-toggle,.project-shell.with-tree .project-tree-toggle{font-size:10px;padding:5px}}
 .branches-workspace{position:relative;display:flex;flex-direction:column;gap:8px}.branches-workspace>h2{font-size:1.5em}.branches-viewport{flex:1;min-height:240px;height:auto;background-image:radial-gradient(var(--border-normal) 1px,transparent 1px);background-size:24px 24px}.branches-observation,.branches-notice{height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0;font-size:.85em}.branches-controls{position:absolute;right:28px;top:110px;width:290px;max-height:calc(100% - 140px);overflow:auto;z-index:2;display:flex;flex-direction:column;background:var(--surface-panel);border:1px solid var(--border-normal);padding:18px;border-radius:6px;box-shadow:0 5px 18px #0002}.branch-node{border-radius:7px;min-height:60px}.import-entry{padding:20px;border:1px solid var(--border-normal);border-radius:6px;margin:16px 0}.import-entry .field{margin-top:12px}
 
 .source-tab-group{display:flex;flex:none;border-right:1px solid var(--border-normal)}.source-tab-close{padding:8px;background:var(--surface-panel);font-size:18px}.source-tab{border-right:0}
@@ -33,9 +33,8 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
 
 .setting-segments{display:flex;border:1px solid var(--border-normal);border-radius:6px;overflow:hidden;min-width:300px}.setting-segments button{flex:1;padding:10px 16px;background:var(--surface-panel);color:var(--text-secondary);border:0}.setting-segments button[aria-checked="true"]{background:var(--accent-primary);color:var(--on-accent)}@media(max-width:760px){.setting-segments{min-width:0;width:100%}}
 
-.project-shell.with-tree{grid-template-columns:180px var(--tree-width,230px) minmax(0,1fr)}.project-shell.with-tree[data-navigation-collapsed="true"]{grid-template-columns:64px var(--tree-width,230px) minmax(0,1fr)}.project-tree-panel{position:relative}.tree-divider{position:absolute;right:0;top:0;bottom:0;width:6px;cursor:col-resize;touch-action:none}.tree-divider:hover,.tree-divider:focus-visible{background:var(--accent-primary);outline:0}.project-shell.with-tree[data-tree-collapsed="true"]{grid-template-columns:180px minmax(0,1fr)}.project-shell.with-tree[data-tree-collapsed="true"][data-navigation-collapsed="true"]{grid-template-columns:64px minmax(0,1fr)}
-@media(max-width:1100px){.project-shell.with-tree,.project-shell.with-tree[data-navigation-collapsed="true"]{grid-template-columns:64px var(--tree-width,190px) minmax(0,1fr)}.project-shell.with-tree[data-tree-collapsed="true"]{grid-template-columns:64px minmax(0,1fr)}}
-@media(max-width:900px){.project-shell.with-tree,.project-shell.with-tree[data-navigation-collapsed="true"],.project-shell.with-tree[data-tree-collapsed="true"]{grid-template-columns:64px minmax(0,1fr)}.project-tree-panel{position:absolute;top:54px;bottom:30px;left:64px;width:var(--tree-width,230px);z-index:15;box-shadow:8px 0 20px #0002}.source-toolbar{flex-wrap:wrap}.source-header{min-width:0}.source-header h1{overflow-wrap:anywhere}}
+.project-tree-panel{position:relative}.tree-divider{position:absolute;right:0;top:0;bottom:0;width:6px;cursor:col-resize;touch-action:none}.tree-divider:hover,.tree-divider:focus-visible{background:var(--accent-primary);outline:0}
+@media(max-width:900px){.project-tree-panel{position:absolute;top:54px;bottom:30px;left:64px;width:var(--tree-width,230px);z-index:15;box-shadow:8px 0 20px #0002}.source-toolbar{flex-wrap:wrap}.source-header{min-width:0}.source-header h1{overflow-wrap:anywhere}}
 
 .supporting-workspace{width:100%;margin:0;padding:28px 32px}.catalog-workspace>h1{margin-bottom:24px}.sidebar-settings{margin-top:auto;text-align:left;padding:12px 14px}.sidebar-settings+.close-project{margin-top:0}.tree-menu{position:relative;flex:none}.tree-menu>summary{list-style:none;cursor:pointer;padding:5px 8px}.tree-menu .tree-tools{position:absolute;right:0;top:30px;min-width:160px;z-index:18;background:var(--surface-raised);border:1px solid var(--border-strong);box-shadow:0 5px 15px #0003;padding:10px;opacity:1;flex-wrap:wrap}.tree-heading{flex-wrap:wrap}.tree-chapter-row{font-size:.85em}.tree-scene-open{padding:12px 8px;min-width:0}.tree-chapter-row>button{min-width:0;overflow:hidden;text-overflow:ellipsis}.tree-menu:not([open])>.tree-tools{display:none}.runtime-advanced{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.runtime-panel{padding:18px 24px}.runtime-toolbar{margin-left:0;flex:none;overflow:visible}.app-header>.button{margin-left:auto;white-space:nowrap}.runtime-toolbar .button{white-space:nowrap}.source-header>.source-document-state{min-width:130px;text-align:right}.source-header{gap:8px}.app-shell .source-workspace .source-toolbar [data-source-action="save"]{display:none}
 @media(max-width:760px){.app-header .brand{font-size:1em}.app-header .brand .navigation-icon{display:none}.app-header .button{font-size:11px;padding:6px 9px}.app-header .runtime-toolbar{max-width:none}.app-header>.button{margin-left:auto}.supporting-workspace{padding:18px}.tree-menu .tree-tools{max-width:180px}.scene-history .button{font-size:11px;padding:6px 8px}}
@@ -389,9 +388,10 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
   font-weight:650}
 .story-refusal-head>.story-icon-button {
   flex:none}
+/* In a narrow scene list, names and beats wrap at word breaks rather than being cut. */
 .story-refusal-rows {
   display:grid;
-  grid-template-columns:minmax(0,1fr) auto}
+  grid-template-columns:minmax(min-content,1fr) auto}
 .story-refusal-row {
   display:grid;
   grid-column:1/-1;
@@ -409,9 +409,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
   background:var(--surface-hover)}
 .story-refusal-row>span {
   align-self:center;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap}
+  overflow-wrap:break-word}
 .story-refusal-row>span+span {
   padding-left:12px;
   color:var(--text-secondary)}
@@ -429,6 +427,9 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
   align-items:center;
   gap:8px;
   flex-wrap:wrap}
+/* header-v2 / compact-v2: Cancel and Commit Beat show only while the beat has a draft. */
+.expanded-beat:not([data-unsubmitted="true"])>.row-actions {
+  display:none}
 .expanded-beat .scene-draft {
   width:100%;
   box-sizing:border-box;
@@ -513,14 +514,12 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
   padding:4px 8px}
 .source-tab-bar select {
   max-width:160px}
+/* The navigation width is --nav-width, so no rule combines navigation and scene list state:
+   Writing focus's single column outranks every with-tree state. */
 .project-shell.with-tree {
-  grid-template-columns:180px var(--tree-width,230px) minmax(0,1fr)}
-.project-shell.with-tree[data-navigation-collapsed="true"] {
-  grid-template-columns:64px var(--tree-width,230px) minmax(0,1fr)}
+  grid-template-columns:var(--nav-width) var(--tree-width,230px) minmax(0,1fr)}
 .project-shell.with-tree[data-tree-collapsed="true"] {
-  grid-template-columns:180px minmax(0,1fr)}
-.project-shell.with-tree[data-tree-collapsed="true"][data-navigation-collapsed="true"] {
-  grid-template-columns:64px minmax(0,1fr)}
+  grid-template-columns:var(--nav-width) minmax(0,1fr)}
 .project-shell.with-tree[data-writing-focus="true"] {
   grid-template-columns:minmax(0,1fr)}
 
@@ -575,7 +574,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
   display:none}
 
 @media(max-width:900px) {
- .project-shell.with-tree,.project-shell.with-tree[data-tree-collapsed="true"],.project-shell.with-tree[data-navigation-collapsed="true"] {
+ .project-shell.with-tree,.project-shell.with-tree[data-tree-collapsed="true"] {
   grid-template-columns:var(--nav-width) minmax(0,1fr)}
 .project-shell.with-tree[data-writing-focus="true"] {
   grid-template-columns:minmax(0,1fr)}
@@ -854,9 +853,11 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-stage-slot{container-type:size;display:grid;place-items:start center;min-width:0;min-height:0}
 .story-stage-slot>.preview-canvas{width:min(100cqw,calc(100cqh * var(--stage-w) / var(--stage-h)));max-width:none;max-height:none;box-shadow:0 0 0 1px var(--stage-edge)}
 .story-editor{min-width:0;min-height:0;overflow:auto;border-left:1px solid var(--border-normal);padding:0 4px 8px 12px;scroll-padding:44px 8px 8px}
-.story-editor-heading{position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:8px;min-height:36px;background:var(--surface-app)}
+/* combined-v1: the heading wraps its marks and + Next line under the title rather than cutting
+   the title; the beat menu stays at the top right. */
+.story-editor-heading{position:sticky;top:0;z-index:4;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-height:36px;padding-right:32px;box-sizing:border-box;background:var(--surface-app)}
 .story-editor-title{font-size:13px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.story-beat-menu{position:relative;margin-left:auto;flex:none}
+.story-beat-menu{position:absolute;top:6px;right:0}
 .story-beat-menu>summary{list-style:none;cursor:pointer;padding:2px 8px;border-radius:var(--radius-small);color:var(--text-secondary)}
 .story-beat-menu>summary::-webkit-details-marker{display:none}
 .story-beat-menu>summary:hover{background:var(--surface-hover);color:var(--text-primary)}
@@ -920,6 +921,9 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-track-beat:hover{background:var(--surface-hover)}
 .story-track-beat:focus-visible{outline:2px solid var(--focus-ring);outline-offset:-2px}
 .story-track-beat[data-selected=true]{border-left-color:var(--accent-primary);border-right:2px solid var(--accent-primary);background:var(--accent-subtle);color:var(--text-primary)}
+/* combined-v1: in light theme the selected Tracks column or Reel card uses the cream selection fill,
+   so it stands apart from the blue branch tints. */
+:root[data-theme="light"] .story-track-beat[data-selected=true]{background:var(--surface-selected)}
 .story-lane{display:block;min-width:0;padding:2px 6px;overflow:hidden;border-bottom:1px solid var(--border-normal);font:11px/1.4 var(--font-ui);white-space:nowrap;text-overflow:ellipsis}
 .story-lane-0{color:var(--text-primary);font-family:var(--font-source)}
 .story-track-beat[data-selected=true] .story-lane-0{font-weight:700}
@@ -936,7 +940,7 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-track-mark>button{flex:1;min-height:0;padding:0;border:0;border-radius:0;background:transparent;color:var(--text-muted);font-size:15px;cursor:pointer}
 .story-track-slot{flex-basis:154px}
 .story-track-slot>.story-slot-name{flex:none;padding:6px;text-align:left;font-size:12px;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.story-track-slot>.story-slot-name[data-selected=true]{box-shadow:inset 2px 0 var(--accent-primary);background:var(--accent-subtle)}
+.story-track-slot>.story-slot-name[data-selected=true]{box-shadow:inset 2px 0 var(--accent-primary);background:var(--surface-selected)}
 .story-track-slot>button:last-child{font-size:12px}
 .story-track-slot .story-rail-end{bottom:-14px}
 /* Reel (story-revamp / combined-v1): the same route as Tracks, one card per beat with its
@@ -1015,6 +1019,7 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .scene-workspace[data-writing-focus="true"] .story-tracks .story-track-beat>.story-lane-0,.scene-workspace[data-writing-focus="true"] .story-track-labels>.story-lane-0{position:sticky;left:0;z-index:1;background:var(--surface-panel)}
 .scene-workspace[data-writing-focus="true"] .story-tracks .story-track-column[data-arm] .story-track-beat>.story-lane-0{background:color-mix(in srgb,var(--arm) 8%,var(--surface-panel))}
 .scene-workspace[data-writing-focus="true"] .story-tracks .story-track-beat[data-selected=true]>.story-lane-0{background:var(--accent-subtle)}
+:root[data-theme="light"] .scene-workspace[data-writing-focus="true"] .story-tracks .story-track-beat[data-selected=true]>.story-lane-0{background:var(--surface-selected)}
 .scene-workspace[data-writing-focus="true"] .story-tracks .story-track-column>.story-track-insert{position:sticky;right:0;top:auto;flex:none;align-self:flex-end;margin:0 0 4px -26px;background:var(--surface-raised)}
 .scene-workspace[data-writing-focus="true"] .story-track-mark{flex:none;flex-direction:row;align-items:stretch;min-height:28px}
 .scene-workspace[data-writing-focus="true"] .story-track-mark>button{display:flex;align-items:center;justify-content:flex-end;padding:0 12px;font-size:12px;text-align:right}
@@ -1113,7 +1118,8 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-field-hint{margin:0;font-size:11.5px;line-height:1.45;color:var(--text-muted)}
 .story-field>.field-error{margin:0;font-size:12px}
 .story-warn{margin:0;font-size:11.5px;line-height:1.45;color:var(--status-warning)}
-.story-prose textarea{width:100%;box-sizing:border-box}
+/* combined-v1 .sr-prose: dialogue and narration text is 14 px; Writing focus raises it to 15 px. */
+.story-prose textarea{width:100%;box-sizing:border-box;font-size:14px}
 .story-next-line{margin-left:4px;min-height:24px!important;padding:2px 9px!important;font-size:12px;color:var(--accent-primary);background:transparent;border-color:var(--accent-primary)}
 .story-next-line:hover:not(:disabled){background:var(--accent-subtle);color:var(--text-primary)}
 /* Switches, lists and portrait menus. */
