@@ -1268,17 +1268,17 @@ fn media_failure(request_id: String, error: media::MediaError) -> CoreResponse {
 
 fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
     use scene::SceneError::*;
-    if let Indexed { index, cause } = error {
-        let mut response = scene_failure(request_id, *cause);
+    // Context around a cause: the cause's response, with the draft index or the references added.
+    let (error, index, references) = match error {
+        Indexed { index, cause } => (*cause, Some(index), None),
+        IncomingReferences(references) => (ReferenceBlocked, None, Some(references)),
+        error => (error, None, None),
+    };
+    if index.is_some() || references.is_some() {
+        let mut response = scene_failure(request_id, error);
         if let Some(error) = &mut response.error {
-            error.action_index = Some(index);
-        }
-        return response;
-    }
-    if let IncomingReferences(references) = error {
-        let mut response = scene_failure(request_id, ReferenceBlocked);
-        if let Some(error) = &mut response.error {
-            error.references = Some(references);
+            error.action_index = index.or(error.action_index);
+            error.references = references.or(error.references.take());
         }
         return response;
     }
