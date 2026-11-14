@@ -630,15 +630,18 @@ a beat follow `story-combined-editor` / `replace-v2`
   "Before …" and "End of …" positions. It opens on the beat's own location with the
   rest closed. Up and Down move, Right opens or moves in, Left closes or moves out,
   Enter selects and Escape cancels. A beat never moves into its own branches.
-- Move to opens with no position chosen and says where the beat is now: "05 Eli's
-  line is after 04 Custom Code now. Choose where to move it." It leaves out the two
-  positions that would leave the beat where it is. Protected Custom Code and the
-  beat's own place show in order as rows that can't be chosen: "04 Custom Code ·
-  protected, stays in place" and "05 Eli's line · here now". A beat may move past
-  protected Custom Code, and the note adds "Protected Custom Code stays where it is."
-  When protected Custom Code is in the beat's own place, focus starts on the position
-  right before it, nearest the beat ("Before 04 Custom Code"); otherwise it starts on
-  that place (`story-release-fixes` / `a-v2`).
+- Move to leaves out the two positions that would leave the beat where it is. It opens
+  with the first remaining position after the beat in its own place chosen, or that
+  place's last position when none follows, and the summary names it
+  (`story-combined-editor` / `replace-v2`). Protected Custom Code shows in order as a
+  row that can't be chosen: "04 Custom Code · protected, stays in place". A beat may
+  move past it, and the note adds "Protected Custom Code stays where it is."
+- When protected Custom Code sits right before or after the beat, Move to opens with no
+  position chosen and says where the beat is now: "05 Eli's line is after 04 Custom
+  Code now. Choose where to move it." The beat's own place shows as a row that can't
+  be chosen, "05 Eli's line · here now", and focus starts on the position right before
+  the region, nearest the beat ("Before 04 Custom Code") (`story-release-fixes` /
+  `a-v2`).
 
 ### Beat drafts
 

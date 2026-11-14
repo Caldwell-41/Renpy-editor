@@ -1766,9 +1766,9 @@ export function renderStoryView(
   // The Move to tree: the scene, its branches and options in source order, each with its
   // "Before …" and "End of …" positions from core's places. `moved` is a node being moved:
   // it never goes into its own branches, and its places that leave it where it is are left
-  // out. Rows that can't be chosen name protected Custom Code and the node's own place
-  // (story-release-fixes / a-v2).
-  const placeTree = (scene: SceneDocument, own: BodyRef, moved?: SceneBeat): { tree: PlaceNode; expanded: string[]; region: boolean } => {
+  // out. Rows that can't be chosen name protected Custom Code and, with `here`, the node's
+  // own place (story-release-fixes / a-v2).
+  const placeTree = (scene: SceneDocument, own: BodyRef, moved?: SceneBeat, here = false): { tree: PlaceNode; expanded: string[]; region: boolean } => {
     const inner = moved ? innerBodies(scene, moved) : new Set<string>();
     let region = false;
     const build = (body: BodyRef, depth: number): PlaceNode => {
@@ -1779,7 +1779,7 @@ export function renderStoryView(
       for (const node of nodeBeats(scene, body)) {
         position({ type: "before", anchor: nodeRef(node) });
         if (moved && protectedRegion(node)) { note(node, "locked"); region = true; }
-        if (node === moved) note(node, "here");
+        if (node === moved && here) note(node, "here");
         if (node === moved || depth > MAX_NESTING) continue;
         for (const child of ownedBodies(scene, node)) if (child.type === "branch" && !inner.has(child.branchId)) children.push(build(child, depth + 1));
       }
@@ -1792,15 +1792,20 @@ export function renderStoryView(
     return { tree, expanded, region };
   };
   const findPlace = (node: PlaceNode, match: (node: PlaceNode) => boolean): PlaceNode | undefined => match(node) ? node : node.children?.map(child => findPlace(child, match)).find(Boolean);
-  // Move to (story-combined-editor / replace-v2) opens on the beat's own place with nothing
-  // chosen, and says where the beat is now (story-release-fixes / a-v2).
+  // Move to (story-combined-editor / replace-v2) opens on the beat's own place with the
+  // first place after the beat there chosen, or its last place. Beside protected Custom
+  // Code it chooses nothing, shows the beat's own place and says where the beat is now
+  // (story-release-fixes / a-v2).
   const moveNodeForm = (scene: SceneDocument, beat: SceneBeat, opener?: HTMLElement): void => {
     if (!draftGuard()) return;
-    const own = beatBody(beat), siblings = nodeBeats(scene, own), { tree, expanded, region } = placeTree(scene, own, beat);
-    const name = `${numbers.get(beat.id) ?? ""} ${beat.conditionalBranch ? "Condition" : nodeName(beat)}`, previous = siblings[siblings.indexOf(beat) - 1];
+    const own = beatBody(beat), siblings = nodeBeats(scene, own), at = siblings.indexOf(beat), previous = siblings[at - 1];
+    const beside = [previous, siblings[at + 1]].some(node => !!node && protectedRegion(node)), { tree, expanded, region } = placeTree(scene, own, beat, beside);
+    const name = `${numbers.get(beat.id) ?? ""} ${beat.conditionalBranch ? "Condition" : nodeName(beat)}`;
     const now = previous ? `after ${numbers.get(previous.id) ?? ""} ${nodeName(previous)}` : `first in ${placeName(scene, own)}`;
+    const positions = findPlace(tree, node => node.id === expanded.at(-1))?.children?.filter(child => child.place && sameBody(child.place.body, own)) ?? [];
+    const after = positions.find(child => { const place = child.place!.position; return place.type === "end" || siblings.findIndex(item => sameNode(nodeRef(item), place.anchor)) > at; }) ?? positions.at(-1);
     openPlaceTree({
-      host, opener: opener ?? null, title: `Move ${name}`, tree, expanded, idle: `${name} is ${now} now. Choose where to move it.`,
+      host, opener: opener ?? null, title: `Move ${name}`, tree, expanded, ...beside ? { idle: `${name} is ${now} now. Choose where to move it.` } : after ? { chosen: after.id } : {},
       note: `${beat.conditionalBranch ? "Moves the entire condition and every branch together." : "Moves this beat to the chosen scene, branch or option."}${region ? " Protected Custom Code stays where it is." : ""}`,
       move: place => mutate({ type: "moveStoryNode", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, node: nodeRef(beat), expectedBody: own, ...place }, () => { selectedBeatId = beat.id; openTo(model.scenes.find(item => item.id === scene.id) ?? scene, place.body); }).then(saved => { if (saved) focusColumn(beat.id); return saved; }),
     });
