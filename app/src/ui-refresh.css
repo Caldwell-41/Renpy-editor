@@ -1062,7 +1062,8 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 /* Story Combined status, approved as story-combined-status / header-v2. The header save
    status sits before Undo, Redo and Save; the bottom status bar holds Undo and Redo
    notices. At 560 px the header keeps one row and shows a short form, and the bottom
-   status bar repeats a refusal line with its scene links. */
+   status bar repeats a refusal line with its scene links. When font metrics leave the row
+   short, the save status gives way first, as header-v2's save state does. */
 .app-header>.app-status{margin-left:auto;flex:0 1 auto;max-width:56vw;display:flex;align-items:center;gap:0 6px;font-size:12px;color:var(--text-secondary)}
 .app-header>.app-status+.header-history{margin-left:0}
 .app-status>b{color:var(--status-error);font-weight:650}
@@ -1074,14 +1075,14 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .app-refusal .status-link{padding:0 2px;color:var(--text-primary);font:inherit;background:none;border:0;border-bottom:1px solid var(--border-strong);border-radius:0;cursor:pointer}
 .app-refusal .status-link>b{color:var(--status-error)}
 @media(max-width:640px){
- .app-header,.app-header:has(.runtime-toolbar){flex-wrap:nowrap;gap:5px;padding:0 8px}
- .app-header .button,.app-header .runtime-toolbar .button{min-height:30px;padding:3px 6px;font-size:11px}
+ .app-header,.app-header:has(.runtime-toolbar){flex-wrap:nowrap;gap:4px;padding:0 8px}
+ .app-header .button,.app-header .runtime-toolbar .button{min-height:30px;padding:3px 5px;font-size:11px}
  .app-header .runtime-toolbar{gap:4px;overflow:visible}
  .app-header .brand{font-size:13px}
  .app-header .header-history-button{width:28px;min-height:30px}
- .app-header>.app-status{flex:none}
  .app-header>.app-status[data-short]{font-size:0}
  .app-header>.app-status[data-short]>*{display:none}
+ .app-header>.app-status{display:block}
  .app-header>.app-status[data-short]::before{content:attr(data-short);font-size:12px}
  .app-header>.app-status[data-kind="error"][data-short]::before{color:var(--status-error);font-weight:650}
  .app-refusal:not(:empty){display:flex}

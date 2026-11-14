@@ -103,6 +103,11 @@ try {
   if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.story-track-column').first().waitFor();
   await checkHeader(`${surface} ${width}x${height} ${theme}`);await page.screenshot({path:output+`header-${surface.toLowerCase()}-${width}x${height}-${theme}.png`,clip:{x:0,y:0,width,height:80}});
  }
+ // Linux Chromium falls back to wider fonts than the Mac's. With a wide font every workspace
+ // still keeps the whole header on one row at 560 px.
+ const wide=await page.addStyleTag({content:':root{--font-ui:Verdana,"DejaVu Sans",sans-serif}'});await setTheme('light');await page.setViewportSize({width:560,height:640});
+ for(const surface of ['Story','Source','Variables','Branches']){await page.getByRole('button',{name:surface,exact:true}).click();if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.story-track-column').first().waitFor();await checkHeader(`${surface} 560x640 wide font`);}
+ await wide.evaluate(style=>style.remove());
  await page.setViewportSize({width:1440,height:900});await page.getByRole('button',{name:'Story',exact:true}).click();
  await page.locator('.story-track-beat[data-beat-kind=dialogue]').first().click();await page.locator('.expanded-beat textarea').first().press('End');await page.keyboard.type(' {i}');
  await page.locator('.app-header').getByRole('button',{name:'Save',exact:true}).click();await page.locator('#app-status').filter({hasText:'Nothing saved'}).waitFor();

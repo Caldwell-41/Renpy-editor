@@ -395,7 +395,8 @@ pending beat drafts ("5 unsaved beat drafts") as well as Saved, Saving, Unsaved 
 draft, Conflict or Recovery required. The bottom status bar shows "Ready" and the
 "Undone: …" and "Redone: …" notices. The approved placement is `story-combined-status`
 / `header-v2`. At 560 px the header stays on one row and shows a short form, such as
-"5 unsaved" or "Nothing saved". Cmd/Ctrl+S has one shell-owned route. In Story it
+"5 unsaved" or "Nothing saved". If wider fonts leave the row short, the save status
+ends in an ellipsis and every control stays in view. Cmd/Ctrl+S has one shell-owned route. In Story it
 accepts all pending beat drafts under [Saving Story drafts](#saving-story-drafts);
 in Source it accepts the focused Source draft. Other contexts retain their existing
 Save behaviour. Pending or refused drafts never report the whole project as Saved.
