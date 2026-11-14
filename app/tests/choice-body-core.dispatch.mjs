@@ -374,9 +374,9 @@ try {
  assert(then.classList.contains('story-then-replaced'));assert.equal(block.querySelector('.story-outcome'),null,'no Then menu when Custom Code ends the option');
  assert.equal(then.querySelector('.story-ending').textContent,'Ends with Custom Code: return "good"');assert(!then.textContent.includes('Continue after the Choice'));
  assert([...then.querySelectorAll('button')].some(b=>b.textContent==='Edit in Source'&&!b.disabled));
- // + Beat goes before the ending: no place before Custom Code or after the ending.
+ // + Beat goes before the ending: protected Custom Code has a place before it (B8), the ending has none after it.
  button('+ Beat',block);draft=kind('narration');
- {const tree=placeTree(draft);assert.deepEqual(positionsIn(tree),[`Before ${beatNumber(scene().beats.find(b=>b.payload.text==='Before code').id)} Narration`],'no place before Custom Code or after the ending');tree.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));}
+ {const tree=placeTree(draft);assert.deepEqual(positionsIn(tree),[`Before ${beatNumber(scene().beats.find(b=>b.payload.text==='Before code').id)} Narration`,`Before ${beatNumber(codeEnding.id)} Custom Code`],'a place before Custom Code, none after the ending');tree.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));}
  button('Cancel',draft);
  // Ending unknown sits on the Custom Code beat that causes it; Then stays editable.
  block=option(unknownOption.id);assert.equal(block.querySelector('.story-beat-note').textContent,'Ending unknown: Custom Code can leave this option');
