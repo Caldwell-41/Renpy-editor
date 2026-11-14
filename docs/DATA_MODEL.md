@@ -181,8 +181,8 @@ stays byte-identical on opening and no-op edits.
 
 The native menu guard combines availability and picked hiding. Disabled rows use
 the combined selectable gate, so hiding the last enabled answer continues after the
-Choice. Hide picked takes precedence over disabled display. Completion treats hiding
-as a possible continuation and refuses an unsafe Scene ending. Repeat revisits this
+Choice. Hide picked takes precedence over disabled display. The scene fallthrough
+guard treats hiding as a possible continuation. Repeat revisits this
 same gate and store. Source-embedded UUIDs anchor the existing mappings, preserve
 rename/reorder identity, and distinguish duplicate captions. New options get fresh
 UUIDs. Duplicate runtime keys, reserved declaration collisions, edited/missing helpers,
@@ -835,8 +835,11 @@ code that lists the places. The place before protected Custom Code is the region
 byte: the new or moved lines go directly before it and its bytes stay unchanged. A move
 may pass protected Custom Code in the same body, and the region stays where it is. There
 is no place inside a region, and none before an empty body's `pass`, whose end place
-replaces it. Unknown endings count as "may continue" for the scene
-fallthrough guard, Call and Choice completion and the Branches continuation lines.
+replaces it. Unknown endings count as "may continue" for the Branches continuation
+lines. The scene fallthrough guard compares the scene body's ending before and after
+each write. A scene that ends must keep ending, and an `unknown` ending must not become
+`continues`. A scene that already continues stays editable. Story Save checks each
+command against the candidate the commands before it left.
 
 Source-map v6 adds `ownedScreens` for explicitly created custom screens. Each entry
 stores distinct screen/root UUIDs, its source name, `game/ui/<name>.rpy` path and
