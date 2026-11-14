@@ -8855,7 +8855,7 @@ mod tests {
             .join(&fixture.workspace().scenes[0].source_path);
         fs::write(
             &path,
-            "label scene_one:\n    if ticket_count == 2:\n        \"Two\"\n    elif bec_seen:\n        \"Seen\"\n    else:\n        \"None\"\n    menu:\n        \"Go\" if ticket_count == 2:\n            \"Gone\"\n        \"Stay\":\n            \"Stayed\"\n    show bec happy\n    return\n",
+            "label scene_one:\n    if ticket_count == 2:\n        \"Two\"\n    elif bec_seen:\n        \"Seen\"\n    else:\n        \"None\"\n    menu:\n        \"Go\" if ticket_count == 2:\n            \"Gone\"\n        \"Stay\":\n            \"Stayed\"\n    show bec happy\n    bec \"Last call.\"\n    return\n",
         )
         .unwrap();
         // Each beat's ID, kind and, for a branch or option, whether its test is supported.
@@ -8904,7 +8904,7 @@ mod tests {
                 .unwrap();
             fixture.workspace();
         }
-        // The character and the image that `show bec happy` names.
+        // The character that `bec "Last call."` names, and later the image `show bec happy` names.
         let characters = fixture
             .service
             .create_character(
@@ -8917,7 +8917,17 @@ mod tests {
                 },
             )
             .unwrap();
-        fixture.workspace();
+        // With the character but not its image, the line is dialogue and `show bec happy`
+        // stays Custom Code; every line keeps its ID.
+        let between = rows(&fixture.workspace());
+        assert_eq!(kinds(&before)[12], "customCode");
+        assert_eq!(kinds(&between)[12], "dialogue");
+        assert_eq!(kinds(&between)[11], "customCode");
+        assert_eq!(tests(&between), [true, true, true]);
+        assert_eq!(
+            between.iter().map(|(id, ..)| id).collect::<Vec<_>>(),
+            before.iter().map(|(id, ..)| id).collect::<Vec<_>>()
+        );
         let image = fixture.root.join("bec happy.png");
         fs::write(&image, b"bec raster").unwrap();
         let choice = fixture
@@ -8944,6 +8954,7 @@ mod tests {
         // `show bec happy` was Custom Code until its character and image existed.
         assert_eq!(kinds(&before)[11], "customCode");
         assert_eq!(kinds(&after)[11], "changeAppearance");
+        assert_eq!(kinds(&after)[12], "dialogue");
         // The same lines keep their IDs, so drafts and selection stay on them.
         assert_eq!(
             after.iter().map(|(id, ..)| id).collect::<Vec<_>>(),
