@@ -652,7 +652,7 @@ async function deleteScene(tree: ParentNode, name: string): Promise<HTMLElement>
   row.querySelector<HTMLElement>(".tree-menu > summary")!.click();
   press(row.querySelector(".tree-menu")!, "Delete");
   assert.equal(row.querySelector(".confirm-row > span")!.textContent, `Delete scene "${name}"? Undo restores it.`);
-  press(row, "Confirm delete"); await tick();
+  press(row, "Delete scene"); await tick();
   return row;
 }
 const refused = (references: { beats: object[]; protectedCode: object[] }) => async (): Promise<never> => { throw Object.assign(Error("The Scene has incoming or unknown references and cannot be deleted safely."), { code: "INCOMING_REFERENCE", references }); };

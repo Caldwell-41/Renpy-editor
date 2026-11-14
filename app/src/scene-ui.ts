@@ -1201,7 +1201,7 @@ export function renderStoryView(
         moveDown.addEventListener("click", () => void mutate({ type: "moveScene", sceneId: scene.id, chapterId: chapter.id, direction: "down", expectedSourceRevision: scene.sourceRevision }));
         const removeScene = button("Delete", "icon-button"); removeScene.ariaLabel = `Delete scene ${scene.displayName}`;
         removeScene.disabled = scene.id === model.entrySceneId || model.scenes.length === 1;
-        removeScene.addEventListener("click", () => { if (sceneRow.nextElementSibling?.matches(".story-scene-refusal")) sceneRow.nextElementSibling.remove(); confirmAction(sceneRow, `Delete scene "${scene.displayName}"? Undo restores it.${pendingDrafts(scene.id).length ? " Its unsaved beat drafts are discarded." : ""}`, () => mutate({ type: "deleteScene", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision })); });
+        removeScene.addEventListener("click", () => { if (sceneRow.nextElementSibling?.matches(".story-scene-refusal")) sceneRow.nextElementSibling.remove(); confirmAction(sceneRow, `Delete scene "${scene.displayName}"? Undo restores it.${pendingDrafts(scene.id).length ? " Its unsaved beat drafts are discarded." : ""}`, () => mutate({ type: "deleteScene", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision }), "Delete scene"); });
         controls.append(renameScene, moveUp, moveDown, removeScene);
         if (model.chapters.length > 1) {
           const target = entitySelect(model.chapters.filter((item) => item.id !== chapter.id).map((item) => ({ id: item.id, label: item.displayName })));
@@ -2626,10 +2626,10 @@ function refusalCopy(sceneId: string, references: IncomingReferences): { readonl
   const intro = parts.join(", and ");
   return { intro: `${intro[0]!.toUpperCase()}${intro.slice(1)}:`, tail: beats ? "Change or remove them, then delete again. Nothing was deleted." : "Change that code in Source first. Nothing was deleted." };
 }
-function confirmAction(host: HTMLElement, copy: string, commit: () => Promise<unknown>): void {
+function confirmAction(host: HTMLElement, copy: string, commit: () => Promise<unknown>, confirmLabel = "Confirm delete"): void {
   if (host.querySelector(":scope > .confirm-row")) return;
   const panel = document.createElement("div"); panel.className = "confirm-row"; const text = document.createElement("span"); text.textContent = copy;
-  const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => panel.remove()); const confirm = button("Confirm delete", "button danger"); confirm.addEventListener("click", () => void commit()); panel.append(text, cancel, confirm); host.append(panel);
+  const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => panel.remove()); const confirm = button(confirmLabel, "button danger"); confirm.addEventListener("click", () => void commit()); panel.append(text, cancel, confirm); host.append(panel);
 }
 
 /** What a stage beat changes, by name: the background, or the character. */
