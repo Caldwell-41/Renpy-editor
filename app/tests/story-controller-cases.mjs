@@ -815,7 +815,7 @@ export const storyCases={
    const at=c.requests().length,was=status();await c.click('Save',header());await c.wait(()=>status()!==was&&/^Nothing saved/.test(status()));await c.settle();
    c.assert(!c.requests().slice(at).some(r=>r.request.operation==='scene.saveDrafts'),'The conflict stops Save before any request');
    c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(changed)),'A refused Save writes nothing');
-   c.assert.equal(status(),`Nothing saved. 1 of 1 draft need changes:${entry.displayName} 1`);
+   c.assert.equal(status(),`Nothing saved. 1 of 1 draft needs changes:${entry.displayName} 1`);
    c.assert.equal(panel(id).querySelector('.story-conflict > p')?.textContent,'This beat is no longer in source.');
    c.assert.deepEqual(buttons(panel(id)).filter(x=>['Commit Beat','Override source','Discard draft'].includes(x)),['Discard draft']);
    await c.click('Discard draft',panel(id));await c.settle();c.assert.equal(!!panel(id)?.querySelector('.story-conflict'),false);c.assert.equal(!!c.document.querySelector('.scene-workspace [data-beat-draft="true"]'),false,'Discard draft leaves no draft');

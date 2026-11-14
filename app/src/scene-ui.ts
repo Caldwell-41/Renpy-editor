@@ -901,7 +901,7 @@ export function renderStoryView(
       const count = failing.filter(draft => draft.sceneId === scene.id).length;
       return count ? [{ label: scene.displayName, count, open: () => open(scene.id) }] : [];
     });
-    return { text: `${refusal.lead} ${failing.length} of ${total} ${drafts} need changes:`, kind: "error", links, lead: refusal.lead, short: "Nothing saved" };
+    return { text: `${refusal.lead} ${failing.length} of ${total} ${drafts} ${total === 1 ? "needs" : "need"} changes:`, kind: "error", links, lead: refusal.lead, short: "Nothing saved" };
   };
   // Status changes only when the count or links change, so typing does not replace other status.
   const statusKey = (): string => { const status = saveStatus(); return JSON.stringify(status && [status.text, status.links.map(link => [link.label, link.count])]); };

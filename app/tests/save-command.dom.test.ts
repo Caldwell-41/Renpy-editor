@@ -332,7 +332,7 @@ test("Story Save takes one route from toolbar and keyboard, and a refusal never 
   click("Save"); await ticks(10);
   window.dispatchEvent(saveEvent({ ctrl: true })); await ticks(10);
   assert.equal(sent.length, 4); assert.equal(flushes, 0); assert.equal(accepted, "From keyboard");
-  assert.equal(status(), "Nothing saved. 1 of 1 draft need changes:Scene 1");
+  assert.equal(status(), "Nothing saved. 1 of 1 draft needs changes:Scene 1");
   editor = document.querySelector<HTMLTextAreaElement>('.story-editor[data-editor-for="line"] textarea')!;
   assert.equal(editor.value, "Refused draft"); assert.equal(editor.closest<HTMLElement>("[data-beat-draft-key]")?.dataset.saveRefused, "true");
 
@@ -341,7 +341,7 @@ test("Story Save takes one route from toolbar and keyboard, and a refusal never 
   accepted = "Edited elsewhere"; revision += 1;
   click("Save"); await ticks(10);
   assert.equal(sent.length, 5); assert.equal(flushes, 0);
-  assert.equal(status(), "Story changed in source and was refreshed. Nothing saved. 1 of 1 draft need changes:Scene 1");
+  assert.equal(status(), "Story changed in source and was refreshed. Nothing saved. 1 of 1 draft needs changes:Scene 1");
   assert.equal(document.querySelector('.story-editor[data-editor-for="line"] .story-conflict-source')?.textContent, "Edited elsewhere");
   assert.equal(document.querySelector<HTMLTextAreaElement>('.story-editor[data-editor-for="line"] textarea')?.value, "Refused draft");
 

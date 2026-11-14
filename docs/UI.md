@@ -747,7 +747,7 @@ A refused Story Save follows the approved `story-combined-status` design
 (`header-v2`), which places `story-save-refusal` (`marked-v1`) inside Story Combined.
 Save reveals the first failing draft in project order. The header save status reads
 "Nothing saved. 3 of 5 drafts need changes:", followed by one link per scene with its
-count of failing drafts. At 560 px the header shows "Nothing saved" and the bottom
+count of failing drafts. With one beat draft it reads "1 of 1 draft needs changes:". At 560 px the header shows "Nothing saved" and the bottom
 status bar holds the full line and links. Each link reveals that scene's first failing
 draft. A failing beat's Tracks or Reel column and its scene row show a red `!` in place
 of the draft `*`, and the column gets a red top edge and the reason as its tooltip. Reel
