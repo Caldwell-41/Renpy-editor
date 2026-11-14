@@ -75,7 +75,27 @@ pub enum Condition {
     Unknown {
         source: String,
         diagnostic: ConditionError,
+        /// The variable a missing-variable or type-mismatch test names, so the builder
+        /// can say why it can't take the test. Derived from the source each read.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        detail: Option<ConditionDetail>,
     },
+}
+/// The parts of a test the builder names when it can't take the test: the variable,
+/// its type when it exists, and the comparison and the other side it sits in.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ConditionDetail {
+    pub variable: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub variable_type: Option<VariableType>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub operator: Option<Comparison>,
+    /// The other side as written, such as `2`, `True` or `fare`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub other: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub other_type: Option<VariableType>,
 }
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -109,10 +129,10 @@ enum Token {
 }
 
 pub fn parse(source: &str, authoring: &AuthoringMetadata) -> Condition {
+    let tokens = tokenize(source);
     let parsed = (|| {
-        let tokens = tokenize(source)?;
         let mut parser = Parser {
-            tokens,
+            tokens: tokens.clone()?,
             at: 0,
             nodes: 0,
             authoring,
@@ -131,8 +151,107 @@ pub fn parse(source: &str, authoring: &AuthoringMetadata) -> Condition {
         Ok(expression) => Condition::Supported { expression },
         Err(diagnostic) => Condition::Unknown {
             source: source.into(),
+            detail: tokens
+                .ok()
+                .and_then(|tokens| detail(&tokens, &diagnostic, authoring)),
             diagnostic,
         },
+    }
+}
+/// What a missing-variable or type-mismatch test names, read from its tokens.
+fn detail(
+    tokens: &[Token],
+    diagnostic: &ConditionError,
+    authoring: &AuthoringMetadata,
+) -> Option<ConditionDetail> {
+    let known = |token: Option<&Token>| match token {
+        Some(Token::Word(word)) => authoring
+            .variables
+            .iter()
+            .find(|v| &v.technical_name == word),
+        _ => None,
+    };
+    let comparison = |at: usize| match tokens.get(at) {
+        Some(Token::Comparison(operator)) => Some(*operator),
+        _ => None,
+    };
+    let typed = |token: Option<&Token>| -> Option<(String, VariableType)> {
+        match token? {
+            Token::Int(value) => Some((value.clone(), VariableType::Int)),
+            Token::Decimal(value) => Some((value.clone(), VariableType::Decimal)),
+            Token::String(value) => {
+                Some((serde_json::to_string(value).ok()?, VariableType::String))
+            }
+            Token::Word(word) if word == "True" || word == "False" => {
+                Some((word.clone(), VariableType::Bool))
+            }
+            Token::Word(word) => known(token).map(|v| (word.clone(), v.variable_type)),
+            _ => None,
+        }
+    };
+    let named = |variable: &str,
+                 variable_type: Option<VariableType>,
+                 operator: Option<Comparison>,
+                 other: Option<(String, VariableType)>| {
+        let (other, other_type) = other.unzip();
+        Some(ConditionDetail {
+            variable: variable.into(),
+            variable_type,
+            operator,
+            other,
+            other_type,
+        })
+    };
+    let before = |at: usize| at.checked_sub(1).and_then(comparison);
+    match diagnostic {
+        ConditionError::MissingVariable => {
+            let at = tokens.iter().enumerate().position(|(at, token)| {
+                matches!(token, Token::Word(word) if !["and", "or", "not", "True", "False"].contains(&word.as_str()))
+                    && known(tokens.get(at)).is_none()
+            })?;
+            let Token::Word(name) = &tokens[at] else {
+                return None;
+            };
+            if let Some(operator) = comparison(at + 1) {
+                return named(name, None, Some(operator), typed(tokens.get(at + 2)));
+            }
+            if let Some(operator) = before(at) {
+                return named(
+                    name,
+                    None,
+                    Some(operator),
+                    typed(at.checked_sub(2).and_then(|at| tokens.get(at))),
+                );
+            }
+            named(name, None, None, None)
+        }
+        ConditionError::TypeMismatch => {
+            for at in 0..tokens.len() {
+                let Some(variable) = known(tokens.get(at)) else {
+                    continue;
+                };
+                let (name, kind) = (variable.technical_name.as_str(), variable.variable_type);
+                let numeric = arithmetic::numeric_type(kind);
+                let operator = comparison(at + 1);
+                let other = operator.and_then(|_| typed(tokens.get(at + 2)));
+                if operator
+                    .is_some_and(|op| !matches!(op, Comparison::Equal | Comparison::NotEqual))
+                    && !numeric
+                {
+                    return named(name, Some(kind), operator, None);
+                }
+                if let Some((text, other_kind)) = other {
+                    if other_kind != kind && !(numeric && arithmetic::numeric_type(other_kind)) {
+                        return named(name, Some(kind), operator, Some((text, other_kind)));
+                    }
+                }
+                if operator.is_none() && before(at).is_none() && kind != VariableType::Bool {
+                    return named(name, Some(kind), None, None);
+                }
+            }
+            None
+        }
+        _ => None,
     }
 }
 fn tokenize(source: &str) -> Result<Vec<Token>, ConditionError> {
@@ -713,6 +832,81 @@ mod tests {
                 "{source}"
             );
         }
+    }
+    #[test]
+    fn an_unknown_test_names_its_variable_and_the_types_the_builder_words_it_with() {
+        let definitions = definitions();
+        let detail = |source: &str| match parse(source, &definitions) {
+            Condition::Unknown { detail, .. } => detail,
+            other => panic!("{source} parsed as {other:?}"),
+        };
+        let named = |variable: &str,
+                     variable_type: Option<VariableType>,
+                     operator: Option<Comparison>,
+                     other: Option<(&str, VariableType)>| {
+            Some(ConditionDetail {
+                variable: variable.into(),
+                variable_type,
+                operator,
+                other: other.map(|(text, _)| text.into()),
+                other_type: other.map(|(_, kind)| kind),
+            })
+        };
+        // A missing variable, with the type of what it is compared with, on either side.
+        assert_eq!(
+            detail("ticket_count == 2"),
+            named(
+                "ticket_count",
+                None,
+                Some(Comparison::Equal),
+                Some(("2", VariableType::Int))
+            )
+        );
+        assert_eq!(
+            detail("2.5 < fare"),
+            named(
+                "fare",
+                None,
+                Some(Comparison::Less),
+                Some(("2.5", VariableType::Decimal))
+            )
+        );
+        assert_eq!(detail("flag and late"), named("late", None, None, None));
+        // A variable of the wrong type: ordered, compared with another type, or alone.
+        assert_eq!(
+            detail("name >= 3"),
+            named(
+                "name",
+                Some(VariableType::String),
+                Some(Comparison::GreaterEqual),
+                None
+            )
+        );
+        assert_eq!(
+            detail("score == True"),
+            named(
+                "score",
+                Some(VariableType::Int),
+                Some(Comparison::Equal),
+                Some(("True", VariableType::Bool))
+            )
+        );
+        assert_eq!(
+            detail("name == score"),
+            named(
+                "name",
+                Some(VariableType::String),
+                Some(Comparison::Equal),
+                Some(("score", VariableType::Int))
+            )
+        );
+        assert_eq!(
+            detail("score"),
+            named("score", Some(VariableType::Int), None, None)
+        );
+        // Nothing to name: other problems, and a mismatch the builder words generally.
+        assert_eq!(detail("renpy.seen_label('x')"), None);
+        assert_eq!(detail("3 == 'x'"), None);
     }
     #[test]
     fn phase3a_bounds_and_missing_state_remain_unknown() {

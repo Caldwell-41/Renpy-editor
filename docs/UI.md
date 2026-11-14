@@ -311,8 +311,8 @@ comparison ("If rule 1 comparison", "Option 2 rule 1 comparison").
 
 A test core could not read (`story-release-fixes` / `a-v2`) keeps its line in a
 red-bordered box, with why and what to do in red under it, then Create and Edit in
-Source as they apply. The builder derives the names from the line and the project's
-variables:
+Source as they apply. Core names the variable, its type, and the comparison and other
+side it sits in; the renderer never reads the test's Python:
 
 - Missing variable: "ticket_count is not a project variable. Create it, or change this
   line in Source." Create ticket_count… opens New variable with that name and the type

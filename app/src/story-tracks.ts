@@ -6,6 +6,10 @@
 // and actions; only a beat column's contents differ. Writing focus draws the columns as
 // rows and labels the markers; story-focus.ts adds its grips and hidden-lane markers.
 import type { BeatPayload, BodyRef, NodeRef, Position, SceneBeat, SceneBody, SceneDocument } from "./scene-ui.ts";
+import type { ConditionProblem } from "./story-condition-editor.ts";
+
+/** How many nested branches and options Story walks through before it stops. */
+export const MAX_NESTING = 32;
 
 /** groupId → the open branch or option (its header beat id). */
 export type OpenBranches = ReadonlyMap<string, string>;
@@ -69,7 +73,7 @@ export function stageBeatsAbove(scene: SceneDocument, body: BodyRef, position: P
   const passed = new Set<BeatPayload["type"]>(["playMusic", "stopMusic", "playSfx", "setVariable", "showScreen", "hideScreen"]);
   const found: SceneBeat[] = [];
   let nodes = nodeBeats(scene, body), at = position.type === "end" ? nodes.length : nodes.findIndex(node => sameNode(nodeRef(node), position.anchor));
-  for (let depth = 0; depth <= 32 && at >= 0; depth++) {
+  for (let depth = 0; depth <= MAX_NESTING && at >= 0; depth++) {
     for (let index = at - 1; index >= 0; index--) {
       const beat = nodes[index]!, type = beat.payload.type;
       if (!beat.conditionalBranch && stage.has(type) && (!("transition" in beat.payload) || beat.payload.transition === "none")) { found.unshift(beat); continue; }
@@ -105,7 +109,7 @@ export function firstPlace(scene: SceneDocument, body: BodyRef): Position | unde
 export function beatNumbers(scene: SceneDocument): Map<string, string> {
   const numbers = new Map<string, string>();
   const visit = (body: BodyRef, prefix: string, offset: number, depth: number): void => {
-    if (depth > 32) return;
+    if (depth > MAX_NESTING) return;
     (bodyOf(scene, body)?.nodes ?? []).forEach((node, index) => {
       const number = prefix ? `${prefix}.${offset + index + 1}` : String(index + 1).padStart(2, "0");
       numbers.set(node.beatId, number);
@@ -151,7 +155,7 @@ export type TrackItem =
 export function trackRoute(scene: SceneDocument, open: OpenBranches, pending: readonly PendingBeat[] = []): TrackItem[] {
   const items: TrackItem[] = [];
   const walk = (body: BodyRef, depth: number, chain: readonly BodyRef[]): void => {
-    if (depth > 32) return;
+    if (depth > MAX_NESTING) return;
     const here = pending.filter(item => sameBody(item.body, body));
     const pendingAt = (position: Position): void => { for (const item of here) if (samePosition(item.position, position)) items.push({ kind: "new", pending: item, depth, chain }); };
     for (const beat of nodeBeats(scene, body)) {
@@ -269,7 +273,7 @@ function thenText(context: RouteContext, owner: SceneBeat, branch: BodyRef): str
   }
   // The next node after the owner, climbing out of enclosing branches.
   let node: SceneBeat | undefined = owner;
-  for (let steps = 0; node && steps <= 32; steps++) {
+  for (let steps = 0; node && steps <= MAX_NESTING; steps++) {
     const nodes = bodyOf(scene, beatBody(node))?.nodes ?? [], index = nodes.findIndex(item => item.beatId === node!.id);
     const next = nodes[index + 1];
     if (next) return trackCopy.thenNext(numbers.get(next.beatId) ?? "");
@@ -477,7 +481,7 @@ export interface BranchPathContext {
   readonly open: OpenBranches;
   readonly caption: (owner: SceneBeat) => string;
   /** A condition branch whose test core could not read: its short problem and reason. */
-  readonly problem: (header: SceneBeat) => { readonly short: string; readonly reason: string } | undefined;
+  readonly problem: (header: SceneBeat) => ConditionProblem | undefined;
   readonly branchName: (header: SceneBeat) => string;
   readonly select: (id: string) => void;
   readonly toggle: (owner: SceneBeat, branch: BodyRef) => void;

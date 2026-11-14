@@ -7,12 +7,12 @@ import { decimalValue, int64 } from "./numeric-input.ts";
 import { validateField } from "./authoring-input.ts";
 import type { Condition, ConditionExpression } from "./scene-ui.ts";
 import { backingSelect, button, element, field, iconButton, segmented, type ChoiceItem } from "./story-editor-controls.ts";
-import { variableMenu, variableTypeName as typeName, type Variable } from "./story-new-variable.ts";
+import { typeName, typePhrase, variableMenu, type Variable, type VariableDraft } from "./story-new-variable.ts";
 
 type Variables = readonly Variable[];
 type Operator = Extract<ConditionExpression, { type: "compare" }>["operator"];
 /** Creates a variable from the variable list. Resolves with it, or undefined when cancelled. */
-export type NewVariable = (opener: HTMLElement, initial?: { readonly name: string; readonly variableType: Variable["variableType"] }) => Promise<Variable | undefined>;
+export type NewVariable = (opener: HTMLElement, initial?: VariableDraft) => Promise<Variable | undefined>;
 /**
  * One rule as the author left it. `value` is the raw text, which may be half typed.
  * `original` is the rule as source wrote it, kept until the author changes the rule.
@@ -112,63 +112,37 @@ function ruleWords(rule: Rule, variables: Variables): string {
  * Why core could not read a branch's test, and what the author can do (`story-release-fixes`
  * / `a-v2`). `test` is the line as the builder names it, "ticket_count = 2"; `short` names the
  * problem in the Branch path; `reason` and `next` are the builder's two sentences; `create`
- * is a missing variable the author can create, with the type its comparison suggests.
+ * is a missing variable the author can create, with the type its comparison suggests. The
+ * names come from core's `detail`; the renderer never reads the test's Python.
  */
 export interface ConditionProblem {
   readonly test: string;
   readonly short: string;
   readonly reason: string;
   readonly next: string;
-  readonly create?: { readonly name: string; readonly variableType: Variable["variableType"] };
+  readonly create?: VariableDraft;
   /** False when `next` already says what holds until then. */
   readonly until?: false;
 }
-type Token = { readonly kind: "word" | "int" | "decimal" | "string" | "op" | "paren"; readonly raw: string; readonly space: string };
-/** The test's tokens as core reads them, for naming its parts only. Undefined when it is not that small language. */
-function tokens(source: string): Token[] | undefined {
-  const pattern = /(\s*)(?:([A-Za-z_][A-Za-z0-9_]*)|(-?\d+\.\d*|-?\.\d+)|(-?\d+)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(==|!=|<=|>=|<|>)|([()]))/y;
-  const found: Token[] = [];
-  for (let at = 0; at < source.trimEnd().length;) {
-    pattern.lastIndex = at; const match = pattern.exec(source); if (!match) return undefined;
-    const [, space = "", word, decimal, int, string, op, paren] = match;
-    found.push({ space, ...word ? { kind: "word", raw: word } : decimal ? { kind: "decimal", raw: decimal } : int ? { kind: "int", raw: int } : string ? { kind: "string", raw: string } : op ? { kind: "op", raw: op } : { kind: "paren", raw: paren! } });
-    at = pattern.lastIndex;
-  }
-  return found;
-}
-const symbolOf = (python: string): string => operators.find(item => item.python === python)?.symbol ?? python;
-const ordering = (python: string): boolean => ["<", "<=", ">", ">="].includes(python);
-/** "a whole number", "text": a type as a sentence names it. */
-const typePhrase = (type: Variable["variableType"]): string => ({ bool: "yes/no", int: "a whole number", decimal: "a decimal", string: "text" })[type];
-const literalType = (token: Token | undefined, variables: Variables): Variable["variableType"] | undefined =>
-  token?.kind === "int" || token?.kind === "decimal" ? token.kind : token?.kind === "string" ? "string" : token?.kind === "word" ? token.raw === "True" || token.raw === "False" ? "bool" : variables.find(item => item.technicalName === token.raw)?.variableType : undefined;
-const keywords = new Set(["and", "or", "not", "True", "False"]);
+const symbolOf = (op: Operator): string => operators.find(item => item.op === op)!.symbol;
+/** The line with = ≠ ≤ ≥ for its comparisons. Quoted text stays as written. */
+const symbolLine = (source: string): string => source.trim().replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|==|!=|<=|>=/g, (match, quoted?: string) => quoted ?? operators.find(item => item.python === match)!.symbol);
 
 /** The problem with a test core could not read, or undefined for a test it read. */
-export function conditionProblem(condition: Condition | undefined, variables: Variables): ConditionProblem | undefined {
+export function conditionProblem(condition: Condition | undefined): ConditionProblem | undefined {
   if (condition?.status !== "unknown") return undefined;
-  const parts = tokens(condition.source);
-  // The line as written, with = ≠ ≤ ≥ for its comparisons.
-  const test = parts ? parts.map(token => token.space + (token.kind === "op" ? symbolOf(token.raw) : token.raw)).join("").trim() : condition.source.trim();
-  const known = (token: Token | undefined): Variable | undefined => token?.kind === "word" ? variables.find(item => item.technicalName === token.raw) : undefined;
-  const problem = (short: string, reason: string, next: string, create?: ConditionProblem["create"]): ConditionProblem => ({ test, short, reason, next, ...create ? { create } : {} });
+  const test = symbolLine(condition.source), detail = condition.detail;
+  const problem = (short: string, reason: string, next: string, create?: VariableDraft): ConditionProblem => ({ test, short, reason, next, ...create ? { create } : {} });
   switch (condition.diagnostic) {
-    case "missingVariable": {
-      const at = parts?.findIndex(token => token.kind === "word" && !keywords.has(token.raw) && !known(token)) ?? -1;
-      if (!parts || at < 0) return problem("not a variable", "This line names a variable the project doesn't have.", "Change this line in Source.");
-      const name = parts[at]!.raw, compared = parts[at + 1]?.kind === "op" ? literalType(parts[at + 2], variables) : parts[at - 1]?.kind === "op" ? literalType(parts[at - 2], variables) : undefined;
-      return problem("not a variable", `${name} is not a project variable.`, "Create it, or change this line in Source.", { name, variableType: compared ?? "bool" });
-    }
+    case "missingVariable":
+      if (!detail) return problem("not a variable", "This line names a variable the project doesn't have.", "Change this line in Source.");
+      return problem("not a variable", `${detail.variable} is not a project variable.`, "Create it, or change this line in Source.", { name: detail.variable, variableType: detail.otherType ?? "bool" });
     case "typeMismatch": {
-      for (let at = 0; parts && at < parts.length; at++) {
-        const variable = known(parts[at]); if (!variable) continue;
-        const op = parts[at + 1]?.kind === "op" ? parts[at + 1]!.raw : undefined, other = op ? literalType(parts[at + 2], variables) : undefined;
-        const numeric = variable.variableType === "int" || variable.variableType === "decimal";
-        if (op && ordering(op) && !numeric) return problem("wrong type", `${variable.technicalName} is ${typePhrase(variable.variableType)}, and ${symbolOf(op)} only compares numbers.`, "Use = or ≠ in Source.");
-        if (op && other && other !== variable.variableType && !(numeric && (other === "int" || other === "decimal"))) return problem("wrong type", `${variable.technicalName} is ${typePhrase(variable.variableType)}, and ${parts[at + 2]!.raw} is ${typePhrase(other)}.`, `Compare it with ${typePhrase(variable.variableType)} in Source.`);
-        if (!op && parts[at - 1]?.kind !== "op" && variable.variableType !== "bool") return problem("wrong type", `${variable.technicalName} is ${typePhrase(variable.variableType)}, not yes/no.`, "Compare it with a value in Source.");
-      }
-      return problem("wrong type", "This line compares values of different types.", "Change this line in Source.");
+      const type = detail?.variableType;
+      if (!detail || !type) return problem("wrong type", "This line compares values of different types.", "Change this line in Source.");
+      if (detail.operator && detail.other !== undefined && detail.otherType) return problem("wrong type", `${detail.variable} is ${typePhrase(type)}, and ${detail.other} is ${typePhrase(detail.otherType)}.`, `Compare it with ${typePhrase(type)} in Source.`);
+      if (detail.operator) return problem("wrong type", `${detail.variable} is ${typePhrase(type)}, and ${symbolOf(detail.operator)} only compares numbers.`, "Use = or ≠ in Source.");
+      return problem("wrong type", `${detail.variable} is ${typePhrase(type)}, not yes/no.`, "Compare it with a value in Source.");
     }
     case "invalidValue": return problem("invalid number", "A number in this line is out of range.", "Change this line in Source.");
     case "limitExceeded": return problem("too long", "This line is too long for the builder.", "Shorten it in Source.");
@@ -222,7 +196,7 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
   const host = element("div", "story-rules");
   const parsed = initial?.status === "supported" ? rulesOf(initial.expression, variables) : initial ? undefined : { join: "and" as const, rules: [] };
   if (!parsed) {
-    const problem = conditionProblem(initial, variables), done = { host, read: () => initial, summary: () => options.caption ?? "", editable: false, capture: () => undefined, restore: () => undefined, relabel: () => undefined };
+    const problem = conditionProblem(initial), done = { host, read: () => initial, summary: () => options.caption ?? "", editable: false, capture: () => undefined, restore: () => undefined, relabel: () => undefined };
     if (problem && initial?.status === "unknown") {
       // A test core could not read: its line in an error box, why, and what to do (story-release-fixes / a-v2).
       const code = element("code", "story-rule-code story-rule-invalid", `${options.keyword} ${initial.source}:`), error = element("p", "story-rule-error", problemText(problem, options.subject ?? "branch"));
@@ -254,7 +228,7 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
     code.textContent = state.rules.length ? `${options.keyword} ${state.rules.map(rule => rulePython(rule, variables)).join(` ${state.join} `)}:` : options.empty;
     code.classList.toggle("story-rule-empty", !state.rules.length);
   };
-  const variableItems = (): ChoiceItem[] => variables.map(variable => ({ value: variable.id, label: variable.technicalName, detail: typeName(variable) }));
+  const variableItems = (): ChoiceItem[] => variables.map(variable => ({ value: variable.id, label: variable.technicalName, detail: typeName(variable.variableType) }));
   const draw = (): void => {
     const focused = document.activeElement instanceof HTMLElement && host.contains(document.activeElement) ? document.activeElement.closest<HTMLElement>("[data-rule-focus]")?.dataset.ruleFocus : undefined;
     checks = []; host.replaceChildren();

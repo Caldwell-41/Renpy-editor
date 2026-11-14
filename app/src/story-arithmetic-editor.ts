@@ -1,7 +1,7 @@
 import { formulaCompletionRange } from "./formula-editing.ts";
 import type { NewVariable } from "./story-condition-editor.ts";
 import { choose } from "./story-editor-controls.ts";
-import { variableMenu } from "./story-new-variable.ts";
+import { typeName, typePhrase, variableMenu } from "./story-new-variable.ts";
 import type { AssignmentDraftValidation, ArithmeticUnknown, BeatPayload, IntegerAdjustment, SceneWorkspace } from "./scene-ui.ts";
 
 type SetVariable = Extract<BeatPayload, { type: "setVariable" }>;
@@ -24,7 +24,6 @@ const reasons: Record<ArithmeticUnknown, string> = {
   unobservedCurrentValue: "Current value unknown. Declaration defaults are not current Story values.",
   unsupportedControlFlow: "Current value unknown after code or unevaluated flow.",
 };
-const typeName = (type: string): string => type === "int" ? "whole number" : type;
 function node<K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = ""): HTMLElementTagNameMap[K] {
   const element = document.createElement(tag); element.className = className; element.textContent = text; return element;
 }
@@ -128,7 +127,7 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
         if (own !== generation || !host.isConnected) return;
         variables = result.variables; capabilities = result.capabilities; operationMenu(); feedback.replaceChildren();
         const inferred = result.assignment.inferredResultType;
-        if (inferred) feedback.append(node("p", "story-formula-type", `Gives a ${typeName(inferred)}${target!.variableType === "decimal" && inferred === "int" ? ", stored as a decimal" : ""}.`));
+        if (inferred) feedback.append(node("p", "story-formula-type", `Gives ${typePhrase(inferred)}${target!.variableType === "decimal" && inferred === "int" ? ", stored as a decimal" : ""}.`));
         for (const diagnostic of result.assignment.diagnostics) {
           if (result.support === "refused" && !showErrors) continue;
           feedback.append(node("p", result.support === "refused" ? "story-formula-problem" : "story-formula-unknown", reasons[diagnostic.reason]));

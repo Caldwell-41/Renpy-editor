@@ -483,13 +483,13 @@ test("the Tracks Characters lane names the character, expression and position", 
 });
 
 /** Condition 01: If has_ticket, two Else if tests core could not read, and Otherwise. */
-function brokenCondition(missing: Condition = { status: "unknown", source: "ticket_count == 2", diagnostic: "missingVariable" }): SceneWorkspace {
+function brokenCondition(missing: Condition = { status: "unknown", source: "ticket_count == 2", diagnostic: "missingVariable", detail: { variable: "ticket_count", operator: "equal", other: "2", otherType: "int" } }): SceneWorkspace {
   const header = (id: string, ordinal: number, condition?: Condition): SceneBeat => storyBeat(id, { type: "customCode", source: "", reason: "Condition header" }, { protected: true, conditionalBranch: { groupId: "test", ordinal, otherwise: !condition, ...condition ? { condition } : {} } });
   const inside = (id: string, branchId: string): SceneBeat => storyBeat(id, { type: "narration", text: `Inside ${branchId}.` }, { owner: { groupId: "test", branchId } });
   const model = editorProject([
     header("if", 0, { status: "supported", expression: { type: "variable", variableId: "flag", variableType: "bool" } }), inside("in-if", "if"),
     header("missing", 1, missing), inside("in-missing", "missing"),
-    header("type", 2, { status: "unknown", source: "destination >= 3", diagnostic: "typeMismatch" }), inside("in-type", "type"),
+    header("type", 2, { status: "unknown", source: "destination >= 3", diagnostic: "typeMismatch", detail: { variable: "destination", variableType: "string", operator: "greaterEqual" } }), inside("in-type", "type"),
     header("else", 3), inside("in-else", "else"),
     storyBeat("after", { type: "narration", text: "The doors close behind them." }),
   ]);
@@ -537,7 +537,7 @@ test("the rule builder words each problem for a branch or an option, and names i
   const s = mountStory(brokenCondition()), variables = editorFixture().authoring.variables;
   const flag = { type: "variable" as const, variableId: "flag", variableType: "bool" as const };
   const shown = (condition: Condition, subject?: "branch" | "option"): HTMLElement => { const builder = buildRuleBuilder(variables, condition, { keyword: "if", label: "Option 1", empty: "", required: false, newVariable: async () => undefined, source: () => {}, ...subject ? { subject } : {} }); document.body.append(builder.host); return builder.host; };
-  const missing = shown({ status: "unknown", source: "ticket_count == 2", diagnostic: "missingVariable" }, "option");
+  const missing = shown({ status: "unknown", source: "ticket_count == 2", diagnostic: "missingVariable", detail: { variable: "ticket_count", operator: "equal", other: "2", otherType: "int" } }, "option");
   assert.equal(missing.querySelector(".story-rule-error")!.textContent, "ticket_count is not a project variable. Create it, or change this line in Source. Until then, the builder can't edit this option.");
   assert.equal(shown({ status: "unknown", source: "renpy.seen_label('x')", diagnostic: "unsupportedSyntax" }).querySelector(".story-rule-error")!.textContent, "The builder can't show this Python. Until then, edit it in Source.");
   assert.equal(shown({ status: "supported", expression: { type: "and", left: flag, right: { type: "or", left: flag, right: flag } } }).querySelector(".story-field-hint")!.textContent, "This mixes All and Any. The builder can't edit it. Edit it in Source.");

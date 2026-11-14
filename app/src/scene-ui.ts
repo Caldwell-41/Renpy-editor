@@ -11,7 +11,7 @@ import { isTextField, typingStepIdleMs, type DraftStep, type DraftStepRecord, ty
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenEffects, ScreenRevisions, ScreenTargetBinding } from "./screen-contracts.ts";
 import { laneGrips, resizeGrip, watchHiddenLanes, type FocusWidths } from "./story-focus.ts";
 import type { IncomingReferences } from "./protocol.ts";
-import { armOf, beatBody, beatNumbers, bodyOf, bodyOwner, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, protectedRegion, renderBranchPath, renderMarksLegend, renderRoute, renderTracksKey, renderViewSwitch, sameBody, sameNode, samePosition, shorten, stageBeatsAbove, trackCopy, trackRoute, unknownCause, endingBeat, type PendingBeat, type RouteView, viewName } from "./story-tracks.ts";
+import { MAX_NESTING, armOf, beatBody, beatNumbers, bodyOf, bodyOwner, laneOf, nodeBeats, nodeRef, ownedBodies, pinRouteLabels, protectedRegion, renderBranchPath, renderMarksLegend, renderRoute, renderTracksKey, renderViewSwitch, sameBody, sameNode, samePosition, shorten, stageBeatsAbove, trackCopy, trackRoute, unknownCause, endingBeat, type PendingBeat, type RouteView, viewName } from "./story-tracks.ts";
 export type PlacementRef = "left" | "centre" | "right";
 export type TransitionRef = "none" | "dissolve" | "fade";
 
@@ -24,7 +24,17 @@ export type ConditionExpression =
   | { readonly type: "and" | "or"; readonly left: ConditionExpression; readonly right: ConditionExpression };
 export type Condition =
   | { readonly status: "supported"; readonly expression: ConditionExpression }
-  | { readonly status: "unknown"; readonly source: string; readonly diagnostic: "unsupportedSyntax" | "limitExceeded" | "missingVariable" | "typeMismatch" | "invalidValue" };
+  | { readonly status: "unknown"; readonly source: string; readonly diagnostic: "unsupportedSyntax" | "limitExceeded" | "missingVariable" | "typeMismatch" | "invalidValue"; readonly detail?: ConditionDetail };
+type VariableType = "bool" | "int" | "decimal" | "string";
+/** Core's names for a test it could not read: the variable, its type when it exists, and the comparison and other side it sits in. */
+export interface ConditionDetail {
+  readonly variable: string;
+  readonly variableType?: VariableType;
+  readonly operator?: Extract<ConditionExpression, { type: "compare" }>["operator"];
+  /** The other side as written: "2", "True", "fare". */
+  readonly other?: string;
+  readonly otherType?: VariableType;
+}
 
 export type ChoicePrompt =
   | { readonly type: "narration"; readonly text: string }
@@ -182,7 +192,7 @@ export function conditionCaption(condition: Condition, variables?: SceneWorkspac
 
 /** A branch's test as text: its typed condition, its line when core could not read it, or its Variable for older sources. */
 function branchTest(branch: ConditionalBranch, model: SceneWorkspace): string {
-  const problem = conditionProblem(branch.condition, model.authoring.variables);
+  const problem = conditionProblem(branch.condition);
   return problem ? problem.test : branch.condition ? conditionCaption(branch.condition, model.authoring.variables)
     : model.authoring.variables.find(variable => variable.id === branch.variableId)?.technicalName ?? "Unknown condition";
 }
@@ -807,7 +817,7 @@ export function renderStoryView(
 
   // Opens every branch on the way to a body, so Tracks shows it.
   const openTo = (scene: SceneDocument, body: BodyRef): void => {
-    for (let at: BodyRef | undefined = body, steps = 0; at?.type === "branch" && steps <= 32; steps++) { openBranches.set(at.groupId, at.branchId); at = bodyOf(scene, at)?.parent; }
+    for (let at: BodyRef | undefined = body, steps = 0; at?.type === "branch" && steps <= MAX_NESTING; steps++) { openBranches.set(at.groupId, at.branchId); at = bodyOf(scene, at)?.parent; }
   };
   // Selects a beat or a branch header and opens the branches around it. Blank lines and
   // comments are not Tracks beats: a target there selects the next beat in its body.
@@ -1744,14 +1754,14 @@ export function renderStoryView(
         position({ type: "before", anchor: nodeRef(node) });
         if (moved && protectedRegion(node)) { note(node, "locked"); region = true; }
         if (node === moved) note(node, "here");
-        if (node === moved || depth > 32) continue;
+        if (node === moved || depth > MAX_NESTING) continue;
         for (const child of ownedBodies(scene, node)) if (child.type === "branch" && !inner.has(child.branchId)) children.push(build(child, depth + 1));
       }
       position({ type: "end" });
       return { id, label: placeName(scene, body), path: pathCaption(scene, body), children };
     };
     // It opens on the beat's own place: the scene, then each branch or option around it.
-    const expanded = ["root"]; for (let at: BodyRef | undefined = own, steps = 0; at?.type === "branch" && steps <= 32; steps++) { expanded.splice(1, 0, at.branchId); at = bodyOf(scene, at)?.parent; }
+    const expanded = ["root"]; for (let at: BodyRef | undefined = own, steps = 0; at?.type === "branch" && steps <= MAX_NESTING; steps++) { expanded.splice(1, 0, at.branchId); at = bodyOf(scene, at)?.parent; }
     const tree = build({ type: "root" }, 0);
     return { tree, expanded, region };
   };
@@ -1797,7 +1807,7 @@ export function renderStoryView(
   const beatName = (beat: SceneBeat): string => beat.conditionalBranch ? beat.conditionalBranch.choiceOption ? "Option" : "Condition" : beatLabels[beat.payload.type];
   const forkCaption = (beat: SceneBeat): string => beat.conditionalBranch ? branchTest(beat.conditionalBranch, model) : "Unknown condition";
   // A condition branch whose test core could not read, and a condition's such branches (story-release-fixes / a-v2).
-  const branchProblem = (header: SceneBeat): ConditionProblem | undefined => header.conditionalBranch && !header.conditionalBranch.choiceOption ? conditionProblem(header.conditionalBranch.condition, model.authoring.variables) : undefined;
+  const branchProblem = (header: SceneBeat): ConditionProblem | undefined => header.conditionalBranch && !header.conditionalBranch.choiceOption ? conditionProblem(header.conditionalBranch.condition) : undefined;
   const groupProblems = (scene: SceneDocument, groupId: string): [SceneBeat, ConditionProblem][] => scene.beats.flatMap(header => { const problem = header.conditionalBranch?.groupId === groupId ? branchProblem(header) : undefined; return problem ? [[header, problem] as [SceneBeat, ConditionProblem]] : []; });
   const toFix = (count: number): string => `${count} ${count === 1 ? "branch" : "branches"} to fix`;
   // A branch or option as Tracks and the Branch path name it.
@@ -1815,7 +1825,7 @@ export function renderStoryView(
   // An editor path: the scene, then each branch or option around the body. Never "body".
   const pathCaption = (scene: SceneDocument, body: BodyRef): string => {
     const parts: string[] = [];
-    for (let at: BodyRef | undefined = body, steps = 0; at?.type === "branch" && steps <= 32; steps++) {
+    for (let at: BodyRef | undefined = body, steps = 0; at?.type === "branch" && steps <= MAX_NESTING; steps++) {
       const header = scene.beats.find(beat => beat.id === (at as { branchId: string }).branchId), branch = header?.conditionalBranch;
       parts.unshift(!header || !branch ? "Missing branch" : branch.choiceOption ? branchName(scene, header) : branch.otherwise ? "Otherwise" : `${branch.ordinal ? "Else if" : "If"} ${shorten(forkCaption(header))}`);
       at = bodyOf(scene, at)?.parent;
@@ -2045,7 +2055,7 @@ export function renderStoryView(
   const continuationAfter = (scene: SceneDocument, beat: SceneBeat): string | undefined => {
     const shown = beatNumbers(scene);
     let node: SceneBeat | undefined = beat;
-    for (let steps = 0; node && steps <= 32; steps++) {
+    for (let steps = 0; node && steps <= MAX_NESTING; steps++) {
       const nodes = bodyOf(scene, beatBody(node))?.nodes ?? [], index = nodes.findIndex(item => item.beatId === node!.id), next = nodes[index + 1];
       if (next) return shown.get(next.beatId);
       node = bodyOwner(scene, beatBody(node));

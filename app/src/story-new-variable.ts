@@ -18,10 +18,15 @@ export interface NewVariableOptions {
   /** Creates the variable. Resolves with it, or throws with a reason the dialog shows. */
   readonly create: (request: NewVariableRequest) => Promise<Variable>;
   /** A name and type to start from, such as a test's missing variable. */
-  readonly initial?: { readonly name: string; readonly variableType: Variable["variableType"] };
+  readonly initial?: VariableDraft;
 }
+/** A variable to create: its name and type. */
+export interface VariableDraft { readonly name: string; readonly variableType: Variable["variableType"] }
 
-export const variableTypeName = (variable: Variable): string => ({ bool: "yes/no", int: "whole number", decimal: "decimal", string: "text" })[variable.variableType];
+/** "whole number": a type as a list names it. */
+export const typeName = (type: Variable["variableType"]): string => ({ bool: "yes/no", int: "whole number", decimal: "decimal", string: "text" })[type];
+/** "a whole number", "text": a type as a sentence names it. */
+export const typePhrase = (type: Variable["variableType"]): string => type === "int" || type === "decimal" ? `a ${typeName(type)}` : typeName(type);
 export function variableBadge(variable?: Variable): HTMLElement {
   const node = element("span", "story-type", variable ? ({ bool: "Y/N", int: "#", decimal: "#.#", string: "Aa" })[variable.variableType] : ""); node.setAttribute("aria-hidden", "true"); return node;
 }
@@ -44,8 +49,8 @@ export function variableMenu(select: HTMLSelectElement, options: { readonly labe
     list.replaceChildren();
     for (const item of variables) {
       const option = button("", "story-dropdown-option", () => { menu.open = false; choose(select, item.id); summary.focus(); });
-      option.role = "option"; option.tabIndex = -1; option.dataset.value = item.id; option.setAttribute("aria-selected", String(item.id === select.value)); option.setAttribute("aria-label", `${item.technicalName}, ${variableTypeName(item)}`);
-      const text = element("span", "story-variable-text"); text.append(element("span", "story-variable-name", item.technicalName), element("small", "", variableTypeName(item)));
+      option.role = "option"; option.tabIndex = -1; option.dataset.value = item.id; option.setAttribute("aria-selected", String(item.id === select.value)); option.setAttribute("aria-label", `${item.technicalName}, ${typeName(item.variableType)}`);
+      const text = element("span", "story-variable-text"); text.append(element("span", "story-variable-name", item.technicalName), element("small", "", typeName(item.variableType)));
       option.append(variableBadge(item), text); list.append(option);
     }
     if (!variables.length) list.append(element("p", "story-dropdown-empty", "No variables yet."));
