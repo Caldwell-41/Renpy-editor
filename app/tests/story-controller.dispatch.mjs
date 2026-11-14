@@ -26,6 +26,8 @@ export const STORY_CASES=[
  'Beat draft conflicts resolve with Discard draft or Override source',
  'Reel edits and inserts through the shared drafts and commands, and view switches keep them',
  'Writing focus keeps drafts, focus and caret, and edits, inserts and resizes through the shared commands',
+ 'Branch beat drafts stay with their branch through ordinary external edits',
+ 'Missing and mismatched condition Variables show their reason in Tracks, Branch path and the builder',
 ];
 const NARROW=STORY_CASES.filter((_,i)=>[0,1,2,7,8].includes(i));
 const REOPEN_CASE='Undo Redo preserves exact bytes and process reopen retains maps with session history reset';

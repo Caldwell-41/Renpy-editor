@@ -3906,6 +3906,27 @@ pub(crate) fn build_mapping(
                 .or_default()
                 .push_back((beat.id.clone(), None));
         }
+        // An ID follows its bytes only while they name one line. If an edit adds or
+        // removes a copy, nothing says which copy is the beat, so no copy keeps an ID;
+        // otherwise a copy elsewhere, such as in another branch, would take it (#120).
+        let mut lines = HashMap::<(String, String), usize>::new();
+        for parsed in &parsed {
+            let key = (
+                parsed.payload.kind().to_owned(),
+                sha256(&bytes[parsed.start..parsed.end]),
+            );
+            *lines.entry(key).or_default() += 1;
+        }
+        for (key, queue) in &mut ids {
+            let forced = |id: &String| forced_ids.contains(id.as_str());
+            let claimed = queue.iter().filter(|(id, _)| forced(id)).count();
+            let carried = queue.len() - claimed;
+            if carried > 0
+                && lines.get(key).copied().unwrap_or(0).saturating_sub(claimed) != carried
+            {
+                queue.retain(|(id, _)| forced(id));
+            }
+        }
     }
     let mut mappings = Vec::new();
     let mut beats = Vec::new();
@@ -7861,5 +7882,87 @@ mod tests {
             drop(process);
             workspace = command(&workspace).unwrap();
         }
+    }
+
+    // A beat ID names one line. When an external edit adds or removes a copy of a line,
+    // bytes cannot say which copy is the beat, so no copy keeps its ID (#120).
+    #[test]
+    fn external_copies_of_a_line_never_carry_its_beat_into_another_branch() {
+        let original = "label scene_one:\n    if flag:\n        \"Kept\"\n        \"Nested\"\n    elif trust == 4:\n        \"Boundary\"\n    \"After\"\n    return\n";
+        let ids = |ws: &SceneWorkspace, text: &str| {
+            ws.scenes[0]
+                .beats
+                .iter()
+                .filter(|b| matches!(&b.payload, BeatPayload::Narration { text: t } if t == text))
+                .map(|b| (b.id.clone(), b.owner.as_ref().map(|o| o.branch_id.clone())))
+                .collect::<Vec<_>>()
+        };
+        let edit = |changed: String| {
+            let f = Fixture::new(b"label scene_one:\n    return\n");
+            f.migrate();
+            for (name, variable_type, default_value) in [
+                ("flag", VariableType::Bool, Value::Bool(true)),
+                ("trust", VariableType::Int, Value::String("5".into())),
+            ] {
+                f.service
+                    .create_variable(
+                        &f.project,
+                        &f.project_id,
+                        CreateVariableRequest {
+                            technical_name: name.into(),
+                            variable_type,
+                            default_value,
+                        },
+                    )
+                    .unwrap();
+            }
+            let path = f.root.join(&f.workspace().scenes[0].source_path);
+            fs::write(&path, original).unwrap();
+            let before = f.workspace();
+            fs::write(&path, changed).unwrap();
+            (before, f.workspace())
+        };
+        // The If headers of `ws`, a workspace of the original source.
+        let header = |ws: &SceneWorkspace, source: &str| {
+            ws.scenes[0]
+                .beats
+                .iter()
+                .filter(|b| b.conditional_branch.is_some())
+                .filter(|b| {
+                    original[b.byte_start as usize..b.byte_end as usize].trim_end() == source
+                })
+                .map(|b| b.id.clone())
+                .collect::<Vec<_>>()
+        };
+        // A line cut from If and pasted into Else if is still one line: its ID follows it.
+        let (before, after) = edit(original.replace("        \"Nested\"\n", "").replace(
+            "        \"Boundary\"\n",
+            "        \"Boundary\"\n        \"Nested\"\n",
+        ));
+        let (nested, if_branch) = ids(&before, "Nested")[0].clone();
+        let elif = ids(&before, "Boundary")[0].1.clone();
+        assert_eq!(ids(&after, "Nested"), vec![(nested.clone(), elif)]);
+        assert_ne!(if_branch, ids(&after, "Nested")[0].1);
+        // An earlier condition with an identical line: neither copy is the beat.
+        let (before, after) = edit(original.replace(
+            "    if flag:\n",
+            "    if trust == 9:\n        \"Nested\"\n    if flag:\n",
+        ));
+        let nested = ids(&before, "Nested")[0].0.clone();
+        let copies = ids(&after, "Nested");
+        assert_eq!(copies.len(), 2);
+        assert!(copies.iter().all(|(id, _)| id != &nested), "{copies:?}");
+        // A copy of the whole condition: neither If header nor either line keeps its ID.
+        let (before, after) = edit(original.replace(
+            "    if flag:\n",
+            "    if flag:\n        \"Nested\"\n    if flag:\n",
+        ));
+        let nested = ids(&before, "Nested")[0].0.clone();
+        let if_header = header(&before, "    if flag:");
+        assert_eq!(if_header.len(), 1);
+        assert!(ids(&after, "Nested").iter().all(|(id, _)| id != &nested));
+        assert!(after.scenes[0].beats.iter().all(|b| b.id != if_header[0]));
+        // An unrelated line keeps its ID through each edit.
+        assert_eq!(ids(&before, "After")[0].0, ids(&after, "After")[0].0);
     }
 }

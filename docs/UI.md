@@ -614,7 +614,10 @@ A draft whose beat, insertion place or scene left source has no beat to sit unde
 It shows above the shown scene's beats with "Conflict with source" and, in place of
 source text, why there is none, for example "This beat is no longer in source." A
 beat that became protected says to edit it in Source. Only Discard draft resolves
-these drafts. A scene whose source Story cannot map has no beats to compare with. That
+these drafts. A beat draft also keeps the branch it began in. If source moves its beat
+to another branch, the draft shows "This beat is no longer in source." and never saves
+into the other branch. An external edit that adds or removes a copy of the beat's line
+has the same result, because source no longer says which copy is the beat. A scene whose source Story cannot map has no beats to compare with. That
 happens when its file is missing or invalid, or when a Source draft of that file is
 unsaved and the file changed on disk. Its drafts are not conflicts: they show above its
 beats with their own actions, and Commit and Story Save refuse them until Story can read

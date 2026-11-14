@@ -2233,11 +2233,13 @@ export function renderStoryView(
     if (kept) { card.append(kept.panel); for (const editor of kept.editors()) editor.refresh?.(); return; }
     // A draft commits against current revisions while its beat's accepted payload is unchanged.
     // Otherwise it conflicts: only Discard draft or Override source resolves it.
-    const accepted = JSON.stringify(beat.payload);
-    // The beat in the shown model, and the revisions a write of it expects.
+    // It also keeps the branch it began in: a beat that source moved to another branch is
+    // no longer the beat the author drafted, and core refuses a write to another branch.
+    const accepted = JSON.stringify(beat.payload), owner = beatBody(beat);
+    // The beat in the shown model, while it is still in the draft's branch, and the revisions a write of it expects.
     const located = () => {
-      const current = model.scenes.find(item => item.id === scene.id), node = current?.beats.find(item => item.id === beat.id);
-      return { current, node, basis: current && node ? { scene: current, expectedBody: beatBody(node), captured: expectedRevisions(model) } : undefined };
+      const current = model.scenes.find(item => item.id === scene.id), node = current?.beats.find(item => item.id === beat.id && sameBody(beatBody(item), owner));
+      return { current, node, basis: current && node ? { scene: current, expectedBody: owner, captured: expectedRevisions(model) } : undefined };
     };
     const base = (): { scene: SceneDocument; expectedBody: BodyRef; captured: ExpectedRevisions } => {
       const { current, node, basis } = located();

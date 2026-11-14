@@ -15,6 +15,8 @@ const names=[
  'Beat draft conflicts resolve with Discard draft or Override source',
  'Reel edits and inserts through the shared drafts and commands, and view switches keep them',
  'Writing focus keeps drafts, focus and caret, and edits, inserts and resizes through the shared commands',
+ 'Branch beat drafts stay with their branch through ordinary external edits',
+ 'Missing and mismatched condition Variables show their reason in Tracks, Branch path and the builder',
 ];
 const scene=c=>c.workspace().scenes.find(s=>s.id===c.workspace().entrySceneId);
 // The scene Story shows, read from the selected row in the actual scene tree.
@@ -784,5 +786,83 @@ export const storyCases={
   await c.history('redo');await c.settle();c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(committed));
   c.assert.equal(workspace().dataset.writingFocus,'true','Undo and Redo keep Writing focus');c.assert.equal(width('lane-1'),'40px','and the session widths');
   toggle().click();c.assert.equal(workspace().dataset.writingFocus,'false');
+ },
+ [names[14]]:async c=>{
+  await c.call('scene.list');
+  const entry=scene(c),path=entry.sourcePath,header=()=>c.document.querySelector('.app-header'),status=()=>c.document.querySelector('#app-status').textContent;
+  const ifHeader=shownBeats(c).find(b=>b.id===shownBeats(c).find(x=>x.payload.text==='Nested in focus')?.owner?.branchId);c.assert(ifHeader);
+  const inIf=text=>scene(c).beats.find(b=>b.payload.text===text&&b.owner?.branchId===ifHeader.id);
+  const refresh=async()=>{const owner=c.session();await c.click('Branches');await c.wait(()=>c.session()===owner&&c.document.querySelector('.branches-workspace'));await c.settle();await goStory(c,entry.id);};
+  const type=async(beat,text)=>{c.assert(beat);await select(c,beat.id);c.enter(card(c,beat.id).querySelector('textarea'),text);await c.settle();};
+  const panel=id=>c.document.querySelector(`.scene-workspace [data-beat-draft-key="${id}"]`);
+  const buttons=scope=>[...scope.querySelectorAll('button')].filter(x=>!x.hidden&&!x.closest('[hidden]')).map(x=>x.textContent);
+  // One ordinary external write while the draft waits; Story reads it on return from Branches.
+  const external=async(edit,id)=>{await c.raw({driver:'externalReplace',path,...edit(c.sourceText(await c.snapshot(),path))});const changed=await c.snapshot();await refresh();c.assert.equal(panel(id)?.querySelector('textarea')?.value!==undefined,true,'The draft is retained');return changed;};
+  // Story Save refuses a draft whose beat left its branch, writes nothing and shows the conflict with only Discard draft.
+  const refusedThenDiscarded=async(id,changed)=>{
+   const at=c.requests().length,was=status();await c.click('Save',header());await c.wait(()=>status()!==was&&/^Nothing saved/.test(status()));await c.settle();
+   c.assert(!c.requests().slice(at).some(r=>r.request.operation==='scene.saveDrafts'),'The conflict stops Save before any request');
+   c.assert.deepEqual(c.hashes(c.rpy(await c.snapshot())),c.hashes(c.rpy(changed)),'A refused Save writes nothing');
+   c.assert.equal(status(),`Nothing saved. 1 of 1 draft needs changes:${entry.displayName} 1`);
+   c.assert.equal(panel(id).querySelector('.story-conflict > p')?.textContent,'This beat is no longer in source.');
+   c.assert.deepEqual(buttons(panel(id)).filter(x=>['Commit Beat','Override source','Discard draft'].includes(x)),['Discard draft']);
+   await c.click('Discard draft',panel(id));await c.settle();c.assert.equal(!!panel(id)?.querySelector('.story-conflict'),false);c.assert.equal(!!c.document.querySelector('.scene-workspace [data-beat-draft="true"]'),false,'Discard draft leaves no draft');
+  };
+  const move=(line,after)=>text=>{const from=text.indexOf(line),to=text.indexOf(after)+after.length;c.assert(from>=0&&to>from);const middle=text.slice(from+line.length,to);return {remove:line+middle,insert:middle+line};};
+  // (a) The external edit cuts the nested beat's line from If and pastes it into the Else if.
+  const a=inIf('Nested in focus');await type(a,'Draft from If');
+  await refusedThenDiscarded(a.id,await external(move('        "Nested in focus"\n','        "Boundary preserved"\n'),a.id));
+  // (b) It adds an earlier condition holding an identical line.
+  const b=inIf('First in focus');await type(b,'Draft from If');
+  await refusedThenDiscarded(b.id,await external(()=>({remove:'    if flag:\n',insert:'    if trust == 9:\n        "First in focus"\n    if flag:\n'}),b.id));
+  // (c) It adds an identical copy of the condition's If and the beat's line above them.
+  const copied=inIf('End of If from Reel');await type(copied,'Draft from If');
+  await refusedThenDiscarded(copied.id,await external(()=>({remove:'    if trust == 9:\n',insert:'    if flag:\n        "End of If from Reel"\n    if trust == 9:\n'}),copied.id));
+  // An unrelated external edit leaves a branch draft with its beat: Commit writes only that line.
+  const branch=scene(c).beats.find(x=>x.payload.text==='Inserted branch café 雪');c.assert(branch?.owner);
+  await type(branch,'Kept in its branch');
+  const unrelated=await external(()=>({remove:'        "Boundary preserved"\n',insert:'        "Boundary edited outside"\n'}),branch.id);
+  c.assert.equal(!!panel(branch.id).querySelector('.story-conflict'),false,'No conflict');c.assert.equal(scene(c).beats.find(x=>x.id===branch.id)?.owner?.branchId,branch.owner.branchId);
+  const before=c.workspace();await c.click('Commit Beat',card(c,branch.id));await c.wait(accepted(c,branch.id));await c.settle();
+  c.assert.deepEqual(envelope(c,before,'updateBodyBeat').expectedBody,{type:'branch',...branch.owner});
+  const committed=await c.snapshot();
+  c.assert.equal(c.sourceText(committed,path),replaceOnce(c,c.sourceText(unrelated,path),'"Inserted branch café 雪"','"Kept in its branch"'));
+  unchangedOtherSources(c,unrelated,committed,path);
+ },
+ [names[15]]:async c=>{
+  await c.call('scene.list');
+  const entry=scene(c),path=entry.sourcePath,status=()=>c.document.querySelector('#app-status').textContent;
+  // Ordinary external edits: a whole number compared with a yes/no, and a Variable the project lacks.
+  await c.raw({driver:'externalReplace',path,remove:'    if trust == 9:\n',insert:'    if trust == True:\n'});
+  await c.raw({driver:'externalReplace',path,remove:'    elif trust == 4:\n',insert:'    elif missing_flag == 4:\n'});
+  const changed=await c.snapshot(),owner=c.session();
+  await c.click('Branches');await c.wait(()=>c.session()===owner&&c.document.querySelector('.branches-workspace'));await c.settle();await goStory(c,entry.id);
+  const branchOf=source=>shownBeats(c).find(b=>b.conditionalBranch?.condition?.source===source);
+  // What Story shows today for each test: Branch path, Tracks, the condition editor and its rule builder.
+  const shown=async(source,word,reason)=>{
+   const branch=branchOf(source);c.assert(branch);c.assert.equal(branch.conditionalBranch.condition.status,'unknown');
+   const caption=`Unknown condition: ${source} (${reason})`,ifId=nodeOf(c,branch.conditionalBranch.groupId).id;
+   const section=await branchBody(c,branch.id),workspace=c.document.querySelector('.scene-workspace');
+   c.assert.equal(workspace.querySelector(`.story-branch-segment[data-branch-id="${branch.id}"]`).title,`Close ${word} ${caption}`);
+   c.assert.equal(workspace.querySelector(`.story-track-entry[data-branch-id="${branch.id}"] [title]`).title,`${word} ${caption}`);
+   c.assert.equal(section.querySelector('.story-rule-code').textContent,`${word==='If'?'if':'elif'} ${source}:`);
+   c.assert.equal(section.querySelector('.story-field-hint').textContent,'This test uses Python the builder cannot show. It stays as written.');
+   c.assert.equal([...section.querySelectorAll('button')].find(b=>b.textContent==='Edit in Source')?.disabled,false);
+   c.assert.equal(section.querySelector(`[data-beat-opener="branch:${branch.id}"]`).disabled,true,'+ Beat is off while the test is unknown');
+   return {test:workspace.querySelector(`.story-branch-group[data-branch-owner="${ifId}"] .story-branch-test`).title,summary:card(c,ifId).querySelector('.story-condition-summary').textContent};
+  };
+  const mismatch=await shown('trust == True','If','Variable type mismatch');
+  c.assert.deepEqual(mismatch,{test:'Unknown condition: trust == True (Variable type mismatch)',summary:'Condition · Unknown condition: trust == True (Variable type mismatch) · 1 branches / 1 Beats'});
+  // An Else if's reason is not in its condition's Branch path caption or summary, which show the If test.
+  const missing=await shown('missing_flag == 4','Else if','missing Variable');
+  c.assert.equal(missing.test,'flag');c.assert.match(missing.summary,/^Condition · flag · 3 branches \/ \d+ Beats$/);
+  // An unrelated draft still saves.
+  const root=scene(c).beats.find(b=>b.payload.text==='Override A'&&!b.owner);c.assert(root);
+  await select(c,root.id);c.enter(card(c,root.id).querySelector('textarea'),'Saved beside unknown tests');await c.settle();
+  const at=c.requests().length;await c.click('Save',c.document.querySelector('.app-header'));
+  await c.wait(()=>c.requests().slice(at).some(r=>r.request.operation==='scene.saveDrafts'&&r.responseOk));await c.settle();c.assert.equal(status(),'Saved');
+  const saved=await c.snapshot();
+  c.assert.equal(c.sourceText(saved,path),replaceOnce(c,c.sourceText(changed,path),'"Override A"','"Saved beside unknown tests"'));
+  unchangedOtherSources(c,changed,saved,path);
  },
 };
