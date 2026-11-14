@@ -17,6 +17,7 @@ const names=[
  'Writing focus keeps drafts, focus and caret, and edits, inserts and resizes through the shared commands',
  'Branch beat drafts stay with their branch through ordinary external edits',
  'Missing and mismatched condition Variables show their reason in Tracks, Branch path and the builder',
+ 'Undo of a nested beat keeps Redo when the host refuses a history read as busy',
 ];
 const scene=c=>c.workspace().scenes.find(s=>s.id===c.workspace().entrySceneId);
 // The scene Story shows, read from the selected row in the actual scene tree.
@@ -930,6 +931,27 @@ export const storyCases={
   await c.history('undo');await c.settle();
   c.assert.deepEqual(shownBeats(c).map(b=>b.id),ids);c.assert(branchOf('missing_flag == 4'));
   c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(saved));
+ },
+ // The source-foundation runtime probe reads source while the app reads history, so the
+ // native host can refuse the app's history.state as busy. Undo must still leave Redo.
+ [names[16]]:async c=>{
+  const s=scene(c),child=s.beats.find(b=>b.owner&&b.payload.type==='narration'&&!b.protected);c.assert(child,'A nested narration child');
+  const before=await c.snapshot(),original=c.sourceText(before,s.sourcePath);
+  const editor=await pick(c,child.id),form=editor.querySelector('.expanded-beat');
+  c.enter(editor.querySelector('textarea'),'Redo survives a busy read');await c.click('Commit Beat',editor);
+  await c.wait(()=>!form.isConnected&&c.lastMutation()?.response.ok);await c.settle();
+  const committed=await c.snapshot();
+  c.assert.equal(c.sourceText(committed,s.sourcePath),replaceOnce(c,original,`"${child.payload.text}"`,'"Redo survives a busy read"'));
+  // Every history read until Undo settles is refused before dispatch, as a concurrent read would be.
+  c.busy('history.state',2);await c.history('undo');await c.settle();
+  c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(before));
+  // No input follows: Story shows the undone beat, and Redo stays available.
+  await c.wait(()=>card(c,child.id)?.querySelector('textarea')?.value===child.payload.text);await c.settle();
+  c.assert.equal((await c.call('history.state')).redo?.name,'narration edit in Scene 1');
+  const redo=c.document.querySelector('.app-header [data-history="redo"]');c.assert.notEqual(redo.getAttribute('aria-disabled'),'true','Header Redo stays available after Undo');
+  c.assert.equal(card(c,child.id).querySelector('.expanded-beat').dataset.unsubmitted,undefined,'Showing the undone beat starts no draft');
+  await c.history('redo');await c.settle();
+  c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(committed));c.assert.equal(c.document.querySelector('.scene-workspace [data-unsubmitted="true"]'),null);
  },
  [RELEASE_JOURNEY]:async c=>{
   const view=async(c,name)=>{await c.click(name,c.document.querySelector('.scene-workspace .story-view-switch'));

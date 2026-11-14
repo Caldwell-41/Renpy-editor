@@ -28,6 +28,7 @@ export const STORY_CASES=[
  'Writing focus keeps drafts, focus and caret, and edits, inserts and resizes through the shared commands',
  'Branch beat drafts stay with their branch through ordinary external edits',
  'Missing and mismatched condition Variables show their reason in Tracks, Branch path and the builder',
+ 'Undo of a nested beat keeps Redo when the host refuses a history read as busy',
 ];
 const NARROW=STORY_CASES.filter((_,i)=>[0,1,2,7,8].includes(i));
 const REOPEN_CASE='Undo Redo preserves exact bytes and process reopen retains maps with session history reset';
@@ -55,6 +56,8 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
  let domSequence=0,lastEvent,caseActive=false,caseEventStart=0;
  const panelEvents=new Map(),sourceDocuments=new Map();let sourceInputEvent,sourceNavigationEvent;
  let stopFailure;let inFlight=0;let responseBarrier;
+ // Reads the native host refuses before dispatch, as it does while another request holds the service.
+ const refusals=new Map();
  const transcript=[];
  const w=new Window({url:'http://tauri.localhost'});
  Object.assign(globalThis,{window:w,document:w.document,HTMLElement:w.HTMLElement,HTMLInputElement:w.HTMLInputElement,
@@ -121,6 +124,11 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   if(['source.updateDraft','source.save','source.applyBoth','source.saveAll','source.discard','source.discardAll'].includes(operation)){
    assert(caseActive&&eligible&&event.sequence>caseEventStart&&(['source','header'].includes(event.panel)||(operation==='source.updateDraft'&&event.panel==='source-navigation')),
     'Source writes must originate in the current actual Source UI');
+  }
+  const refused=refusals.get(operation);
+  if(refused){
+   refusals.set(operation,refused-1);const response={protocolVersion:1,requestId:request.requestId,ok:false,error:{code:'RUNTIME_BUSY',message:'Another request is in progress.'}};
+   transcript.push({request,responseOk:false,errorCode:'RUNTIME_BUSY',refusedBeforeDispatch:true,domEvent:null});return response;
   }
   inFlight++;let response;
   try{
@@ -190,6 +198,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   try{actionPromise=action();await wait(()=>barrier.observed);await observe();}
   finally{release();responseBarrier=undefined;await actionPromise;}
  };
+ const busy=(operation,times)=>{assert(caseActive&&reads.has(operation)&&times>0,'Only typed reads may be refused as busy');refusals.set(operation,times);};
  const raw=async request=>{
   assert(['snapshot','externalAppend','externalRemove','externalReplace','interruptedSave'].includes(request?.driver),'Only owned fixture controls allowed');return child.request(request);
  };
@@ -232,7 +241,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   assert.deepEqual(await snapshot(),beforeSelection,'Selecting a scene must not change project files');
   const selected=await call('scene.list');
   assert.equal(selected.projectRevision,opened.projectRevision);assert.deepEqual(await call('history.state'),historyBeforeSelection);
-  const context={assert,wait,click,history,enter,key,labelled,call,raw,snapshot,rpy,hashes,pendingWrite,
+  const context={assert,wait,click,history,enter,key,labelled,call,raw,snapshot,rpy,hashes,pendingWrite,busy,
    requests:()=>transcript,settle:async()=>{await new Promise(r=>setTimeout(r,0));await wait(()=>inFlight===0);await new Promise(r=>setTimeout(r,0));},
    workspace:()=>latestWorkspace,session:()=>session,lastMutation:()=>lastMutation,document,
    sourceText:(snapshot,path)=>Buffer.from(snapshot[path]).toString('utf8')};
@@ -240,7 +249,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
    const before=await snapshot();const from=transcript.length;const beforeEvent=domSequence;
    lastMutation=undefined;lastEvent=undefined;sourceInputEvent=undefined;sourceNavigationEvent=undefined;panelEvents.clear();caseEventStart=domSequence;caseActive=true;
    // Case code owns exact expected byte/model/history assertions and actual selectors.
-   try{await cases.storyCases[name](context);await context.settle();}finally{caseActive=false;}
+   try{await cases.storyCases[name](context);await context.settle();assert(![...refusals.values()].some(Boolean),'Every armed busy refusal must reach the app');}finally{caseActive=false;refusals.clear();}
    const after=await snapshot();const requests=transcript.slice(from);
    assert(domSequence>beforeEvent,'A DOM scenario must operate actual application controls');
    evidence.cases.push({name,passed:true,beforeSHA256:hashes(rpy(before)),afterSHA256:hashes(rpy(after)),
