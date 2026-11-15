@@ -4,7 +4,7 @@
 import { technicalName, technicalNameInput } from "./authoring-input.ts";
 import { decimalValue, int64, type DecimalValue } from "./numeric-input.ts";
 import type { SceneWorkspace } from "./scene-ui.ts";
-import { backingSelect, element, field, FieldError, openFormDialog, segmented } from "./story-editor-controls.ts";
+import { backingSelect, button, choose, dropdownKeys, element, field, FieldError, openFormDialog, segmented } from "./story-editor-controls.ts";
 
 export type Variable = SceneWorkspace["authoring"]["variables"][number];
 export interface NewVariableRequest {
@@ -17,6 +17,51 @@ export interface NewVariableOptions {
   readonly opener: HTMLElement;
   /** Creates the variable. Resolves with it, or throws with a reason the dialog shows. */
   readonly create: (request: NewVariableRequest) => Promise<Variable>;
+  /** A name and type to start from, such as a test's missing variable. */
+  readonly initial?: VariableDraft;
+}
+/** A variable to create: its name and type. */
+export interface VariableDraft { readonly name: string; readonly variableType: Variable["variableType"] }
+
+/** "whole number": a type as a list names it. */
+export const typeName = (type: Variable["variableType"]): string => ({ bool: "yes/no", int: "whole number", decimal: "decimal", string: "text" })[type];
+/** "a whole number", "text": a type as a sentence names it. */
+export const typePhrase = (type: Variable["variableType"]): string => type === "int" || type === "decimal" ? `a ${typeName(type)}` : typeName(type);
+export function variableBadge(variable?: Variable): HTMLElement {
+  const node = element("span", "story-type", variable ? ({ bool: "Y/N", int: "#", decimal: "#.#", string: "Aa" })[variable.variableType] : ""); node.setAttribute("aria-hidden", "true"); return node;
+}
+
+/**
+ * The variable list (`story-revamp` / `combined`): a dropdown of the project's variables by
+ * name and type that writes `select`. With `create`, it ends with "+ New variable…", and an
+ * empty list says "No variables yet." (`story-release-fixes` / `a-v2`). It redraws when
+ * `select` changes; `draw` redraws it after `select` is set without an event.
+ */
+export function variableMenu(select: HTMLSelectElement, options: { readonly label: string; readonly variables: () => readonly Variable[]; readonly create?: (summary: HTMLElement) => void }): { readonly menu: HTMLDetailsElement; readonly summary: HTMLElement; readonly draw: () => void } {
+  const menu = element("details", "story-dropdown story-variable-picker"), summary = element("summary", "story-person"); summary.dataset.control = "";
+  const list = element("div", "story-dropdown-list"); list.role = "listbox"; list.setAttribute("aria-label", options.label);
+  const draw = (): void => {
+    const variables = options.variables(), chosen = variables.find(item => item.id === select.value);
+    // A variable that left the project keeps its select's own caption, such as "Missing Variable".
+    const name = chosen?.technicalName ?? (select.value ? select.selectedOptions[0]?.textContent ?? undefined : undefined);
+    summary.replaceChildren(...name ? [variableBadge(chosen)] : [], element("span", name ? "story-variable-name" : "story-variable-name story-placeholder", name ?? "Choose a variable"), element("span", "story-caret", "▾"));
+    summary.setAttribute("aria-label", `${options.label}: ${name ?? "none chosen"}`);
+    list.replaceChildren();
+    for (const item of variables) {
+      const option = button("", "story-dropdown-option", () => { menu.open = false; choose(select, item.id); summary.focus(); });
+      option.role = "option"; option.tabIndex = -1; option.dataset.value = item.id; option.setAttribute("aria-selected", String(item.id === select.value)); option.setAttribute("aria-label", `${item.technicalName}, ${typeName(item.variableType)}`);
+      const text = element("span", "story-variable-text"); text.append(element("span", "story-variable-name", item.technicalName), element("small", "", typeName(item.variableType)));
+      option.append(variableBadge(item), text); list.append(option);
+    }
+    if (!variables.length) list.append(element("p", "story-dropdown-empty", "No variables yet."));
+    const create = options.create;
+    if (create) {
+      const option = button("+ New variable…", "story-dropdown-option story-dropdown-create", () => { menu.open = false; create(summary); });
+      option.role = "option"; option.tabIndex = -1; option.setAttribute("aria-selected", "false"); list.append(option);
+    }
+  };
+  dropdownKeys(menu, summary, list); select.addEventListener("change", draw); draw(); menu.append(summary, list);
+  return { menu, summary, draw };
 }
 
 const types = [{ value: "bool", label: "Yes/no" }, { value: "int", label: "Whole number" }, { value: "decimal", label: "Decimal" }, { value: "string", label: "Text" }] as const;
@@ -24,7 +69,8 @@ const types = [{ value: "bool", label: "Yes/no" }, { value: "int", label: "Whole
 /** Opens New variable. Resolves with the created variable, or undefined when cancelled. */
 export function openNewVariable(options: NewVariableOptions): Promise<Variable | undefined> {
   const name = element("input"); name.type = "text"; name.setAttribute("aria-label", "Variable name"); name.placeholder = "e.g. found_letter"; technicalNameInput(name);
-  const type = backingSelect("Variable type", types, "bool");
+  if (options.initial) name.value = options.initial.name;
+  const type = backingSelect("Variable type", types, options.initial?.variableType ?? "bool");
   const start = element("div", "story-variable-start");
   let startControl: HTMLInputElement | HTMLSelectElement;
   const drawStart = (): void => {

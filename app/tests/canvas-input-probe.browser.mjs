@@ -32,7 +32,7 @@ try {
     if(current?.stage==='resize-arrow-right' && request.operation==='source.open' && request.requestId.startsWith('canvas-input-')){
       if(busySourceReads===0){
         busySourceReads++;
-        return {ok:false,error:{code:'RUNTIME_BUSY',message:'Read refused before dispatch'}};
+        return {ok:false,error:{code:'REQUEST_OVERLAP',message:'Read refused before dispatch'}};
       }
       retriedSourceRead=true;
     }

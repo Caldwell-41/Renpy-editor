@@ -3,13 +3,15 @@
 use super::*;
 use crate::metadata::BeatOwner;
 
-/// Whether the story can pass the end of a node or a body.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+/// Whether the story can pass the end of a node or a body, ordered from never to
+/// certainly. An edit that moves a scene ending later in this order opens a new
+/// fallthrough.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(super) enum Ending {
     Ends,
-    Continues,
-    /// Custom Code may leave the body. Guards treat this as "may continue".
+    /// Custom Code may leave the body. Continuation lines treat this as "may continue".
     Unknown,
+    Continues,
 }
 
 impl Ending {
@@ -196,9 +198,6 @@ impl<'s, 'a> Bodies<'s, 'a> {
         })
     }
 
-    pub(super) fn scene_may_continue(&self) -> bool {
-        self.ending(None, 0).0.may_continue()
-    }
     pub(super) fn group_may_continue(&self, group_id: &str) -> bool {
         self.group(group_id, 0).may_continue()
     }
@@ -545,8 +544,8 @@ pub(super) fn qualify_body<'a>(
 ) -> Result<Body<'a>, SceneError> {
     Bodies::new(source, beats)?.qualify(body)
 }
-pub(super) fn root_may_continue(source: &[u8], beats: &[SceneBeat]) -> Result<bool, SceneError> {
-    Ok(Bodies::new(source, beats)?.scene_may_continue())
+pub(super) fn root_ending(source: &[u8], beats: &[SceneBeat]) -> Result<Ending, SceneError> {
+    Ok(Bodies::new(source, beats)?.ending(None, 0).0)
 }
 
 /// One body named by an edit, with each node's ending.
@@ -640,8 +639,12 @@ impl<'a> Body<'a> {
         terminating: bool,
     ) -> Result<(usize, usize), SceneError> {
         let opaque = |b: &SceneBeat| b.protected && b.conditional_branch.is_none();
+        // A place before protected Custom Code is its first byte, outside the region.
+        // An empty body's `pass` is replaced at its end place, never written before.
         let start = match kept.get(index) {
-            Some((target, _)) if opaque(target) => return Err(SceneError::OpaqueBoundary),
+            Some((target, _)) if target.structural_placeholder => {
+                return Err(SceneError::OpaqueBoundary)
+            }
             Some((target, _)) => target.byte_start as usize,
             None => {
                 if self.owner.is_none()

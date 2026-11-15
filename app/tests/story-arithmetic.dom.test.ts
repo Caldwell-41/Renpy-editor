@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
 import type { SceneCommand, SceneWorkspace } from "../src/scene-ui.js";
-import { renderStoryView, selectBeat, storyEditor, storyFixture, trackColumn } from "./story-controls-fixture.js";
+import { chooseIn, editorProject, pickKind, press, renderStoryView, sceneBodies, selectBeat, storyBeat, storyEditor, storyFixture, texts, trackColumn } from "./story-controls-fixture.js";
+import { mountStory } from "./story-dom-mount.js";
+const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
 
 test("imported arithmetic opens as an equation and commits the retained formula through Story", async () => {
   const browser = new Window({url:"http://tauri.localhost"});
@@ -90,4 +92,115 @@ test("Story format errors wait for blur, stay associated, and clear while correc
   const id=field.getAttribute('aria-describedby');assert.ok(id&&document.getElementById(id)?.textContent?.includes('Check the formula'));
   field.value='2';field.dispatchEvent(new Event('input',{bubbles:true}));await settle();assert.notEqual(field.getAttribute('aria-invalid'),'true');
  }finally{await browser.happyDOM.close();}
+});
+
+test("a Set variable check waits for Story's own write and never tests the revisions that write replaces",async()=>{
+  const browser = new Window({url:"http://tauri.localhost"});
+  Object.assign(globalThis, {window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLSelectElement:browser.HTMLSelectElement,KeyboardEvent:browser.KeyboardEvent,Event:browser.Event});
+  document.body.innerHTML='<main></main><aside></aside>';
+  const base=storyFixture(),host=document.querySelector<HTMLElement>("main")!;
+  const scene=(revision:string,beats:SceneWorkspace["scenes"][number]["beats"]):SceneWorkspace=>({...base,projectRevision:`project-${revision}`,authoringRevision:"authoring",scenes:[{...base.scenes[0]!,sourceRevision:`source-${revision}`,beats,bodies:sceneBodies(beats)},base.scenes[1]!]});
+  const end={id:"end",byteStart:30,byteEnd:41,protected:false,payload:{type:"return" as const}};
+  const arithmetic=(operand:string,id="arithmetic",byteStart=0)=>({id,byteStart,byteEnd:byteStart+30,protected:false,payload:{type:"setVariable" as const,variableId:"trust",value:{operation:"add" as const,operand}}});
+  const checks:{project:string;source:string}[]=[];let finish!:(next:SceneWorkspace)=>void;
+  const view=renderStoryView(host,document.querySelector("aside")!,scene("1",[arithmetic("trust + 2"),end]),{
+    validateAssignment:async(command,expected)=>{checks.push({project:expected.projectRevision,source:String((command as {expectedSourceRevision?:unknown}).expectedSourceRevision)});throw Error("offline");},
+    resolution:{width:1280,height:720},present:async()=>{throw Error("no media");},status:()=>{},
+    apply:async()=>new Promise<SceneWorkspace>(resolve=>{finish=resolve;}),
+  },"arithmetic");
+  const wait=()=>new Promise(r=>setTimeout(r,200));
+  const formula=()=>host.querySelector<HTMLInputElement>('.story-editor [aria-label="Formula"]')!;
+  const press=(scope:ParentNode,label:string)=>[...scope.querySelectorAll<HTMLButtonElement>("button")].find(item=>item.textContent===label)!.click();
+  try{
+    // Commit Beat: the write is in flight while the formula's check comes due.
+    formula().value="trust + 3";formula().dispatchEvent(new Event("input",{bubbles:true}));await wait();
+    let sent=checks.length;press(storyEditor(host),"Commit Beat");await wait();
+    assert.deepEqual(checks.slice(sent),[],"No check runs against the revisions a pending Commit replaces");
+    finish(scene("2",[arithmetic("trust + 3"),end]));await wait();
+    assert.ok(checks.slice(sent).every(check=>check.project==="project-2"&&check.source==="source-2"),JSON.stringify(checks.slice(sent)));
+    // Add Beat: a new Set variable beat, the same way.
+    press(host,"+ Add beat");const variable=pickKind(host,"Set variable").querySelector<HTMLSelectElement>('[aria-label="Variable"]')!;
+    variable.value="trust";variable.dispatchEvent(new Event("change",{bubbles:true}));
+    formula().value="trust + 1";formula().dispatchEvent(new Event("input",{bubbles:true}));await wait();
+    sent=checks.length;press(host.querySelector(".new-beat")!,"Add Beat");await wait();
+    assert.deepEqual(checks.slice(sent),[],"No check runs against the revisions a pending Add Beat replaces");
+    finish(scene("3",[arithmetic("trust + 3"),arithmetic("trust + 1","added",30),{...end,byteStart:60,byteEnd:71}]));await wait();
+    assert.ok(checks.slice(sent).every(check=>check.project==="project-3"&&check.source==="source-3"),JSON.stringify(checks.slice(sent)));
+  }finally{view.dispose();await browser.happyDOM.close();}
+});
+
+test("a Set variable draft whose variable left the project shows Missing Variable, with no check or conflict",async()=>{
+  const browser = new Window({url:"http://tauri.localhost"});
+  Object.assign(globalThis, {window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLSelectElement:browser.HTMLSelectElement,KeyboardEvent:browser.KeyboardEvent,Event:browser.Event});
+  document.body.innerHTML='<main></main><aside></aside>';
+  const base=storyFixture(),host=document.querySelector<HTMLElement>("main")!;
+  const beats=[{id:"arithmetic",byteStart:0,byteEnd:30,protected:false,payload:{type:"setVariable" as const,variableId:"trust",value:{operation:"add" as const,operand:"trust + 2"}}},{id:"end",byteStart:30,byteEnd:41,protected:false,payload:{type:"return" as const}}];
+  const model:SceneWorkspace={...base,authoringRevision:"authoring",scenes:[{...base.scenes[0]!,beats,bodies:sceneBodies(beats)},base.scenes[1]!]};
+  // An Undo of "+ New variable…" removes the variable; the scene's source is unchanged.
+  const removed:SceneWorkspace={...model,projectRevision:"project-2",authoringRevision:"authoring-2",authoring:{...model.authoring,variables:model.authoring.variables.filter(item=>item.id!=="trust")}};
+  let checks=0;const statuses:string[]=[],applied:unknown[]=[];
+  const actions={validateAssignment:async()=>{checks++;throw Error("offline");},resolution:{width:1280,height:720},present:async()=>{throw Error("no media");},status:(value:string)=>{statuses.push(value);},apply:async(command:SceneCommand)=>{applied.push(command);throw Error("refused");}};
+  const view=renderStoryView(host,document.querySelector("aside")!,model,actions,"arithmetic");
+  const editor=()=>storyEditor(host),summary=()=>editor().querySelector<HTMLElement>(".story-variable-picker > summary")!;
+  try{
+    const formula=editor().querySelector<HTMLInputElement>('[aria-label="Formula"]')!;
+    formula.value="trust + 3";formula.dispatchEvent(new Event("input",{bubbles:true}));await new Promise(r=>setTimeout(r,200));
+    const sent=checks;view.update(removed,actions,"arithmetic");await new Promise(r=>setTimeout(r,200));
+    assert.equal(summary().getAttribute("aria-label"),"Variable: Missing Variable");
+    summary().click();assert.ok(!texts(editor().querySelector(".story-variable-picker [role=listbox]")!,".story-variable-name").includes("trust"),"The list offers only project variables");summary().click();
+    assert.equal(editor().querySelector('[aria-label="Formula"]'),null);assert.equal(editor().querySelector<HTMLInputElement>('input[aria-label="Value"]')!.value,"trust + 3");
+    assert.equal(checks,sent,"A missing variable sends no check");assert.equal(editor().querySelector(".story-conflict"),null);
+    assert.equal(trackColumn(host,"arithmetic")!.dataset.beatDraft,"true");
+    press(editor(),"Commit Beat");await tick();
+    assert.deepEqual(applied,[]);assert.match(statuses.at(-1)!,/Select a declared Variable/);
+  }finally{view.dispose();await browser.happyDOM.close();}
+});
+
+test("Escape in a Set variable editor asks for Cancel only while it has a draft, and the hint ends with its editor",async()=>{
+  const browser = new Window({url:"http://tauri.localhost"});
+  Object.assign(globalThis, {window:browser,document:browser.document,HTMLElement:browser.HTMLElement,HTMLInputElement:browser.HTMLInputElement,HTMLTextAreaElement:browser.HTMLTextAreaElement,HTMLSelectElement:browser.HTMLSelectElement,KeyboardEvent:browser.KeyboardEvent,Event:browser.Event});
+  document.body.innerHTML='<main></main><aside></aside>';
+  const base=storyFixture(),host=document.querySelector<HTMLElement>("main")!;
+  const beats=[{id:"arithmetic",byteStart:0,byteEnd:30,protected:false,payload:{type:"setVariable" as const,variableId:"trust",value:{operation:"add" as const,operand:"trust + 2"}}},{id:"end",byteStart:30,byteEnd:41,protected:false,payload:{type:"return" as const}}];
+  const model:SceneWorkspace={...base,authoringRevision:"authoring",scenes:[{...base.scenes[0]!,beats,bodies:sceneBodies(beats)},base.scenes[1]!]};
+  const statuses:string[]=[];let refreshed=0;
+  const actions={validateAssignment:async()=>{throw Error("offline");},resolution:{width:1280,height:720},present:async()=>{throw Error("no media");},status:(value:string)=>{statuses.push(value);},draftsChanged:()=>{refreshed++;},apply:async()=>{throw Error("refused");}};
+  const view=renderStoryView(host,document.querySelector("aside")!,model,actions,"arithmetic");
+  const escape=():void=>{storyEditor(host).querySelector<HTMLElement>(".story-variable-picker > summary")!.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));};
+  const hint="Use Cancel to discard this draft, or keep editing.";
+  try{
+    escape();
+    assert.ok(!statuses.includes(hint),"Escape with no draft names no draft");
+    const formula=storyEditor(host).querySelector<HTMLInputElement>('[aria-label="Formula"]')!;
+    formula.value="trust + 3";formula.dispatchEvent(new Event("input",{bubbles:true}));await tick();
+    escape();assert.equal(statuses.at(-1),hint);
+    const before=refreshed;selectBeat(host,"end");await tick();
+    assert.ok(refreshed>before,"Leaving the editor restores the usual status");
+  }finally{view.dispose();await browser.happyDOM.close();}
+});
+
+test("Set variable's list ends with + New variable…, says when there are none, and selects the new variable", async () => {
+  const empty = editorProject([storyBeat("words", { type: "narration", text: "The timetable has not changed in thirty years." })]);
+  const model: SceneWorkspace = { ...empty, authoring: { ...empty.authoring, variables: [] } };
+  const requests: unknown[] = [];
+  const s = mountStory(model, { createVariable: async request => {
+    requests.push(request);
+    return { ...model, projectRevision: "project-2", authoring: { ...model.authoring, variables: [{ id: "count", technicalName: request.technicalName, variableType: request.variableType, defaultValue: "0" }] } };
+  } });
+  selectBeat(s.host, "words"); press(s.host, "+ Add beat"); const panel = pickKind(s.host, "Set variable");
+  const summary = (): HTMLElement => panel.querySelector<HTMLElement>(".story-variable-picker > summary")!;
+  assert.equal(summary().textContent, "Choose a variable▾");
+  summary().click();
+  assert.deepEqual(texts(panel.querySelector(".story-variable-picker [role=listbox]")!, ":scope > *"), ["No variables yet.", "+ New variable…"]);
+  const value = panel.querySelector<HTMLInputElement>('input[aria-label="Value"]')!;
+  assert.equal(value.disabled, true); assert.equal(value.placeholder, "Choose a variable first");
+  press(panel, "+ New variable…");
+  const dialog = s.host.querySelector<HTMLElement>(".story-new-variable")!;
+  const name = dialog.querySelector<HTMLInputElement>('input[aria-label="Variable name"]')!; name.value = "ticket_count"; name.dispatchEvent(new Event("input", { bubbles: true }));
+  chooseIn(dialog, "Variable type", "Whole number");
+  press(dialog, "Create variable"); await tick();
+  assert.deepEqual(requests, [{ technicalName: "ticket_count", variableType: "int", defaultValue: "0" }]);
+  assert.equal(summary().getAttribute("aria-label"), "Variable: ticket_count"); assert.equal(document.activeElement, summary());
+  assert.ok(panel.querySelector('input[aria-label="Formula"]'), "A whole number takes a calculation");
+  await s.close();
 });

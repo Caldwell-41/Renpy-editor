@@ -1,5 +1,5 @@
 //! Explicit-body Beat edits over verified disjoint source ranges.
-use super::bodies::{qualify_body, root_may_continue, trivia, Bodies, Body};
+use super::bodies::{qualify_body, root_ending, trivia, Bodies, Body, Ending};
 use super::*;
 mod operations;
 
@@ -186,6 +186,10 @@ impl AuthoringService {
             return Err(SceneError::InvariantBlocked);
         }
         let edit = self.prepare_call_labels(project, &beats, edit)?;
+        let adds_beat = matches!(
+            edit,
+            BodyEdit::Insert { .. } | BodyEdit::Dialogue(BeatEdit::ContinueDialogue { .. })
+        );
         let transfer_edit = match &edit {
             BodyEdit::Structural(_) => true,
             BodyEdit::Insert { payload, .. } | BodyEdit::Update { payload, .. } => {
@@ -259,7 +263,6 @@ impl AuthoringService {
                 Some(start),
             ));
         }
-        logic::validate_conditional_completion(&proposed, &scene, &loaded)?;
         if transfer_edit {
             self.validate_candidate_transfers(
                 project,
@@ -283,8 +286,15 @@ impl AuthoringService {
         if next_beats.len() > MAX_BEATS_PER_SCENE {
             return Err(SceneError::InvariantBlocked);
         }
-        if !root_may_continue(&source, &beats)? && root_may_continue(&proposed, &next_beats)? {
-            return Err(SceneError::InvariantBlocked);
+        // A scene that ends must keep ending, and an unknown ending must not become
+        // a certain fallthrough. A scene that already continues stays editable.
+        let ending = root_ending(&source, &beats)?;
+        if root_ending(&proposed, &next_beats)? > ending {
+            return Err(if ending == Ending::Unknown {
+                SceneError::CustomCodeEnding { adds_beat }
+            } else {
+                SceneError::InvariantBlocked
+            });
         }
         *loaded
             .source_map

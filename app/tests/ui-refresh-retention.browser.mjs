@@ -41,7 +41,7 @@ try{
      await new Promise(r=>setTimeout(r,70));
      if(held||mode==='corrected-refusal'){
       window.__retentionEvidence.refusals++;
-      return {protocolVersion:1,requestId:'fixture',ok:false,error:{code:'RUNTIME_BUSY',message:'Draft write refused before dispatch'}};
+      return {protocolVersion:1,requestId:'fixture',ok:false,error:{code:'REQUEST_OVERLAP',message:'Draft write refused before dispatch'}};
      }
      window.__retentionEvidence.retainedTexts.push(payload.text);
     }

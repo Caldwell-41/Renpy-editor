@@ -74,12 +74,12 @@ test('native driver matches a recent title independently of its date without pre
   await browser.happyDOM.close();
 });
 
-test('native observation retries only busy rejection and retains failures and deadline', async () => {
+test('native observation retries only an overlap refusal and retains failures and deadline', async () => {
   const scope: { __loomlightProbeRetryBusy?: <T>(task: () => Promise<T>, timeout?: number) => Promise<T> } = {};
   runInNewContext(helper, { window: scope, document: {}, performance, setTimeout });
   let calls = 0;
   const value = await scope.__loomlightProbeRetryBusy!(async () => {
-    if (++calls < 3) throw Object.assign(new Error('busy'), { code: 'RUNTIME_BUSY' });
+    if (++calls < 3) throw Object.assign(new Error('busy'), { code: 'REQUEST_OVERLAP' });
     return 'retained';
   });
   assert.equal(value, 'retained'); assert.equal(calls, 3);
@@ -87,7 +87,10 @@ test('native observation retries only busy rejection and retains failures and de
   await assert.rejects(scope.__loomlightProbeRetryBusy!(async () => { calls++; throw Object.assign(new Error('invalid source'), { code: 'INVALID_SOURCE' }); }), /invalid source/);
   assert.equal(calls, 1, 'real errors must not be retried');
   calls = 0;
-  await assert.rejects(scope.__loomlightProbeRetryBusy!(async () => { calls++; throw Object.assign(new Error('busy deadline'), { code: 'RUNTIME_BUSY' }); }, 0), /busy deadline/);
+  await assert.rejects(scope.__loomlightProbeRetryBusy!(async () => { calls++; throw Object.assign(new Error('runtime running'), { code: 'RUNTIME_BUSY' }); }), /runtime running/);
+  assert.equal(calls, 1, 'a handler refusal while Ren\'Py runs must not be retried');
+  calls = 0;
+  await assert.rejects(scope.__loomlightProbeRetryBusy!(async () => { calls++; throw Object.assign(new Error('busy deadline'), { code: 'REQUEST_OVERLAP' }); }, 0), /busy deadline/);
   assert.equal(calls, 1, 'deadline must remain rejecting');
 });
 

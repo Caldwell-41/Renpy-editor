@@ -89,7 +89,8 @@ containing body. A new option is empty; its source contains a sole verified `pas
 until a Beat replaces it. Jump and Return are explicit transfers inside an option.
 Return returns to the caller, or to the main menu when there is no caller. A newly
 created Scene still starts with Return. Structural commands refuse a new Scene
-fallthrough, including when every guarded option can be unavailable.
+fallthrough, including when every guarded option can be unavailable. A Scene whose
+source already continues past its end, with or without a Call or Choice, stays editable.
 
 The Choice payload has an optional `prompt`, either
 `{"type":"narration","text":"..."}` or
@@ -138,6 +139,17 @@ after its containing Choice. Completion analysis traverses the same owners witho
 evaluating conditions. Branches records the originating option header and ancestor
 guards, each transfer and the continuation in its actual containing body.
 
+Source-map v15 maps an unsupported statement and its deeper lines as one Custom Code
+beat. A `python:` block is one beat, not one beat per line. Blank and comment lines
+inside the block stay in it; those after its last line are trivia. Older maps have one
+row per line. On open, core checks those rows with the old recognizer, then folds each
+block's rows into one. The first row keeps its ID, and the other rows go under
+`refinedChildMappings` with their IDs and unknown fields. Older builds also read
+some lines inside a top-level block as beats, such as dialogue in `init python:` or
+an If header and its child in a screen. Those rows fold the same way. A Choice row
+inside a block refuses, because folding it would turn a supported menu into
+protected code. Opening never writes `.rpy` bytes.
+
 Caption, guard, reorder and option-count edits carry each retained body's exact
 bytes and mapped IDs. New options get new IDs. Then controls edit only the last
 Jump/Repeat/Return, or its absence for Continue. Source reconciliation refuses ambiguous
@@ -169,8 +181,8 @@ stays byte-identical on opening and no-op edits.
 
 The native menu guard combines availability and picked hiding. Disabled rows use
 the combined selectable gate, so hiding the last enabled answer continues after the
-Choice. Hide picked takes precedence over disabled display. Completion treats hiding
-as a possible continuation and refuses an unsafe Scene ending. Repeat revisits this
+Choice. Hide picked takes precedence over disabled display. The scene fallthrough
+guard treats hiding as a possible continuation. Repeat revisits this
 same gate and store. Source-embedded UUIDs anchor the existing mappings, preserve
 rename/reorder identity, and distinguish duplicate captions. New options get fresh
 UUIDs. Duplicate runtime keys, reserved declaration collisions, edited/missing helpers,
@@ -448,10 +460,14 @@ in one entry through the existing shared session history. Semantic no-ops and re
 edits add no entry. Undo/Redo restores both files and their actual revisions; project
 reopen retains accepted values and starts a new empty history. Existing types stay fixed after creation. Decimal defaults and values use
 finite binary64 JSON numbers, with the exact JSON string `"-0.0"` for negative
-zero. This applies to defaults, literal assignments, inspected arithmetic results
-and canvas samples. Core also accepts a signed numeric zero and returns the string
+zero. This applies to defaults, literal assignment commands, inspected arithmetic
+results and canvas samples. Core also accepts a signed numeric zero and returns the string
 form; other decimal strings are refused. Positive zero remains a JSON number.
-Condition decimal atoms and arithmetic operands remain source strings. Integer
+Condition decimal atoms and arithmetic operands remain source strings. Story reads a
+decimal Set variable from source as `{operation: "assign", operand}` with the written
+text, so `$ fare = 4.50` shows and saves as `4.50`. When Screens rewrites a button's
+actions, an unchanged decimal `SetVariable` literal keeps its source text. A decimal
+default is written in canonical form, so `4.50` is saved as `4.5`. Integer
 values retain exact signed i64 strings. Story
 also supports bounded numeric formulas. Set variable keeps
 `variableId` and `value`; arithmetic uses `{operation, operand}` in `value`.
@@ -815,8 +831,17 @@ when its statement, at the body's indentation, starts with the word `jump` or `r
 `places` lists each insertion place core accepts as an ADR 0016 `Position` with
 `fitsEnding`, and `defaultPlace` is the place before the ending node, or the end, or else
 the last listed place. Insert, condition insert and move check a request with the same
-code that lists the places. Unknown endings count as "may continue" for the scene
-fallthrough guard, Call and Choice completion and the Branches continuation lines.
+code that lists the places. The place before protected Custom Code is the region's first
+byte: the new or moved lines go directly before it and its bytes stay unchanged. A move
+may pass protected Custom Code in the same body, and the region stays where it is. There
+is no place inside a region, and none before an empty body's `pass`, whose end place
+replaces it. Unknown endings count as "may continue" for the Branches continuation
+lines. The scene fallthrough guard compares the scene body's ending before and after
+each write. A scene that ends must keep ending, and an `unknown` ending must not become
+`continues`. A scene that already continues stays editable. When the ending was
+`unknown`, core refuses with `CUSTOM_CODE_ENDING`, whose message names Custom Code as
+the cause. Other refusals of this guard use `SCENE_INVARIANT`. Story Save checks each
+command against the candidate the commands before it left.
 
 Source-map v6 adds `ownedScreens` for explicitly created custom screens. Each entry
 stores distinct screen/root UUIDs, its source name, `game/ui/<name>.rpy` path and

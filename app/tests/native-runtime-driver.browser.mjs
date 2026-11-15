@@ -70,7 +70,7 @@ try {
         if(request.operation==='probe.runtimeUiReport'){window.__driverReport=request.payload;return ok(null);}
         if(request.operation==='preferences.write'){preferences=request.payload;return ok(preferences);}
         if(request.operation==='preferences.read')return ok(preferences);
-        if(busy.delete(request.operation))return {ok:false,error:{code:'RUNTIME_BUSY'}};
+        if(busy.delete(request.operation))return {ok:false,error:{code:'REQUEST_OVERLAP'}};
         return fixture.request(request.operation,request.payload);
       }};
       window.__loomlightRuntimeProbeCase=mode;

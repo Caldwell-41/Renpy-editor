@@ -6,6 +6,48 @@ use crate::{
 use serde_json::{json, Value};
 use std::sync::{Arc, Condvar, Mutex};
 
+/// Why `ApplicationHost` did not run a task, or why the task ended without a result.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CheckoutError {
+    /// Another request holds the service. The task never ran, so it may be sent again.
+    Overlap,
+    /// The host is shutting down. The task never ran and never will.
+    ShuttingDown,
+    /// The state lock is poisoned, before or after the task.
+    Unavailable,
+    /// The task panicked, possibly after it wrote.
+    Failed,
+    /// `with_service_until` reached its deadline before the service returned.
+    Deadline,
+}
+impl CheckoutError {
+    pub fn message(self) -> &'static str {
+        match self {
+            Self::Overlap => "Another request is in progress.",
+            Self::ShuttingDown => "Service shutting down.",
+            Self::Unavailable => "Service unavailable.",
+            Self::Failed => "Request failed.",
+            Self::Deadline => "Service publication deadline reached.",
+        }
+    }
+    /// `busy` for an overlap, which the caller may retry; this error's own message otherwise.
+    pub fn busy_or(self, busy: &'static str) -> &'static str {
+        if self == Self::Overlap {
+            busy
+        } else {
+            self.message()
+        }
+    }
+}
+impl From<CheckoutError> for &'static str {
+    fn from(error: CheckoutError) -> Self {
+        error.message()
+    }
+}
+/// How long a native dialog's completion waits for the service. The author has already
+/// chosen, so the host waits instead of refusing; the app never sends the request again.
+const DIALOG_COMPLETION_WAIT: std::time::Duration = std::time::Duration::from_secs(10);
+
 #[derive(Clone)]
 pub struct ApplicationHost(Arc<Shared>);
 struct Shared {
@@ -55,18 +97,22 @@ impl ApplicationHost {
         &self,
         deadline: std::time::Instant,
         task: impl FnOnce(&mut LifecycleService) -> T,
-    ) -> Result<T, &'static str> {
+    ) -> Result<T, CheckoutError> {
         let mut task = Some(task);
         loop {
             if std::time::Instant::now() >= deadline {
-                return Err("Service publication deadline reached.");
+                return Err(CheckoutError::Deadline);
             }
             match self.with_service(|service| (task.take().unwrap())(service)) {
                 Ok(value) => return Ok(value),
-                Err("Another request is in progress.") => {
-                    let state = self.0.state.lock().map_err(|_| "Service unavailable.")?;
+                Err(CheckoutError::Overlap) => {
+                    let state = self
+                        .0
+                        .state
+                        .lock()
+                        .map_err(|_| CheckoutError::Unavailable)?;
                     if state.closing {
-                        return Err("Service shutting down.");
+                        return Err(CheckoutError::ShuttingDown);
                     }
                     if state.service.is_none() {
                         let _ = self
@@ -76,7 +122,7 @@ impl ApplicationHost {
                                 state,
                                 deadline.saturating_duration_since(std::time::Instant::now()),
                             )
-                            .map_err(|_| "Service unavailable.")?;
+                            .map_err(|_| CheckoutError::Unavailable)?;
                     }
                 }
                 Err(error) => return Err(error),
@@ -87,19 +133,24 @@ impl ApplicationHost {
     pub fn with_service<T>(
         &self,
         task: impl FnOnce(&mut LifecycleService) -> T,
-    ) -> Result<T, &'static str> {
+    ) -> Result<T, CheckoutError> {
         let mut service = {
-            let mut state = self.0.state.lock().map_err(|_| "Service unavailable.")?;
+            let mut state = self
+                .0
+                .state
+                .lock()
+                .map_err(|_| CheckoutError::Unavailable)?;
             if state.closing {
-                return Err("Service shutting down.");
+                return Err(CheckoutError::ShuttingDown);
             }
-            state
-                .service
-                .take()
-                .ok_or("Another request is in progress.")?
+            state.service.take().ok_or(CheckoutError::Overlap)?
         };
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| task(&mut service)));
-        let mut state = self.0.state.lock().map_err(|_| "Service unavailable.")?;
+        let mut state = self
+            .0
+            .state
+            .lock()
+            .map_err(|_| CheckoutError::Unavailable)?;
         if state
             .revoked_session
             .take()
@@ -113,16 +164,29 @@ impl ApplicationHost {
         state.service = Some(service);
         self.0.returned.notify_all();
         drop(state);
-        result.map_err(|_| "Request failed.")
+        result.map_err(|_| CheckoutError::Failed)
     }
-    /// A native dialog captures its session before showing UI and completes here.
+    /// A native dialog captures its session before showing UI and completes here. The
+    /// dialog has already closed, so a completion that overlaps another request waits for
+    /// the service with the author's choice instead of refusing. Its response is never
+    /// REQUEST_OVERLAP, because sending the request again would open the dialog again.
     pub fn complete_dialog(
         &self,
         request_id: String,
         expected: Option<String>,
         task: impl FnOnce(&mut LifecycleService) -> CoreResponse,
-    ) -> Result<CoreResponse, &'static str> {
-        self.with_service(|service| {
+    ) -> CoreResponse {
+        self.complete_dialog_within(DIALOG_COMPLETION_WAIT, request_id, expected, task)
+    }
+    fn complete_dialog_within(
+        &self,
+        wait: std::time::Duration,
+        request_id: String,
+        expected: Option<String>,
+        task: impl FnOnce(&mut LifecycleService) -> CoreResponse,
+    ) -> CoreResponse {
+        let id = request_id.clone();
+        let completed = self.with_service_until(std::time::Instant::now() + wait, |service| {
             if service.current().map(|p| p.session_id) != expected {
                 return CoreResponse::failure(
                     request_id,
@@ -131,7 +195,16 @@ impl ApplicationHost {
                 );
             }
             task(service)
-        })
+        });
+        match completed {
+            Ok(response) => response,
+            Err(CheckoutError::Deadline) => CoreResponse::failure(
+                id,
+                "INTERNAL_ERROR",
+                "Another request kept the project busy, so this choice was not applied. Choose again.",
+            ),
+            Err(error) => checkout_failure(id, error),
+        }
     }
     pub fn dispatch(&self, request: Value, smoke: bool) -> CoreResponse {
         let validated = match validate_request(&request) {
@@ -281,6 +354,9 @@ impl ApplicationHost {
             "runtime.prepare" | "runtime.grantTrust" | "runtime.start"
         ) {
             let mut state = self.0.state.lock().unwrap();
+            if state.closing {
+                return checkout_failure(id, CheckoutError::ShuttingDown);
+            }
             let Some(session) = payload
                 .get("sessionId")
                 .and_then(Value::as_str)
@@ -293,11 +369,17 @@ impl ApplicationHost {
                     "The project session changed.",
                 );
             };
-            if state.closing
-                || state.service.is_none()
-                || state.request.as_ref().is_some_and(|p| p.result.is_none())
-            {
-                return busy(id);
+            // A runtime request still running is a runtime refusal, which lasts as long
+            // as that work does. Any other holder is an ordinary overlap.
+            if state.request.as_ref().is_some_and(|p| p.result.is_none()) {
+                return CoreResponse::failure(
+                    id,
+                    "RUNTIME_BUSY",
+                    "Another runtime request is in progress.",
+                );
+            }
+            if state.service.is_none() {
+                return checkout_failure(id, CheckoutError::Overlap);
             }
             if let Err(error) = state
                 .service
@@ -361,7 +443,7 @@ impl ApplicationHost {
             return CoreResponse::success(id, json!({"pending": true, "requestToken": token}));
         }
         self.with_service(|service| handle_application_request(request, smoke, service))
-            .unwrap_or_else(|_| busy(id))
+            .unwrap_or_else(|error| checkout_failure(id, error))
     }
     #[cfg(test)]
     pub(crate) fn request_spawns(&self) -> usize {
@@ -414,13 +496,135 @@ fn stale(id: String) -> CoreResponse {
         "Runtime operation is no longer current.",
     )
 }
-fn busy(id: String) -> CoreResponse {
-    CoreResponse::failure(id, "RUNTIME_BUSY", "Another request is in progress.")
+/// `REQUEST_OVERLAP` means no handler ran, so the app may send the request again. Every
+/// other checkout failure is `INTERNAL_ERROR`, which the app never retries. A panic or a
+/// lock poisoned after the handler may follow a write, and a retry cannot outlast
+/// shutdown or a poisoned lock. `RUNTIME_BUSY` is a handler's refusal while Ren'Py runs.
+pub fn checkout_failure(id: String, error: CheckoutError) -> CoreResponse {
+    match error {
+        CheckoutError::Overlap => CoreResponse::failure(id, "REQUEST_OVERLAP", error.message()),
+        _ => CoreResponse::failure(id, "INTERNAL_ERROR", error.message()),
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    const DARK: &str = r#"{"schemaVersion":1,"theme":"dark","density":"default","sourceFontSize":14,"rememberLayout":true,"layouts":{}}"#;
+    fn theme(host: &ApplicationHost) -> Value {
+        let read = json!({"protocolVersion":1,"requestId":"read","operation":"preferences.read","payload":{}});
+        serde_json::to_value(host.dispatch(read, false)).unwrap()["value"]["theme"].clone()
+    }
+    #[test]
+    fn an_overlapping_request_is_refused_as_an_overlap_before_it_runs() {
+        let dir = tempfile::tempdir().unwrap();
+        let host = ApplicationHost::new(LifecycleService::new(dir.path().to_owned()).unwrap());
+        let (entered, ready) = std::sync::mpsc::channel();
+        let (release, wait) = std::sync::mpsc::channel::<()>();
+        let owner = host.clone();
+        let held = std::thread::spawn(move || {
+            owner.with_service(|_| {
+                entered.send(()).unwrap();
+                wait.recv().unwrap();
+            })
+        });
+        ready.recv().unwrap();
+        let write = json!({"protocolVersion":1,"requestId":"write","operation":"preferences.write",
+            "payload":serde_json::from_str::<Value>(DARK).unwrap()});
+        let refused = serde_json::to_value(host.dispatch(write, false)).unwrap();
+        release.send(()).unwrap();
+        held.join().unwrap().unwrap();
+        assert_eq!(refused["error"]["code"], "REQUEST_OVERLAP");
+        assert_eq!(theme(&host), "system");
+    }
+    #[test]
+    fn a_poisoned_state_lock_is_an_internal_error() {
+        let dir = tempfile::tempdir().unwrap();
+        let host = ApplicationHost::new(LifecycleService::new(dir.path().to_owned()).unwrap());
+        let poisoned = host.clone();
+        let _ = std::thread::spawn(move || {
+            let _state = poisoned.0.state.lock().unwrap();
+            panic!("synthetic poison");
+        })
+        .join();
+        let write = json!({"protocolVersion":1,"requestId":"write","operation":"preferences.write",
+            "payload":serde_json::from_str::<Value>(DARK).unwrap()});
+        let refused = serde_json::to_value(host.dispatch(write, false)).unwrap();
+        assert_eq!(refused["error"]["code"], "INTERNAL_ERROR");
+    }
+    #[test]
+    fn a_dialog_completion_waits_for_an_overlapping_request_and_applies_once() {
+        let dir = tempfile::tempdir().unwrap();
+        let host = ApplicationHost::new(LifecycleService::new(dir.path().to_owned()).unwrap());
+        let (entered, ready) = std::sync::mpsc::channel();
+        let owner = host.clone();
+        let held = std::thread::spawn(move || {
+            owner.with_service(|_| {
+                entered.send(()).unwrap();
+                std::thread::sleep(std::time::Duration::from_millis(200));
+            })
+        });
+        ready.recv().unwrap();
+        let mut applied = 0;
+        let response = host.complete_dialog("dialog".into(), None, |_| {
+            applied += 1;
+            CoreResponse::success("dialog".into(), json!({"chosen": true}))
+        });
+        held.join().unwrap().unwrap();
+        assert_eq!(applied, 1);
+        assert_eq!(
+            serde_json::to_value(response).unwrap()["value"]["chosen"],
+            true
+        );
+    }
+    #[test]
+    fn a_dialog_completion_past_its_wait_is_never_an_overlap() {
+        let dir = tempfile::tempdir().unwrap();
+        let host = ApplicationHost::new(LifecycleService::new(dir.path().to_owned()).unwrap());
+        let (entered, ready) = std::sync::mpsc::channel();
+        let (release, wait) = std::sync::mpsc::channel::<()>();
+        let owner = host.clone();
+        let held = std::thread::spawn(move || {
+            owner.with_service(|_| {
+                entered.send(()).unwrap();
+                wait.recv().unwrap();
+            })
+        });
+        ready.recv().unwrap();
+        let mut applied = false;
+        let response = host.complete_dialog_within(
+            std::time::Duration::from_millis(50),
+            "dialog".into(),
+            None,
+            |_| {
+                applied = true;
+                CoreResponse::success("dialog".into(), json!({}))
+            },
+        );
+        release.send(()).unwrap();
+        held.join().unwrap().unwrap();
+        assert!(!applied);
+        assert_eq!(
+            serde_json::to_value(response).unwrap()["error"]["code"],
+            "INTERNAL_ERROR"
+        );
+    }
+    #[test]
+    fn a_handler_that_panics_after_writing_is_not_reported_busy() {
+        let dir = tempfile::tempdir().unwrap();
+        let host = ApplicationHost::new(LifecycleService::new(dir.path().to_owned()).unwrap());
+        let error = host
+            .with_service(|service| {
+                service
+                    .write_preferences(serde_json::from_str(DARK).unwrap())
+                    .unwrap();
+                panic!("synthetic handler failure");
+            })
+            .unwrap_err();
+        let response = serde_json::to_value(checkout_failure("write".into(), error)).unwrap();
+        assert_eq!(theme(&host), "dark");
+        assert_eq!(response["error"]["code"], "INTERNAL_ERROR");
+    }
     #[test]
     fn connection_publication_waits_for_checkout_and_expired_deadline_never_runs_task() {
         let dir = tempfile::tempdir().unwrap();

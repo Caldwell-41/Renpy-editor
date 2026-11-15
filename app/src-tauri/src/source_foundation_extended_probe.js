@@ -1,12 +1,12 @@
 // Extends the original eleven checks. Mutations use ordinary source/scene IPC;
 // the runner owns the single external write in this disposable profile.
-window.__loomlightFoundationExtended = async ({ details, check, wait, click, call, read }) => {
+window.__loomlightFoundationExtended = async ({ details, check, wait, click, call }) => {
   let project, model, scene;
   const refresh = async () => {
-    project = await read('project.current');
-    model = await read('scene.list', { sessionId: project.sessionId }); scene = model.scenes[0];
+    project = await call('project.current');
+    model = await call('scene.list', { sessionId: project.sessionId }); scene = model.scenes[0];
   };
-  const source = () => read('source.open', { sessionId: project.sessionId, path: scene.sourcePath });
+  const source = () => call('source.open', { sessionId: project.sessionId, path: scene.sourcePath });
   const owners = m => JSON.stringify(m.scenes[0].beats.filter(b => b.owner).map(b => [b.id, b.owner]));
   const apply = command => call('scene.apply', { sessionId: project.sessionId, expectedProjectRevision: model.projectRevision, expectedSourceMapRevision: model.sourceMapRevision, command: { sceneId: scene.id, expectedSourceRevision: scene.sourceRevision, ...command } });
   const reopen = async () => {

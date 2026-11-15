@@ -304,16 +304,20 @@ function setStatus(message: string, kind: "normal" | "error" = "normal", links: 
 }
 async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   const capturedView = viewGeneration;
-  const retryableRead = ["sdk.discover", "project.status", "source.list", "source.open", "screens.list", "screens.inspect", "screens.canvasPlan", "screens.canvasStatus", "scene.list", "authoring.list", "references.list", "prompts.list", "context.options", "flow.list", "runtime.resolveDiagnostic", "media.present", "asset.previewImport"].includes(operation);
-  for (let attempt = 0; ; attempt += 1) {
-    const requester = coreRequester;
-    const response = await requestLane.run(operation, () => requester<T>(operation, payload));
-    if (response.ok) return response.value;
-    // The host has not checked out the service for this refusal. Retry only reads;
-    // writes, trust and process starts are never replayed after an ambiguous result.
-    if (!retryableRead || response.error.code !== "RUNTIME_BUSY" || attempt >= 40 || viewGeneration !== capturedView) throw Object.assign(new Error(response.error.message), response.error);
-    await new Promise(resolve => setTimeout(resolve,25));
-  }
+  // REQUEST_OVERLAP means the host refused before checking out the service, so no handler
+  // ran and the same request, write or read, can be sent again. A native dialog request is
+  // refused this way only before its dialog opens. The retry keeps its lane turn and
+  // its payload. No other code is retried: RUNTIME_BUSY comes from a handler that ran and
+  // lasts while Ren'Py runs, and INTERNAL_ERROR may follow a write or outlast any retry.
+  const response = await requestLane.run(operation, async () => {
+    for (let attempt = 0; ; attempt += 1) {
+      const response = await coreRequester<T>(operation, payload);
+      if (response.ok || response.error.code !== "REQUEST_OVERLAP" || attempt >= 40 || viewGeneration !== capturedView) return response;
+      await new Promise(resolve => setTimeout(resolve, 25));
+    }
+  });
+  if (response.ok) return response.value;
+  throw Object.assign(new Error(response.error.message), response.error);
 }
 async function projectValue<T>(project: OpenProject, operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   if (currentProject?.sessionId !== project.sessionId) throw new Error("This project view is no longer active.");
@@ -531,7 +535,12 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
     const transition = controller ? await runAuthoringOperation(project, operationScopes.sourceNavigation, () => controller.prepareTransition("navigation")) : undefined;
     if (controller && !transition) return;
     try {
-      const step = await runAuthoringOperation(project, operationScopes.history, () => projectValue<HistoryStep>(project, direction === "undo" ? "history.undo" : "history.redo"));
+      // Story's formula checks wait for this Undo or Redo and the workspace it brings.
+      const held = storyView?.historyWrite();
+      let step: HistoryStep;
+      try { step = await runAuthoringOperation(project, operationScopes.history, () => projectValue<HistoryStep>(project, direction === "undo" ? "history.undo" : "history.redo")); }
+      catch (error) { held?.(false); throw error; }
+      held?.(true);
       outcome = "committed";
       if (currentProject?.sessionId !== project.sessionId) return;
       if (step.step) storyView?.applyStep(step.step, direction);
@@ -845,12 +854,13 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
         expectedAuthoringRevision: expected.authoringRevision,
         command,
       }),
-      saveDrafts: async (commands, expected, drafts) => runAuthoringOperation(project, operationScopes.storySave, () => projectValue<SceneWorkspace>(project, "scene.saveDrafts", {
+      saveDrafts: async (commands, expected, drafts, beats = []) => runAuthoringOperation(project, operationScopes.storySave, () => projectValue<SceneWorkspace>(project, "scene.saveDrafts", {
         expectedProjectRevision: expected.projectRevision,
         expectedSourceMapRevision: expected.sourceMapRevision,
         expectedAuthoringRevision: expected.authoringRevision,
         commands,
         drafts,
+        ...(beats.some(beat => beat !== null) ? { historyBeats: beats } : {}),
       })),
       // A draft step writes nothing, so it takes no authoring turn; the request lane
       // still delivers it before the Commit, Save or Undo that follows.
@@ -870,7 +880,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
           return await projectValue<SceneWorkspace>(project, "scene.list");
         } finally { finishAuthoringCompletion(operationToken); void refreshPersistenceStatus(project, viewGeneration); }
       },
-      apply: async (command: SceneCommand, expected, drafts = []) => {
+      apply: async (command: SceneCommand, expected, drafts = [], beat?: string) => {
         const operationToken = beginAuthoringCompletion(project, command);
         if (!operationToken) throw new Error("Another persistence operation is still in progress.");
         try {
@@ -880,6 +890,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
             expectedAuthoringRevision: expected.authoringRevision,
             command,
             ...(drafts.length ? { drafts } : {}),
+            ...(beat ? { historyBeat: beat } : {}),
           });
         } finally { finishAuthoringCompletion(operationToken); }
       },

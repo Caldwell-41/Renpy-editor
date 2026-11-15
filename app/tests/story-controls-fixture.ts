@@ -6,7 +6,7 @@ export function withBodies(model: SceneWorkspace): SceneWorkspace {
 /** Story for presentation tests: each model it shows, including accepted results, gets
  *  bodies from `withBodies`. Hand-built beats then never carry stale bodies. */
 export const renderStoryView: typeof renderStory = (host, tree, model, actions, beatId) => {
-  const wrap = (next: SceneActions): SceneActions => ({ ...next, apply: async (command, expected) => withBodies(await next.apply(command, expected)) });
+  const wrap = (next: SceneActions): SceneActions => ({ ...next, apply: async (command, expected, ...rest) => withBodies(await next.apply(command, expected, ...rest)) });
   const view = renderStory(host, tree, withBodies(model), wrap(actions), beatId);
   return { ...view, update: (next, nextActions, selected) => view.update(withBodies(next), wrap(nextActions), selected) };
 };
@@ -26,7 +26,8 @@ export function sceneBodies(beats: readonly SceneBeat[], ends: readonly string[]
     const trivia = (beat: SceneBeat): boolean => !beat.conditionalBranch && beat.payload.type === "customCode" && (!beat.payload.source.trim() || beat.payload.source.trim().startsWith("#"));
     const nodes = beats.filter(beat => owned(shell.body, beat) && !trivia(beat) && !beat.structuralPlaceholder && !beat.conditionalBranch?.choiceOption && !beat.conditionalBranch?.otherwise && !beat.conditionalBranch?.ordinal);
     const ending = nodes.findIndex(beat => ends.includes(beat.id) || ["jump", "repeatChoice", "return"].includes(beat.payload.type)), reached = ending < 0 ? nodes : nodes.slice(0, ending + 1);
-    const places: InsertionPlace[] = reached.filter(beat => !beat.protected || beat.conditionalBranch).map(beat => ({ position: { type: "before" as const, anchor: beat.conditionalBranch ? { type: "condition" as const, groupId: beat.conditionalBranch.groupId } : { type: "beat" as const, beatId: beat.id } }, fitsEnding: false }));
+    // As core lists them: a place before every node, protected Custom Code included.
+    const places: InsertionPlace[] = reached.map(beat => ({ position: { type: "before" as const, anchor: beat.conditionalBranch ? { type: "condition" as const, groupId: beat.conditionalBranch.groupId } : { type: "beat" as const, beatId: beat.id } }, fitsEnding: false }));
     if (ending < 0) places.push({ position: { type: "end" }, fitsEnding: true });
     return { ...shell, nodes: nodes.map(beat => ({ beatId: beat.id, bodies: shells.filter(item => item.owningNode === beat.id).map(item => item.body) })),
       ending: ending < 0 ? { type: "continues" as const } : { type: "ends" as const, beatId: nodes[ending]!.id }, places, defaultPlace: ending < 0 ? { type: "end" as const } : places.at(-1)?.position };
@@ -119,6 +120,18 @@ export function editorFixture(): SceneWorkspace {
     } };
 }
 
+/** editorFixture's project, with scene one holding `beats`. */
+export function editorProject(beats: readonly SceneBeat[]): SceneWorkspace {
+  const model = editorFixture();
+  return { ...model, scenes: model.scenes.map(scene => scene.id === "one" ? { ...scene, beats, bodies: sceneBodies(beats) } : scene) };
+}
+let beatOffset = 0;
+/** A beat for `editorProject`, each at its own bytes. */
+export const storyBeat = (id: string, payload: SceneBeat["payload"], more: Partial<SceneBeat> = {}): SceneBeat => ({ id, byteStart: beatOffset += 20, byteEnd: beatOffset + 20, protected: false, payload, ...more });
+export const texts = (scope: ParentNode, selector: string): string[] => [...scope.querySelectorAll(selector)].map(node => node.textContent ?? "");
+/** A new beat's Goes at, In and After, as label and value pairs. */
+export const placeRows = (panel: ParentNode): string[] => texts(panel, ".story-where > *");
+
 /** Presses a button by its text or accessible name. */
 export function press(scope: ParentNode, label: string): HTMLButtonElement {
   const found = [...scope.querySelectorAll<HTMLButtonElement>("button")].find(item => item.textContent === label || item.getAttribute("aria-label") === label);
@@ -150,3 +163,16 @@ export function openGuard(block: HTMLElement): HTMLElement {
 }
 /** Types into a field as the author does: the value, then an input event. */
 export function type(control: HTMLInputElement | HTMLTextAreaElement, value: string): void { control.value = value; control.dispatchEvent(new Event("input", { bubbles: true })); }
+/** Chooses a new beat's place, as the author does: Choose a place… when shown, else ⋯ Move to…;
+ *  then opens each named branch and picks the position. */
+export async function choosePlace(host: ParentNode, panel: HTMLElement, position: string, ...branches: string[]): Promise<void> {
+  const shown = (label: string): HTMLButtonElement | undefined => [...panel.querySelectorAll<HTMLButtonElement>("button")].find(item => item.textContent === label && !item.closest("[hidden]"));
+  const choose = shown("Choose a place…");
+  if (choose) choose.click(); else { panel.querySelector<HTMLElement>(".story-beat-menu > summary")!.click(); shown("Move to…")!.click(); }
+  const places = host.querySelector<HTMLElement>(".story-move"); if (!places) throw Error("Move to is not open");
+  const item = (label: string, selector = "[role=treeitem]"): HTMLElement | undefined => [...places.querySelectorAll<HTMLElement>(selector)].find(node => node.textContent!.slice(1) === label);
+  for (const branch of branches) item(branch, '[role=treeitem][aria-expanded="false"]')?.click();
+  const target = item(position); if (!target) throw Error(`No place ${position} in ${[...places.querySelectorAll("[role=treeitem]")].map(node => node.textContent).join(" | ")}`);
+  target.click(); [...places.querySelectorAll<HTMLButtonElement>(".story-dialog-actions button")].at(-1)!.click();
+  await new Promise(resolve => setTimeout(resolve, 0));
+}

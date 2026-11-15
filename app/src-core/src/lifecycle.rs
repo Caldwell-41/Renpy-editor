@@ -3,6 +3,7 @@ pub(crate) mod acceptance;
 pub mod runtime;
 pub use crate::renpy::runtime::canvas::CanvasShutdown;
 mod runtime_probe;
+mod story_example;
 use crate::ai_credentials::Records;
 use crate::{
     authoring::{
@@ -2713,6 +2714,7 @@ mod tests {
         service
             .scene_apply(SceneCommandRequest {
                 drafts: Vec::new(),
+                history_beat: None,
                 expected_project_revision: workspace.project_revision.clone(),
                 expected_source_map_revision: workspace.source_map_revision.clone(),
                 expected_authoring_revision: None,

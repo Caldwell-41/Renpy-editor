@@ -1532,7 +1532,10 @@ fn build_reconciled_mapping(
             .all(|(before, after)| {
                 before.kind == reconciliation_kind(after, bytes)
                     && before.owner == after.owner
-                    && before.conditional_branch == after.conditional_branch
+                    && crate::metadata::ConditionalBranch::same_place(
+                        before.conditional_branch.as_ref(),
+                        after.conditional_branch.as_ref(),
+                    )
                     && (!previous_ids.contains(after.id.as_str()) || before.id == after.id)
             });
     let mut unmatched_before: HashMap<&str, Vec<&crate::metadata::BeatSourceMapping>> =
@@ -2103,6 +2106,7 @@ mod tests {
                 &fixture.project_id,
                 SceneCommandRequest {
                     drafts: Vec::new(),
+                    history_beat: None,
                     expected_project_revision: workspace.project_revision.clone(),
                     expected_source_map_revision: workspace.source_map_revision.clone(),
                     expected_authoring_revision: None,
@@ -2207,6 +2211,7 @@ mod tests {
                 &fixture.project_id,
                 SceneCommandRequest {
                     drafts: Vec::new(),
+                    history_beat: None,
                     expected_project_revision: workspace.project_revision.clone(),
                     expected_source_map_revision: workspace.source_map_revision.clone(),
                     expected_authoring_revision: None,
@@ -2598,6 +2603,7 @@ mod tests {
             &fixture.project_id,
             SceneCommandRequest {
                 drafts: Vec::new(),
+                history_beat: None,
                 expected_project_revision: workspace.project_revision,
                 expected_source_map_revision: workspace.source_map_revision,
                 expected_authoring_revision: None,

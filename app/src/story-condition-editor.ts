@@ -6,13 +6,13 @@
 import { decimalValue, int64 } from "./numeric-input.ts";
 import { validateField } from "./authoring-input.ts";
 import type { Condition, ConditionExpression } from "./scene-ui.ts";
-import { backingSelect, button, choose, dropdownKeys, element, field, iconButton, segmented, type ChoiceItem } from "./story-editor-controls.ts";
-import type { Variable } from "./story-new-variable.ts";
+import { backingSelect, button, element, field, iconButton, segmented, type ChoiceItem } from "./story-editor-controls.ts";
+import { typeName, typePhrase, variableMenu, type Variable, type VariableDraft } from "./story-new-variable.ts";
 
 type Variables = readonly Variable[];
 type Operator = Extract<ConditionExpression, { type: "compare" }>["operator"];
 /** Creates a variable from the variable list. Resolves with it, or undefined when cancelled. */
-export type NewVariable = (opener: HTMLElement) => Promise<Variable | undefined>;
+export type NewVariable = (opener: HTMLElement, initial?: VariableDraft) => Promise<Variable | undefined>;
 /**
  * One rule as the author left it. `value` is the raw text, which may be half typed.
  * `original` is the rule as source wrote it, kept until the author changes the rule.
@@ -26,10 +26,6 @@ const operators: readonly { readonly op: Operator; readonly symbol: string; read
   { op: "greater", symbol: ">", words: "is greater than", python: ">" }, { op: "greaterEqual", symbol: "≥", words: "is at least", python: ">=" },
 ];
 const numeric = (variable?: Variable): boolean => variable?.variableType === "int" || variable?.variableType === "decimal";
-const typeName = (variable: Variable): string => ({ bool: "yes/no", int: "whole number", decimal: "decimal", string: "text" })[variable.variableType];
-const badge = (variable?: Variable): HTMLElement => {
-  const node = element("span", "story-type", variable ? ({ bool: "Y/N", int: "#", decimal: "#.#", string: "Aa" })[variable.variableType] : ""); node.setAttribute("aria-hidden", "true"); return node;
-};
 
 /** A number as ADR 0014 carries it: an exact whole number, else a decimal. */
 function numberLiteral(raw: string): { readonly type: "int" | "decimal"; readonly value: string } {
@@ -52,6 +48,16 @@ function rulesOf(expression: ConditionExpression, variables: Variables): Omit<St
     const rule = ruleOf(leaf, variables); if (!rule) return undefined; rules.push({ ...rule, original: leaf });
   }
   return { join, rules };
+}
+/** Whether a test joins rules with both All (`and`) and Any (`or`). */
+function mixesJoins(expression: ConditionExpression): boolean {
+  const joins = new Set<string>();
+  const visit = (node: ConditionExpression): void => {
+    if (node.type === "and" || node.type === "or") { joins.add(node.type); visit(node.left); visit(node.right); }
+    else if (node.type === "not") visit(node.operand);
+    else if (node.type === "compare") { visit(node.left); visit(node.right); }
+  };
+  visit(expression); return joins.size === 2;
 }
 function ruleOf(node: ConditionExpression, variables: Variables): Rule | undefined {
   const known = (id: string, type: Variable["variableType"]): boolean => variables.some(variable => variable.id === id && variable.variableType === type);
@@ -102,10 +108,58 @@ function ruleWords(rule: Rule, variables: Variables): string {
   return variable?.variableType === "string" ? `${name} ${words} "${rule.value}"` : `${name} ${words} ${rule.value.trim()}`;
 }
 
+/**
+ * Why core could not read a branch's test, and what the author can do (`story-release-fixes`
+ * / `a-v2`). `test` is the line as the builder names it, "ticket_count = 2"; `short` names the
+ * problem in the Branch path; `reason` and `next` are the builder's two sentences; `create`
+ * is a missing variable the author can create, with the type its comparison suggests. The
+ * names come from core's `detail`; the renderer never reads the test's Python.
+ */
+export interface ConditionProblem {
+  readonly test: string;
+  readonly short: string;
+  readonly reason: string;
+  readonly next: string;
+  readonly create?: VariableDraft;
+}
+const symbolOf = (op: Operator): string => operators.find(item => item.op === op)!.symbol;
+/** The line with = ≠ ≤ ≥ for its comparisons. Quoted text stays as written. */
+const symbolLine = (source: string): string => source.trim().replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|==|!=|<=|>=/g, (match, quoted?: string) => quoted ?? operators.find(item => item.python === match)!.symbol);
+
+/** A test core could not read, as its line reads with = ≠ ≤ ≥. */
+export const unknownTest = (condition: Condition & { status: "unknown" }): string => symbolLine(condition.source);
+
+/** The problem with a test core could not read, or undefined for a test it read. Custom
+ *  Python the builder can't show is not a problem: the builder says so as a hint. */
+export function conditionProblem(condition: Condition | undefined): ConditionProblem | undefined {
+  if (condition?.status !== "unknown") return undefined;
+  const test = unknownTest(condition), detail = condition.detail;
+  const problem = (short: string, reason: string, next: string, create?: VariableDraft): ConditionProblem => ({ test, short, reason, next, ...create ? { create } : {} });
+  switch (condition.diagnostic) {
+    case "missingVariable":
+      if (!detail) return problem("not a variable", "This line names a variable the project doesn't have.", "Change this line in Source.");
+      return problem("not a variable", `${detail.variable} is not a project variable.`, "Create it, or change this line in Source.", { name: detail.variable, variableType: detail.otherType ?? "bool" });
+    case "typeMismatch": {
+      const type = detail?.variableType;
+      if (!detail || !type) return problem("wrong type", "This line compares values of different types.", "Change this line in Source.");
+      if (detail.operator && detail.other !== undefined && detail.otherType) return problem("wrong type", `${detail.variable} is ${typePhrase(type)}, and ${detail.other} is ${typePhrase(detail.otherType)}.`, `Compare it with ${typePhrase(type)} in Source.`);
+      if (detail.operator) return problem("wrong type", `${detail.variable} is ${typePhrase(type)}, and ${symbolOf(detail.operator)} only compares numbers.`, "Use = or ≠ in Source.");
+      return problem("wrong type", `${detail.variable} is ${typePhrase(type)}, not yes/no.`, "Compare it with a value in Source.");
+    }
+    case "invalidValue": return problem("invalid number", "A number in this line is out of range.", "Change this line in Source.");
+    case "limitExceeded": return problem("too long", "This line is too long for the builder.", "Shorten it in Source.");
+    case "unsupportedSyntax": return undefined;
+  }
+}
+/** The builder's message for a problem: why, what to do, and what it can't do until then. */
+export function problemText(problem: ConditionProblem, subject: "branch" | "option"): string {
+  return `${problem.reason} ${problem.next} Until then, the builder can't edit this ${subject}.`;
+}
+
 export interface RuleBuilderOptions {
   /** The Ren'Py keyword its line starts with. */
   readonly keyword: "if" | "elif";
-  /** Names the rules for screen readers: "Option 2", "If". */
+  /** Names the rules for screen readers: "Option 2", "If". `relabel` changes it. */
   readonly label: string;
   /** What the line says with no rules: "Always available", or the reason a test is needed. */
   readonly empty: string;
@@ -115,8 +169,12 @@ export interface RuleBuilderOptions {
   readonly source?: () => void;
   /** How a condition the builder cannot show reads. */
   readonly caption?: string;
-  /** Offers "+ New variable…" at the end of each variable list. */
+  /** Offers "+ New variable…" at the end of each variable list, and Create for a test's missing variable. */
   readonly newVariable?: NewVariable;
+  /** Story redraws once a missing variable is created, since core reads the test again. */
+  readonly created?: () => void;
+  /** What the builder edits, as its messages name it: a condition's branch or a Choice's option. */
+  readonly subject?: "branch" | "option";
 }
 export interface RuleBuilder {
   readonly host: HTMLElement;
@@ -129,24 +187,37 @@ export interface RuleBuilder {
   /** Builder state for draft-step Undo. */
   readonly capture: () => unknown;
   readonly restore: (saved: unknown) => void;
+  /** Renames the rules for screen readers, as when an option moves. */
+  readonly relabel: (label: string) => void;
+  /** Story shows a kept draft again: the variable lists follow the project's variables now,
+   *  so a variable an Undo removed leaves them and a rule on it says it is gone. */
+  readonly refresh: (projectVariables: Variables) => void;
 }
 
 /** The rule builder for one condition. `initial` is the condition in source, if any. */
 export function buildRuleBuilder(projectVariables: Variables, initial: Condition | undefined, options: RuleBuilderOptions): RuleBuilder {
   // The project's variables, and any the author creates from the list.
-  let variables = projectVariables;
+  let variables = projectVariables, label = options.label;
   const host = element("div", "story-rules");
   const parsed = initial?.status === "supported" ? rulesOf(initial.expression, variables) : initial ? undefined : { join: "and" as const, rules: [] };
   if (!parsed) {
-    // An unknown condition, mixed All and Any, or a test that is not variable-against-value.
-    const unknown = initial?.status === "unknown";
-    const code = element("code", "story-rule-code", unknown ? `${options.keyword} ${initial.source}:` : options.caption ?? "");
-    const note = element("p", "story-field-hint", unknown
-      ? "This test uses Python the builder cannot show. It stays as written."
-      : "This test mixes All and Any, or compares values the builder cannot show. It stays as written.");
-    host.append(code, note);
+    const problem = conditionProblem(initial), done = { host, read: () => initial, summary: () => options.caption ?? "", editable: false, capture: () => undefined, restore: () => undefined, relabel: () => undefined, refresh: () => undefined };
+    if (problem && initial?.status === "unknown") {
+      // A test core could not read: its line in an error box, why, and what to do (story-release-fixes / a-v2).
+      const code = element("code", "story-rule-code story-rule-invalid", `${options.keyword} ${initial.source}:`), error = element("p", "story-rule-error", problemText(problem, options.subject ?? "branch"));
+      error.id = `story-rule-error-${crypto.randomUUID()}`; code.setAttribute("aria-invalid", "true"); code.setAttribute("aria-describedby", error.id);
+      const fixes = element("div", "row-actions story-rule-actions"), create = problem.create, newVariable = options.newVariable;
+      if (create && newVariable) { const add: HTMLButtonElement = button(`Create ${create.name}…`, "button secondary", () => { void newVariable(add, create).then(created => { if (created) options.created?.(); }); }); fixes.append(add); }
+      if (options.source) fixes.append(button("Edit in Source", "button secondary", options.source));
+      host.append(code, error, ...fixes.children.length ? [fixes] : []);
+      return done;
+    }
+    // Custom Python, mixed All and Any, or another test that is not variable-against-value,
+    // such as trust > fare. Information, not an error: its line and a hint.
+    const note = initial?.status === "supported" && mixesJoins(initial.expression) ? "This mixes All and Any. The builder can't edit it. Edit it in Source." : "The builder can't show this Python. Until then, edit it in Source.";
+    host.append(element("code", "story-rule-code", initial?.status === "unknown" ? `${options.keyword} ${initial.source}:` : options.caption ?? ""), element("p", "story-field-hint", note));
     if (options.source) host.append(button("Edit in Source", "button secondary", options.source));
-    return { host, read: () => initial, summary: () => options.caption ?? "", editable: false, capture: () => undefined, restore: () => undefined };
+    return done;
   }
   let state: State = { ...parsed, touched: false };
   // Reads run every rule's check, so each shows its message beside its field.
@@ -163,12 +234,12 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
     code.textContent = state.rules.length ? `${options.keyword} ${state.rules.map(rule => rulePython(rule, variables)).join(` ${state.join} `)}:` : options.empty;
     code.classList.toggle("story-rule-empty", !state.rules.length);
   };
-  const variableItems = (): ChoiceItem[] => variables.map(variable => ({ value: variable.id, label: variable.technicalName, detail: typeName(variable) }));
+  const variableItems = (): ChoiceItem[] => variables.map(variable => ({ value: variable.id, label: variable.technicalName, detail: typeName(variable.variableType) }));
   const draw = (): void => {
     const focused = document.activeElement instanceof HTMLElement && host.contains(document.activeElement) ? document.activeElement.closest<HTMLElement>("[data-rule-focus]")?.dataset.ruleFocus : undefined;
     checks = []; host.replaceChildren();
     if (state.rules.length > 1) {
-      const match = backingSelect(`${options.label} match`, [{ value: "and", label: "All" }, { value: "or", label: "Any" }], state.join);
+      const match = backingSelect(`${label} match`, [{ value: "and", label: "All" }, { value: "or", label: "Any" }], state.join);
       match.addEventListener("change", () => set({ join: match.value as "and" | "or" }));
       const join = segmented(match, [{ value: "and", label: "All" }, { value: "or", label: "Any" }]); join.dataset.ruleFocus = "join";
       host.append(field("Match", join, match));
@@ -191,46 +262,34 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
   };
   const ruleRow = (rule: Rule, index: number): HTMLElement => {
     const row = element("div", "story-rule"); row.dataset.rule = String(index);
-    const variable = variables.find(item => item.id === rule.variableId), title = `${options.label} rule ${index + 1}`;
+    const variable = variables.find(item => item.id === rule.variableId), title = `${label} rule ${index + 1}`;
+    // A lone rule's comparison has no number: "If comparison". Several are numbered.
+    const comparison = state.rules.length === 1 ? `${label} comparison` : `${title} comparison`;
     const update = (next: Partial<Rule>, redraw = false, notify = false): void => set({ rules: state.rules.map((item, at) => at === index ? { ...item, ...next, original: undefined } : item) }, redraw, notify);
-    // The variable list: name and type, as in Story Combined v1.
+    // The variable list: name and type, as in Story Combined v1, ending with "+ New variable…".
     const pick = backingSelect(`${title} variable`, variableItems(), rule.variableId);
-    const menu = element("details", "story-dropdown story-variable-picker"), summary = element("summary", "story-person"); summary.dataset.control = ""; summary.dataset.ruleFocus = `variable-${index}`;
-    summary.append(badge(variable), element("span", "story-variable-name", variable?.technicalName ?? "Choose a variable"), element("span", "story-caret", "▾"));
-    summary.setAttribute("aria-label", `${title} variable: ${variable?.technicalName ?? "none chosen"}`);
-    const list = element("div", "story-dropdown-list"); list.role = "listbox"; list.setAttribute("aria-label", `${title} variable`);
-    for (const item of variables) {
-      const option = button("", "story-dropdown-option", () => { menu.open = false; choose(pick, item.id); summary.focus(); });
-      option.role = "option"; option.tabIndex = -1; option.dataset.value = item.id; option.setAttribute("aria-selected", String(item.id === rule.variableId)); option.setAttribute("aria-label", `${item.technicalName}, ${typeName(item)}`);
-      const text = element("span", "story-variable-text"); text.append(element("span", "story-variable-name", item.technicalName), element("small", "", typeName(item)));
-      option.append(badge(item), text); list.append(option);
-    }
     const newVariable = options.newVariable;
-    if (newVariable) {
-      const create = button("+ New variable…", "story-dropdown-option story-dropdown-create", () => {
-        menu.open = false;
-        void newVariable(summary).then(created => {
-          if (!created || !host.isConnected) return;
-          variables = [...variables.filter(item => item.id !== created.id), created];
-          update(defaultRule(created), true, true); refocus(`variable-${index}`);
-        });
+    const { menu, summary } = variableMenu(pick, { label: `${title} variable`, variables: () => variables, ...newVariable ? { create: (opener: HTMLElement) => {
+      void newVariable(opener).then(created => {
+        if (!created || !host.isConnected) return;
+        variables = [...variables.filter(item => item.id !== created.id), created];
+        update(defaultRule(created), true, true); refocus(`variable-${index}`);
       });
-      create.role = "option"; create.tabIndex = -1; create.setAttribute("aria-selected", "false"); list.append(create);
-    }
-    dropdownKeys(menu, summary, list); menu.append(summary, list);
+    } } : {} });
+    summary.dataset.ruleFocus = `variable-${index}`;
     // A new variable starts a fresh rule of its type.
     pick.addEventListener("change", () => { const chosen = variables.find(item => item.id === pick.value); if (chosen) { update(defaultRule(chosen), true); refocus(`variable-${index}`); } });
     const remove = iconButton("close", `Remove rule ${index + 1}`, () => { set({ rules: state.rules.filter((_item, at) => at !== index) }, true, true); refocus(state.rules.length ? `variable-${Math.max(0, index - 1)}` : "add"); });
     const top = element("div", "story-rule-top"); top.append(menu, pick, remove);
     const how = element("div", "story-rule-how");
     if (variable?.variableType === "bool") {
-      const truth = backingSelect(`${title} test`, [{ value: "true", label: "is true" }, { value: "false", label: "is false" }], rule.value === "false" ? "false" : "true");
+      const truth = backingSelect(comparison, [{ value: "true", label: "is true" }, { value: "false", label: "is false" }], rule.value === "false" ? "false" : "true");
       truth.addEventListener("change", () => update({ value: truth.value }));
       const control = segmented(truth, [{ value: "true", label: "is true" }, { value: "false", label: "is false" }]); control.dataset.ruleFocus = `test-${index}`;
       how.append(control, truth);
     } else if (variable) {
       const offered = numeric(variable) ? operators : operators.filter(item => item.op === "equal" || item.op === "notEqual");
-      const op = backingSelect(`${title} test`, offered.map(item => ({ value: item.op, label: item.words })), rule.op);
+      const op = backingSelect(comparison, offered.map(item => ({ value: item.op, label: item.words })), rule.op);
       op.addEventListener("change", () => update({ op: op.value as Operator }));
       const control = segmented(op, offered.map(item => ({ value: item.op, label: item.symbol, detail: item.words })), "story-operators"); control.dataset.ruleFocus = `test-${index}`;
       const value = element("input"); value.type = "text"; value.value = rule.value; value.setAttribute("aria-label", `${title} value`); value.dataset.ruleFocus = `value-${index}`;
@@ -249,7 +308,7 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
     let failure: unknown;
     for (const check of checks) { try { check(); } catch (error) { failure ??= error; } }
     if (failure) throw failure;
-    if (!state.rules.length) { if (options.required) throw Error("Add a rule to give this branch a test."); return undefined; }
+    if (!state.rules.length) { if (options.required) throw Error("Add a rule to this branch."); return undefined; }
     const [first, ...rest] = state.rules.map(rule => expressionOf(rule, variables));
     const expression = rest.reduce<ConditionExpression>((left, right) => ({ type: state.join, left, right }), first!);
     return { status: "supported", expression };
@@ -259,5 +318,10 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
     summary: () => state.rules.map(rule => ruleWords(rule, variables)).join(` ${state.join} `),
     capture: () => state,
     restore: saved => { if (saved) { state = saved as State; draw(); } },
+    relabel: next => { if (next !== label) { label = next; draw(); } },
+    refresh: next => {
+      const shape = (list: Variables): string => JSON.stringify(list.map(item => [item.id, item.technicalName, item.variableType]));
+      if (shape(next) !== shape(variables)) { variables = next; draw(); }
+    },
   };
 }

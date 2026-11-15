@@ -20,6 +20,9 @@ pub struct SceneSaveDraftsRequest {
     /// entries leave the project history when the Save succeeds (ADR 0025).
     #[serde(default)]
     pub drafts: Vec<String>,
+    /// The number Story shows for each command's beat, or null, in the same order.
+    #[serde(default)]
+    pub history_beats: Vec<Option<String>>,
 }
 
 /// Candidate bytes and revision by path, and whether the build created the file.
@@ -159,8 +162,13 @@ impl AuthoringService {
             || request.commands.len() > MAX_SAVE_DRAFTS
             || !request.commands.iter().all(is_draft_command)
             || (!request.drafts.is_empty() && request.drafts.len() != request.commands.len())
+            || (!request.history_beats.is_empty()
+                && request.history_beats.len() != request.commands.len())
         {
             return Err(SceneError::InvalidPayload);
+        }
+        for beat in &request.history_beats {
+            check_history_beat(beat.as_deref())?;
         }
         check_draft_ids(&request.drafts, MAX_SAVE_DRAFTS)?;
         let loaded = self.prepare_scene_commands(
@@ -176,7 +184,11 @@ impl AuthoringService {
         let labels: Vec<_> = request
             .commands
             .iter()
-            .map(|command| history_label(&loaded.project, command))
+            .enumerate()
+            .map(|(index, command)| {
+                let beat = request.history_beats.get(index).and_then(Option::as_deref);
+                history_label(&loaded.project, command, beat)
+            })
             .collect();
         let (proposal, built) = self.build_drafts(project, project_id, loaded, request.commands)?;
         // A saved draft whose bytes did not change adds no entry; its draft still ends.

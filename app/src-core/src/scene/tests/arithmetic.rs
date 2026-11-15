@@ -133,6 +133,13 @@ fn arithmetic_source_styles_preserve_noop_comments_legacy_ids_and_minimal_edits(
             fs::read(f.root.join(&scene.source_path)).unwrap(),
             source.as_bytes()
         );
+        let mut rows: crate::metadata::SourceMapMetadata =
+            serde_json::from_value(legacy.clone()).unwrap();
+        rows.scene_mappings[0].beats = per_line_rows(
+            &rows.scene_mappings[0].beats,
+            &fs::read(f.root.join(&scene.source_path)).unwrap(),
+        );
+        legacy = serde_json::to_value(&rows).unwrap();
         legacy["schemaVersion"] = json!(7);
         fs::write(
             f.root.join(SOURCE_MAP_PATH),
@@ -166,8 +173,9 @@ fn arithmetic_inspection_has_lossless_results_and_never_uses_defaults() {
         beats[4]["assignment"]["state"],
         json!({"status":"unknown","reason":"integerOverflow"})
     );
+    // The python: block is one beat.
     assert_eq!(
-        beats[7]["assignment"]["state"],
+        beats[6]["assignment"]["state"],
         json!({"status":"unknown","reason":"unsupportedControlFlow"})
     );
 }
@@ -1021,7 +1029,11 @@ fn decimal_literal_commands_and_formula_results_keep_negative_zero() {
         "expectedBody":{"type":"root"},"beat":{"type":"setVariable","variableId":model.authoring.variables[0].id,"value":"-0.0"}});
     let after = apply_wire(&f, &model, command).unwrap();
     let wire = serde_json::to_value(&after).unwrap();
-    assert_eq!(wire["scenes"][0]["beats"][0]["payload"]["value"], "-0.0");
+    // Read back, a decimal keeps its written text as an assignment operand.
+    assert_eq!(
+        wire["scenes"][0]["beats"][0]["payload"]["value"],
+        json!({"operation":"assign","operand":"-0.0"})
+    );
     for beat in &wire["scenes"][0]["beats"].as_array().unwrap()[..2] {
         assert_eq!(
             beat["assignment"]["state"],

@@ -35,6 +35,14 @@ pub enum JournalState {
     Cleaned,
 }
 
+impl JournalState {
+    /// Durable, rejected and cleaned transactions need no recovery; every other state
+    /// blocks writes until it is resolved.
+    pub fn is_terminal(&self) -> bool {
+        matches!(self, Self::Durable | Self::Rejected { .. } | Self::Cleaned)
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JournalMutation {
@@ -273,12 +281,7 @@ impl JournalStore {
             let store = Self { directory };
             match store.load() {
                 Ok(journal) => {
-                    let terminal = matches!(
-                        journal.state,
-                        JournalState::Durable
-                            | JournalState::Rejected { .. }
-                            | JournalState::Cleaned
-                    );
+                    let terminal = journal.state.is_terminal();
                     items.push(RecoveryItem {
                         transaction_id: journal.transaction_id.clone(),
                         code: code_for(&journal.state),
@@ -350,9 +353,7 @@ impl JournalStore {
                 .ok()
                 .and_then(|directory| Self { directory }.load().ok())
                 .map(|journal| match journal.state {
-                    JournalState::Durable
-                    | JournalState::Rejected { .. }
-                    | JournalState::Cleaned => None,
+                    ref state if state.is_terminal() => None,
                     JournalState::Conflict { .. } => Some(ErrorCode::Conflict),
                     _ => Some(ErrorCode::RecoveryRequired),
                 })

@@ -6,6 +6,10 @@
 // and actions; only a beat column's contents differ. Writing focus draws the columns as
 // rows and labels the markers; story-focus.ts adds its grips and hidden-lane markers.
 import type { BeatPayload, BodyRef, NodeRef, Position, SceneBeat, SceneBody, SceneDocument } from "./scene-ui.ts";
+import type { ConditionProblem } from "./story-condition-editor.ts";
+
+/** How many nested branches and options Story walks through before it stops. */
+export const MAX_NESTING = 32;
 
 /** groupId → the open branch or option (its header beat id). */
 export type OpenBranches = ReadonlyMap<string, string>;
@@ -56,32 +60,69 @@ export function bodyOwner(scene: SceneDocument, body: BodyRef): SceneBeat | unde
   const owner = bodyOf(scene, body)?.owningNode;
   return owner === undefined ? undefined : beatOf(scene, owner);
 }
+/**
+ * The stage beats a Transition at a place animates, in source order. Ren'Py's `with`
+ * animates the stage changes since the previous interaction, so the walk goes back to the
+ * last line, choice, transition or other interaction. A stage beat with its own transition
+ * ran it, so it ends the walk too. A branch's first place continues above its condition;
+ * a Choice option's begins after the Choice. Show screen and Hide screen count: with
+ * `config.transition_screens` (true by default) the transition also animates screens shown
+ * or hidden since the last interaction. Call screen is an interaction and ends the walk.
+ * Music, sound and variables change no stage and are passed over. Another condition above
+ * ends the walk.
+ */
+export function stageBeatsAbove(scene: SceneDocument, body: BodyRef, position: Position): SceneBeat[] {
+  const stage = new Set<BeatPayload["type"]>(["background", "showCharacter", "hideCharacter", "changeAppearance", "placement", "showScreen", "hideScreen"]);
+  const passed = new Set<BeatPayload["type"]>(["playMusic", "stopMusic", "playSfx", "setVariable"]);
+  const found: SceneBeat[] = [];
+  let nodes = nodeBeats(scene, body), at = position.type === "end" ? nodes.length : nodes.findIndex(node => sameNode(nodeRef(node), position.anchor));
+  for (let depth = 0; depth <= MAX_NESTING && at >= 0; depth++) {
+    for (let index = at - 1; index >= 0; index--) {
+      const beat = nodes[index]!, type = beat.payload.type;
+      if (!beat.conditionalBranch && stage.has(type) && (!("transition" in beat.payload) || beat.payload.transition === "none")) { found.unshift(beat); continue; }
+      if (beat.conditionalBranch || !passed.has(type)) return found;
+    }
+    const owner = bodyOwner(scene, body);
+    if (!owner || bodyOf(scene, body)?.kind !== "branch") break;
+    body = beatBody(owner); nodes = nodeBeats(scene, body); at = nodes.findIndex(node => node.id === owner.id);
+  }
+  return found;
+}
+/** The node right after a node in its body, if any. */
+function nextNode(scene: SceneDocument, beat: SceneBeat): SceneBeat | undefined {
+  const nodes = bodyOf(scene, beatBody(beat))?.nodes ?? [], index = nodes.findIndex(node => node.beatId === beat.id);
+  return index < 0 ? undefined : nodes[index + 1] && beatOf(scene, nodes[index + 1]!.beatId);
+}
 /** The place right after a node in its body, when core offers one. */
 export function placeAfter(scene: SceneDocument, beat: SceneBeat): Position | undefined {
-  const body = beatBody(beat), info = bodyOf(scene, body), nodes = info?.nodes ?? [];
-  const index = nodes.findIndex(node => node.beatId === beat.id); if (index < 0) return undefined;
-  const next = nodes[index + 1] && beatOf(scene, nodes[index + 1]!.beatId);
-  const position: Position = next ? { type: "before", anchor: nodeRef(next) } : { type: "end" };
-  return info!.places.some(place => samePosition(place.position, position)) ? position : undefined;
+  const info = bodyOf(scene, beatBody(beat)); if (!info?.nodes.some(node => node.beatId === beat.id)) return undefined;
+  const next = nextNode(scene, beat), position: Position = next ? { type: "before", anchor: nodeRef(next) } : { type: "end" };
+  return info.places.some(place => samePosition(place.position, position)) ? position : undefined;
 }
+/** Protected Custom Code, which keeps its place: a move passes it, nothing goes inside it. */
+export function protectedRegion(beat: SceneBeat): boolean { return beat.protected && !beat.conditionalBranch; }
 /** The first place in a body: before its first node, or its only place when empty. */
 export function firstPlace(scene: SceneDocument, body: BodyRef): Position | undefined {
   return bodyOf(scene, body)?.places[0]?.position;
 }
-/** Beat numbers as Tracks shows them: 06 in the scene, 06.2 and 06.2.1 inside its branches.
- *  A branch or option header shares the number of the condition or Choice that owns it. */
+/** Beat numbers as Tracks shows them: 06 in the scene, and 06.1, 06.2 on through all of a
+ *  condition's branches. A Choice numbers each option's beats by the option: 07.2.1 is
+ *  option 2's first beat (story-combined-editor / replace-v2). A branch or option header
+ *  shares the number of the condition or Choice that owns it. */
 export function beatNumbers(scene: SceneDocument): Map<string, string> {
   const numbers = new Map<string, string>();
   const visit = (body: BodyRef, prefix: string, offset: number, depth: number): void => {
-    if (depth > 32) return;
+    if (depth > MAX_NESTING) return;
     (bodyOf(scene, body)?.nodes ?? []).forEach((node, index) => {
       const number = prefix ? `${prefix}.${offset + index + 1}` : String(index + 1).padStart(2, "0");
       numbers.set(node.beatId, number);
       let inner = 0;
-      for (const child of node.bodies ?? []) {
+      (node.bodies ?? []).forEach((child, at) => {
         if (child.type === "branch" && !numbers.has(child.branchId)) numbers.set(child.branchId, number);
-        visit(child, number, inner, depth + 1); inner += bodyOf(scene, child)?.nodes.length ?? 0;
-      }
+        const info = bodyOf(scene, child);
+        if (info?.kind === "option") { visit(child, `${number}.${info.number ?? at + 1}`, 0, depth + 1); return; }
+        visit(child, number, inner, depth + 1); inner += info?.nodes.length ?? 0;
+      });
     });
   };
   visit({ type: "root" }, "", 0, 0);
@@ -117,7 +158,7 @@ export type TrackItem =
 export function trackRoute(scene: SceneDocument, open: OpenBranches, pending: readonly PendingBeat[] = []): TrackItem[] {
   const items: TrackItem[] = [];
   const walk = (body: BodyRef, depth: number, chain: readonly BodyRef[]): void => {
-    if (depth > 32) return;
+    if (depth > MAX_NESTING) return;
     const here = pending.filter(item => sameBody(item.body, body));
     const pendingAt = (position: Position): void => { for (const item of here) if (samePosition(item.position, position)) items.push({ kind: "new", pending: item, depth, chain }); };
     for (const beat of nodeBeats(scene, body)) {
@@ -154,7 +195,7 @@ export const trackCopy = {
   pathTitle: "Branch path",
   noForks: "No conditions or choices in this scene.",
   choice: "Choice",
-  addAfter: (name: string, fork: "condition" | "choice" | undefined) => `Add after ${name}${fork === "choice" ? " and its options" : fork ? " and its branches" : ""}`,
+  addAfter: (name: string, fork: "condition" | "choice" | undefined, region?: string) => `Add after ${name}${fork === "choice" ? " and its options" : fork ? " and its branches" : ""}${region ? `, before ${region}` : ""}`,
   firstBeat: (branch: string) => `Add the first beat in ${branch}`,
   // Writing focus labels its markers.
   firstIn: (branch: string) => `+ First beat in ${branch}`,
@@ -197,6 +238,8 @@ export interface RouteContext {
   readonly selected?: string;
   readonly locked: boolean;
   readonly label: (beat: SceneBeat) => string;
+  /** A beat as a place names it: "Mara's line", or its kind. */
+  readonly name: (beat: SceneBeat) => string;
   readonly summary: (beat: SceneBeat) => string;
   readonly branchName: (header: SceneBeat) => string;
   /** How an end marker names its branch or option: "If trust ≥ 5" in quotes, option 2 "Leave", Otherwise. */
@@ -204,6 +247,8 @@ export interface RouteContext {
   readonly sceneName: (sceneId: string) => string;
   /** Tracks lane shading: which lanes carry state, and whether state is unknown. */
   readonly state: (beat: SceneBeat) => { readonly background: boolean; readonly characters: boolean; readonly music: boolean; readonly unknown: boolean };
+  /** What needs the author's attention in a beat, shown in its place in warning colour: "2 branches to fix". */
+  readonly warning: (beat: SceneBeat) => string | undefined;
   readonly select: (id: string) => void;
   readonly selectNew: (key: string) => void;
   readonly insert: (body: BodyRef, position: Position, opener: string) => void;
@@ -231,7 +276,7 @@ function thenText(context: RouteContext, owner: SceneBeat, branch: BodyRef): str
   }
   // The next node after the owner, climbing out of enclosing branches.
   let node: SceneBeat | undefined = owner;
-  for (let steps = 0; node && steps <= 32; steps++) {
+  for (let steps = 0; node && steps <= MAX_NESTING; steps++) {
     const nodes = bodyOf(scene, beatBody(node))?.nodes ?? [], index = nodes.findIndex(item => item.beatId === node!.id);
     const next = nodes[index + 1];
     if (next) return trackCopy.thenNext(numbers.get(next.beatId) ?? "");
@@ -272,14 +317,15 @@ function rail(context: RouteContext, chain: readonly BodyRef[], label?: { readon
 const laneCell = (index: number, text?: string): HTMLElement => element("span", `story-lane story-lane-${index}${index === 0 ? " story-beat-number" : ""}`, text);
 /** Tracks: the six lanes of a beat, each beat filling the lane its kind belongs to. */
 function laneCells(context: RouteContext, beat: SceneBeat, number: string): HTMLElement[] {
-  const state = context.state(beat), lane = laneOf(beat), summary = context.summary(beat);
+  const state = context.state(beat), lane = laneOf(beat), summary = context.summary(beat), warning = context.warning(beat);
   // Flow names the beat's kind; the other lanes show only what it sets. Below 900 px
   // Writing focus folds every beat into Words, so there each one names its kind.
-  const named = `${context.label(beat)} · ${summary}`;
+  // A warning takes the beat's place: "2 branches to fix".
+  const named = warning ?? `${context.label(beat)} · ${summary}`;
   return lanes.map((_lane, index) => {
     const cell = laneCell(index);
     if (index === 0) cell.textContent = number;
-    else if (index === lane) cell.textContent = lane === 5 ? named : summary;
+    else if (index === lane) { cell.textContent = warning ?? (lane === 5 ? named : summary); cell.classList.toggle("story-lane-warn", !!warning); }
     if (index === 3) {
       const copy = element("span", "story-lane-copy", cell.textContent ?? ""); cell.replaceChildren(copy);
       if (context.focus && lane !== 3) copy.append(element("span", "story-lane-all", named));
@@ -291,10 +337,10 @@ function laneCells(context: RouteContext, beat: SceneBeat, number: string): HTML
 }
 /** Reel: a beat's number and kind, its text, and the reason a draft needs attention
  *  (story-combined-status / header-v2). A Return names itself in the title. */
-function reelCard(number: string, title: string, copy: string): HTMLElement[] {
+function reelCard(number: string, title: string, copy: string, warn = false): HTMLElement[] {
   const heading = element("span", "story-reel-title"); heading.append(element("span", "story-beat-number", number), ` · ${title}`);
   const reason = element("span", "story-reel-reason"); reason.hidden = true;
-  return [heading, element("span", "story-reel-copy", copy), reason];
+  return [heading, element("span", `story-reel-copy${warn ? " story-lane-warn" : ""}`, copy), reason];
 }
 
 /** Tracks or Reel: one column per beat on the route, with the branch markers between them. */
@@ -319,11 +365,12 @@ export function renderRoute(context: RouteContext): HTMLElement {
       column.append(rail(context, item.chain));
       const selected = context.selected === beat.id;
       const button = element("button", "story-track-beat"); button.type = "button"; button.dataset.beatKind = beat.conditionalBranch ? "condition" : beat.payload.type;
-      button.ariaLabel = `${number} ${context.label(beat)}: ${context.summary(beat)}`; button.dataset.selected = String(selected);
+      const warning = context.warning(beat);
+      button.ariaLabel = `${number} ${context.label(beat)}: ${context.summary(beat)}${warning ? `, ${warning}` : ""}`; button.dataset.selected = String(selected);
       if (selected) button.ariaCurrent = "true";
       button.tabIndex = selected || (!context.selected && beat === beats[0]) ? 0 : -1;
       const isReturn = beat.payload.type === "return";
-      button.append(...reel ? reelCard(number, isReturn ? context.summary(beat) : context.label(beat), isReturn ? "" : context.summary(beat)) : laneCells(context, beat, number));
+      button.append(...reel ? reelCard(number, isReturn ? context.summary(beat) : context.label(beat), isReturn ? "" : warning ?? context.summary(beat), !!warning) : laneCells(context, beat, number));
       button.addEventListener("click", () => context.select(beat.id));
       button.addEventListener("keydown", event => {
         const index = beats.indexOf(beat);
@@ -339,7 +386,9 @@ export function renderRoute(context: RouteContext): HTMLElement {
       const after = open ? undefined : placeAfter(scene, beat);
       if (after && !context.locked) {
         const add = action("+", "story-track-insert", () => context.insert(beatBody(beat), after, `after:${beat.id}`));
-        add.dataset.beatOpener = `after:${beat.id}`; add.ariaLabel = add.title = trackCopy.addAfter(`${number} ${context.label(beat)}`, fork);
+        // Before protected Custom Code, the + says the new beat goes right before the region.
+        const next = nextNode(scene, beat), region = next && protectedRegion(next) ? `${numbers.get(next.id) ?? ""} ${context.name(next)}` : undefined;
+        add.dataset.beatOpener = `after:${beat.id}`; add.ariaLabel = add.title = trackCopy.addAfter(`${number} ${context.name(beat)}`, fork, region);
         column.append(add);
       }
       grid.append(column);
@@ -434,6 +483,8 @@ export interface BranchPathContext {
   readonly numbers: ReadonlyMap<string, string>;
   readonly open: OpenBranches;
   readonly caption: (owner: SceneBeat) => string;
+  /** A condition branch whose test core could not read: its short problem and reason. */
+  readonly problem: (header: SceneBeat) => ConditionProblem | undefined;
   readonly branchName: (header: SceneBeat) => string;
   readonly select: (id: string) => void;
   readonly toggle: (owner: SceneBeat, branch: BodyRef) => void;
@@ -453,8 +504,11 @@ export function renderBranchPath(context: BranchPathContext): HTMLElement {
     const group = element("div", "story-branch-group"); group.dataset.branchOwner = owner.id;
     if (groups.children.length) { const arrow = element("span", "story-path-arrow", "›"); arrow.ariaHidden = "true"; group.append(arrow); }
     const edit = action(number, "story-branch-ref", () => context.select(owner.id)); edit.ariaLabel = trackCopy.editFork(fork, number);
-    const caption = fork === "choice" ? trackCopy.choice : context.caption(owner);
-    const test = element("span", "story-branch-test", shorten(caption)); test.title = caption;
+    // A condition's caption follows its open If or Else if, and names that branch's problem.
+    const open = context.open.get(owner.conditionalBranch?.groupId ?? ""), shown = fork === "condition" ? scene.beats.find(header => header.id === open && !header.conditionalBranch?.otherwise) ?? owner : owner;
+    const problem = fork === "condition" ? context.problem(shown) : undefined;
+    const caption = fork === "choice" ? trackCopy.choice : `${shorten(context.caption(shown))}${problem ? ` · ${problem.short}` : ""}`;
+    const test = element("span", `story-branch-test${problem ? " story-branch-warn" : ""}`, caption); test.title = problem ? `${context.caption(shown)}: ${problem.reason}` : context.caption(shown);
     const switches = element("div", "story-branch-switch"); switches.role = "group"; switches.ariaLabel = `${fork === "choice" ? "Options of choice" : "Branches of condition"} ${number}`;
     bodies.forEach((body, index) => {
       if (body.type !== "branch") return;
@@ -462,9 +516,10 @@ export function renderBranchPath(context: BranchPathContext): HTMLElement {
       const open = context.open.get(body.groupId) === body.branchId, name = context.branchName(header);
       const text = fork === "choice" ? (open ? `${index + 1} ${optionText(owner, body.branchId)}`.trim() : String(index + 1))
         : !header.conditionalBranch?.ordinal && !header.conditionalBranch?.otherwise ? "If" : header.conditionalBranch.otherwise ? "Otherwise" : "Else if";
-      const button = action(text, "story-branch-segment", () => context.toggle(owner, body));
+      const problem = fork === "condition" ? context.problem(header) : undefined;
+      const button = action(problem ? `${text} !` : text, `story-branch-segment${problem ? " story-branch-warn" : ""}`, () => context.toggle(owner, body));
       button.dataset.branchId = body.branchId; button.dataset.arm = String(armOf(scene, body)); button.ariaPressed = String(open);
-      button.ariaLabel = button.title = open ? trackCopy.hide(name) : trackCopy.show(name);
+      button.ariaLabel = button.title = `${open ? trackCopy.hide(name) : trackCopy.show(name)}${problem ? `, needs changes: ${problem.reason}` : ""}`;
       switches.append(button);
     });
     group.append(edit, test, switches); groups.append(group);
@@ -482,6 +537,8 @@ export function renderViewSwitch(current: RouteView, choose: (view: RouteView) =
   const group = element("div", "story-view-switch"); group.role = "group"; group.ariaLabel = "Bottom panel view";
   for (const { view, name } of routeViews) {
     const button = action(name, "story-view-option", () => choose(view));
+    // A mouse press would move focus out of the editor; switching keeps it and the caret.
+    button.addEventListener("mousedown", event => event.preventDefault());
     button.dataset.view = view; button.setAttribute("aria-pressed", String(view === current)); group.append(button);
   }
   return group;

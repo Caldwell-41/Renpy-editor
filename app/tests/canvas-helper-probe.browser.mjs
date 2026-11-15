@@ -23,7 +23,7 @@ try {
     if(request.operation==='probe.runtimeUiReport')return {protocolVersion:1,requestId:request.requestId,ok:true,value:{recorded:true}};
     if(request.operation==='source.open' && request.requestId.startsWith('canvas-') && (!initialBusy || (accepted && !acceptedBusy))) {
       if(accepted)acceptedBusy=true;else initialBusy=true;
-      return {protocolVersion:1,requestId:request.requestId,ok:false,error:{code:'RUNTIME_BUSY',message:'Another request is in progress.'}};
+      return {protocolVersion:1,requestId:request.requestId,ok:false,error:{code:'REQUEST_OVERLAP',message:'Another request is in progress.'}};
     }
     const response=await child.request(request);
     if(request.operation==='screens.setLayout' && response.ok){accepted=true;acceptedWrites++;}

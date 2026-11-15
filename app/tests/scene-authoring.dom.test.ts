@@ -2,8 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import { Window } from "happy-dom";
-import { deriveScenePreview, hasSceneDraft, renderRecoverySurface, storyScene, type RecoveryReport, type SceneBeat, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.js";
-import { pickKind, renderStoryView, selectBeat, storyEditor, trackColumn, withBodies } from "./story-controls-fixture.js";
+import { deriveScenePreview, renderRecoverySurface, storyScene, type RecoveryReport, type SceneBeat, type SceneCommand, type SceneWorkspace } from "../src/scene-ui.js";
+import { editorProject, pickKind, press, renderStoryView, selectBeat, storyBeat, storyEditor, texts, trackColumn, withBodies } from "./story-controls-fixture.js";
+import { mountStory } from "./story-dom-mount.js";
 
 const tick = async (): Promise<void> => { await new Promise((resolve) => setTimeout(resolve, 0)); };
 function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } { let resolve!: (value: T) => void; const promise = new Promise<T>((accept) => { resolve = accept; }); return { promise, resolve }; }
@@ -81,10 +82,10 @@ function foundationModel(): SceneWorkspace {
 test("nested child commits carry owner and retain input on stale/session refusal", async () => {
   const browser = installDom(); const model = foundationModel();
   const calls: SceneCommand[] = [];
-  const dispose = renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+  const view = renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status:()=>{}, resolution:{width:1280,height:720}, present:async()=>{throw Error("unexpected media")},
     apply:async command=>{ calls.push(command); throw Error(calls.length===1 ? "SOURCE_CONFLICT" : "STALE_SESSION"); },
-  }).dispose;
+  }); const dispose = view.dispose;
   const host = document.querySelector<HTMLElement>("#host")!;
   // A nested child shows in Tracks once the Branch path opens its branch.
   assert.equal(trackColumn(host, "child"), undefined);
@@ -102,7 +103,7 @@ test("nested child commits carry owner and retain input on stale/session refusal
     assert.deepEqual(calls[n]!.expectedBody,{type:"branch",groupId:"group",branchId:"if"});
     assert.equal((calls[n]!.beat as {text:string}).text,"Retained café 雪");
     assert.equal(calls[n]!.expectedSourceRevision,model.scenes[0]!.sourceRevision);
-    assert.equal(text.value,"Retained café 雪"); assert.ok(text.isConnected && hasSceneDraft(document.querySelector("#host")!));
+    assert.equal(text.value,"Retained café 雪"); assert.ok(text.isConnected && view.hasDrafts());
     assert.ok(!text.disabled && !card.querySelector<HTMLSelectElement>("select")!.disabled);
   }
   const preview = deriveScenePreview(model.scenes[0]!);
@@ -160,7 +161,7 @@ test("root controls respect nested children and conditional insertion boundaries
 
 test("Scene authoring exposes hierarchy, every Beat and natural dialogue continuation", async () => {
   const browser = installDom(); let model = sceneModel(); const calls: SceneCommand[] = []; let status = "";
-  renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
+  const view = renderStoryView(document.querySelector("#host")!, document.querySelector("#tree")!, model, {
     status: (message) => { status = message; },
     resolution: { width: 1920, height: 1080 },
     present: async (assetId, purpose) => ({ assetId, purpose, mimeType: "image/png", dataBase64: "", sha256: "a", byteCount: 24, width: 1, height: 1, cacheKey: `${assetId}:a` }),
@@ -176,7 +177,7 @@ test("Scene authoring exposes hierarchy, every Beat and natural dialogue continu
       }
       return model;
     },
-  }).dispose;
+  });
 
   assert.match(document.querySelector("#tree")?.textContent ?? "", /Opening/);
   assert.match(document.querySelector("#tree")?.textContent ?? "", /Garden/);
@@ -187,7 +188,7 @@ test("Scene authoring exposes hierarchy, every Beat and natural dialogue continu
   selectBeat(host, "dialogue");
   const textarea = document.querySelector<HTMLTextAreaElement>("textarea"); assert.ok(textarea);
   textarea.value = "First line\nSecond line"; textarea.dispatchEvent(new window.Event("input", { bubbles: true }));
-  assert.equal(hasSceneDraft(document), true);
+  assert.equal(view.hasDrafts(), true);
   textarea.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, shiftKey:true, bubbles: true }));
   await tick();
   assert.equal(calls.at(-1)?.type, "continueDialogue");
@@ -558,3 +559,27 @@ test("shipped source-foundation native driver completes against strict renderer 
   browser.happyDOM.abort();
 });
 
+test("a draft whose beat moved to another branch names where it went, and Override source writes it there", async () => {
+  const header = (id: string, ordinal: number, otherwise = false): SceneBeat => storyBeat(id, { type: "customCode", source: "", reason: "Condition header" }, { protected: true, conditionalBranch: { groupId: "test", ordinal, otherwise, ...otherwise ? {} : { condition: { status: "supported", expression: { type: "variable", variableId: "flag", variableType: "bool" } } } } });
+  const line = storyBeat("eli", { type: "dialogue", characterId: "eli", text: "Keep your ticket. Some doors only open once." }, { owner: { groupId: "test", branchId: "if" } });
+  const before = [header("if", 0), line, header("else", 1, true), storyBeat("pass", { type: "customCode", source: "        pass", reason: "Empty branch" }, { protected: true, structuralPlaceholder: true, owner: { groupId: "test", branchId: "else" } }), storyBeat("after", { type: "narration", text: "The doors close behind them." })];
+  const s = mountStory(editorProject(before));
+  const draft = selectBeat(s.host, "eli", "if").querySelector<HTMLTextAreaElement>("textarea")!;
+  draft.value = "Keep your ticket. Some doors only open once, and this one is closing."; draft.dispatchEvent(new Event("input", { bubbles: true }));
+  // Source moves the line into Otherwise.
+  const moved = editorProject([before[0]!, before[2]!, { ...line, owner: { groupId: "test", branchId: "else" } }, before[4]!]);
+  s.view.update(moved, { apply: async command => { s.calls.push(command); return moved; }, status: () => {}, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); } });
+  const panel = s.host.querySelector<HTMLElement>('.story-editor [data-beat-draft-key="eli"]')!;
+  assert.equal(panel.querySelector(".story-conflict > p")!.textContent, "This beat moved to Otherwise in source. Your draft is still for this beat.");
+  assert.equal(panel.querySelector(".story-conflict label > span")!.textContent, "Source, now in Otherwise");
+  assert.equal(panel.querySelector(".story-conflict-source")!.textContent, "Keep your ticket. Some doors only open once.");
+  assert.deepEqual(texts(panel, ".story-resolution button"), ["Discard draft", "Override source"]);
+  assert.equal(panel.querySelector(".story-resolution p")!.textContent, "Override source saves your draft to this beat in Otherwise. Other drafts stay unsaved.");
+  // Show it in Otherwise opens that branch with the beat selected.
+  press(panel, "Show it in Otherwise");
+  assert.equal([...s.host.querySelectorAll<HTMLElement>(".story-branch-segment")].find(item => item.dataset.branchId === "else")!.ariaPressed, "true");
+  assert.equal(s.host.querySelector<HTMLElement>('.story-route [data-beat-id="eli"] > .story-track-beat')!.dataset.selected, "true");
+  press(s.host.querySelector<HTMLElement>('[data-beat-draft-key="eli"]')!, "Override source"); await tick();
+  assert.deepEqual(s.calls.at(-1), { type: "updateBodyBeat", sceneId: "one", expectedSourceRevision: "source-one", beatId: "eli", expectedBody: { type: "branch", groupId: "test", branchId: "else" }, beat: { type: "dialogue", characterId: "eli", text: "Keep your ticket. Some doors only open once, and this one is closing." } });
+  await s.close();
+});

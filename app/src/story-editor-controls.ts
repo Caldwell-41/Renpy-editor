@@ -60,16 +60,16 @@ export const unavailable = (select: HTMLSelectElement): boolean => !select.value
 /** The visible control a backing select belongs to. */
 const visibleOf = (select: HTMLSelectElement): HTMLElement | undefined =>
   select.parentElement?.querySelector<HTMLElement>(":scope > [data-control]") ?? undefined;
-/** Marks a choice as needing a change, focuses its visible control and throws. */
+/** Marks a choice as needing a change and throws. The editor's `focus` moves to it. */
 export function refuseChoice(select: HTMLSelectElement, message: string): never {
-  const control = visibleOf(select), focus = control?.matches("summary, button, [tabindex]") ? control : control?.querySelector<HTMLElement>('[tabindex="0"], summary, button');
+  const control = visibleOf(select);
   let error = select.parentElement?.querySelector<HTMLElement>(":scope > .field-error");
   control?.setAttribute("aria-invalid", "true");
   if (!error) { error = element("span", "field-error"); error.role = "alert"; select.parentElement?.append(error); }
   error.textContent = message;
-  focus?.focus(); throw new Error(message);
+  throw new Error(message);
 }
-/** Reads a required choice. An unavailable one is marked and focused, and nothing is read. */
+/** Reads a required choice. An unavailable one is marked, and nothing is read. */
 export function requireChoice(select: HTMLSelectElement, message = "Select an available item first."): string {
   if (unavailable(select)) refuseChoice(select, message);
   visibleOf(select)?.removeAttribute("aria-invalid"); select.parentElement?.querySelector(":scope > .field-error")?.remove();
@@ -263,9 +263,12 @@ export function pictureField(select: HTMLSelectElement, options: PictureOptions)
   row.append(picture, text, change); return row;
 }
 
-/** Moves focus to an editor's first invalid field, or its first control. */
+/** Moves focus to an editor's first invalid field, or its first control. A marked group,
+ *  such as a list of choices, takes focus at its current item. */
 export function focusFirst(host: HTMLElement): void {
-  (host.querySelector<HTMLElement>('[aria-invalid="true"]:not([hidden])') ?? host.querySelector<HTMLElement>('input:not([type=hidden]):not([hidden]), textarea, summary, [role=radio][tabindex="0"], button:not([disabled])'))?.focus();
+  const invalid = host.querySelector<HTMLElement>('[aria-invalid="true"]:not([hidden])');
+  const target = invalid && !invalid.matches("input, select, textarea, summary, button, [tabindex]") ? invalid.querySelector<HTMLElement>('[tabindex="0"], summary, button') : invalid;
+  (target ?? host.querySelector<HTMLElement>('input:not([type=hidden]):not([hidden]), textarea, summary, [role=radio][tabindex="0"], button:not([disabled])'))?.focus();
 }
 
 /** A reason a form dialog shows, with the field to fix. */

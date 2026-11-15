@@ -178,16 +178,21 @@ fn every_listed_insertion_place_is_accepted_and_no_other() {
         f.command(insert(&current, &body["body"], &place["position"], payload));
         f.undo();
     }
-    // Before the Custom Code in "Go" is not listed, and core refuses it.
+    // Before the Custom Code in "Go" is listed, so the loop above added there.
     let a = scene(&mut f);
     let go = holding(&a, "$ seen = True");
-    assert!(!positions(go).contains(&before(beat(&a, "$ seen = True"))));
-    let refused = f.reject(insert(
-        &a,
-        &go["body"],
-        &before(beat(&a, "$ seen = True")),
-        narration(),
-    ));
+    assert!(positions(go).contains(&before(beat(&a, "$ seen = True"))));
+    // Before an empty option's `pass` is not listed, and core refuses it.
+    let pass = beats(&a)
+        .iter()
+        .find(|b| b["structuralPlaceholder"] == true)
+        .unwrap();
+    let empty = bodies(&a)
+        .iter()
+        .find(|b| b["body"]["branchId"] == pass["owner"]["branchId"])
+        .unwrap();
+    assert_eq!(positions(empty), vec![json!({"type":"end"})]);
+    let refused = f.reject(insert(&a, &empty["body"], &before(pass), narration()));
     assert_eq!(refused["error"]["code"], "OPAQUE_BOUNDARY");
     f.service.close().unwrap();
 }
@@ -207,8 +212,15 @@ fn custom_code_before_return_does_not_hide_the_ending() {
         .unwrap();
     assert_eq!(body["kind"], "branch");
     assert_eq!(body["ending"], json!({"type":"ends","beatId":ret["id"]}));
-    // No place before protected Custom Code, none after the ending.
-    assert_eq!(positions(body), vec![before(ending), before(ret)]);
+    // A place before protected Custom Code, none after the ending.
+    assert_eq!(
+        positions(body),
+        vec![
+            before(ending),
+            before(beat(&a, "$ seen = True")),
+            before(ret)
+        ]
+    );
     assert_eq!(body["defaultPlace"], before(ret));
     f.service.close().unwrap();
 }
@@ -225,8 +237,11 @@ fn custom_code_jump_or_return_ends_its_body_and_refuses_a_later_insert() {
         let ending = beat(&a, code);
         assert_eq!(ending["payload"]["type"], "customCode");
         assert_eq!(body["ending"], json!({"type":"ends","beatId":ending["id"]}));
-        assert_eq!(positions(&body), vec![before(beat(&a, "Hello"))]);
-        assert_eq!(body["defaultPlace"], before(beat(&a, "Hello")));
+        assert_eq!(
+            positions(&body),
+            vec![before(beat(&a, "Hello")), before(ending)]
+        );
+        assert_eq!(body["defaultPlace"], before(ending));
         let refused = f.reject(insert(
             &a,
             &body["body"],
@@ -301,7 +316,7 @@ fn an_empty_body_has_one_place_that_replaces_its_pass() {
 }
 
 #[test]
-fn protected_custom_code_is_one_node_with_no_place_before_it() {
+fn protected_custom_code_is_one_node_with_a_place_before_it() {
     let mut f = Fixture::new();
     let a = save(&mut f, "    \"Hello\"\n    $ seen = True\n    \"After\"\n");
     let code = beat(&a, "$ seen = True");
@@ -316,6 +331,7 @@ fn protected_custom_code_is_one_node_with_no_place_before_it() {
         positions(body),
         vec![
             before(beat(&a, "Hello")),
+            before(code),
             before(beat(&a, "After")),
             json!({"type":"end"})
         ]
@@ -436,5 +452,281 @@ fn branches_draw_no_continuation_out_of_a_condition_ended_by_custom_code() {
         .collect::<Vec<_>>();
     assert_eq!(kinds.iter().filter(|k| **k == "guard").count(), 2);
     assert!(!kinds.contains(&"continuation"), "{kinds:?}");
+    f.service.close().unwrap();
+}
+
+/// The opening lines and indent of the scene body, an If branch and a Choice option.
+const BODIES: [(&str, usize); 3] = [
+    ("", 4),
+    ("    if flag:\n", 8),
+    ("    menu:\n        \"Go\":\n", 12),
+];
+const REGION: &str = "python:\n    late = True # kept\n";
+/// One body's rows at its indent, then the scene's Return.
+fn lines(prefix: &str, indent: usize, rows: &[&str]) -> String {
+    let pad = " ".repeat(indent);
+    let rows = rows
+        .iter()
+        .flat_map(|row| row.lines())
+        .map(|line| format!("{pad}{line}\n"))
+        .collect::<String>();
+    format!("{prefix}{rows}    return\n")
+}
+fn region(scene: &Value) -> &Value {
+    beats(scene)
+        .iter()
+        .find(|b| {
+            b["payload"]["source"]
+                .as_str()
+                .is_some_and(|s| s.contains("late = True"))
+        })
+        .unwrap()
+}
+fn file(f: &Fixture, scene: &Value) -> String {
+    let bytes = std::fs::read(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap();
+    String::from_utf8(bytes)
+        .unwrap()
+        .trim_start_matches('\u{feff}')
+        .to_owned()
+}
+fn label(scene: &Value) -> String {
+    format!("label {}:\n", scene["technicalLabel"].as_str().unwrap())
+}
+fn reopen(f: &mut Fixture) -> Value {
+    f.service.close().unwrap();
+    f.service.open_path(&f.root).unwrap();
+    scene(f)
+}
+/// The node after `text`'s node in its body.
+fn next_node(scene: &Value, text: &str) -> Value {
+    let id = &beat(scene, text)["id"];
+    holding(scene, text)["nodes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .skip_while(|n| n["beatId"] != *id)
+        .nth(1)
+        .unwrap()["beatId"]
+        .clone()
+}
+
+#[test]
+fn a_new_beat_goes_directly_before_protected_custom_code_in_every_body() {
+    for (prefix, indent) in BODIES {
+        let mut f = Fixture::new();
+        let a = save(
+            &mut f,
+            &lines(prefix, indent, &["\"Opening\"", REGION, "\"After\""]),
+        );
+        let original = file(&f, &a);
+        let code = region(&a).clone();
+        assert_eq!(code["protected"], true);
+        let body = holding(&a, "Opening").clone();
+        // The place before the region is listed. Nothing inside it is.
+        let last = if indent == 4 {
+            before(
+                beats(&a)
+                    .iter()
+                    .find(|b| b["payload"]["type"] == "return")
+                    .unwrap(),
+            )
+        } else {
+            json!({"type":"end"})
+        };
+        assert_eq!(
+            positions(&body),
+            vec![
+                before(beat(&a, "Opening")),
+                before(&code),
+                before(beat(&a, "After")),
+                last
+            ]
+        );
+        f.command(insert(&a, &body["body"], &before(&code), narration()));
+        // One new line before the region's first line. Every other byte stays.
+        let expected = format!(
+            "{}{}",
+            label(&a),
+            lines(
+                prefix,
+                indent,
+                &["\"Opening\"", "\"Inserted\"", REGION, "\"After\""]
+            )
+        );
+        assert_eq!(file(&f, &a), expected);
+        f.undo();
+        assert_eq!(file(&f, &a), original);
+        f.redo();
+        let b = reopen(&mut f);
+        assert_eq!(file(&f, &a), expected);
+        assert_eq!(region(&b)["id"], code["id"]);
+        assert_eq!(region(&b)["protected"], true);
+        assert_eq!(next_node(&b, "Inserted"), code["id"]);
+        f.service.close().unwrap();
+    }
+}
+
+#[test]
+fn a_beat_moves_across_protected_custom_code_and_the_region_stays() {
+    for (prefix, indent) in BODIES {
+        let mut f = Fixture::new();
+        let rows = ["\"Opening\"", REGION, "\"After\""];
+        let a = save(&mut f, &lines(prefix, indent, &rows));
+        let original = file(&f, &a);
+        let code = region(&a).clone();
+        let body = holding(&a, "Opening")["body"].clone();
+        let mv = |scene: &Value, text: &str, position: Value| {
+            with_scene(
+                scene,
+                json!({"type":"moveStoryNode","node":{"type":"beat","beatId":beat(scene, text)["id"]},
+                    "expectedBody":body,"body":body,"position":position}),
+            )
+        };
+        // From after the region to directly before it.
+        f.command(mv(&a, "After", before(&code)));
+        let moved = format!(
+            "{}{}",
+            label(&a),
+            lines(prefix, indent, &["\"Opening\"", "\"After\"", REGION])
+        );
+        assert_eq!(file(&f, &a), moved);
+        f.undo();
+        assert_eq!(file(&f, &a), original);
+        // From before the region to after it.
+        let a = scene(&mut f);
+        f.command(mv(&a, "Opening", before(beat(&a, "After"))));
+        let crossed = format!(
+            "{}{}",
+            label(&a),
+            lines(prefix, indent, &[REGION, "\"Opening\"", "\"After\""])
+        );
+        assert_eq!(file(&f, &a), crossed);
+        let b = reopen(&mut f);
+        assert_eq!(region(&b)["id"], code["id"]);
+        assert_eq!(next_node(&b, "Opening"), beat(&b, "After")["id"]);
+        f.service.close().unwrap();
+    }
+}
+
+fn refused(f: &mut Fixture, scene: &Value, fields: Value) {
+    let refused = f.reject(with_scene(scene, fields));
+    assert_eq!(refused["error"]["code"], "SCENE_INVARIANT");
+}
+/// The guard's refusal when Custom Code that may leave ends the scene before the edit.
+fn refused_after_code(f: &mut Fixture, scene: &Value, fields: Value, change: &str) {
+    let refused = f.reject(with_scene(scene, fields));
+    assert_eq!(refused["error"]["code"], "CUSTOM_CODE_ENDING");
+    assert_eq!(
+        refused["error"]["message"],
+        format!("Can't {change}. This scene ends with Custom Code that may leave it, so a beat after it could run on into the next scene. Add a Return or Jump after the Custom Code first, or edit the scene in Source.")
+    );
+}
+fn owner_body(beat: &Value) -> Value {
+    json!({"type":"branch","groupId":beat["owner"]["groupId"],"branchId":beat["owner"]["branchId"]})
+}
+
+/// Custom Code may leave B, so the scene ending is unknown. A path that certainly
+/// falls through after the edit is still a new fallthrough.
+#[test]
+fn an_unknown_ending_refuses_an_edit_that_makes_a_path_fall_through() {
+    for body in [
+        "    menu:\n        \"A\":\n            return\n        \"B\":\n            $ renpy.jump(\"x\")\n",
+        "    if flag:\n        return\n    else:\n        $ renpy.jump(\"x\")\n",
+    ] {
+        let mut f = Fixture::new();
+        let a = save(&mut f, body);
+        assert_eq!(scene_body(&a)["ending"], json!({"type":"unknown"}));
+        let ending = beats(&a)
+            .iter()
+            .find(|b| b["payload"]["type"] == "return")
+            .unwrap()
+            .clone();
+        refused_after_code(
+            &mut f,
+            &a,
+            json!({"type":"updateBodyBeat","beatId":ending["id"],"expectedBody":owner_body(&ending),"beat":narration()}),
+            "make this change",
+        );
+        refused_after_code(
+            &mut f,
+            &a,
+            json!({"type":"removeStoryNode","node":{"type":"beat","beatId":ending["id"]},"expectedBody":owner_body(&ending)}),
+            "make this change",
+        );
+        f.service.close().unwrap();
+    }
+}
+
+/// Custom Code that may leave ends the scene's last path. A beat added after it is
+/// refused with that cause.
+#[test]
+fn a_beat_after_custom_code_that_ends_the_scene_is_refused_with_its_cause() {
+    let mut f = Fixture::new();
+    let a = save(
+        &mut f,
+        "    if flag:\n        return\n    else:\n        $ renpy.pause(1)\n",
+    );
+    assert_eq!(scene_body(&a)["ending"], json!({"type":"unknown"}));
+    let code = beat(&a, "$ renpy.pause(1)").clone();
+    refused_after_code(
+        &mut f,
+        &a,
+        json!({"type":"insertBodyBeat","body":owner_body(&code),"position":{"type":"end"},"beat":narration()}),
+        "add a beat here",
+    );
+    f.service.close().unwrap();
+}
+
+#[test]
+fn branch_edits_that_open_a_path_past_an_ending_condition_are_refused() {
+    let mut f = Fixture::new();
+    let a = save(
+        &mut f,
+        "    if flag:\n        return\n    else:\n        return\n",
+    );
+    let group = beats(&a)
+        .iter()
+        .find(|b| b["conditionalBranch"]["ordinal"] == 0)
+        .unwrap()["conditionalBranch"]["groupId"]
+        .clone();
+    let otherwise = beats(&a)
+        .iter()
+        .find(|b| b["conditionalBranch"]["otherwise"] == true)
+        .unwrap()
+        .clone();
+    // Without Otherwise, a false condition passes the condition.
+    refused(
+        &mut f,
+        &a,
+        json!({"type":"removeConditionBranch","groupId":group,"branchId":otherwise["id"],"expectedBody":{"type":"root"}}),
+    );
+    // A new Else If starts with an empty body, which continues.
+    refused(
+        &mut f,
+        &a,
+        json!({"type":"addConditionBranch","groupId":group,"expectedBody":{"type":"root"},"beforeBranchId":otherwise["id"],
+            "condition":{"status":"supported","expression":{"type":"bool","value":true}}}),
+    );
+    f.service.close().unwrap();
+}
+
+#[test]
+fn moving_the_scene_return_into_a_branch_is_refused() {
+    let mut f = Fixture::new();
+    let a = save(
+        &mut f,
+        "    if flag:\n        \"In\"\n    \"After\"\n    return\n",
+    );
+    let ending = beats(&a)
+        .iter()
+        .find(|b| b["payload"]["type"] == "return")
+        .unwrap()
+        .clone();
+    refused(
+        &mut f,
+        &a,
+        json!({"type":"moveStoryNode","node":{"type":"beat","beatId":ending["id"]},"expectedBody":{"type":"root"},
+            "body":owner_body(beat(&a, "In")),"position":{"type":"end"}}),
+    );
     f.service.close().unwrap();
 }

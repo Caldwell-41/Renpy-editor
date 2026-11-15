@@ -162,6 +162,17 @@ try{
  await page.screenshot({path:`${output}/focus-1100x720-reel.png`});await view('tracks');
  await text.focus();await text.evaluate(field=>field.setSelectionRange(2,5));
  await page.getByRole('button',{name:'Show game window',exact:true}).click();assert(await page.locator('.story-stage').isVisible());await keeps('leaving');
+ // A new Choice's Prompt takes what the author types while option 1 is still empty:
+ // leaving an empty field and previewing the draft mark it, but never pull focus back to it.
+ await mount({width:1280,height:720});
+ await page.getByRole('button',{name:'+ Add beat',exact:true}).click();await page.getByRole('dialog',{name:'Add a beat'}).getByRole('option',{name:'Choice',exact:true}).click();
+ const editorPanel=page.locator('.story-editor'),prompt=editorPanel.locator('input[aria-label="Prompt text"]'),firstOption=editorPanel.locator('input[aria-label="Choice option text"]').first();
+ await editorPanel.getByRole('button',{name:'Add a prompt shown with the options'}).click();
+ assert(await prompt.evaluate(field=>document.activeElement===field),'+ Prompt focuses the Prompt');
+ await firstOption.click();await prompt.click();await page.keyboard.type('Hello');
+ assert.deepEqual([await prompt.inputValue(),await firstOption.inputValue()],['Hello',''],'typing goes to the Prompt, not option 1');
+ assert(await prompt.evaluate(field=>document.activeElement===field),'the Prompt keeps focus');
+ await editorPanel.getByRole('button',{name:'Cancel',exact:true}).click();
  assert.deepEqual(errors,[]);passed=true;console.log(JSON.stringify({passed:true,captures:results.length,runtimeErrors:errors.length}));
 }catch(error){failure=String(error);throw error;
 }finally{

@@ -546,7 +546,10 @@ fn dialog_target_reports_revision_bound_finish_without_hiding_a_panel() {
     let (_temporary, mut service, root, owner) = composition_project();
     service.close().unwrap();
     let map_path = root.join(".renpy-editor/source-map.json");
-    let mut map: Value = serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
+    let mut map = crate::scene::per_line_map(
+        &root,
+        serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap(),
+    );
     map["schemaVersion"] = json!(8);
     let entry = map["ownedScreens"]
         .as_array_mut()

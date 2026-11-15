@@ -227,15 +227,21 @@ fn main() {
     let evidence = PathBuf::from(args.get(evidence_index + 1).unwrap());
     let reopen = args.iter().any(|a| a == "--reopen");
     let retain = args.iter().any(|a| a == "--retain");
+    // `--seed example` opens the public Story example (tests/fixtures/story-example).
+    let example = args.windows(2).any(|pair| pair == ["--seed", "example"]);
     let service = if reopen {
         assert!(root.is_dir());
         LifecycleService::new(root.clone()).unwrap()
+    } else if example {
+        assert!(!root.exists());
+        let repository = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        LifecycleService::prepare_story_example_probe(root.clone(), &repository).unwrap()
     } else {
         assert!(!root.exists());
         LifecycleService::prepare_source_foundation_probe(root.clone()).unwrap()
     };
     let host = ApplicationHost::new(service);
-    if !reopen {
+    if !reopen && !example {
         let p = host
             .with_service(|s| s.open_path(&root.join("synthetic-project")).unwrap())
             .unwrap();
@@ -319,6 +325,51 @@ fn main() {
             emit(json!({"externalBytes":bytes}));
             continue;
         }
+        // An ordinary save that an I/O failure stops after it stages its bytes. Its
+        // journal waits for recovery and the source keeps its bytes; no process ends.
+        if request["driver"] == "interruptedSave" {
+            use loomlight_core::transaction::{
+                CommitOutcome, ErrorCode, FaultInjector, FaultPoint, FileMutation, MutationKind,
+                RelativePath, TransactionIntent, TransactionProposal, TransactionService,
+            };
+            struct FailAfterStage;
+            impl FaultInjector for FailAfterStage {
+                fn visit(&mut self, point: FaultPoint, _: &Path) -> Result<(), ErrorCode> {
+                    if point == FaultPoint::MutationStaged(0) {
+                        Err(ErrorCode::IoFailure)
+                    } else {
+                        Ok(())
+                    }
+                }
+            }
+            let relative = request["path"].as_str().unwrap();
+            let project_root = std::fs::canonicalize(root.join("synthetic-project")).unwrap();
+            let transactions = TransactionService::default();
+            let project = transactions
+                .register_trusted_project(&project_root)
+                .unwrap();
+            let path = RelativePath::new(relative).unwrap();
+            let (expected, base) = transactions.snapshot(&project, path.clone()).unwrap();
+            let mut proposed = expected.clone();
+            proposed.extend(b"# interrupted save\n");
+            let outcome = transactions.commit_with_injector(
+                &project,
+                TransactionProposal {
+                    mutations: vec![FileMutation {
+                        path,
+                        kind: MutationKind::ReplaceExisting,
+                        base,
+                        expected_bytes: expected,
+                        proposed,
+                    }],
+                    intent: TransactionIntent::Edit,
+                },
+                &mut FailAfterStage,
+            );
+            assert!(matches!(outcome, CommitOutcome::RecoveryRequired { .. }));
+            emit(json!({"interrupted": relative}));
+            continue;
+        }
         let op = request["operation"].as_str().unwrap();
         // Narrow test process: unexpected execution/content-send operations fail closed.
         let allowed = matches!(
@@ -339,11 +390,16 @@ fn main() {
                 | "history.draftStep"
                 | "scene.list"
                 | "scene.apply"
+                | "scene.validateAssignment"
+                | "media.present"
+                | "screens.list"
+                | "screens.resolveTarget"
                 | "scene.saveDrafts"
                 | "scene.recovery"
                 | "scene.resolveRecovery"
                 | "flow.list"
                 | "authoring.list"
+                | "variable.create"
                 | "source.list"
                 | "source.open"
                 | "source.updateDraft"

@@ -9,7 +9,7 @@ const click=(name:string):void=>{const b=[...document.querySelectorAll<HTMLButto
 const enter=(name:string,text:string):void=>{const n=document.querySelector<HTMLInputElement|HTMLTextAreaElement>(`[name="${name}"]`)!;n.value=text;n.dispatchEvent(new Event("input"));};
 test("failed initial prompt load offers explicit retry without writes or losing the error",async()=>{
  const w=setup();let loads=0;let resolve!:(value:Options)=>void;
- const c=mountPromptPreparation(document.querySelector("main")!,{current:()=>true,load:async()=>{if(++loads===1)throw Object.assign(Error("Another request is in progress."),{code:"RUNTIME_BUSY"});return new Promise<Options>(r=>{resolve=r;});},apply:async()=>{throw Error("Unexpected write");},preview:async()=>{throw Error("Unexpected preview");}});
+ const c=mountPromptPreparation(document.querySelector("main")!,{current:()=>true,load:async()=>{if(++loads===1)throw Object.assign(Error("Another request is in progress."),{code:"REQUEST_OVERLAP"});return new Promise<Options>(r=>{resolve=r;});},apply:async()=>{throw Error("Unexpected write");},preview:async()=>{throw Error("Unexpected preview");}});
  try{
   await tick();assert.match(document.querySelector('.prompt-notice')!.textContent!,/Another request/);
   const retry=[...document.querySelectorAll<HTMLButtonElement>('button')].find(b=>b.textContent==='Reload project prompts');assert(retry,'A failed initial load needs a reachable recovery control');assert.equal(retry.hidden,false);assert.equal(retry.disabled,false);

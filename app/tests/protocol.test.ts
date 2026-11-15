@@ -18,6 +18,15 @@ test("frontend accepts only the exact versioned result envelope", () => {
   for (const actionIndex of [-1, 1024, 1.5, "0", null]) assert.equal(isCoreResponse({ ...failure, error: { ...failure.error, actionIndex } }), false);
 });
 
+test("a scene delete refusal carries the beats and protected code that refuse it", () => {
+  const jump = { sceneId: "one", sceneName: "The last service", beatId: "leave", kind: "jump" };
+  const refusal = (references: unknown) => ({ protocolVersion: 1, requestId: "one", ok: false, error: { code: "INCOMING_REFERENCE", message: "The Scene has incoming or unknown references and cannot be deleted safely.", references } });
+  assert.equal(isCoreResponse(refusal({ beats: [jump], protectedCode: [] }), "one"), true);
+  assert.equal(isCoreResponse(refusal({ beats: [], protectedCode: [{ ...jump, kind: "customCode" }] }), "one"), true);
+  for (const references of [null, [], { beats: [jump] }, { beats: [jump], protectedCode: [], extra: [] }, { beats: [{ ...jump, kind: 1 }], protectedCode: [] }, { beats: [{ ...jump, path: "game/one.rpy" }], protectedCode: [] }])
+    assert.equal(isCoreResponse(refusal(references), "one"), false, JSON.stringify(references));
+});
+
 test("frontend operation list contains only bounded editor and Studio settings operations", () => {
   assert.deepEqual(CORE_OPERATIONS, [
     "system.health",

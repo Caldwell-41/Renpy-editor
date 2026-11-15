@@ -474,6 +474,19 @@ pub(super) fn prepare(
     if actions.len() > MAX_ACTIONS {
         return Err(SceneError::InvalidPayload);
     }
+    let authoring = metadata(variables);
+    // The source text of each accepted action, when it splits into one item per action.
+    let written =
+        std::str::from_utf8(&bytes[button.expression_span.start..button.expression_span.end])
+            .ok()
+            .and_then(
+                |raw| match raw.strip_prefix('[').and_then(|s| s.strip_suffix(']')) {
+                    Some(list) => items(list),
+                    None => Some(vec![raw]),
+                },
+            )
+            .filter(|written| written.len() == button.actions.len())
+            .unwrap_or_default();
     let expressions: Result<Vec<_>, _> = actions
         .iter()
         .enumerate()
@@ -492,6 +505,16 @@ pub(super) fn prepare(
                 }
                 let literal = variable_literal(variable.variable_type, value)
                     .map_err(|_| SceneError::InvalidPayload)?;
+                // An unchanged literal keeps the author's text, such as the trailing zero in 4.50.
+                let unchanged = button.actions.iter().zip(&written).find(|(old, _)| {
+                    matches!(old, ScreenAction::SetVariable { variable_id: old_id, value: old_value }
+                        if old_id == variable_id && !old_value.is_object()
+                            && crate::scene::variables::equivalent_values(
+                                variable.variable_type, old_value, value, &authoring, variable_id))
+                });
+                if let Some((_, text)) = unchanged {
+                    return Ok((*text).to_owned());
+                }
                 Ok(format!(
                     "SetVariable({}, {literal})",
                     serde_json::to_string(&variable.technical_name)
@@ -525,7 +548,6 @@ pub(super) fn prepare(
         1 => expressions[0].clone(),
         _ => format!("[{}]", expressions.join(", ")),
     };
-    let authoring = metadata(variables);
     if parse(&expression, variables, panels, blocking, &button.helper).is_some_and(|prepared| {
         prepared.len() == button.actions.len()
             && prepared

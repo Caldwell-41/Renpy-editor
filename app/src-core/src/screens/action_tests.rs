@@ -1260,3 +1260,53 @@ fn decimal_literal_screen_actions_keep_negative_zero() {
         false
     );
 }
+
+#[test]
+fn a_written_decimal_action_keeps_its_text_when_another_action_changes() {
+    let (_temporary, mut service, root, owner) = composition_project();
+    let mut ids = std::collections::BTreeMap::new();
+    for (name, kind, default) in [
+        ("fare", "decimal", json!(2.5)),
+        ("ready", "bool", json!(false)),
+    ] {
+        let created = ipc(
+            &mut service,
+            "variable.create",
+            json!({"technicalName":name,"variableType":kind,"defaultValue":default}),
+        );
+        let id = created["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|v| v["technicalName"] == name)
+            .unwrap()["id"]
+            .clone();
+        ids.insert(name, id);
+    }
+    let added = compose_command(
+        &mut service,
+        &owner,
+        json!({"type":"add","parentId":owner["rootId"],"kind":"textbutton","text":"Pay"}),
+    );
+    let node = added["selectedId"].clone();
+    let actions = |ready: bool| json!([{"type":"setVariable","variableId":ids["fare"],"value":4.5},{"type":"setVariable","variableId":ids["ready"],"value":ready}]);
+    let command = |doc: &Value, ready: bool| json!({"type":"actions","nodeId":node,"expectedAuthoringRevision":doc["authoringRevision"],"expectedTargetRevisions":[],"actions":actions(ready)});
+    compose_command(&mut service, &owner, command(&added["document"], true));
+    let path = root.join(owner["path"].as_str().unwrap());
+    let written = fs::read_to_string(&path)
+        .unwrap()
+        .replace("SetVariable(\"fare\", 4.5)", "SetVariable(\"fare\", 4.50)");
+    assert!(written.contains("SetVariable(\"fare\", 4.50)"), "{written}");
+    save_composition_source(&mut service, &owner, &written);
+    let doc = ipc(
+        &mut service,
+        "screens.inspect",
+        json!({"path":owner["path"]}),
+    );
+    compose_command(&mut service, &owner, command(&doc, false));
+    let accepted = fs::read_to_string(&path).unwrap();
+    assert!(
+        accepted.contains("[SetVariable(\"fare\", 4.50), SetVariable(\"ready\", False)]"),
+        "{accepted}"
+    );
+}

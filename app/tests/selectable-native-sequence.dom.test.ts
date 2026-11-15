@@ -152,7 +152,7 @@ test('complete selectable native probe drives production shell/controller throug
     if (operation === 'probe.runtimeUiReport') { report = payload; return { recorded: true }; }
     if (operation === 'probe.rewriteStage') {
       const stage = payload.stage;
-      if (stage === 'snapshot') { if (busy) throw Object.assign(Error('Synthetic busy'), { code: 'RUNTIME_BUSY' }); return snapshot(); }
+      if (stage === 'snapshot') { if (busy) throw Object.assign(Error('Synthetic busy'), { code: 'REQUEST_OVERLAP' }); return snapshot(); }
       if (payload.announce) {
         stages.push(stage);
         if (stage === 'physical-send') button('Generate proposal').click();
