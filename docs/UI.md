@@ -309,7 +309,10 @@ such as `trust > fare`, `3 < trust` or a bare `True`, says "The builder can't sh
 this Python. Until then, edit it in Source." So does a test core reads as custom Python.
 Each shows its line and that hint in the neutral hint style. It is information, not a
 problem: it gets no `!` and no count. Screen readers name each rule's test a
-comparison ("If rule 1 comparison", "Option 2 rule 1 comparison").
+comparison. A branch or option with one rule says "If comparison", "Else if comparison"
+or "Option 2 comparison". With several rules each has its number: "If rule 1
+comparison", "Option 2 rule 2 comparison". The names follow added and removed rules and
+an option's number after a move.
 
 A test core could not read (`story-release-fixes` / `a-v2`) keeps its line in a
 red-bordered box, with why and what to do in red under it, then Create and Edit in

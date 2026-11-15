@@ -299,7 +299,7 @@ test("a condition draft waits while tree New works; dirty tree input blocks addi
   button(tree, "New Chapter").click(); const name = tree.querySelector<HTMLInputElement>(".tree-inline input")!; name.value = "Retained chapter name"; name.dispatchEvent(new Event("input", { bubbles: true }));
   button(s.host, "Add Condition").click(); assert.equal(s.host.querySelector(".new-beat"), null); assert.equal(name.value, "Retained chapter name"); assert.ok(name.isConnected);
   button(tree.querySelector<HTMLElement>(".tree-inline")!, "Cancel").click();
-  button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>(".story-editor .new-beat")!; chooseIn(panel, "If rule 1 comparison", "is false");
+  button(s.host, "Add Condition").click(); const panel = s.host.querySelector<HTMLElement>(".story-editor .new-beat")!; chooseIn(panel, "If comparison", "is false");
   button(tree, "New Chapter").click(); assert.ok(tree.querySelector(".tree-inline")); assert.ok(panel.isConnected && s.view.hasDrafts()); assert.equal(s.calls.length, 0); await s.close();
 });
 
@@ -474,7 +474,7 @@ test("condition drafts are retained and marked, and Story Save saves them with t
   const branch = (id: string): HTMLElement => storyEditor(s.host).querySelector<HTMLElement>(`.story-branch-editor[data-branch-id="${id}"]`)!;
   selectBeat(s.host, "if");
   // Editing the If test makes it a draft; the condition's column and the branch show it.
-  chooseIn(branch("if").querySelector<HTMLElement>(".story-branch-test")!, "If rule 1 comparison", "is false");
+  chooseIn(branch("if").querySelector<HTMLElement>(".story-branch-test")!, "If comparison", "is false");
   assert.equal(trackColumn(s.host, "if")!.dataset.beatDraft, "true");
   assert.equal(branch("if").querySelector(".story-editor-state")!.textContent, "* Draft");
   // "Remove this Else if" marks the Else if; + Add Else if adds a new one. Neither writes.
@@ -483,7 +483,7 @@ test("condition drafts are retained and marked, and Story Save saves them with t
   assert.equal(s.calls.length, 0);
   // Leaving the condition and coming back keeps all three.
   selectBeat(s.host, "a", "if"); selectBeat(s.host, "if");
-  assert.equal(branch("if").querySelector<HTMLElement>('[role=radiogroup][aria-label="If rule 1 comparison"] [aria-checked=true]')?.textContent, "is false");
+  assert.equal(branch("if").querySelector<HTMLElement>('[role=radiogroup][aria-label="If comparison"] [aria-checked=true]')?.textContent, "is false");
   assert.ok(branch("elif").querySelector(".story-branch-removal")); assert.ok(storyEditor(s.host).querySelector(".story-branch-new"));
   assert.equal((await s.view.save()).kind, "saved");
   assert.deepEqual(saved[0]!.commands.map(command => command.type), ["updateConditionBranch", "addConditionBranch", "removeConditionBranch"]);
@@ -522,7 +522,7 @@ test("Remove branch saves the drafts inside the branch first, and cancels the br
   const branch = (id: string): HTMLElement => storyEditor(s.host).querySelector<HTMLElement>(`.story-branch-editor[data-branch-id="${id}"]`)!;
   // A beat draft inside the Else if, and an edit to the Else if's own test.
   type(selectBeat(s.host, "maybe", "elif").querySelector("textarea")!, "Edited inside");
-  selectBeat(s.host, "if"); chooseIn(branch("elif").querySelector<HTMLElement>(".story-branch-test")!, "Else if rule 1 comparison", "≤");
+  selectBeat(s.host, "if"); chooseIn(branch("elif").querySelector<HTMLElement>(".story-branch-test")!, "Else if comparison", "≤");
   press(branch("elif"), "Remove this Else if");
   const removal = branch("elif").querySelector<HTMLElement>(".story-branch-removal")!;
   assert.match(removal.textContent!, /Drafts inside it are saved first/);
@@ -645,7 +645,7 @@ test("the rule builder words each problem for a branch or an option, and names i
     assert.equal(shown({ status: "supported", expression }).querySelector(".story-field-hint")!.textContent, "The builder can't show this Python. Until then, edit it in Source.", JSON.stringify(expression));
   // Screen readers name each rule's test a comparison.
   const rule = shown({ status: "supported", expression: { type: "compare", operator: "greaterEqual", left: { type: "variable", variableId: "trust", variableType: "int" }, right: { type: "int", value: "3" } } });
-  chooseIn(rule, "Option 1 rule 1 comparison", "≤"); assert.ok(rule.querySelector('select[aria-label="Option 1 rule 1 comparison"]'));
+  chooseIn(rule, "Option 1 comparison", "≤"); assert.ok(rule.querySelector('select[aria-label="Option 1 comparison"]'));
   await s.close();
 });
 

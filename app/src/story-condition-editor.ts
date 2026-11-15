@@ -263,6 +263,8 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
   const ruleRow = (rule: Rule, index: number): HTMLElement => {
     const row = element("div", "story-rule"); row.dataset.rule = String(index);
     const variable = variables.find(item => item.id === rule.variableId), title = `${label} rule ${index + 1}`;
+    // A lone rule's comparison has no number: "If comparison". Several are numbered.
+    const comparison = state.rules.length === 1 ? `${label} comparison` : `${title} comparison`;
     const update = (next: Partial<Rule>, redraw = false, notify = false): void => set({ rules: state.rules.map((item, at) => at === index ? { ...item, ...next, original: undefined } : item) }, redraw, notify);
     // The variable list: name and type, as in Story Combined v1, ending with "+ New variable…".
     const pick = backingSelect(`${title} variable`, variableItems(), rule.variableId);
@@ -281,13 +283,13 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
     const top = element("div", "story-rule-top"); top.append(menu, pick, remove);
     const how = element("div", "story-rule-how");
     if (variable?.variableType === "bool") {
-      const truth = backingSelect(`${title} comparison`, [{ value: "true", label: "is true" }, { value: "false", label: "is false" }], rule.value === "false" ? "false" : "true");
+      const truth = backingSelect(comparison, [{ value: "true", label: "is true" }, { value: "false", label: "is false" }], rule.value === "false" ? "false" : "true");
       truth.addEventListener("change", () => update({ value: truth.value }));
       const control = segmented(truth, [{ value: "true", label: "is true" }, { value: "false", label: "is false" }]); control.dataset.ruleFocus = `test-${index}`;
       how.append(control, truth);
     } else if (variable) {
       const offered = numeric(variable) ? operators : operators.filter(item => item.op === "equal" || item.op === "notEqual");
-      const op = backingSelect(`${title} comparison`, offered.map(item => ({ value: item.op, label: item.words })), rule.op);
+      const op = backingSelect(comparison, offered.map(item => ({ value: item.op, label: item.words })), rule.op);
       op.addEventListener("change", () => update({ op: op.value as Operator }));
       const control = segmented(op, offered.map(item => ({ value: item.op, label: item.symbol, detail: item.words })), "story-operators"); control.dataset.ruleFocus = `test-${index}`;
       const value = element("input"); value.type = "text"; value.value = rule.value; value.setAttribute("aria-label", `${title} value`); value.dataset.ruleFocus = `value-${index}`;

@@ -73,9 +73,15 @@ test("an option's rules are named for screen readers by its option number, which
   const s = setup([two, ending], async () => { throw Error("No writes"); });
   selectBeat(s.host, "choice");
   const rules = openGuard(optionBlocks(s.host)[1]!);
-  assert.ok(rules.querySelector('select[aria-label="Option 2 rule 1 comparison"]')); assert.ok(rules.querySelector('input[aria-label="Option 2 rule 1 value"]'));
+  const comparisons = (): (string | null)[] => [...rules.querySelectorAll("select")].map(item => item.getAttribute("aria-label")).filter(label => label?.endsWith(" comparison") ?? false);
+  // One rule has no number; several rules are numbered, and the labels follow adds and removes.
+  assert.deepEqual(comparisons(), ["Option 2 comparison"]); assert.ok(rules.querySelector('input[aria-label="Option 2 rule 1 value"]'));
+  click(rules, "+ Add rule");
+  assert.deepEqual(comparisons(), ["Option 2 rule 1 comparison", "Option 2 rule 2 comparison"]);
   press(optionBlocks(s.host)[1]!, "Move option 2 up");
-  assert.ok(rules.querySelector('select[aria-label="Option 1 rule 1 comparison"]')); assert.equal(rules.querySelector('[aria-label^="Option 2"]'), null);
+  assert.deepEqual(comparisons(), ["Option 1 rule 1 comparison", "Option 1 rule 2 comparison"]); assert.equal(rules.querySelector('[aria-label^="Option 2"]'), null);
+  press(rules, "Remove rule 2");
+  assert.deepEqual(comparisons(), ["Option 1 comparison"]);
   await s.close();
 });
 
