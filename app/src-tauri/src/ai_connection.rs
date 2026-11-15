@@ -91,7 +91,7 @@ impl Service {
         let (endpoint, origin) = canonical_endpoint(&input.endpoint, input.private_http)?;
         let store = host
             .with_service(|s| credentials::checked(s, &input.token))
-            .map_err(|_| "Settings busy.")??;
+            .map_err(|e| e.busy_or("Settings busy."))??;
         let key = if let Some(id) = &input.profile_id {
             let profile = store
                 .profiles
@@ -162,7 +162,7 @@ impl Service {
             .filter(|d| d.matches(target) && d.state != "connecting")
             .ok_or(STALE)?;
         host.with_service(|s| credentials::checked(s, &draft.token))
-            .map_err(|_| "Settings busy.")??;
+            .map_err(|e| e.busy_or("Settings busy."))??;
         draft.key = Some(Secret::new(key.into()));
         draft.revision = draft
             .revision
@@ -187,7 +187,7 @@ impl Service {
                 .filter(|d| d.matches(&target) && d.state != "connecting")
                 .ok_or(STALE)?;
             host.with_service(|s| credentials::checked(s, &draft.token))
-                .map_err(|_| "Settings busy.")??;
+                .map_err(|e| e.busy_or("Settings busy."))??;
             let key = Secret::new(
                 draft
                     .key
@@ -297,7 +297,7 @@ impl Service {
         let _change = crate::ai_requests::service().change();
         let before = host
             .with_service(|s| credentials::checked(s, &draft.token))
-            .map_err(|_| "Settings busy.")??;
+            .map_err(|e| e.busy_or("Settings busy."))??;
         let result = host
             .with_service(|s| {
                 credentials::save_connection(
@@ -309,7 +309,7 @@ impl Service {
                     draft.key.as_ref().ok_or("Enter an API key.")?,
                 )
             })
-            .map_err(|_| "Settings busy.")?;
+            .map_err(|e| e.busy_or("Settings busy."))?;
         let (profile_id, outcome) = match result {
             Ok(value) => value,
             Err(error) => {

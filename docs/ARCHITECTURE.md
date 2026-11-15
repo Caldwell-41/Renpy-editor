@@ -803,20 +803,39 @@ a race where diagnostic polling could refuse a concurrent Source read. The held-
 regression now includes diagnostics, malformed payload/session refusal and responsive
 Stop. Diagnostic resolution alone uses the Source/transaction authority.
 
-`RUNTIME_BUSY` means the handler never ran. `ApplicationHost` returns it when another
-request holds the service, and the runtime gate returns it before writing. A handler
-that panics, or a state lock poisoned after the handler, returns `INTERNAL_ERROR`,
-because the request may already have written. `dispatch::checkout_failure` owns this
-mapping for dispatch and for native dialog completion.
+Two refusals look alike and differ in whether a handler ran:
 
-`value()` sends any request again, read or write, while the host refuses it with
-`RUNTIME_BUSY`, up to 40 times at 25 ms intervals, inside the request's lane turn. The payload
-and session never change, so a retried write still carries its expected revisions and a
-stale retry gets the ordinary conflict. No other code is retried. When the wait runs out,
-the surface shows the busy message. Commit shows "Another request is in progress. Input
-retained." without the Source advice. This retry also keeps the header's `history.state`
-read from dimming Undo and Redo while core still holds the entries (H94), and it lets
-Commit, Story Save and Undo overlap out-of-lane requests such as formula checks (H96).
+- `REQUEST_OVERLAP`, "Another request is in progress.": `ApplicationHost` refused
+  before checking out the service, because another request holds it. No handler ran.
+- `RUNTIME_BUSY`: a handler ran and refused because Ren'Py is running or cleaning up
+  (the runtime, transaction execution, Scene, Source and authoring gates), or because
+  a runtime request is still running. It lasts as long as that run.
+
+`dispatch::CheckoutError` names every way checkout can fail, and
+`dispatch::checkout_failure` maps it for dispatch, the Tauri side and the probes. Only
+`Overlap` becomes `REQUEST_OVERLAP`. Shutdown, a poisoned state lock and a handler
+panic become `INTERNAL_ERROR`, because a retry cannot outlast shutdown or a poisoned
+lock and a panicking handler may already have written. Native AI settings, connection
+and request paths keep their own refusal messages for an overlap and report the
+checkout error's own message otherwise.
+
+`value()` sends a request again, read or write, only while the host refuses it with
+`REQUEST_OVERLAP`, up to 40 times at 25 ms intervals, inside the request's lane turn,
+with the same payload. No other code is retried, so a `RUNTIME_BUSY` refusal reaches
+the surface at once and does not hold the lane. When the wait runs out, the surface
+shows the refusal. Commit shows "Another request is in progress. Input retained." or
+the runtime refusal with "Input retained.", without the Source advice. The retry keeps
+the header's `history.state` read from dimming Undo and Redo while core still holds the
+entries (H94), and lets Commit, Story Save and Undo overlap out-of-lane requests such
+as formula checks (H96). The probes' `__loomlightProbeRetryBusy` retries the same code.
+
+A native dialog request (`project.openPicker`, `project.chooseParent`, `sdk.browse`,
+`asset.choose*`) checks the session before the dialog opens; an overlap there is an
+ordinary `REQUEST_OVERLAP`. After the dialog closes, `ApplicationHost::complete_dialog`
+waits up to 10 s for the service with the author's choice instead of refusing, so its
+response is never `REQUEST_OVERLAP` and the app never opens the dialog again. Past the
+wait it returns `INTERNAL_ERROR`, "Another request kept the project busy, so this
+choice was not applied. Choose again."
 
 Source retention/observation, project status/flush, device preference reads/writes and
 scene/authoring/flow observations share one renderer request lane. Selection persistence

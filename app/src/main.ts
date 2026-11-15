@@ -304,13 +304,14 @@ function setStatus(message: string, kind: "normal" | "error" = "normal", links: 
 }
 async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   const capturedView = viewGeneration;
-  // RUNTIME_BUSY means the host refused before the handler ran, so sending the same
-  // request again, write or read, cannot repeat an effect. The retry keeps its lane turn,
-  // and a write still carries its expected revisions, so a stale retry is refused.
+  // REQUEST_OVERLAP means the host refused before checking out the service, so no handler
+  // ran and the same request, write or read, can be sent again. A native dialog request is
+  // refused this way only before its dialog opens. The retry keeps its lane turn and
+  // its payload. Every other code, RUNTIME_BUSY included, comes from a handler that ran.
   const response = await requestLane.run(operation, async () => {
     for (let attempt = 0; ; attempt += 1) {
       const response = await coreRequester<T>(operation, payload);
-      if (response.ok || response.error.code !== "RUNTIME_BUSY" || attempt >= 40 || viewGeneration !== capturedView) return response;
+      if (response.ok || response.error.code !== "REQUEST_OVERLAP" || attempt >= 40 || viewGeneration !== capturedView) return response;
       await new Promise(resolve => setTimeout(resolve, 25));
     }
   });

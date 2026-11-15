@@ -1,11 +1,11 @@
 setTimeout(async () => {
   const invoke = window.__TAURI_INTERNALS__.invoke;
-  // These probe observations can contend with normal shell reads. RUNTIME_BUSY
+  // These probe observations can contend with normal shell reads. REQUEST_OVERLAP
   // refuses before dispatch, so retry delivery through the existing bounded helper.
   const callProbe = request => window.__loomlightProbeRetryBusy(async () => {
     const reply = await invoke("core_request", { request });
-    if (reply?.ok === false && reply.error?.code === "RUNTIME_BUSY") {
-      throw Object.assign(new Error("Probe request was busy."), { code: "RUNTIME_BUSY" });
+    if (reply?.ok === false && reply.error?.code === "REQUEST_OVERLAP") {
+      throw Object.assign(new Error("Probe request was busy."), { code: "REQUEST_OVERLAP" });
     }
     return reply;
   });

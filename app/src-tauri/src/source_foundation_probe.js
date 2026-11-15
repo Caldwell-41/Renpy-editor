@@ -6,7 +6,7 @@
   const find = window.__loomlightProbeFindButton;
   const click = async name => { await wait(() => find(name) && !find(name).disabled); find(name).click(); };
   // The host refuses a request that overlaps another one before dispatch, so every
-  // request, write or read, retries a RUNTIME_BUSY refusal. Checks below test the effect.
+  // request, write or read, retries a REQUEST_OVERLAP refusal. Checks below test the effect.
   const call = (operation, payload = {}) => window.__loomlightProbeRetryBusy(async () => {
     const result = await window.__TAURI_INTERNALS__.invoke('core_request', { request: { protocolVersion: 1, requestId: crypto.randomUUID(), operation, payload } });
     if (!result.ok) throw Object.assign(Error(`${operation}: ${result.error.code}`), { code: result.error.code }); return result.value;

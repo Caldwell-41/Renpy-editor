@@ -846,10 +846,11 @@ export function renderStoryView(
         if (await reload()) actions.status(staleStatus, "error");
         return false;
       }
-      // Core's Custom Code ending refusal already says what to do next. A busy host
-      // refused before reading the source, so Source is no answer to it.
+      // Core's Custom Code ending refusal already says what to do next. An overlapping
+      // request or a running game refused the change before it read the source, and
+      // Source would be refused the same way, so neither gets the Source advice.
       const code = (error as { code?: string }).code;
-      actions.status(`${friendlyError(error, "Scene change could not be saved")}${code === "CUSTOM_CODE_ENDING" ? "" : code === "RUNTIME_BUSY" ? " Input retained." : " Input retained. If this source structure cannot be moved safely, edit it in Source."}`, "error");
+      actions.status(`${friendlyError(error, "Scene change could not be saved")}${code === "CUSTOM_CODE_ENDING" ? "" : code === "RUNTIME_BUSY" || code === "REQUEST_OVERLAP" ? " Input retained." : " Input retained. If this source structure cannot be moved safely, edit it in Source."}`, "error");
       focusDraft();
       return false;
     } finally { unlock(); }

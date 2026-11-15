@@ -220,7 +220,7 @@ pub fn step(host: &ApplicationHost, payload: Value) -> Result<Value, &'static st
         }
         Ok(json!({"recorded":true}))
     })
-    .map_err(|_| "Windows fixture busy")?
+    .map_err(|e| e.busy_or("Windows fixture busy"))?
 }
 #[cfg(test)]
 mod tests {

@@ -379,7 +379,7 @@ try {
     try{await new Promise(resolve=>setTimeout(resolve,1200));return await visualRequest(operation,payload);}
     finally{loadingScene=false;}
    }
-   if(loadingScene&&operation==='source.list')return {protocolVersion:1,requestId:'fixture',ok:false,error:{code:'RUNTIME_BUSY',message:'Initial scene observation owns the service'}};
+   if(loadingScene&&operation==='source.list')return {protocolVersion:1,requestId:'fixture',ok:false,error:{code:'REQUEST_OVERLAP',message:'Initial scene observation owns the service'}};
    return visualRequest(operation,payload);
   };
   let preferences={schemaVersion:1,theme:'system',density:'default',sourceFontSize:14,rememberLayout:true,layouts:{}};
@@ -388,7 +388,7 @@ try {
    const response=value=>({protocolVersion:1,requestId:request.requestId,ok:true,value});
    if(request.operation==='probe.runtimeUiReport'){window.__refreshReport=request.payload;window.__busyRemaining=[...busy.values()];return response(null);}
    const remaining=busy.get(request.operation)??0;
-   if(remaining){busy.set(request.operation,remaining-1);return {protocolVersion:1,requestId:request.requestId,ok:false,error:{code:'RUNTIME_BUSY',message:'Observation overlaps draft retention'}};}
+   if(remaining){busy.set(request.operation,remaining-1);return {protocolVersion:1,requestId:request.requestId,ok:false,error:{code:'REQUEST_OVERLAP',message:'Observation overlaps draft retention'}};}
    if(request.operation==='preferences.write'){preferences=request.payload;return response(preferences);}
    if(request.operation==='preferences.read')return response(preferences);
    return {...await visualRequest(request.operation,request.payload),requestId:request.requestId};
@@ -433,7 +433,7 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
     try{await new Promise(resolve=>setTimeout(resolve,1200));return await visualRequest(operation,payload);}
     finally{held=false;}
    }
-   if(operation==='source.list'&&held){window.__earlyContention++;return {protocolVersion:1,requestId:'fixture',ok:false,error:{code:'RUNTIME_BUSY',message:'Initial observation owns service'}};}
+   if(operation==='source.list'&&held){window.__earlyContention++;return {protocolVersion:1,requestId:'fixture',ok:false,error:{code:'REQUEST_OVERLAP',message:'Initial observation owns service'}};}
    return visualRequest(operation,payload);
   };
   const {enableRichSourceEditor}=await import('/src/source-editor.ts');enableRichSourceEditor();

@@ -59,15 +59,15 @@ window.__loomlightProbeSelectBeat = beatId => {
   if (!select) throw Error(`Unique rendered fixture Beat required; ${columns.length} rendered`);
   if (select.dataset.selected !== 'true') select.click();
 };
-// ApplicationHost refuses a request that overlaps another one with RUNTIME_BUSY before
-// it dispatches it, so the refused request had no effect and any request may retry.
-// Other errors and the deadline still fail.
+// ApplicationHost refuses a request that overlaps another one with REQUEST_OVERLAP before
+// it checks out the service, so no handler ran and any request may retry. Other errors,
+// RUNTIME_BUSY from a handler while Ren'Py runs included, and the deadline still fail.
 window.__loomlightProbeRetryBusy = async (task, timeoutMs = 10000) => {
   const deadline = performance.now() + timeoutMs;
   for (;;) {
     try { return await task(); }
     catch (error) {
-      if (error.code !== 'RUNTIME_BUSY' || performance.now() >= deadline) throw error;
+      if (error.code !== 'REQUEST_OVERLAP' || performance.now() >= deadline) throw error;
       await new Promise(resolve => setTimeout(resolve, 100));
     }
   }

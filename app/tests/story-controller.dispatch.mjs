@@ -31,6 +31,7 @@ export const STORY_CASES=[
  'Undo of a nested beat keeps Redo when the host refuses a history read as busy',
  'Commit, Story Save and Undo land once when the host refuses each write as busy',
  'A Commit the host keeps refusing as busy keeps its input and shows a plain busy message',
+ 'A Commit the runtime refuses is sent once and keeps its input',
 ];
 const NARROW=STORY_CASES.filter((_,i)=>[0,1,2,7,8].includes(i));
 const REOPEN_CASE='Undo Redo preserves exact bytes and process reopen retains maps with session history reset';
@@ -58,8 +59,10 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
  let domSequence=0,lastEvent,caseActive=false,caseEventStart=0;
  const panelEvents=new Map(),sourceDocuments=new Map();let sourceInputEvent,sourceNavigationEvent;
  let stopFailure;let inFlight=0;let responseBarrier;
- // Requests the native host refuses before dispatch, as it does while another request holds the service.
+ // Requests the native host refuses before dispatch, as it does while another request holds
+ // the service (REQUEST_OVERLAP), or that a handler refuses while Ren'Py runs (RUNTIME_BUSY).
  const refusals=new Map();
+ const refusalMessages={REQUEST_OVERLAP:'Another request is in progress.',RUNTIME_BUSY:'Stop the runtime operation before changing these files.'};
  const transcript=[];
  const w=new Window({url:'http://tauri.localhost'});
  Object.assign(globalThis,{window:w,document:w.document,HTMLElement:w.HTMLElement,HTMLInputElement:w.HTMLInputElement,
@@ -128,9 +131,9 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
     'Source writes must originate in the current actual Source UI');
   }
   const refused=refusals.get(operation);
-  if(refused){
-   refusals.set(operation,refused-1);const response={protocolVersion:1,requestId:request.requestId,ok:false,error:{code:'RUNTIME_BUSY',message:'Another request is in progress.'}};
-   transcript.push({request,responseOk:false,errorCode:'RUNTIME_BUSY',refusedBeforeDispatch:true,domEvent:null});return response;
+  if(refused?.times){
+   refused.times--;const code=refused.code,response={protocolVersion:1,requestId:request.requestId,ok:false,error:{code,message:refusalMessages[code]}};
+   transcript.push({request,responseOk:false,errorCode:code,refusedBeforeDispatch:true,domEvent:null});return response;
   }
   inFlight++;let response;
   try{
@@ -200,7 +203,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   try{actionPromise=action();await wait(()=>barrier.observed);await observe();}
   finally{release();responseBarrier=undefined;await actionPromise;}
  };
- const busy=(operation,times)=>{assert(caseActive&&(reads.has(operation)||['scene.apply','scene.saveDrafts','history.undo'].includes(operation))&&times>0,'Only typed reads and Story writes may be refused as busy');refusals.set(operation,times);};
+ const busy=(operation,times,code='REQUEST_OVERLAP')=>{assert(caseActive&&(reads.has(operation)||['scene.apply','scene.saveDrafts','history.undo'].includes(operation))&&times>0&&code in refusalMessages,'Only typed reads and Story writes may be refused as busy');refusals.set(operation,{times,code});};
  const raw=async request=>{
   assert(['snapshot','externalAppend','externalRemove','externalReplace','interruptedSave'].includes(request?.driver),'Only owned fixture controls allowed');return child.request(request);
  };
@@ -251,7 +254,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
    const before=await snapshot();const from=transcript.length;const beforeEvent=domSequence;
    lastMutation=undefined;lastEvent=undefined;sourceInputEvent=undefined;sourceNavigationEvent=undefined;panelEvents.clear();caseEventStart=domSequence;caseActive=true;
    // Case code owns exact expected byte/model/history assertions and actual selectors.
-   try{await cases.storyCases[name](context);await context.settle();assert(![...refusals.values()].some(Boolean),'Every armed busy refusal must reach the app');}finally{caseActive=false;refusals.clear();}
+   try{await cases.storyCases[name](context);await context.settle();assert(![...refusals.values()].some(r=>r.times),'Every armed busy refusal must reach the app');}finally{caseActive=false;refusals.clear();}
    const after=await snapshot();const requests=transcript.slice(from);
    assert(domSequence>beforeEvent,'A DOM scenario must operate actual application controls');
    evidence.cases.push({name,passed:true,beforeSHA256:hashes(rpy(before)),afterSHA256:hashes(rpy(after)),

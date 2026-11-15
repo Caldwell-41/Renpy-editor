@@ -28,11 +28,11 @@ const rpc=async request=>{
   if(request.operation==='screens.inspect'&&busyInspectOnce){
     busyInspectOnce=false;await rpc({driver:'hold'});
     const response=await child.request(request);receipts.push({request,response});
-    assert.equal(response.error?.code,'RUNTIME_BUSY');releaseTimer=setTimeout(()=>void releaseOwner().catch(error=>errors.push(String(error))),100);return response;
+    assert.equal(response.error?.code,'REQUEST_OVERLAP');releaseTimer=setTimeout(()=>void releaseOwner().catch(error=>errors.push(String(error))),100);return response;
   }
   const response=await child.request(request);receipts.push({request,response});
   if(request.driver==='hold'){ownerHeld=true;releasePending=undefined;}
-  if(holdBusyLayoutReply&&request.operation==='screens.setLayout'&&response.error?.code==='RUNTIME_BUSY'){
+  if(holdBusyLayoutReply&&request.operation==='screens.setLayout'&&response.error?.code==='REQUEST_OVERLAP'){
     holdBusyLayoutReply=false;busyLayoutReply.resolve(response);await deliverBusyLayoutReply.promise;
   }
   return response;
@@ -86,7 +86,7 @@ try {
   await rpc({driver:'hold'});holdBusyLayoutReply=true;
   await ui.getByLabel('Width',{exact:true}).fill('750');await ui.getByRole('button',{name:'Apply layout',exact:true}).evaluate(button=>window.__helpFocus=button);await ui.getByRole('button',{name:'Apply layout',exact:true}).click();
   let replyTimer;
-  try{await Promise.race([busyLayoutReply.promise,new Promise((_,reject)=>{replyTimer=setTimeout(()=>reject(Error('Held layout request did not return RUNTIME_BUSY')),15000);})]);}finally{clearTimeout(replyTimer);}
+  try{await Promise.race([busyLayoutReply.promise,new Promise((_,reject)=>{replyTimer=setTimeout(()=>reject(Error('Held layout request did not return REQUEST_OVERLAP')),15000);})]);}finally{clearTimeout(replyTimer);}
   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   await writeFile(join(output,'ownership-focus-pending.json'),JSON.stringify(await focusState(),null,2));
   const pendingWrites=receipts.filter(receipt=>receipt.request.operation==='screens.setLayout').length;

@@ -21,6 +21,7 @@ const names=[
  'Undo of a nested beat keeps Redo when the host refuses a history read as busy',
  'Commit, Story Save and Undo land once when the host refuses each write as busy',
  'A Commit the host keeps refusing as busy keeps its input and shows a plain busy message',
+ 'A Commit the runtime refuses is sent once and keeps its input',
 ];
 const scene=c=>c.workspace().scenes.find(s=>s.id===c.workspace().entrySceneId);
 // The number Tracks shows for a beat. History names an existing beat by it (header-v2).
@@ -975,7 +976,7 @@ export const storyCases={
   const child=s.beats.find(b=>b.owner&&unique(b)),top=s.beats.find(b=>!b.owner&&unique(b));c.assert(child&&top,'A nested and a top-level narration');
   const retried=(operation,from)=>{const sent=c.requests().slice(from).filter(r=>r.request.operation===operation);
    c.assert(!/Another request|Source/.test(busyStatus(c)),`${operation} shows "${busyStatus(c)}"`);
-   c.assert.deepEqual(sent.map(r=>r.errorCode??'ok'),['RUNTIME_BUSY','ok'],`${operation} is sent again after a busy refusal`);
+   c.assert.deepEqual(sent.map(r=>r.errorCode??'ok'),['REQUEST_OVERLAP','ok'],`${operation} is sent again after a busy refusal`);
    c.assert.deepEqual(sent[1].request.payload,sent[0].request.payload,'The retry carries the same expected revisions');};
   const answered=(operation,from)=>()=>c.requests().slice(from).some(r=>r.request.operation===operation&&r.responseOk)||/Another request/.test(busyStatus(c));
   let from=c.requests().length;
@@ -1008,6 +1009,21 @@ export const storyCases={
   c.assert.equal(card(c,child.id).querySelector('textarea').value,'Busy past the wait');
   await c.click('Commit Beat',card(c,child.id));await c.wait(()=>c.lastMutation()?.response.ok);await c.settle();
   c.assert.equal(c.sourceText(await c.snapshot(),path),replaceOnce(c,original,`"${child.payload.text}"`,'"Busy past the wait"'));
+ },
+ // A runtime refusal lasts as long as Ren'Py runs, so the app shows it at once instead of
+ // holding the request lane, and the input stays in the editor.
+ [names[19]]:async c=>{
+  const s=busyScene(c),path=s.sourcePath,before=await c.snapshot(),original=c.sourceText(before,path);
+  const child=s.beats.find(b=>b.owner&&!b.protected&&b.payload.type==='narration'&&original.split(`"${b.payload.text}"`).length===2);c.assert(child,'A nested narration');
+  const from=c.requests().length,editor=await pick(c,child.id);c.enter(editor.querySelector('textarea'),'Refused while running');
+  c.busy('scene.apply',1,'RUNTIME_BUSY');await c.click('Commit Beat',editor);
+  await c.wait(()=>busyStatus(c).startsWith('Stop the runtime'));await c.settle();
+  c.assert.equal(busyStatus(c),'Stop the runtime operation before changing these files. Input retained.');
+  c.assert.deepEqual(c.requests().slice(from).filter(r=>r.request.operation==='scene.apply').map(r=>r.errorCode??'ok'),['RUNTIME_BUSY'],'A runtime refusal is not sent again');
+  c.assert.deepEqual(c.rpy(await c.snapshot()),c.rpy(before),'A refused Commit writes nothing');
+  c.assert.equal(card(c,child.id).querySelector('textarea').value,'Refused while running');
+  await c.click('Commit Beat',card(c,child.id));await c.wait(()=>c.lastMutation()?.response.ok);await c.settle();
+  c.assert.equal(c.sourceText(await c.snapshot(),path),replaceOnce(c,original,`"${child.payload.text}"`,'"Refused while running"'));
  },
  [RELEASE_JOURNEY]:async c=>{
   const view=async(c,name)=>{await c.click(name,c.document.querySelector('.scene-workspace .story-view-switch'));

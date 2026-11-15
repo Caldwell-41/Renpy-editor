@@ -182,7 +182,7 @@ impl Service {
                 let key = read(records, &profile)?;
                 Ok((profile, key))
             })
-            .map_err(|_| "Project service is busy; no model-load settings changed.")??;
+            .map_err(|e| e.busy_or("Project service is busy; no model-load settings changed."))??;
         // Management uses the same captured origin, credential and bounded transport.
         // Network and DNS never run while the project service is checked out.
         let prepared = ai_request::prepare(profile, key, 30).map_err(Failure::message)?;
@@ -350,7 +350,7 @@ impl Service {
                     credentials::token(&store),
                 ))
             })
-            .map_err(|_| "Project service is busy; no request was sent.")??;
+            .map_err(|e| e.busy_or("Project service is busy; no request was sent."))??;
         let compatibility_profile = compatibility.then(|| profile.profile_id.clone());
         // Resolution/transport construction is outside the project mutation lock.
         let prepared = if let Some(destination) = reviewed {
@@ -647,14 +647,14 @@ impl Service {
                 }
                 Ok(profile)
             })
-            .map_err(|_| "Project service is busy.")??;
+            .map_err(|e| e.busy_or("Project service is busy."))??;
         let destination =
             ai_request::resolve_destination(&profile.settings).map_err(Failure::message)?;
         host.with_service(|s| {
             s.rewrite_prepare_bound(&session, request, destination)
                 .map_err(|_| "Project or configuration changed; review a fresh send.")
         })
-        .map_err(|_| "Project service is busy.")?
+        .map_err(|e| e.busy_or("Project service is busy."))?
     }
     pub fn dispatch(
         self: &Arc<Self>,

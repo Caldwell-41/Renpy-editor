@@ -1,10 +1,11 @@
 //! Native-only isolated synthetic fixture. Uses the existing credential owner.
+use loomlight_core::dispatch::{checkout_failure, ApplicationHost, CheckoutError};
+use loomlight_core::CoreResponse;
 use loomlight_core::{
     ai_credentials::{self, Records},
     ai_profiles::{ProfileStore, StudioSettings},
     lifecycle::LifecycleService,
 };
-use loomlight_core::{dispatch::ApplicationHost, CoreResponse};
 use std::path::Path;
 use std::time::{Duration, Instant};
 
@@ -16,12 +17,7 @@ pub fn snapshot_response(
     // A snapshot must own the same checkout as source/history mutations.
     match host.with_service(|_| snapshot(root)) {
         Ok(files) => Ok(CoreResponse::success(request_id, files?)),
-        Err("Another request is in progress.") => Ok(CoreResponse::failure(
-            request_id,
-            "RUNTIME_BUSY",
-            "Another request is in progress.",
-        )),
-        Err(error) => Err(error),
+        Err(error) => Ok(checkout_failure(request_id, error)),
     }
 }
 
@@ -29,14 +25,14 @@ fn with_idle_service<T>(
     host: &ApplicationHost,
     timeout: Duration,
     task: impl FnOnce(&mut LifecycleService) -> T,
-) -> Result<T, &'static str> {
+) -> Result<T, CheckoutError> {
     let deadline = Instant::now() + timeout;
     let mut task = Some(task);
     loop {
         // Checkout refusal happens before the closure is invoked. Never repeat
         // cleanup after it entered the service, even when its inner result failed.
         match host.with_service(|service| task.take().unwrap()(service)) {
-            Err("Another request is in progress.") if Instant::now() < deadline => {
+            Err(CheckoutError::Overlap) if Instant::now() < deadline => {
                 std::thread::sleep(Duration::from_millis(10));
             }
             result => return result,
@@ -330,7 +326,7 @@ mod tests {
         let busy =
             serde_json::to_value(snapshot_response(&host, root.path(), "busy".into()).unwrap())
                 .unwrap();
-        assert_eq!(busy["error"]["code"], "RUNTIME_BUSY");
+        assert_eq!(busy["error"]["code"], "REQUEST_OVERLAP");
         release.send(()).unwrap();
         thread.join().unwrap();
         let response =
@@ -362,7 +358,7 @@ mod tests {
         let refused = with_idle_service(&host, Duration::from_millis(20), |_| {
             calls.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
         });
-        assert_eq!(refused, Err("Another request is in progress."));
+        assert_eq!(refused, Err(CheckoutError::Overlap));
         assert_eq!(calls.load(std::sync::atomic::Ordering::SeqCst), 0);
         release.send(()).unwrap();
         thread.join().unwrap();

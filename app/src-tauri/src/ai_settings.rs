@@ -33,8 +33,7 @@ struct Target {
     profile_id: String,
 }
 fn snapshot(host: &ApplicationHost) -> credentials::Result<ProfileStore> {
-    host.with_service(|s| s.read())
-        .map_err(|_| "Another request is in progress.")?
+    host.with_service(|s| s.read()).map_err(|e| e.message())?
 }
 
 /// Historical helper/native qualification is deferred, including all reads.
@@ -44,7 +43,7 @@ pub fn reuse_qualification(_: &ApplicationHost) -> credentials::Result<Value> {
 }
 pub(crate) fn secrets(host: &ApplicationHost) -> credentials::Result<impl Secrets> {
     host.with_service(|s| ai_native::secrets(s.ai_data_root()))
-        .map_err(|_| "Another request is in progress.")?
+        .map_err(|e| e.message())?
 }
 fn credential_view(
     profile: &StudioProfile,
@@ -985,7 +984,7 @@ pub fn dispatch(
                     .map_err(|_| "Current reload fixture busy")?;
                 let store = host
                     .with_service(|s| fixture.read(s))
-                    .map_err(|_| "Current reload host busy")??;
+                    .map_err(|e| e.busy_or("Current reload host busy"))??;
                 view_store(host, store)
             })();
             return match result {
@@ -1071,7 +1070,7 @@ fn dispatch_settings_with_fixture(
             host.with_service(|s| {
                 credentials::save(s, &p.token, p.profile_id.as_deref(), p.settings)
             })
-            .map_err(|_| "Another request is in progress.")??;
+            .map_err(|e| e.busy_or("Another request is in progress."))??;
             return view(host);
         }
         let p: Target =
@@ -1091,7 +1090,7 @@ fn dispatch_settings_with_fixture(
             }
             if let Some(fixture) = fixture.as_ref() {
                 host.with_service(|s| fixture.check_entry(s, &before, &p.profile_id))
-                    .map_err(|_| "Reload fixture busy.")??;
+                    .map_err(|e| e.busy_or("Reload fixture busy."))??;
             }
             let mut entry = credentials::CredentialEntry::new(&before, &p.token, &p.profile_id)?;
             let outcome = entry_driver(&mut entry)?;
@@ -1102,7 +1101,7 @@ fn dispatch_settings_with_fixture(
             if let Some(fixture) = fixture.as_mut() {
                 let reloaded = host
                     .with_service(|s| fixture.snapshot_after_save(s, outcome))
-                    .map_err(|_| "Reload fixture busy.")
+                    .map_err(|e| e.busy_or("Reload fixture busy."))
                     .and_then(|r| r)
                     .and_then(|store| view_store(host, store));
                 // A confirmation mismatch must not look like the selected fault.
@@ -1125,14 +1124,14 @@ fn dispatch_settings_with_fixture(
                         operation == "ai.removeProfile",
                     )
                 })
-                .map_err(|_| "Another request is in progress.")??;
+                .map_err(|e| e.busy_or("Another request is in progress."))??;
             return Ok(with_outcome(host, outcome, "Removed"));
         } else if operation == "ai.cleanup" {
             host.with_service(|s| {
                 credentials::checked(s, &p.token)?;
                 credentials::cleanup_profile(s, &secrets, &p.profile_id)
             })
-            .map_err(|_| "Another request is in progress.")??;
+            .map_err(|e| e.busy_or("Another request is in progress."))??;
         } else if operation == "ai.discover" {
             let profile = before
                 .profiles
@@ -1237,7 +1236,7 @@ fn native_save(
 ) -> credentials::Result<Option<credentials::SaveOutcome>> {
     native_entry(app, false, |key| {
         host.with_service(|s| entry.save(s, secrets, key))
-            .map_err(|_| "Another request is in progress; input retained for retry.")?
+            .map_err(|e| e.busy_or("Another request is in progress; input retained for retry."))?
     })
 }
 pub(crate) fn native_entry(
@@ -1297,6 +1296,6 @@ fn drive_entry(
 ) -> credentials::Result<Option<credentials::SaveOutcome>> {
     drive_native_entry(receive, results, |key| {
         host.with_service(|s| entry.save(s, secrets, key))
-            .map_err(|_| "Another request is in progress; input retained for retry.")?
+            .map_err(|e| e.busy_or("Another request is in progress; input retained for retry."))?
     })
 }
