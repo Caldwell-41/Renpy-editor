@@ -307,7 +307,8 @@ async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], pay
   // REQUEST_OVERLAP means the host refused before checking out the service, so no handler
   // ran and the same request, write or read, can be sent again. A native dialog request is
   // refused this way only before its dialog opens. The retry keeps its lane turn and
-  // its payload. Every other code, RUNTIME_BUSY included, comes from a handler that ran.
+  // its payload. No other code is retried: RUNTIME_BUSY comes from a handler that ran and
+  // lasts while Ren'Py runs, and INTERNAL_ERROR may follow a write or outlast any retry.
   const response = await requestLane.run(operation, async () => {
     for (let attempt = 0; ; attempt += 1) {
       const response = await coreRequester<T>(operation, payload);
