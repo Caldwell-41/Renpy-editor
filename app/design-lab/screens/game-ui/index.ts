@@ -1,0 +1,419 @@
+// Game UI layout study (#197): three layouts of the Game UI workspace, switchable via ?variant=.
+// Throwaway and memory-only. Nothing here reads a project, writes source or runs Ren'Py.
+// The three layouts share the sample game and the setting controls. Each one decides for
+// itself where the screen list, the settings, the themes and the detailed level go.
+import type { LabContext } from '../../contracts.ts';
+import { icon } from '../../../src/icons.ts';
+import { game, type GameContext } from './game.ts';
+import { art, defaults, fieldByKey, follows, groupTitles, ownerOf, pageById, pages, sampleDefaults, themes, type Field, type Group, type Page, type Part, type Sample, type Value, type Values } from './model.ts';
+import './game.css';
+import './style.css';
+
+export type Variant = 'pages' | 'click' | 'board';
+const variants: Variant[] = ['pages', 'click', 'board'];
+const names: Record<Variant, string> = { pages: '1 · Pages and panel', click: '2 · Click the game', board: '3 · Whole-game board' };
+
+type Doc = { values: Values; offsets: Record<string, { x: number; y: number }>; added: Record<string, { id: string; kind: string }[]> };
+type Entry = { name: string; page: string; before: Doc; after: Doc };
+
+const esc = (value: string) => value.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+const svg = (d: string) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const glyph = {
+  undo: 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11', redo: 'm15 14 5-5-5-5m5 5H9.5a5.5 5.5 0 0 0 0 11H13',
+  gameUi: 'M3 4h18v13H3zM8 21h8M12 17v4M7 12h6M7 9h3', plus: 'M12 5v14M5 12h14', back: 'm14 5-7 7 7 7', next: 'm10 5 7 7-7 7',
+  link: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1',
+  elements: 'M4 4h7v7H4zM13 13h7v7h-7zM14 4l5 5M19 4l-5 5', down: 'm6 9 6 6 6-6', play: 'M7 4v16l13-8z',
+};
+const mac = /Mac|iPhone|iPad/.test(navigator.platform);
+const clone = (doc: Doc): Doc => structuredClone(doc);
+const hasStates = (id: string, kind: string) => kind === 'Button' || ['menu', 'nav', 'list'].includes(id);
+
+export function mountGameUi(host: HTMLElement, context: LabContext, initial: Variant) {
+  document.documentElement.dataset.theme = context.theme;
+  let variant = initial;
+  // What the author looks at. `home` is the board of layout 3, `fine` the game-wide settings of layouts 2 and 3.
+  let page: string, level: 'settings' | 'elements', sel: string | null, home: boolean, fine: boolean, more: boolean, tryIt: boolean;
+  let open: '' | 'theme' | 'add' | 'sample', hit: string | null, replay: string;
+  let doc: Doc, done: Entry[], undone: Entry[], saved: number, status: string, sample: Record<string, string>;
+  let pending: Doc | null = null;
+
+  function reset(state: string) {
+    doc = { values: { ...defaults }, offsets: {}, added: {} }; done = []; undone = []; saved = 0; status = 'Ready';
+    sample = { ...sampleDefaults }; page = 'say'; level = 'settings'; sel = null; home = false; fine = false; more = false; tryIt = false; open = ''; hit = null; replay = '';
+    if (state === 'title') page = 'title';
+    if (state === 'themes') { if (variant === 'pages') page = 'look'; else if (variant === 'click') open = 'theme'; else home = true; }
+    if (state === 'detailed') { page = 'title'; level = 'elements'; sel = 'menu'; more = true; }
+  }
+
+  // ---- the sample project ----
+  function read(key: string, over?: Values): Value {
+    const value = over && key in over ? over[key] : doc.values[key];
+    if (value === null || value === undefined) return follows[key] ? read(follows[key]!, over) : null;
+    return value;
+  }
+  const canSelect = () => variant === 'click' ? !tryIt : level === 'elements';
+  function gameContext(id: string, over: Values | undefined, main: boolean): GameContext {
+    return { g: key => read(key, over), s: key => sample[key] ?? '', parts: main, sel: main && canSelect() ? sel : null, offsets: doc.offsets, added: doc.added[id] ?? [], replay: main ? replay : '' };
+  }
+  function stage(id: string, o: { over?: Values; main?: boolean } = {}) {
+    return `<div class="gu-stage" data-game="${id}"${o.main ? ' data-main' : ''}${o.over ? ` data-over="${esc(JSON.stringify(o.over))}"` : ''}>${game(id, gameContext(id, o.over, !!o.main))}</div>`;
+  }
+  /** Redraws every game picture in place. The controls keep their focus and their drag. */
+  function refreshStages() {
+    host.querySelectorAll<HTMLElement>('[data-game]').forEach(node => {
+      node.innerHTML = game(node.dataset.game!, gameContext(node.dataset.game!, node.dataset.over ? JSON.parse(node.dataset.over) as Values : undefined, node.hasAttribute('data-main')));
+    });
+  }
+  /** Records one edit. `at` is the page Undo returns to. */
+  function push(name: string, before: Doc, at = page) { done.push({ name, page: at, before, after: clone(doc) }); undone = []; status = 'Ready'; }
+  function commit(name: string, change: (next: Doc) => void, at = page) { const before = clone(doc); change(doc); push(name, before, at); }
+  function reveal(entry: Entry) {
+    go(entry.page);
+    if (entry.page === 'look' && variant !== 'pages') { page = 'say'; fine = true; home = variant === 'board'; }
+  }
+  function undo() { const entry = done.pop(); if (!entry) return; doc = clone(entry.before); undone.push(entry); reveal(entry); status = `Undone: ${entry.name}`; }
+  function redo() { const entry = undone.pop(); if (!entry) return; doc = clone(entry.after); done.push(entry); reveal(entry); status = `Redone: ${entry.name}`; }
+  function go(id: string) {
+    page = id; sel = null; home = false; fine = false; open = ''; hit = null;
+    if (id === 'look') level = 'settings';
+  }
+  const editName = (key: string) => `${ownerOf[key]?.title ?? 'Game UI'} ${fieldByKey[key]?.label.toLowerCase() ?? key}`;
+  const partsOf = (pg: Page): Part[] => [...pg.parts, ...(doc.added[pg.id] ?? []).map(item => [item.id, `New ${item.kind.toLowerCase()}`, item.kind] as const)];
+  const partOf = (pg: Page, id: string | null) => partsOf(pg).find(item => item[0] === id);
+  const themeNow = () => themes.find(theme => Object.entries(theme.values).every(([key, value]) => doc.values[key] === value));
+
+  // ---- shared controls ----
+  function control(f: Field): string {
+    const value = read(f.key);
+    const label = esc(f.label);
+    switch (f.kind) {
+      case 'color': return `<span class="gu-color"><input type="color" data-key="${f.key}" value="${value}" aria-label="${label}"><code>${value}</code></span>`;
+      case 'segment': return `<div class="gu-seg" role="group" aria-label="${label}">${f.options!.map(([v, text]) => `<button type="button" data-set="${f.key}" data-value="${v}" aria-pressed="${String(value) === v}">${text}</button>`).join('')}</div>`;
+      case 'select': return `<select data-key="${f.key}" aria-label="${label}">${f.options!.map(([v, text]) => `<option value="${v}" ${String(value) === v ? 'selected' : ''}>${text}</option>`).join('')}</select>`;
+      case 'range': return `<span class="gu-range"><input type="range" data-key="${f.key}" min="${f.min}" max="${f.max}" value="${value}" aria-label="${label}"><output>${value}${f.unit ?? ''}</output></span>`;
+      case 'image': return `<div class="gu-pics" role="group" aria-label="${label}">${f.options!.map(([v, text]) => `<button type="button" data-set="${f.key}" data-value="${v}" aria-pressed="${String(value) === v}" aria-label="${text}" title="${text}"${v === 'none' ? '>None' : ` style="background-image:url(${art[v]})">`}</button>`).join('')}</div>`;
+      case 'checks': { const on = String(value).split(','); return `<div class="gu-checks" role="group" aria-label="${label}">${f.options!.map(([v, text]) => `<label><input type="checkbox" data-check="${f.key}" data-value="${v}" ${on.includes(v) ? 'checked' : ''}>${text}</label>`).join('')}</div>`; }
+      default: return '';
+    }
+  }
+  function field(f: Field): string {
+    if (f.kind === 'toggle') return `<label class="gu-toggle"><input type="checkbox" data-key="${f.key}" ${read(f.key) ? 'checked' : ''}>${esc(f.label)}</label>`;
+    let body = control(f);
+    if (f.follows) {
+      if (doc.values[f.key] === null) {
+        const shown = read(f.key);
+        const what = f.kind === 'color' ? `<i class="gu-swatch" style="background:${shown}"></i>` : '';
+        const word = f.kind === 'color' ? '' : ` (${f.options?.find(([v]) => v === String(shown))?.[1] ?? shown})`;
+        body = `<button type="button" class="gu-flat gu-follow" data-own="${f.key}" title="Give this screen its own value">${what}Same as game-wide look${word}</button>`;
+      } else body += `<button type="button" class="gu-flat gu-same" data-same="${f.key}" title="Use the game-wide look again" aria-label="${esc(f.label)}: use the game-wide look again">${svg(glyph.link)}</button>`;
+    }
+    return `<div class="gu-field"><span class="gu-label">${esc(f.label)}</span><span class="gu-control">${body}</span>${f.help ? `<p class="gu-help">${esc(f.help)}</p>` : ''}</div>`;
+  }
+  const groupHtml = (group: Group) => `<section class="gu-group${group.part && group.part === hit ? ' is-hit' : ''}"${group.part ? ` data-group-part="${group.part}"` : ''}><h3>${esc(group.title)}</h3>${group.fields.map(field).join('')}</section>`;
+  const groupsHtml = (groups: readonly Group[]) => groups.map(groupHtml).join('');
+  function templateTiles(pg: Page, cls = '') {
+    return `<div class="gu-tiles ${cls}">${(pg.templates ?? []).map(t => `<button type="button" class="gu-tile" data-template="${t.id}" aria-pressed="${Object.entries(t.values).every(([key, value]) => doc.values[key] === value)}">${stage(pg.id, { over: t.values })}<span>${t.name}</span></button>`).join('')}</div>`;
+  }
+  function themeTiles(cls = '') {
+    const now = themeNow();
+    return `<div class="gu-tiles ${cls}">${themes.map(t => `<button type="button" class="gu-tile" data-theme="${t.id}" aria-pressed="${t === now}">${stage('say', { over: t.values })}<span>${esc(t.name)}</span><small>${t.note}</small></button>`).join('')}</div>`;
+  }
+  function sampleControl(s: Sample, form: 'select' | 'segment') {
+    if (form === 'select') return `<label class="gu-sample">${s.label}<select data-sample-key="${s.key}">${s.options.map(([v, text]) => `<option value="${v}" ${sample[s.key] === v ? 'selected' : ''}>${text}</option>`).join('')}</select></label>`;
+    return `<span class="gu-sample"><span class="gu-label">${s.label}</span><span class="gu-seg" role="group" aria-label="Sample ${s.label.toLowerCase()}">${s.options.map(([v, text]) => `<button type="button" data-sample="${s.key}" data-value="${v}" aria-pressed="${sample[s.key] === v}">${text}</button>`).join('')}</span></span>`;
+  }
+  const samples = (pg: Page, form: 'select' | 'segment') => (pg.samples ?? []).map(s => sampleControl(s, form)).join('');
+  function addMenu() {
+    return `<span class="gu-anchor"><button type="button" data-act="menu-add" aria-expanded="${open === 'add'}">${svg(glyph.plus)}Add element</button>${open === 'add' ? `<div class="gu-pop gu-menu gu-pop-right" role="menu">${['Text', 'Image', 'Button', 'Bar', 'Box'].map(kind => `<button type="button" class="gu-flat" role="menuitem" data-add="${kind}">${kind}</button>`).join('')}</div>` : ''}</span>`;
+  }
+  const elementList = (pg: Page) => `<div class="gu-els">${partsOf(pg).map(([id, name, kind]) => `<button type="button" class="gu-row gu-el" data-select="${id}" aria-pressed="${sel === id}"><span>${name}</span><span class="gu-muted">${kind}</span></button>`).join('')}</div>`;
+  /** The detailed level's own properties for one element. The plain settings for it sit above these. */
+  function deeper(pg: Page, id: string) {
+    const off = doc.offsets[`${pg.id}.${id}`] ?? { x: 0, y: 0 };
+    const kind = partOf(pg, id)?.[2] ?? '';
+    return `<section class="gu-group"><h3>Position</h3>
+        <div class="gu-field"><span class="gu-label">Moved by</span><span class="gu-control gu-xy"><label>X<input type="number" data-offset="x" value="${off.x}"></label><label>Y<input type="number" data-offset="y" value="${off.y}"></label></span>
+        <p class="gu-help">Drag the element on the canvas, or type how far it sits from its place in the layout.</p></div></section>
+      ${hasStates(id, kind) ? `<section class="gu-group"><h3>Button states</h3>${sampleControl({ key: 'state', label: 'Show', options: [['idle', 'Idle'], ['hover', 'Hover'], ['selected', 'Selected'], ['disabled', 'Disabled']] }, 'segment')}<p class="gu-help gu-help-wide">The canvas shows the first button in this state. Each state takes its own colors, border and picture.</p></section>` : ''}
+      <p class="gu-note">Box effects, image frames and animation belong to the next mock, "Design the detailed level on the screen canvas".</p>`;
+  }
+  const settingsFor = (pg: Page, id: string) => groupsHtml((pg.groups ?? []).filter(group => group.part === id));
+  function elementsPanel(pg: Page, withAdd = true) {
+    const part = partOf(pg, sel);
+    return `<section class="gu-group"><div class="gu-group-head"><h3>${withAdd ? 'Elements' : 'On this screen'}</h3>${withAdd ? addMenu() : ''}</div>${elementList(pg)}</section>
+      ${part ? `<div class="gu-part-head"><h2>${part[1]}</h2><span class="gu-muted">${part[2]}</span></div>${settingsFor(pg, part[0])}${deeper(pg, part[0])}` : '<p class="gu-note">Select an element on the canvas or in the list. Drag it to move it.</p>'}`;
+  }
+  const noSettings = (pg: Page) => `<section class="gu-group"><p>${pg.title} has no settings page yet. It follows the game-wide look.</p><div><button type="button" data-act="level-elements">Edit its elements</button></div></section>`;
+  const resetRow = (pg: Page) => `<section class="gu-group"><div><button type="button" data-act="reset-page">Reset ${pg.title}</button></div></section>`;
+
+  // ---- application shell ----
+  function command(kind: 'undo' | 'redo') {
+    const entry = kind === 'undo' ? done.at(-1) : undone.at(-1);
+    const word = kind === 'undo' ? 'Undo' : 'Redo';
+    const label = entry ? `${word} ${entry.name}` : `Nothing to ${kind}`;
+    const keys = kind === 'undo' ? (mac ? '⌘Z' : 'Ctrl+Z') : (mac ? '⇧⌘Z' : 'Ctrl+Y');
+    return `<button type="button" class="gu-icon" data-act="${kind}" aria-label="${esc(label)}" title="${esc(label)} ${keys}" aria-disabled="${!entry}">${svg(glyph[kind])}</button>`;
+  }
+  function header() {
+    const count = Math.abs(done.length - saved);
+    return `<strong class="gu-brand" data-icon="story">Loomlight</strong><span class="gu-project">The Last Tram</span><span class="gu-spacer"></span>
+      <span class="gu-save-state">${count ? `${count} unsaved ${count === 1 ? 'change' : 'changes'}` : 'Saved'}</span>
+      <div class="gu-history" role="group" aria-label="Project history">${command('undo')}${command('redo')}</div>
+      <button type="button" class="gu-primary" data-act="save">Save</button>
+      <div class="gu-runtime" role="toolbar" aria-label="Runtime controls"><button type="button" data-act="validate">Validate</button><button type="button" data-act="run">Run</button><button type="button" disabled>Stop</button></div>`;
+  }
+  const rail = () => `<nav class="gu-rail" aria-label="Workspaces"><span data-icon="story" title="Story"></span><span data-icon="source" title="Source"></span><span data-icon="branches" title="Branches"></span>
+    <button type="button" class="gu-flat" aria-pressed="true" aria-label="Game UI" title="Game UI">${svg(glyph.gameUi)}</button>
+    <span data-icon="characters" title="Characters"></span><span data-icon="assets" title="Assets"></span><span data-icon="variables" title="Variables"></span></nav>`;
+  const canvas = (pg: Page) => `<div class="gu-canvas${canSelect() ? ' gu-pick' : ''}${tryIt ? ' gu-try' : ''}">${stage(pg.id, { main: true })}</div>`;
+  const elementsOnly = `<span class="gu-only" title="No settings page yet. You edit its elements.">${svg(glyph.elements)}</span>`;
+
+  // ---- layout 1: a list of pages, the canvas, and a panel that switches between Settings and Elements ----
+  function layoutPages(pg: Page) {
+    const look = pg.id === 'look';
+    const list = (Object.keys(groupTitles) as Page['group'][]).map(group => `<h3>${groupTitles[group]}</h3>${pages.filter(item => item.group === group).map(item =>
+      `<button type="button" class="gu-row" data-go="${item.id}" ${item.id === page ? 'aria-current="page"' : ''}><span>${item.title}</span>${item.groups ? '' : elementsOnly}</button>`).join('')}`).join('');
+    const sheet = `<div class="gu-canvas"><div class="gu-sheet">${['say', 'choice', 'title', 'save'].map(id => `<button type="button" class="gu-tile" data-go="${id}">${stage(id)}<span>${pageById(id).title}</span></button>`).join('')}</div></div>`;
+    const foot = look ? 'Four of your screens with sample content. Click one to open it.'
+      : level === 'elements' ? 'Click an element to select it. Drag it to move it.'
+        : 'Sample content. It never changes your game. Click a part to find its settings, or double-click it to edit it as an element.';
+    const panel = look ? `<div class="gu-panel-head"><h2>Game-wide look</h2></div><div class="gu-scroll" data-scroll="panel"><section class="gu-group"><h3>Theme</h3>${themeTiles()}<p class="gu-help gu-help-wide">A theme sets everything below. A screen that has its own value keeps it.</p></section>${groupsHtml(pg.groups!)}</div>`
+      : `<div class="gu-panel-head"><div class="gu-seg gu-level" role="group" aria-label="Level"><button type="button" data-act="level-settings" aria-pressed="${level === 'settings'}">Settings</button><button type="button" data-act="level-elements" aria-pressed="${level === 'elements'}">Elements</button></div></div>
+        <div class="gu-scroll" data-scroll="panel">${level === 'elements' ? elementsPanel(pg)
+    : `${pg.templates ? `<section class="gu-group"><h3>Template</h3>${templateTiles(pg)}</section>` : ''}${pg.groups ? groupsHtml(pg.groups) : noSettings(pg)}${resetRow(pg)}`}</div>`;
+    return `<aside class="gu-list" data-scroll="list" aria-label="Game UI screens">${list}<div class="gu-list-foot"><button type="button" data-act="new-screen">${svg(glyph.plus)}New screen</button></div></aside>
+      <main class="gu-centre"><div class="gu-bar"><h2>${pg.title}</h2>${look ? '' : samples(pg, 'select')}</div>${look ? sheet : canvas(pg)}<p class="gu-foot">${foot}</p></main>
+      <aside class="gu-panel" aria-label="${look ? 'Game-wide look' : level === 'elements' ? 'Elements' : 'Settings'}">${panel}</aside>`;
+  }
+
+  // ---- layout 2: the canvas is the navigation. Click a part for its settings. No level switch. ----
+  function layoutClick(pg: Page) {
+    const now = themeNow();
+    const themeButton = `<span class="gu-anchor"><button type="button" data-act="menu-theme" aria-expanded="${open === 'theme'}"><span class="gu-dots">${['gui.panel', 'gui.accent', 'gui.text'].map(key => `<i style="background:${read(key)}"></i>`).join('')}</span>Theme: ${now ? esc(now.name) : 'Your own'}${svg(glyph.down)}</button>
+      ${open === 'theme' ? `<div class="gu-pop gu-theme-pop"><h3>Theme</h3>${themeTiles('gu-tiles-4')}<div><button type="button" data-act="fine">Fine-tune colors, text, buttons and boxes</button></div></div>` : ''}</span>`;
+    const strip = (['story', 'menus', 'yours'] as const).map(group => `<div class="gu-strip-group"><h3>${groupTitles[group]}</h3><div class="gu-strip-row">${pages.filter(item => item.group === group).map(item =>
+      `<button type="button" class="gu-tile gu-thumb" data-go="${item.id}" ${item.id === page ? 'aria-current="page"' : ''}>${stage(item.id)}<span>${item.title}</span></button>`).join('')}${group === 'yours' ? `<button type="button" class="gu-new" data-act="new-screen">${svg(glyph.plus)}New screen</button>` : ''}</div></div>`).join('');
+    const part = partOf(pg, sel);
+    let panel: string;
+    if (fine) panel = `<div class="gu-panel-head"><button type="button" class="gu-flat gu-crumb" data-act="fine">${svg(glyph.back)}${pg.title}</button><h2>Game-wide look</h2></div><div class="gu-scroll" data-scroll="panel"><section class="gu-group"><h3>Theme</h3>${themeTiles()}</section>${groupsHtml(pageById('look').groups!)}</div>`;
+    else if (part) {
+      const plain = settingsFor(pg, part[0]);
+      panel = `<div class="gu-panel-head"><button type="button" class="gu-flat gu-crumb" data-act="deselect">${svg(glyph.back)}${pg.title}</button><h2>${part[1]}</h2><span class="gu-muted">${part[2]}</span></div>
+        <div class="gu-scroll" data-scroll="panel">${plain || '<p class="gu-note">This part has no plain settings yet. It follows the game-wide look.</p>'}
+        <button type="button" class="gu-flat gu-disclose" data-act="more" aria-expanded="${more}">${svg(more ? glyph.down : glyph.next)}All properties</button>${more ? deeper(pg, part[0]) : ''}</div>`;
+    } else panel = `<div class="gu-panel-head"><h2>${pg.title}</h2></div><div class="gu-scroll" data-scroll="panel">
+        ${pg.templates ? `<section class="gu-group"><h3>Template</h3>${templateTiles(pg)}</section>` : ''}
+        ${groupsHtml((pg.groups ?? []).filter(group => !group.part))}
+        <section class="gu-group"><h3>Parts of this screen</h3>${elementList(pg)}<p class="gu-help gu-help-wide">Click a part here or on the canvas to change it.</p></section>${resetRow(pg)}</div>`;
+    return `<main class="gu-centre"><div class="gu-bar"><h2>${pg.title}</h2>${themeButton}<span class="gu-spacer"></span>${addMenu()}
+        <button type="button" data-act="try" aria-pressed="${tryIt}" title="Use the screen the way a player does. Nothing is saved.">${svg(glyph.play)}Try it</button></div>
+      ${canvas(pg)}
+      <div class="gu-showing">${tryIt ? '<span>Try it is on. Buttons react to the pointer and menu buttons open their screens.</span>' : `${samples(pg, 'segment')}<span class="gu-muted">Sample content never changes your game.</span>`}</div>
+      <div class="gu-strip" data-scroll="strip" aria-label="Game UI screens">${strip}</div></main>
+      <aside class="gu-panel" aria-label="Settings">${panel}</aside>`;
+  }
+
+  // ---- layout 3: a board of every screen with the themes beside it, then one screen in focus ----
+  function layoutBoard(pg: Page) {
+    if (home) {
+      const board = (['story', 'menus', 'yours'] as const).map(group => `<section><h3>${groupTitles[group]}</h3><div class="gu-board-row">${pages.filter(item => item.group === group).map(item =>
+        `<button type="button" class="gu-tile" data-go="${item.id}">${stage(item.id)}<span>${item.title}${item.groups ? '' : elementsOnly}</span></button>`).join('')}${group === 'yours' ? `<button type="button" class="gu-new" data-act="new-screen">${svg(glyph.plus)}New screen</button>` : ''}</div></section>`).join('');
+      return `<aside class="gu-list gu-look" aria-label="Game-wide look"><div class="gu-panel-head"><h2>Game-wide look</h2></div><div class="gu-scroll" data-scroll="look"><section class="gu-group"><h3>Theme</h3>${themeTiles()}<p class="gu-help gu-help-wide">Every screen on the board follows the theme. A screen that has its own value keeps it.</p></section>${groupsHtml(pageById('look').groups!)}</div></aside>
+        <main class="gu-board" data-scroll="board" aria-label="Game UI screens">${board}</main>`;
+    }
+    const editing = level === 'elements';
+    const summary = (pg.samples ?? []).map(s => s.options.find(([v]) => v === sample[s.key])?.[1]).join(', ');
+    const sampleMenu = pg.samples ? `<span class="gu-anchor"><button type="button" data-act="menu-sample" aria-expanded="${open === 'sample'}">Sample: ${summary}${svg(glyph.down)}</button>${open === 'sample' ? `<div class="gu-pop gu-sample-pop">${samples(pg, 'segment')}<p class="gu-help gu-help-wide">Sample content never changes your game.</p></div>` : ''}</span>` : '';
+    return `<main class="gu-centre"><div class="gu-bar${editing ? ' gu-bar-editing' : ''}"><button type="button" data-act="home">${svg(glyph.back)}All screens</button>
+        <button type="button" class="gu-icon" data-act="prev" aria-label="Previous screen" title="Previous screen">${svg(glyph.back)}</button><button type="button" class="gu-icon" data-act="next" aria-label="Next screen" title="Next screen">${svg(glyph.next)}</button>
+        <h2>${pg.title}</h2>${sampleMenu}<span class="gu-spacer"></span>
+        ${editing ? `<span>Editing elements</span>${addMenu()}<button type="button" class="gu-primary" data-act="level-settings">Done</button>` : `<button type="button" data-act="level-elements">${svg(glyph.elements)}Edit elements</button>`}</div>
+      ${canvas(pg)}
+      ${pg.templates && !editing ? `<div class="gu-tstrip"><h3>Templates</h3>${templateTiles(pg, 'gu-tiles-row')}</div>` : `<p class="gu-foot">${editing ? 'Click an element to select it. Drag it to move it.' : 'Click a part to find its settings, or double-click it to edit elements.'}</p>`}</main>
+      <aside class="gu-panel" aria-label="${editing ? 'Elements' : 'Settings'}"><div class="gu-panel-head"><h2>${editing ? 'Elements' : 'Settings'}</h2></div><div class="gu-scroll" data-scroll="panel">${editing ? elementsPanel(pg, false) : `${pg.groups ? groupsHtml(pg.groups) : noSettings(pg)}${resetRow(pg)}`}</div></aside>`;
+  }
+
+  // ---- rendering ----
+  function focusSelector(el: HTMLElement) {
+    for (const name of ['key', 'set', 'act', 'go', 'select', 'check', 'template', 'theme', 'sample', 'own', 'same', 'offset', 'add']) {
+      const value = el.dataset[name];
+      if (value !== undefined) return `[data-${name}="${value}"]${el.dataset.value !== undefined ? `[data-value="${el.dataset.value}"]` : ''}`;
+    }
+    return el.dataset.sampleKey ? `[data-sample-key="${el.dataset.sampleKey}"]` : null;
+  }
+  function render() {
+    const active = document.activeElement as HTMLElement | null;
+    const focus = active && host.contains(active) ? focusSelector(active) : null;
+    const scroll = new Map<string, [number, number]>();
+    host.querySelectorAll<HTMLElement>('[data-scroll]').forEach(node => scroll.set(node.dataset.scroll!, [node.scrollTop, node.scrollLeft]));
+    const pg = pageById(page);
+    host.innerHTML = `<div class="gu-shell" data-variant="${variant}" data-home="${variant === 'board' && home}">
+      <section class="gu-proto" aria-label="Prototype controls"><strong>Game UI layout study · unapproved</strong><span>Sample project. Changes stay in this preview.</span>
+        <button type="button" data-act="reset">Reset</button><label>Layout <select data-variant-select aria-label="Game UI layout">${variants.map(v => `<option value="${v}" ${v === variant ? 'selected' : ''}>${names[v]}</option>`).join('')}</select></label></section>
+      <div class="gu-app"><header class="gu-header">${header()}</header>
+        <div class="gu-body">${rail()}${variant === 'pages' ? layoutPages(pg) : variant === 'click' ? layoutClick(pg) : layoutBoard(pg)}</div>
+        <footer class="gu-footer"><span role="status" aria-live="polite">${esc(status)}</span><span class="gu-muted">Local project</span></footer></div></div>`;
+    host.querySelectorAll<HTMLElement>('[data-icon]').forEach(node => node.prepend(icon(node.dataset.icon!)));
+    host.querySelectorAll<HTMLElement>('[data-scroll]').forEach(node => { const at = scroll.get(node.dataset.scroll!); if (at) { node.scrollTop = at[0]; node.scrollLeft = at[1]; } });
+    if (hit) host.querySelector('.is-hit')?.scrollIntoView({ block: 'nearest' });
+    host.querySelector('.gu-strip [aria-current]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (focus) host.querySelector<HTMLElement>(focus)?.focus();
+    replay = '';
+  }
+  function switchVariant(next: Variant) {
+    variant = next; open = ''; home = false; fine = false;
+    if (page === 'look') { page = 'say'; fine = next === 'click'; home = next === 'board'; }
+    if (['http:', 'https:'].includes(location.protocol) && !location.pathname.includes('preview.html')) {
+      try { const url = new URL(location.href); url.searchParams.set('variant', next); history.replaceState(null, '', url); } catch { /* An inline viewer may refuse URL changes. */ }
+    }
+    render();
+  }
+
+  // ---- events ----
+  function act(name: string) {
+    const order = pages.filter(item => item.id !== 'look');
+    switch (name) {
+      case 'undo': undo(); break;
+      case 'redo': redo(); break;
+      case 'save': saved = done.length; status = 'Saved.'; break;
+      case 'validate': status = 'No problems found in this sample.'; break;
+      case 'run': status = 'Run is not part of this preview. It starts the game at the title screen.'; break;
+      case 'reset': reset(new URLSearchParams(location.search).get('state') ?? 'dialogue'); break;
+      case 'level-settings': level = 'settings'; sel = null; break;
+      case 'level-elements': level = 'elements'; hit = null; break;
+      case 'home': home = true; open = ''; sel = null; level = 'settings'; break;
+      case 'prev': case 'next': go(order[(order.findIndex(item => item.id === page) + (name === 'next' ? 1 : -1) + order.length) % order.length]!.id); break;
+      case 'fine': fine = !fine; sel = null; break;
+      case 'more': more = !more; break;
+      case 'deselect': sel = null; break;
+      case 'try': tryIt = !tryIt; sel = null; break;
+      case 'menu-theme': open = open === 'theme' ? '' : 'theme'; return;
+      case 'menu-add': open = open === 'add' ? '' : 'add'; return;
+      case 'menu-sample': open = open === 'sample' ? '' : 'sample'; return;
+      case 'new-screen': status = 'New screen opens the visual starters. They are not part of this mock.'; break;
+      case 'reset-page': {
+        const pg = pageById(page);
+        const keys = [...(pg.groups ?? []).flatMap(group => group.fields.map(f => f.key)), ...(pg.templates ?? []).flatMap(t => Object.keys(t.values))];
+        commit(`reset ${pg.title}`, target => {
+          for (const key of keys) target.values[key] = defaults[key] ?? null;
+          for (const key of Object.keys(target.offsets)) if (key.startsWith(`${pg.id}.`)) delete target.offsets[key];
+          delete target.added[pg.id];
+        });
+        sel = null; break;
+      }
+    }
+    open = '';
+  }
+  function onClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (target.closest('[data-main]')) {
+      const to = tryIt ? target.closest<HTMLElement>('[data-goto]')?.dataset.goto : undefined;
+      if (to) { go(to); render(); }
+      return;
+    }
+    const button = target.closest<HTMLButtonElement>('button');
+    if (!button || !host.contains(button) || button.getAttribute('aria-disabled') === 'true') {
+      if (open && !target.closest('.gu-pop')) { open = ''; render(); }
+      return;
+    }
+    const d = button.dataset;
+    const inPop = !!button.closest('.gu-pop');
+    if (d.go) go(d.go);
+    else if (d.set) { if (String(read(d.set)) !== d.value) commit(editName(d.set), next => { next.values[d.set!] = d.value!; }, d.set.startsWith('gui.') ? 'look' : page); }
+    else if (d.own) commit(editName(d.own), next => { next.values[d.own!] = read(d.own!); });
+    else if (d.same) commit(editName(d.same), next => { next.values[d.same!] = null; });
+    else if (d.template) { const t = pageById(page).templates!.find(item => item.id === d.template)!; commit(`${pageById(page).title} template "${t.name}"`, next => { Object.assign(next.values, t.values); }); }
+    else if (d.theme) { const t = themes.find(item => item.id === d.theme)!; if (t !== themeNow()) commit(`theme "${t.name}"`, next => { Object.assign(next.values, t.values); }, 'look'); }
+    else if (d.sample) sample[d.sample] = d.value!;
+    else if (d.select) { sel = d.select; if (variant !== 'click') level = 'elements'; }
+    else if (d.add) {
+      const id = `new${(doc.added[page]?.length ?? 0) + 1}`;
+      commit(`add ${d.add.toLowerCase()} to ${pageById(page).title}`, next => { (next.added[page] ??= []).push({ id, kind: d.add! }); });
+      sel = id; if (variant !== 'click') level = 'elements'; open = '';
+    } else if (d.act) act(d.act);
+    else return;
+    if (!d.act?.startsWith('menu-') && !(inPop && (d.theme || d.sample))) open = '';
+    render();
+  }
+  function onInput(event: Event) {
+    const el = event.target as HTMLInputElement;
+    const key = el.dataset.key;
+    if (!key) return;
+    pending ??= clone(doc);
+    doc.values[key] = el.type === 'checkbox' ? el.checked : el.type === 'range' ? Number(el.value) : el.value;
+    const shown = el.parentElement?.querySelector('output, code');
+    if (shown) shown.textContent = `${el.value}${fieldByKey[key]?.unit ?? ''}`;
+    refreshStages();
+  }
+  function onChange(event: Event) {
+    const el = event.target as HTMLInputElement;
+    const d = el.dataset;
+    if (el.hasAttribute('data-variant-select')) { switchVariant(el.value as Variant); return; }
+    if (d.sampleKey) { sample[d.sampleKey] = el.value; render(); return; }
+    if (d.check) {
+      const options = fieldByKey[d.check]!.options!.map(([v]) => v);
+      const on = new Set(String(read(d.check)).split(',').filter(Boolean)); if (el.checked) on.add(d.value!); else on.delete(d.value!);
+      commit(editName(d.check), next => { next.values[d.check!] = options.filter(v => on.has(v)).join(','); }); render(); return;
+    }
+    if (d.offset && sel) {
+      const key = `${page}.${sel}`;
+      commit(`move ${partOf(pageById(page), sel)?.[1] ?? 'element'}`, next => { next.offsets[key] = { ...(next.offsets[key] ?? { x: 0, y: 0 }), [d.offset!]: Number(el.value) || 0 }; }); render(); return;
+    }
+    if (!d.key) return;
+    onInput(event);
+    const before = pending!; pending = null;
+    if (before.values[d.key] === doc.values[d.key]) return;
+    push(editName(d.key), before, d.key.startsWith('gui.') ? 'look' : page);
+    if (d.key === 'say.show' && el.value !== 'none') replay = `g-show-${el.value}`;
+    render();
+  }
+  /** Selects the part under the pointer and, at the detailed level, drags it. */
+  function onPointerDown(event: PointerEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('[data-main]') || event.button !== 0 || tryIt) return;
+    const id = target.closest<HTMLElement>('[data-part]')?.dataset.part ?? null;
+    if (!canSelect()) { if (hit !== id) { hit = id; render(); } return; }
+    if (id !== sel) { sel = id; render(); }
+    if (!id || id === 'bg') return;
+    event.preventDefault();
+    const key = `${page}.${id}`;
+    const start = doc.offsets[key] ?? { x: 0, y: 0 };
+    const scale = 1920 / host.querySelector<HTMLElement>('[data-main]')!.getBoundingClientRect().width;
+    let before: Doc | null = null;
+    const move = (m: PointerEvent) => {
+      const dx = (m.clientX - event.clientX) * scale, dy = (m.clientY - event.clientY) * scale;
+      if (!before) { if (Math.hypot(dx, dy) < 6) return; before = clone(doc); }
+      const at = doc.offsets[key] = { x: Math.round(start.x + dx), y: Math.round(start.y + dy) };
+      host.querySelectorAll<HTMLElement>(`[data-main] [data-part="${id}"]`).forEach(node => { node.style.translate = `${at.x / 19.2}cqw ${at.y / 19.2}cqw`; });
+    };
+    const up = () => {
+      document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up);
+      if (before) { push(`move ${partOf(pageById(page), id)?.[1] ?? 'element'}`, before); render(); }
+    };
+    document.addEventListener('pointermove', move); document.addEventListener('pointerup', up);
+  }
+  function onDoubleClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('[data-main]') || canSelect() || tryIt) return;
+    level = 'elements'; hit = null; sel = target.closest<HTMLElement>('[data-part]')?.dataset.part ?? null; render();
+  }
+  function onKey(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      if (open) open = ''; else if (sel) sel = null; else if (variant === 'board' && level === 'elements') level = 'settings'; else return;
+      render(); return;
+    }
+    if (!(event.metaKey || event.ctrlKey) || (event.target as HTMLElement).closest('input:not([type=range]):not([type=checkbox]):not([type=color]),textarea')) return;
+    const key = event.key.toLowerCase();
+    if (key === 'z' || (key === 'y' && event.ctrlKey && !mac)) { event.preventDefault(); if (key === 'y' || event.shiftKey) redo(); else undo(); render(); }
+  }
+
+  reset(context.state);
+  host.addEventListener('click', onClick); host.addEventListener('input', onInput); host.addEventListener('change', onChange);
+  host.addEventListener('pointerdown', onPointerDown); host.addEventListener('dblclick', onDoubleClick); document.addEventListener('keydown', onKey);
+  render();
+  return () => {
+    host.removeEventListener('click', onClick); host.removeEventListener('input', onInput); host.removeEventListener('change', onChange);
+    host.removeEventListener('pointerdown', onPointerDown); host.removeEventListener('dblclick', onDoubleClick); document.removeEventListener('keydown', onKey);
+    host.replaceChildren();
+  };
+}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "screenId": "game-ui",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "pages-v1", "variantId": "pages", "approval": null },
+    { "id": "click-v1", "variantId": "click", "approval": null },
+    { "id": "board-v1", "variantId": "board", "approval": null }
+  ]
+}

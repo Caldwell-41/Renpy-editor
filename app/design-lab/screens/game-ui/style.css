@@ -1,0 +1,155 @@
+/* Game UI layout study only: Loomlight's own chrome around the sample game. Production colour tokens. */
+.gu-shell { height:100%; display:grid; grid-template-rows:auto minmax(0,1fr); overflow:hidden; font:13px/1.4 var(--font-ui); color:var(--text-primary); background:var(--surface-app); }
+.gu-shell h2 { margin:0; font-size:14px; font-weight:650; white-space:nowrap; }
+.gu-shell h3 { margin:0; font-size:12px; font-weight:650; }
+.gu-shell p { margin:0; }
+.gu-shell button, .gu-shell select { font:inherit; color:var(--text-primary); background:var(--surface-raised); border:1px solid var(--border-strong); border-radius:3px; padding:3px 9px; min-height:26px; cursor:pointer; }
+.gu-shell button { display:inline-flex; align-items:center; justify-content:center; gap:5px; white-space:nowrap; }
+.gu-shell button:hover:not(:disabled):not([aria-disabled=true]) { background:var(--surface-hover); }
+.gu-shell button:disabled, .gu-shell button[aria-disabled=true] { color:var(--text-muted); border-color:var(--border-normal); background:transparent; cursor:default; }
+.gu-shell button:focus-visible, .gu-shell select:focus-visible, .gu-shell input:focus-visible { outline:2px solid var(--focus-ring); outline-offset:2px; }
+.gu-shell button.gu-primary { color:var(--on-accent); background:var(--accent-primary); border-color:var(--accent-primary); font-weight:600; }
+.gu-shell button.gu-primary:hover { background:var(--accent-hover); }
+.gu-shell button.gu-flat { background:transparent; border-color:transparent; }
+.gu-shell button.gu-icon { width:28px; padding:0; }
+.gu-shell button[aria-pressed=true]:not(.gu-tile):not(.gu-row) { background:var(--accent-subtle); border-color:var(--accent-primary); }
+.gu-shell svg { width:15px; height:15px; flex:none; }
+.gu-muted { color:var(--text-secondary); }
+.gu-spacer { flex:1; min-width:0; }
+.gu-anchor { position:relative; display:inline-flex; }
+
+.gu-proto { display:flex; align-items:center; gap:12px; padding:3px 12px; border-bottom:1px dashed var(--border-strong); font-size:11px; color:var(--text-secondary); }
+.gu-proto strong { font-weight:600; }
+.gu-proto label { margin-left:auto; display:flex; align-items:center; gap:6px; }
+.gu-shell .gu-proto button, .gu-shell .gu-proto select { min-height:22px; padding:1px 7px; font-size:11px; }
+
+/* Shell: header, workspace rail and status bar, after the approved header-undo / icons-v1. */
+.gu-app { min-height:0; display:grid; grid-template-rows:auto minmax(0,1fr) 24px; }
+.gu-header { position:relative; z-index:6; min-height:40px; display:flex; align-items:center; gap:8px 12px; padding:5px 12px; font-size:12px; background:var(--surface-panel); border-bottom:1px solid var(--border-normal); }
+.gu-brand { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:650; }
+.gu-shell .gu-brand svg { width:17px; height:17px; color:var(--accent-primary); }
+.gu-project { padding-left:12px; color:var(--text-secondary); border-left:1px solid var(--border-strong); white-space:nowrap; }
+.gu-save-state { font-size:11px; color:var(--text-secondary); white-space:nowrap; }
+.gu-history, .gu-runtime { display:flex; gap:4px; }
+.gu-runtime { gap:6px; padding-left:12px; border-left:1px solid var(--border-strong); }
+.gu-body { min-height:0; display:grid; grid-template-columns:46px 184px minmax(0,1fr) 284px; }
+[data-variant=click] .gu-body { grid-template-columns:46px minmax(0,1fr) 284px; }
+[data-variant=board] .gu-body { grid-template-columns:46px minmax(0,1fr) 284px; }
+[data-variant=board][data-home=true] .gu-body { grid-template-columns:46px 264px minmax(0,1fr); }
+.gu-rail { display:flex; flex-direction:column; align-items:center; gap:6px; padding-top:10px; background:var(--surface-panel); border-right:1px solid var(--border-normal); }
+.gu-rail>span, .gu-shell .gu-rail>button { width:36px; height:36px; display:flex; align-items:center; justify-content:center; padding:0; color:var(--text-muted); border-radius:4px; }
+.gu-shell .gu-rail>button[aria-pressed=true] { color:var(--text-primary); background:var(--accent-subtle); border-color:transparent; box-shadow:inset 3px 0 var(--accent-primary); }
+.gu-shell .gu-rail svg { width:18px; height:18px; }
+.gu-footer { display:flex; align-items:center; justify-content:space-between; padding:0 12px; font-size:11px; background:var(--surface-panel); border-top:1px solid var(--border-normal); }
+
+/* Screen list (layout 1) and flat rows */
+.gu-list { min-height:0; overflow:auto; padding:4px 0 0; background:var(--surface-panel); border-right:1px solid var(--border-normal); }
+.gu-list>h3 { padding:10px 12px 3px; }
+.gu-shell button.gu-row { width:100%; min-height:25px; justify-content:space-between; padding:2px 12px; text-align:left; background:transparent; border:0; border-left:2px solid transparent; border-radius:0; }
+.gu-shell button.gu-row[aria-current], .gu-shell button.gu-row[aria-pressed=true] { background:var(--surface-selected); border-left-color:var(--accent-primary); }
+.gu-only { display:inline-flex; color:var(--text-muted); }
+.gu-shell .gu-only svg { width:12px; height:12px; }
+.gu-list-foot { padding:10px 12px 12px; }
+
+/* Centre: toolbar, canvas, note */
+.gu-centre { min-width:0; min-height:0; display:grid; grid-template-rows:38px minmax(0,1fr) auto; }
+[data-variant=click] .gu-centre { grid-template-rows:38px minmax(0,1fr) auto auto; }
+.gu-bar { position:relative; z-index:5; min-width:0; display:flex; align-items:center; gap:10px; padding:0 12px; border-bottom:1px solid var(--border-normal); }
+.gu-bar-editing { background:var(--accent-subtle); }
+.gu-canvas { min-width:0; min-height:0; display:grid; place-items:center; padding:14px; container-type:size; }
+.gu-canvas>.gu-stage { width:min(100cqw, calc(100cqh * 16 / 9)); border:1px solid var(--stage-edge); }
+.gu-sheet { width:min(100cqw, calc((100cqh - 46px) * 16 / 9)); display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; }
+.gu-foot { padding:0 14px 10px; font-size:11px; color:var(--text-secondary); text-align:center; }
+.gu-sample { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--text-secondary); white-space:nowrap; }
+.gu-shell .gu-sample select { min-height:24px; padding:1px 4px; }
+.gu-shell .gu-sample .gu-seg button { flex:none; padding:1px 9px; }
+.gu-group>.gu-sample>.gu-label { display:none; }
+.gu-group>.gu-sample>.gu-seg { flex:1; }
+.gu-shell .gu-group>.gu-sample .gu-seg button { flex:1; padding:1px 4px; }
+.gu-showing { min-height:36px; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px 16px; padding:4px 12px; font-size:12px; }
+
+/* Panel: flat groups of label and control rows */
+.gu-panel { min-height:0; display:grid; grid-template-rows:auto minmax(0,1fr); background:var(--surface-panel); border-left:1px solid var(--border-normal); }
+.gu-look { display:grid; grid-template-rows:auto minmax(0,1fr); padding:0; overflow:hidden; }
+.gu-panel-head { min-height:38px; display:flex; flex-wrap:wrap; align-items:center; gap:2px 8px; padding:5px 12px; border-bottom:1px solid var(--border-normal); }
+.gu-scroll { min-height:0; overflow:auto; }
+.gu-level { flex:1; }
+.gu-shell button.gu-crumb { width:100%; justify-content:flex-start; min-height:20px; padding:0; font-size:12px; color:var(--text-secondary); }
+.gu-part-head { display:flex; align-items:baseline; gap:8px; padding:10px 12px 0; }
+.gu-group { display:grid; gap:7px; padding:10px 12px 12px; border-bottom:1px solid var(--border-normal); }
+.gu-group.is-hit { background:var(--accent-subtle); }
+.gu-group-head { display:flex; align-items:center; justify-content:space-between; }
+.gu-field { display:grid; grid-template-columns:78px minmax(0,1fr); align-items:center; gap:3px 8px; }
+.gu-label { font-size:12px; color:var(--text-secondary); }
+.gu-control { min-width:0; display:flex; align-items:center; gap:4px; }
+.gu-control>select, .gu-control>.gu-seg, .gu-control>.gu-range, .gu-control>.gu-follow { flex:1; min-width:0; }
+.gu-help { grid-column:2; font-size:11px; color:var(--text-secondary); }
+.gu-help-wide { grid-column:1 / -1; }
+.gu-note { padding:10px 12px; font-size:12px; color:var(--text-secondary); }
+.gu-toggle { display:flex; align-items:center; gap:7px; font-size:12px; }
+.gu-seg { display:flex; }
+.gu-shell .gu-seg button { flex:1; min-width:0; min-height:24px; padding:1px 6px; font-size:12px; border-radius:0; }
+.gu-shell .gu-seg button+button { margin-left:-1px; }
+.gu-shell .gu-seg button:first-child { border-radius:3px 0 0 3px; }
+.gu-shell .gu-seg button:last-child { border-radius:0 3px 3px 0; }
+.gu-shell .gu-seg button[aria-pressed=true] { position:relative; z-index:1; }
+.gu-color { display:flex; align-items:center; gap:7px; }
+.gu-color input { width:30px; height:24px; padding:0; background:none; border:1px solid var(--border-strong); border-radius:3px; cursor:pointer; }
+.gu-color code { font:12px var(--font-source); color:var(--text-secondary); }
+.gu-range { display:flex; align-items:center; gap:8px; }
+.gu-range input { flex:1; min-width:0; accent-color:var(--accent-primary); }
+.gu-range output { width:38px; font-size:12px; color:var(--text-secondary); text-align:right; }
+.gu-shell button.gu-follow { justify-content:flex-start; gap:6px; min-height:24px; padding:1px 0; font-size:12px; color:var(--text-secondary); text-align:left; white-space:normal; }
+.gu-shell button.gu-follow:hover { color:var(--text-primary); }
+.gu-swatch { width:14px; height:14px; flex:none; border:1px solid var(--border-strong); border-radius:2px; }
+.gu-shell button.gu-same { width:24px; min-height:24px; padding:0; color:var(--text-secondary); }
+.gu-pics { display:flex; gap:5px; }
+.gu-shell .gu-pics button { flex:1; min-width:0; max-width:48px; height:26px; min-height:0; padding:0; font-size:11px; background-size:cover; background-position:center; border-radius:2px; }
+.gu-shell .gu-pics button[aria-pressed=true] { border-color:var(--accent-primary); box-shadow:0 2px 0 var(--accent-primary); }
+.gu-checks { display:grid; grid-template-columns:1fr 1fr; gap:3px 8px; font-size:12px; }
+.gu-checks label { display:flex; align-items:center; gap:6px; }
+.gu-shell input[type=checkbox] { accent-color:var(--accent-primary); margin:0; }
+.gu-xy { gap:10px; }
+.gu-xy label { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--text-secondary); }
+.gu-xy input { width:64px; min-height:24px; padding:1px 5px; }
+.gu-els { display:grid; margin:0 -12px; }
+.gu-shell button.gu-disclose { width:100%; justify-content:flex-start; padding:8px 12px; font-weight:650; font-size:12px; border-radius:0; border-bottom:1px solid var(--border-normal); }
+
+/* Picture tiles: templates, themes, the screen strip and the board. The selected tile gets an accent bar and accent text. */
+.gu-tiles { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.gu-tiles-4 { grid-template-columns:repeat(4, 150px); }
+.gu-tiles-row { grid-template-columns:repeat(4, 132px); }
+.gu-shell button.gu-tile { min-width:0; min-height:0; display:grid; justify-content:stretch; gap:3px; padding:0; font-size:12px; text-align:left; white-space:normal; background:transparent; border:0; border-radius:0; }
+.gu-shell button.gu-tile:hover:not(:disabled):not([aria-disabled=true]) { background:transparent; }
+.gu-tile .gu-stage { border:1px solid var(--stage-edge); border-bottom:2px solid transparent; pointer-events:none; }
+.gu-tile:hover .gu-stage { border-bottom-color:var(--border-strong); }
+.gu-tile[aria-pressed=true] .gu-stage, .gu-tile[aria-current] .gu-stage { border-bottom-color:var(--accent-primary); }
+.gu-tile[aria-pressed=true]>span, .gu-tile[aria-current]>span { color:var(--accent-hover); font-weight:600; }
+.gu-tile>span { display:flex; align-items:center; gap:5px; }
+.gu-tile small { font-size:11px; color:var(--text-secondary); }
+.gu-shell button.gu-new { align-self:start; aspect-ratio:16/9; min-height:0; flex-direction:column; color:var(--text-secondary); background:transparent; border:1px dashed var(--border-strong); border-radius:0; }
+
+/* Layout 2: screens as a strip of live pictures under the canvas */
+.gu-strip { display:flex; gap:18px; overflow-x:auto; padding:6px 12px 8px; background:var(--surface-panel); border-top:1px solid var(--border-normal); }
+.gu-strip-group { display:grid; gap:4px; }
+.gu-strip-row { display:flex; gap:8px; }
+.gu-strip-row>button { flex:none; width:104px; }
+.gu-shell .gu-strip .gu-tile { font-size:11px; }
+
+/* Layout 3: the board and the template strip */
+.gu-board { min-height:0; overflow:auto; display:grid; align-content:start; gap:16px; padding:12px 16px 18px; }
+.gu-board section { display:grid; gap:6px; }
+.gu-board-row { display:grid; grid-template-columns:repeat(auto-fill, minmax(168px, 1fr)); gap:12px; }
+.gu-tstrip { display:flex; align-items:flex-start; justify-content:center; gap:12px; padding:0 14px 10px; }
+.gu-tstrip h3 { padding-top:2px; }
+
+/* Floating layers: menus and sheets. Only these carry a shadow. */
+.gu-pop { position:absolute; z-index:10; top:calc(100% + 4px); left:0; display:grid; gap:8px; padding:10px; background:var(--surface-raised); border:1px solid var(--border-strong); border-radius:4px; box-shadow:var(--shadow-preview); }
+.gu-pop-right { left:auto; right:0; }
+.gu-menu { gap:0; padding:4px; min-width:130px; }
+.gu-shell .gu-menu button { justify-content:flex-start; }
+.gu-sample-pop { min-width:300px; }
+.gu-sample-pop .gu-sample { display:grid; grid-template-columns:70px 1fr; }
+.gu-dots { display:inline-flex; }
+.gu-dots i { width:11px; height:11px; margin-right:-3px; border:1px solid var(--border-strong); border-radius:50%; }
+.gu-dots i:last-child { margin-right:3px; }
