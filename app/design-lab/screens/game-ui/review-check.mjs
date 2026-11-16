@@ -10,6 +10,8 @@ export default async function ({ page, open, capture }) {
   // A setting changes the canvas at once, counts as one unsaved change, and Undo reverses it.
   await open({ state: 'dialogue', viewport: 'wide', theme: 'dark' });
   assert.equal(await saveState(), 'Saved');
+  const modeless = variant === 'click' || variant === 'blend';
+  const sheet = variant === 'refined' || variant === 'blend';
   if (variant === 'click') await main().locator('[data-part="box"]').click({ position: { x: 5, y: 5 } });
   const opacity = page.locator('[data-key="say.opacity"]');
   await opacity.focus();
@@ -21,6 +23,7 @@ export default async function ({ page, open, capture }) {
   assert.equal(await status(), 'Undone: Dialogue box opacity');
 
   // A template and a theme each apply in one step and redraw every picture of the screen.
+  if (sheet) await page.locator('[data-act="menu-template"]').click();
   await page.locator('[data-template="bar"]').first().click();
   assert.equal(await main().locator('.g-say-bar').count(), 1);
   await capture(`${variant}-template`);
@@ -35,8 +38,13 @@ export default async function ({ page, open, capture }) {
   await open({ state: 'title', viewport: 'wide', theme: 'dark' });
   const menu = () => main().locator('[data-part="menu"]');
   if (variant === 'pages') await menu().dblclick({ position: { x: 3, y: 3 } });
-  else if (variant === 'board') await page.locator('[data-act="level-elements"]').click();
-  if (variant !== 'pages') await menu().click({ position: { x: 3, y: 3 } });
+  else if (variant === 'refined') {
+    // Layout A: a click finds the settings, and that group offers the way into the detailed level.
+    await menu().click({ position: { x: 3, y: 3 } });
+    assert.equal(await page.locator('.gu-group.is-hit h3').innerText(), 'Menu');
+    await page.locator('[data-act="edit-hit"]').click();
+  } else if (variant === 'board') await page.locator('[data-act="level-elements"]').click();
+  if (modeless || variant === 'board') await menu().click({ position: { x: 3, y: 3 } });
   assert.match(await menu().getAttribute('class'), /is-sel/);
   const from = await menu().boundingBox();
   await page.mouse.move(from.x + 4, from.y + 4);
@@ -56,6 +64,13 @@ export default async function ({ page, open, capture }) {
     await main().locator('[data-goto="save"]').first().click();
     assert.equal(await page.locator('.gu-bar h2').innerText(), 'Save and load');
     await capture('click-try-it');
+  }
+  if (sheet) {
+    // A screen with no settings page opens on its elements with no dead end.
+    await page.locator('[data-act="others"]').click();
+    await page.locator('.gu-list [data-go="notify"]').click();
+    assert.equal(await page.locator('.gu-panel h2').first().innerText(), 'Notices');
+    assert.equal(await page.locator('.gu-panel [data-act="level-settings"]').count(), 0);
   }
   if (variant === 'board') {
     await page.locator('[data-act="level-settings"]').click();

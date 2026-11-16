@@ -1,9 +1,10 @@
 # Game UI workspace layout study
 
-This Design Lab screen, `game-ui`, mocks three layouts of the Game UI workspace for
+This Design Lab screen, `game-ui`, mocks layouts of the Game UI workspace for
 [Lay out the Game UI workspace](https://github.com/Caldwell-41/Renpy-editor/issues/197).
-All three are unapproved drafts. The [approval record](approval.json) lists
-`pages-v1`, `click-v1` and `board-v1` with no approval.
+The first round has three layouts: 1, 2 and 3. On 2026-11-17 Kris said he likes
+layout 1 the most and asked for a second round: A, B and C. All are unapproved
+drafts, and the [approval record](approval.json) lists each revision with no approval.
 
 Scope comes from [Set the destination and scope of Game UI](https://github.com/Caldwell-41/Renpy-editor/issues/192):
 one workspace with settings pages and a detailed level, stock screens first, no Apply
@@ -12,9 +13,9 @@ button, themes and templates.
 ## Open it
 
 From `app/`, run `npm run design:dev`, then open
-`http://127.0.0.1:5174/preview.html?screen=game-ui&variant=pages&state=dialogue&theme=dark`.
-Change `variant` to `click` or `board`, or use the Layout menu in the dashed bar at
-the top. The preview fills the browser window, so a wide window shows the layouts at
+`http://127.0.0.1:5174/preview.html?screen=game-ui&variant=refined&state=dialogue&theme=dark`.
+The `variant` values are `refined` (A), `blend` (B), `pages` (1), `click` (2) and
+`board` (3). The Layout menu in the dashed bar at the top also switches between them. The preview fills the browser window, so a wide window shows the layouts at
 their real proportions.
 
 | State | What it opens on |
@@ -24,7 +25,41 @@ their real proportions.
 | `themes` | The place where themes sit in that layout |
 | `detailed` | The detailed level on the Title screen, with Menu buttons selected |
 
-## The three layouts
+## Second round
+
+### A · Layout 1, refined
+
+Layout 1's skeleton after a pass with Kris's experience-first principle: every
+control has to justify its place, and the loop of picking a screen, changing it and
+seeing it gets shorter. The pass removes more than it adds.
+
+| Change | Reason |
+| --- | --- |
+| The toolbar above the canvas is gone. The screen's name sits in the panel head. | The list already shows which screen is open. The canvas gains the height. |
+| Sample content is one row under the canvas. The footnote is gone, and the status bar confirms that a sample change leaves the game unchanged. | One place for sample content, with no standing explanation. |
+| The four template pictures become one row that names the template in use and opens a sheet of large live pictures. | An author picks a template once and changes settings often. Every Dialogue box setting now fits without scrolling at 720 px. |
+| The six screens with no settings page sit under one closed "Other screens" row. The marker icons are gone. | Ten pages, the game-wide look and the author's own screens are what an author opens. |
+| A screen with no settings page opens on its elements. The "no settings page yet" message is gone. | No dead end. |
+| A click on the canvas outlines the part and highlights its settings. That group then shows "Edit element". | The way into the detailed level appears where the author is looking. The double-click still works, and the Settings / Elements switch stays. |
+| At the detailed level, an "Element" menu replaces the element list. | The canvas is the main way to pick an element, and its properties start at the top of the panel. |
+| Theme tiles lose their second line of text. "Reset" becomes a text button. | Less to read. |
+
+### B · Recommended blend
+
+The agent's recommendation. It starts from A and takes one idea from each of the
+other first-round layouts.
+
+- From layout 2: no Settings / Elements switch. With nothing selected, the panel shows
+  the whole settings page. A click on a part of the canvas narrows the panel to that
+  part, a drag moves it, and "All properties" opens under its plain settings. A group
+  heading has an arrow that selects its part, and "All elements" at the foot of the
+  page is the optional element list.
+- From layout 3: the "Game-wide look" page shows the board of every screen, so a theme
+  change redraws all of them at once.
+- "Add element" sits in the panel head. "Try it" is left out until someone has measured
+  whether the hidden process can answer the pointer.
+
+## First round: layouts 1, 2 and 3
 
 | Part | 1 · Pages and panel | 2 · Click the game | 3 · Whole-game board |
 | --- | --- | --- | --- |
@@ -91,5 +126,4 @@ toolbar at all times, because that layout has no separate detailed level.
 npm run design:check -- game-ui pages --theme dark --interaction ./screens/game-ui/review-check.mjs
 ```
 
-Run it once for each of `pages`, `click` and `board`. Retire the module when the
-layout is chosen.
+Run it once for each layout. Retire the module when the layout is chosen.

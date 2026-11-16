@@ -3,8 +3,30 @@
   "screenId": "game-ui",
   "currentApproved": null,
   "revisions": [
-    { "id": "pages-v1", "variantId": "pages", "approval": null },
-    { "id": "click-v1", "variantId": "click", "approval": null },
-    { "id": "board-v1", "variantId": "board", "approval": null }
+    {
+      "id": "refined-v1",
+      "variantId": "refined",
+      "approval": null
+    },
+    {
+      "id": "blend-v1",
+      "variantId": "blend",
+      "approval": null
+    },
+    {
+      "id": "pages-v1",
+      "variantId": "pages",
+      "approval": null
+    },
+    {
+      "id": "click-v1",
+      "variantId": "click",
+      "approval": null
+    },
+    {
+      "id": "board-v1",
+      "variantId": "board",
+      "approval": null
+    }
   ]
 }

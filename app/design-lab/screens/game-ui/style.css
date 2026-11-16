@@ -153,3 +153,27 @@
 .gu-dots { display:inline-flex; }
 .gu-dots i { width:11px; height:11px; margin-right:-3px; border:1px solid var(--border-strong); border-radius:50%; }
 .gu-dots i:last-child { margin-right:3px; }
+
+/* Layouts A and B: no toolbar above the canvas, one preview row under it, and a template row that opens a sheet. */
+[data-variant=refined] .gu-body, [data-variant=blend] .gu-body { grid-template-columns:46px 172px minmax(0,1fr) 280px; }
+[data-variant=refined] .gu-centre, [data-variant=blend] .gu-centre { grid-template-rows:minmax(0,1fr) auto; }
+.gu-list-a { padding-top:8px; }
+.gu-shell button.gu-row-new { justify-content:flex-start; gap:6px; color:var(--text-secondary); }
+.gu-shell button.gu-other { margin-top:10px; gap:6px; border-top:1px solid var(--border-normal); border-bottom:0; }
+.gu-disclose .gu-muted { margin-left:auto; font-weight:400; }
+.gu-preview { min-height:38px; display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px; padding:0 14px 8px; font-size:12px; }
+.gu-preview-note { margin-left:auto; }
+.gu-panel { position:relative; z-index:4; }
+.gu-panel-top { min-width:0; }
+.gu-panel-head .gu-level { flex:none; margin-left:auto; }
+.gu-shell .gu-panel-head .gu-level button { padding:1px 10px; }
+.gu-template { padding:8px 12px; border-bottom:1px solid var(--border-normal); }
+.gu-template .gu-anchor { display:flex; }
+.gu-shell button.gu-template-button { flex:1; min-width:0; justify-content:flex-start; gap:10px; padding:0; text-align:left; }
+.gu-template-thumb { width:84px; flex:none; }
+.gu-template-thumb .gu-stage { border:1px solid var(--stage-edge); pointer-events:none; }
+.gu-template-text { flex:1; min-width:0; display:grid; }
+.gu-template-pop { width:max-content; }
+.gu-shell button.gu-edit { min-height:20px; padding:0 4px; font-size:12px; color:var(--accent-hover); }
+.gu-shell button.gu-quiet { padding:0; color:var(--text-secondary); }
+.g .is-hit { outline:1px solid var(--accent-primary); outline-offset:2px; }
