@@ -228,9 +228,20 @@ init python:
         return
         yield
 
+    def _llp_evict(screen):
+        # Screen analysis is cached under (name, variant, location). A draft keeps
+        # the same file and line, so without this the old tree keeps running.
+        cache = renpy.sl2.slast.scache
+        keys = [k for k in list(cache.const_analyzed) if k[0] == screen]
+        for k in keys:
+            cache.const_analyzed.pop(k, None)
+            cache.not_const_analyzed.pop(k, None)
+        return len(keys)
+
     def _llp_load(req):
         started = _llp_perf()
         text = "\n" * (req["line"] - 1) + req["text"]
+        evicted = _llp_evict(req["screen"]) if req.get("screen") else 0
         name = renpy.load_string(text, req["file"])
         loaded = _llp_perf()
         if name is None:
@@ -251,7 +262,7 @@ init python:
         yield dict(settle=True)
         if req.get("screen"):
             _llp_S["good"][req["screen"]] = (text, req["file"])
-        _llp_capture(req, extra=dict(loadMs=(loaded - started) * 1000, rebuildMs=(rebuilt - loaded) * 1000))
+        _llp_capture(req, extra=dict(loadMs=(loaded - started) * 1000, rebuildMs=(rebuilt - loaded) * 1000, evicted=evicted))
 
     def _llp_pointer(req):
         focused = renpy.display.interface.mouse_focused
@@ -362,8 +373,9 @@ init python:
                 failed = _llp_perf()
                 S["job"] = None
                 S["wait"] = None
-                for text, filename in list(S["good"].values()):
+                for screen, (text, filename) in list(S["good"].items()):
                     try:
+                        _llp_evict(screen)
                         renpy.load_string(text, filename)
                     except Exception:
                         pass
