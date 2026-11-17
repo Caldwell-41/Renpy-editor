@@ -65,11 +65,29 @@ other ticket owned:
 
 - Fit and 100% for the canvas, at the right of the row under it. At 100% the canvas
   scrolls.
-- A collapse control on the screen list and on the settings panel. Collapsed, each is
-  a thin column with the control that restores it, and focus stays on that control.
+- A collapse control for the screen list and for the settings panel. A collapsed
+  panel takes no width, and focus stays on its control. Kris disliked the first
+  version (a boxed panel icon and a 34 px bar), so the mock now offers two: a chevron
+  tab on the panel's edge, and a button at each end of the row under the canvas. The
+  "Collapse control" menu in the dashed bar switches between them.
 - The narrow window. Below 900 px the list starts collapsed. At 700 px or less the
   panel sits under the canvas, and the header hides the project name and shortens the
   save state.
+
+B also shows the source behind a setting, in two places that Kris chose on 2026-11-17.
+Neither adds anything to the layout at rest.
+
+- A setting's label opens the line it writes, under the row: the file, the line
+  number, the saved line and the new line. A right-click on the row does the same.
+  The sheet names side effects, such as the 34 pictures that the accent color redraws.
+  "Open in Source" goes to that line.
+- The header's unsaved count is a button. It lists every line that differs from the
+  saved project, grouped by file, each with Revert. Save writes exactly that list, and
+  the count is the number of lines, not the number of edits. This list depends on
+  [Decide when Game UI writes source](https://github.com/Caldwell-41/Renpy-editor/issues/200)
+  choosing one workspace Save. If each edit writes at once, it has nothing to show.
+
+The file names, variable names and line numbers in both are sample values.
 
 ### C · Council blend
 

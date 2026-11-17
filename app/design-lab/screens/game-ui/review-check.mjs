@@ -110,6 +110,24 @@ export default async function ({ page, open, capture }) {
     assert.equal(await page.locator('.gu-panel [data-act="level-settings"]').count(), 0);
   }
   if (variant === 'blend') {
+    // The label of a setting opens the line it writes, and the unsaved count opens the list of pending lines.
+    await open({ state: 'dialogue', viewport: 'wide', theme: 'dark' });
+    await page.locator('[data-set="say.height"][data-value="l"]').click();
+    await page.locator('[data-what="say.height"]').click();
+    assert.match(await page.locator('.gu-writes').innerText(), /gui\.rpy · line 101[\s\S]*- define gui\.textbox_height = "m"[\s\S]*\+ define gui\.textbox_height = "l"/);
+    await capture('blend-what-this-writes');
+    await page.locator('.gu-list [data-go="look"]').click();
+    await page.locator('[data-key="gui.accent"]').fill('#3366cc');
+    await page.locator('[data-key="gui.accent"]').dispatchEvent('change');
+    assert.equal(await saveState(), '2 unsaved changes');
+    await page.locator('[data-act="menu-changes"]').click();
+    assert.match(await page.locator('.gu-changes').innerText(), /Save writes these 2 lines[\s\S]*gui\.accent_color = "#3366cc"[\s\S]*Also redraws 34 of the 52 pictures/);
+    await capture('blend-changes');
+    await page.locator('[data-revert="v:gui.accent"]').click();
+    assert.equal(await saveState(), '1 unsaved change');
+    await page.locator('[data-revert="v:say.height"]').click();
+    assert.equal(await saveState(), 'Saved');
+    assert.equal(await page.locator('.gu-changes').count(), 0);
     // Zoom, the collapsing panels and the narrow window.
     await open({ state: 'title', viewport: 'wide', theme: 'dark' });
     const width = async () => (await main().boundingBox()).width;
@@ -118,7 +136,11 @@ export default async function ({ page, open, capture }) {
     await page.locator('[data-act="toggle-panel"]').click();
     assert.ok(await width() > fit + 300, 'the canvas takes the space of both panels');
     assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-act')), 'toggle-panel');
+    assert.equal(await page.locator('.gu-list, .gu-panel').count(), 0);
     await capture('blend-panels-collapsed');
+    await page.locator('[data-collapse-select]').selectOption('buttons');
+    await capture('blend-collapse-buttons');
+    await page.locator('[data-collapse-select]').selectOption('edge');
     await page.locator('[data-act="toggle-panel"]').click();
     await page.locator('[data-act="toggle-list"]').click();
     await page.locator('[data-act="zoom-100"]').click();
