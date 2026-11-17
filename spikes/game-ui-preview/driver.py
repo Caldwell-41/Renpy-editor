@@ -586,7 +586,7 @@ def main():
             for k in range(1 if args.phase in ("smoke", "broken") else starts):
                 io = os.path.join(args.work, "io-%s-%d" % (variant, k))
                 helper = Helper(args.sdk, copy, io, budget, log)
-                start = dict(compiled=k == 0, launchToImageMs=helper.first["launchToImageMs"],
+                start = dict(compiled=k == 0, launchToImageMs=helper.first["launchToImageMs"], tLaunch=helper.t_launch,
                              helperFirst={key: helper.first.get(key) for key in ("tInit", "tCommand", "tMain", "tRequest", "tPng", "native", "renderer", "physical", "drawPerVirt")})
                 try:
                     if args.phase == "broken":
