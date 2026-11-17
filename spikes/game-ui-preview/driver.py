@@ -52,9 +52,9 @@ def generate_stock(sdk, target, budget, log):
     budget.take("generate_gui")
     subprocess.run(sdk_command(sdk, ["launcher", "generate_gui", stage, "--width", "1920", "--height", "1080",
                                      "--template", os.path.join(sdk, "gui"), "--start"]),
-                   check=True, stdout=log, stderr=subprocess.STDOUT, timeout=180)
+                   check=True, stdout=log, stderr=subprocess.STDOUT, timeout=180, cwd=sdk)
     budget.take("gui_images")
-    subprocess.run(sdk_command(sdk, [stage, "gui_images"]), check=True, stdout=log, stderr=subprocess.STDOUT, timeout=180)
+    subprocess.run(sdk_command(sdk, [stage, "gui_images"]), check=True, stdout=log, stderr=subprocess.STDOUT, timeout=180, cwd=sdk)
     os.replace(stage, target)
     return (time.perf_counter() - started) * 1000
 
