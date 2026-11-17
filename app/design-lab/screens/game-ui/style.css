@@ -299,3 +299,13 @@
 .gu-shell button.gu-what-button { width:22px; min-height:22px; padding:0; color:var(--text-secondary); opacity:0; }
 .gu-toggle-row:hover .gu-what-button, .gu-toggle-row:focus-within .gu-what-button, .gu-shell button.gu-what-button[aria-expanded=true] { opacity:1; }
 .gu-shell .gu-control>input[type=text]:not([type=checkbox]):not([type=radio]) { flex:1; min-width:0; height:24px; min-height:24px; padding:1px 6px; }
+
+/* Layout B, Game-wide look: the large view of one screen. The peek floats over the board, so it has a shadow. */
+.gu-peek { position:absolute; z-index:8; display:grid; gap:5px; padding:6px; background:var(--surface-raised); border:1px solid var(--border-strong); border-radius:4px; box-shadow:var(--shadow-preview); pointer-events:none; }
+.gu-peek .gu-stage { border:1px solid var(--stage-edge); }
+.gu-peek p { display:flex; justify-content:space-between; gap:12px; font-size:12px; }
+.gu-peek p span { color:var(--text-secondary); }
+.gu-shell .gu-board .gu-tile { cursor:zoom-in; }
+.gu-canvas-b>.gu-preview.gu-pinned { align-items:center; }
+.gu-pinned .gu-preview-left { flex-wrap:nowrap; gap:6px; }
+.gu-pinned strong { margin-left:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

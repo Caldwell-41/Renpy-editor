@@ -187,6 +187,22 @@ Polish from round three:
   styles its scroll bars so that they stay in view. The check browser hides scroll
   bars, so nobody has seen this work. The narrow sample row drops the word "Sample".
 
+After round three Kris found the screens on the Game-wide look board too small to
+judge a setting by. He asked for a large view on the pointer and a direct way to the
+screen's page, and chose this design on 2026-11-17:
+
+- Pointing at a screen on the board shows it large after about a third of a second.
+  The large preview sits in the part of the board with the most room away from that
+  screen, and the pointer passes through it. Keyboard focus shows it at once.
+- A click, or Enter, pins the large view where a screen's canvas sits. It stays and
+  follows the game-wide settings while the author changes them.
+- The row under the pinned view has "All screens", Previous and Next, the screen's
+  name and "Edit" with the screen's name, which opens that screen's page. The arrow
+  keys step through the screens, and Escape returns to the board.
+- This replaces the approved rule that a click on a board screen opens its page. The
+  screen list still opens any page in one click. Kris asked for one way that works on
+  Windows and macOS, and a plain click needs no hover, modifier key or right-click.
+
 Declined: a neutral Save button, because the header is the shared approved shell
 header; zoom with the mouse wheel, as scope; typing on the canvas with a double-click,
 because Kris chose the Text field only.

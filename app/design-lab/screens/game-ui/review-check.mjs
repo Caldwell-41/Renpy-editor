@@ -202,6 +202,33 @@ export default async function ({ page, open, capture }) {
     const viewBox = await page.locator('.gu-view').boundingBox(), boxBox = await main().locator('[data-part="box"]').boundingBox();
     assert.ok(boxBox.y < viewBox.y + viewBox.height && boxBox.y + boxBox.height > viewBox.y, 'the selected box shows at 100%');
     await capture('blend-zoom-on-selection');
+    // Game-wide look: pointing at a screen on the board shows it large, and a click keeps the large view open.
+    await open({ state: 'themes', viewport: 'wide', theme: 'dark' });
+    const tile = page.locator('.gu-board [data-pin="choice"]');
+    const small = (await tile.locator('.gu-stage').boundingBox()).width;
+    await tile.hover();
+    await page.locator('.gu-peek').waitFor();
+    const peek = await page.locator('.gu-peek .gu-stage').boundingBox(), tileBox = await tile.boundingBox();
+    assert.ok(peek.width > small * 1.8, `the peek is ${peek.width} px wide beside a ${small} px tile`);
+    assert.ok(peek.y >= tileBox.y + tileBox.height || peek.y + peek.height <= tileBox.y, 'the peek does not cover the screen under the pointer');
+    await capture('blend-board-peek');
+    await tile.click();
+    assert.equal(await page.locator('.gu-peek').count(), 0);
+    assert.equal(await page.locator('.gu-pinned strong').innerText(), 'Choices');
+    assert.equal(await page.locator('.gu-panel h2').first().innerText(), 'Game-wide look');
+    // The pinned screen follows a game-wide setting while it changes.
+    await page.locator('[data-key="gui.accent"]').fill('#3366cc');
+    await page.locator('[data-key="gui.accent"]').dispatchEvent('change');
+    assert.match(await page.locator('.gu-view .g').getAttribute('style'), /--ga:#3366cc/);
+    assert.equal(await page.locator('.gu-pinned strong').innerText(), 'Choices');
+    await capture('blend-board-pinned');
+    await page.locator('[data-act="pin-next"]').click();
+    assert.equal(await page.locator('.gu-pinned strong').innerText(), 'Quick menu');
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('.gu-board').count(), 1);
+    await page.locator('.gu-board [data-pin="title"]').click();
+    await page.locator('.gu-pinned [data-go="title"]').click();
+    assert.equal(await page.locator('.gu-list [aria-current]').innerText(), 'Title screen');
     // Zoom, the collapsing panels and the narrow window.
     await open({ state: 'title', viewport: 'wide', theme: 'dark' });
     const width = async () => (await main().boundingBox()).width;

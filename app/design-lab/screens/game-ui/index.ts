@@ -56,6 +56,8 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   let savedDoc: Doc, what: string | null;
   // Layout B: the page and element that the 100% view last scrolled to.
   let zoomFocus = '';
+  // Layout B, Game-wide look: the screen whose large view is pinned over the board, and a control to focus after the next redraw.
+  let pinned: string | null = null, focusNext = '';
   // The number of the next added element. It never goes down, so no two elements share an id.
   let nextNew = 1;
   let doc: Doc, done: Entry[], undone: Entry[], saved: number, status: string, sample: Record<string, string>;
@@ -64,7 +66,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   function reset(state: string) {
     doc = { values: { ...defaults }, offsets: {}, added: {} }; done = []; undone = []; saved = 0; status = 'Ready';
     sample = { ...sampleDefaults }; page = 'say'; level = 'settings'; sel = null; home = false; fine = false; more = false; tryIt = false; open = ''; hit = null; replay = ''; others = false; allParts = null; forced = false;
-    zoom = 'fit'; listOpen = null; panelOpen = true; what = null; nextNew = 1;
+    zoom = 'fit'; listOpen = null; panelOpen = true; what = null; nextNew = 1; pinned = null;
     if (state === 'title') page = 'title';
     if (state === 'themes') { if (traits[variant].lookPage) page = 'look'; else if (variant === 'click') open = 'theme'; else home = true; }
     if (state === 'detailed') { page = 'title'; level = 'elements'; sel = 'menu'; more = true; }
@@ -103,7 +105,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   function undo() { const entry = done.pop(); if (!entry) return; doc = clone(entry.before); undone.push(entry); reveal(entry); status = `Undone: ${entry.name}`; }
   function redo() { const entry = undone.pop(); if (!entry) return; doc = clone(entry.after); done.push(entry); reveal(entry); status = `Redone: ${entry.name}`; }
   function go(id: string) {
-    page = id; sel = null; home = false; fine = false; open = ''; hit = null; status = 'Ready';
+    page = id; sel = null; home = false; fine = false; open = ''; hit = null; status = 'Ready'; pinned = null;
     if (id === 'look') level = 'settings';
     else if (variant === 'refined' || variant === 'council') {
       // A screen with no settings page opens on its elements. Leaving it returns to Settings.
@@ -436,8 +438,9 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
         <div class="gu-scroll" data-scroll="panel">${open2.stacked ? template : ''}${pg.groups ? groupsHtml(pg.groups) : `<p class="gu-note">${pg.title} follows the game-wide look. Click an element to change it.</p>`}
         ${allElements(pg, !pg.groups)}</div>`;
     }
-    // The board groups the screens as the list does.
-    const tile = (item: Page) => `<button type="button" class="gu-tile" data-go="${item.id}">${stage(item.id)}<span>${item.title}</span></button>`;
+    // The board groups the screens as the list does. Pointing at a screen shows it large for a look. A click keeps the
+    // large view open, so the author can change the game-wide settings and watch one screen. The list opens a screen's page.
+    const tile = (item: Page) => `<button type="button" class="gu-tile" data-pin="${item.id}" title="Show ${esc(item.title)} large">${stage(item.id)}<span>${item.title}</span></button>`;
     const section = (title: string, items: readonly Page[]) => `<section><h3>${title}</h3><div class="gu-board-row">${items.map(tile).join('')}</div></section>`;
     const withPage = (group: Page['group']) => pages.filter(item => item.group === group && (item.groups || group === 'yours'));
     const board = `<div class="gu-board" data-scroll="board">${section(groupTitles.story, withPage('story'))}${section(groupTitles.menus, withPage('menus'))}${section(groupTitles.yours, withPage('yours'))}${section('Other screens', pages.filter(item => !item.groups && item.group !== 'yours'))}</div>`;
@@ -445,7 +448,14 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const row = `<div class="gu-preview"><div class="gu-preview-left">${!open2.list && !open2.panel ? `<strong>${pg.title}</strong>` : ''}${pg.samples ? `${open2.stacked ? '' : '<span class="gu-label" title="Sample content never changes your game.">Sample</span>'}${samples(pg, 'select')}` : ''}</div>
       <div class="gu-seg gu-zoom" role="group" aria-label="Canvas size"><button type="button" data-act="zoom-fit" aria-pressed="${zoom === 'fit'}">Fit</button><button type="button" data-act="zoom-100" aria-pressed="${zoom === '100'}">100%</button></div></div>`;
     const view = `<div class="gu-canvas gu-canvas-b gu-pick${zoom === '100' ? ' gu-zoom-100' : ''}"><div class="gu-view" data-scroll="canvas">${stage(pg.id, { main: true })}</div>${row}</div>`;
-    return `${open2.list ? screenList(false) : ''}<main class="gu-centre">${look ? board : view}${tabs}</main>
+    // The pinned view puts one screen where a screen's canvas sits, with its controls in the row under it.
+    const shown = look && pinned ? pageById(pinned) : null;
+    const large = shown ? `<div class="gu-canvas gu-canvas-b"><div class="gu-view">${stage(shown.id)}</div><div class="gu-preview gu-pinned">
+        <div class="gu-preview-left"><button type="button" data-act="unpin">${svg(glyph.back)}All screens</button>
+          <button type="button" class="gu-icon" data-act="pin-prev" aria-label="Previous screen" title="Previous screen">${svg(glyph.back)}</button><button type="button" class="gu-icon" data-act="pin-next" aria-label="Next screen" title="Next screen">${svg(glyph.next)}</button>
+          <strong>${shown.title}</strong></div>
+        <button type="button" data-go="${shown.id}">Edit ${shown.title}</button></div></div>` : '';
+    return `${open2.list ? screenList(false) : ''}<main class="gu-centre">${shown ? large : look ? board : view}${tabs}</main>
       ${open2.panel ? `<aside class="gu-panel" aria-label="${look ? 'Game-wide look' : 'Settings'}">${panel}${sheet}</aside>` : ''}`;
   }
   /** Layout B: names every element on the canvas, for the tag on the pointer and on the selection. */
@@ -583,7 +593,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
 
   // ---- rendering ----
   function focusSelector(el: HTMLElement) {
-    for (const name of ['key', 'set', 'act', 'go', 'select', 'check', 'template', 'theme', 'sample', 'own', 'same', 'offset', 'add']) {
+    for (const name of ['key', 'set', 'act', 'go', 'select', 'check', 'template', 'theme', 'sample', 'own', 'same', 'offset', 'add', 'pin']) {
       const value = el.dataset[name];
       if (value !== undefined) return `[data-${name}="${value}"]${el.dataset.value !== undefined ? `[data-value="${el.dataset.value}"]` : ''}`;
     }
@@ -598,7 +608,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const scroll = new Map<string, [number, number]>();
     host.querySelectorAll<HTMLElement>('[data-scroll]').forEach(node => scroll.set(node.dataset.scroll!, [node.scrollTop, node.scrollLeft]));
     const pg = pageById(page);
-    const sides = variant === 'blend' ? ` data-list="${frame().list ? 'open' : 'gone'}" data-panel="${frame().panel ? 'open' : 'gone'}" data-look="${page === 'look'}"` : '';
+    const sides = variant === 'blend' ? ` data-list="${frame().list ? 'open' : 'gone'}" data-panel="${frame().panel ? 'open' : 'gone'}" data-look="${page === 'look' && !pinned}"` : '';
     host.innerHTML = `<div class="gu-shell" data-variant="${variant}" data-home="${variant === 'board' && home}"${sides}>
       <section class="gu-proto" aria-label="Prototype controls"><strong>Game UI layout study · unapproved</strong><span>Sample project. Changes stay in this preview.</span>
         <button type="button" data-act="reset">Reset</button><label>Layout <select data-variant-select aria-label="Game UI layout">${variants.map(v => `<option value="${v}" ${v === variant ? 'selected' : ''}>${names[v]}</option>`).join('')}</select></label></section>
@@ -611,6 +621,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     if (hit) host.querySelector('.gu-group.is-hit')?.scrollIntoView({ block: 'nearest' });
     host.querySelector('.gu-strip [aria-current]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     if (focus) host.querySelector<HTMLElement>(focus)?.focus();
+    if (focusNext) { host.querySelector<HTMLElement>(focusNext)?.focus(); focusNext = ''; }
     replay = '';
   }
   function switchVariant(next: Variant) {
@@ -644,6 +655,8 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       case 'try': tryIt = !tryIt; sel = null; break;
       case 'menu-theme': case 'menu-add': case 'menu-sample': case 'menu-template': case 'menu-elements': case 'menu-changes': { const which = name.slice(5) as typeof open; open = open === which ? '' : which; return; }
       case 'others': others = !others; break;
+      case 'unpin': focusNext = `[data-pin="${pinned}"]`; pinned = null; break;
+      case 'pin-prev': case 'pin-next': pinned = boardStep(name === 'pin-next' ? 1 : -1); break;
       case 'open-source': status = 'Open in Source goes to this line in the Source workspace. It is not part of this mock.'; break;
       case 'toggle-list': listOpen = !frame().list; break;
       case 'toggle-panel': panelOpen = !panelOpen; break;
@@ -698,6 +711,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       sel = id; if (!traits[variant].modeless) level = 'elements'; open = '';
     } else if (d.what) what = what === d.what ? null : d.what;
     else if (d.revert) revert(d.revert);
+    else if (d.pin) { pinned = d.pin; focusNext = '[data-act="unpin"]'; }
     else if (d.openPart) { const [owner, part] = d.openPart.split(':') as [string, string]; go(owner); sel = part; }
     else if (d.act) act(d.act);
     else return;
@@ -784,11 +798,20 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     if (!target.closest('[data-main]') || canSelect() || tryIt) return;
     level = 'elements'; hit = null; sel = target.closest<HTMLElement>('[data-part]')?.dataset.part ?? null; render();
   }
+  /** The screens in the order of the board, for Previous and Next in the pinned view. */
+  function boardStep(by: number) {
+    const order = [...pages.filter(item => item.id !== 'look' && (item.groups || item.group === 'yours')), ...pages.filter(item => !item.groups && item.group !== 'yours')];
+    return order[(order.findIndex(item => item.id === pinned) + by + order.length) % order.length]!.id;
+  }
   function onKey(event: KeyboardEvent) {
+    // The pinned view: the arrow keys step through the screens, unless the keyboard is in a control that uses them.
+    if (pinned && (event.key === 'ArrowLeft' || event.key === 'ArrowRight') && !event.metaKey && !event.ctrlKey && !event.altKey && !(event.target as HTMLElement).closest('input,select,textarea,[role=group]')) {
+      event.preventDefault(); pinned = boardStep(event.key === 'ArrowRight' ? 1 : -1); render(); return;
+    }
     // Enter in the Text field of a new element commits it. The field takes one paragraph.
     if (event.key === 'Enter' && event.target instanceof HTMLTextAreaElement && event.target.dataset.addedText) { event.preventDefault(); event.target.blur(); return; }
     if (event.key === 'Escape') {
-      if (open) open = ''; else if (variant === 'council' && level === 'elements' && !forced) act('level-settings'); else if (sel) sel = null; else if (variant === 'board' && level === 'elements') level = 'settings'; else return;
+      if (open) open = ''; else if (pinned) { focusNext = `[data-pin="${pinned}"]`; pinned = null; } else if (variant === 'council' && level === 'elements' && !forced) act('level-settings'); else if (sel) sel = null; else if (variant === 'board' && level === 'elements') level = 'settings'; else return;
       render(); return;
     }
     if (!(event.metaKey || event.ctrlKey) || (event.target as HTMLElement).closest('input:not([type=range]):not([type=checkbox]):not([type=color]),textarea')) return;
@@ -807,6 +830,37 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     if (part && event.type === 'mouseover') host.querySelectorAll(`[data-main] [data-part="${part}"]`).forEach(node => node.classList.add('is-pointed'));
   };
   host.addEventListener('mouseover', onHover); host.addEventListener('mouseout', onHover);
+  // Layout B, Game-wide look: pointing at a screen on the board shows it large, in the part of the board with the most room
+  // away from that screen. The pointer passes through it. Keyboard focus shows it at once.
+  let peekTimer = 0, peekFor: HTMLElement | null = null;
+  const hidePeek = () => { clearTimeout(peekTimer); peekFor = null; host.querySelector('.gu-peek')?.remove(); };
+  function showPeek(tile: HTMLElement) {
+    const centre = tile.closest<HTMLElement>('.gu-centre');
+    if (!tile.isConnected || !centre) return;
+    host.querySelector('.gu-peek')?.remove();
+    const c = centre.getBoundingClientRect(), t = tile.getBoundingClientRect();
+    const above = t.top - c.top, below = c.bottom - t.bottom;
+    const height = Math.max(120, Math.min(315, Math.max(above, below) - 52, (c.width - 40) * 9 / 16));
+    const width = height * 16 / 9;
+    const peek = document.createElement('div');
+    peek.className = 'gu-peek';
+    peek.innerHTML = `<div style="width:${width}px">${stage(tile.dataset.pin!)}</div><p><strong>${pageById(tile.dataset.pin!).title}</strong><span>Click to keep it open</span></p>`;
+    peek.style.left = `${(c.width - width - 14) / 2}px`;
+    if (below >= above) peek.style.top = `${t.bottom - c.top + 8}px`; else peek.style.bottom = `${c.bottom - t.top + 8}px`;
+    centre.append(peek);
+  }
+  const onPeek = (event: MouseEvent | FocusEvent) => {
+    const tile = (event.target as HTMLElement).closest<HTMLElement>('.gu-board [data-pin]');
+    if (event.type === 'mouseover') {
+      if (tile === peekFor) return;
+      hidePeek();
+      if (tile) { peekFor = tile; peekTimer = window.setTimeout(() => showPeek(tile), 350); }
+    } else if (event.type === 'focusin') {
+      if (tile?.matches(':focus-visible')) { hidePeek(); peekFor = tile; showPeek(tile); }
+    } else if (!tile || !tile.contains((event as MouseEvent).relatedTarget as Node | null)) hidePeek();
+  };
+  for (const type of ['mouseover', 'mouseout', 'focusin', 'focusout'] as const) host.addEventListener(type, onPeek);
+  host.addEventListener('scroll', hidePeek, true);
   // Layout B: a right-click on a setting row opens the line it writes.
   const onContext = (event: MouseEvent) => {
     const row = variant === 'blend' ? (event.target as HTMLElement).closest<HTMLElement>('[data-row]') : null;
@@ -820,7 +874,8 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   render();
   return () => {
     host.removeEventListener('click', onClick); host.removeEventListener('input', onInput); host.removeEventListener('change', onChange);
-    host.removeEventListener('pointerdown', onPointerDown); host.removeEventListener('dblclick', onDoubleClick); document.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); host.removeEventListener('contextmenu', onContext); host.removeEventListener('mouseover', onHover); host.removeEventListener('mouseout', onHover);
+    host.removeEventListener('pointerdown', onPointerDown); host.removeEventListener('dblclick', onDoubleClick); document.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); host.removeEventListener('contextmenu', onContext); hidePeek(); host.removeEventListener('scroll', hidePeek, true);
+    for (const type of ['mouseover', 'mouseout', 'focusin', 'focusout'] as const) host.removeEventListener(type, onPeek); host.removeEventListener('mouseover', onHover); host.removeEventListener('mouseout', onHover);
     host.replaceChildren();
   };
 }
