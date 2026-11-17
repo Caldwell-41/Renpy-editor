@@ -329,7 +329,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       ${showOther ? `${other.map(row).join('')}${note ? '<p class="gu-note">These follow the game-wide look. You edit their elements.</p>' : ''}` : ''}</aside>`;
   }
   /** One row for the template in use. The four pictures open in a sheet, so the settings start at the top of the panel. */
-  const templatePop = (pg: Page, cls = 'gu-pop-right') => `<div class="gu-pop ${cls} gu-template-pop"><h3>Template</h3><p class="gu-help gu-help-wide">A template replaces this screen's layout settings. Undo brings them back.</p>${templateTiles(pg, 'gu-tiles-4')}</div>`;
+  const templatePop = (pg: Page, cls = 'gu-pop-right') => `<div class="gu-pop ${cls} gu-template-pop"><h3>Template</h3><p class="gu-help gu-help-wide">A template replaces this screen's layout settings.</p>${templateTiles(pg, 'gu-tiles-4')}</div>`;
   function templateRow(pg: Page, withPop = true) {
     if (!pg.templates) return '';
     const now = pg.templates.find(t => Object.entries(t.values).every(([key, value]) => doc.values[key] === value));

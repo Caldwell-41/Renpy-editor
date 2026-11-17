@@ -177,7 +177,8 @@ Polish from round three:
 - **The name tag** hangs from the element's right corner when it would pass the canvas
   edge.
 - **The template sheet** says what a template replaces above the pictures. In the
-  narrow window it uses the whole panel.
+  narrow window it uses the whole panel. Kris then cut "Undo brings them back" from
+  that line.
 - **Smaller things.** "All elements" also shows for an element that another screen
   owns. The status line returns to "Ready" on another screen. The 100% view
   styles its scroll bars so that they stay in view. The check browser hides scroll
