@@ -318,6 +318,7 @@ init python:
             wait["firstDraw"] = None
             _llp_S["wait"] = wait
         except StopIteration:
+            _llp_S["errors"] = 0
             _llp_S["job"] = None
             _llp_S["wait"] = None
             _llp_S["inflight"] = False
@@ -371,6 +372,13 @@ init python:
             except Exception:
                 trace = _llp_tb.format_exc()
                 failed = _llp_perf()
+                # A failed screen update leaves the UI stack open, as in
+                # renpy.display.error. Reset it before the next interaction.
+                renpy.ui.reset()
+                S["errors"] = S.get("errors", 0) + 1
+                if S["errors"] > 20:
+                    _llp_write("error-storm.json", dict(trace=trace))
+                    _llp_os._exit(75)
                 S["job"] = None
                 S["wait"] = None
                 for screen, (text, filename) in list(S["good"].items()):

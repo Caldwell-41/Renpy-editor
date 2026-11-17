@@ -507,12 +507,12 @@ def summarize(results):
         s = data.get("session")
         if not s:
             continue
-        for name, path in s["paths"].items():
+        for name, path in s.get("paths", {}).items():
             lines.append("path %s: e2e %s helper %s changed %s" % (name, stats([r.get("e2eMs") for r in path]),
                          stats([r.get("helperMs") for r in path]), [r.get("changed") for r in path]))
-        for name, path in s["drafts"].items():
+        for name, path in s.get("drafts", {}).items():
             lines.append("draft %s: e2e %s changed %s" % (name, stats([r.get("e2eMs") for r in path]), [r.get("changed") for r in path]))
-        for name, screen in s["screens"].items():
+        for name, screen in s.get("screens", {}).items():
             verdicts = {}
             for row in screen["lines"]:
                 verdicts[row["verdict"]] = verdicts.get(row["verdict"], 0) + 1
@@ -522,10 +522,12 @@ def summarize(results):
             lines.append("screen %s: elements %d lines %s coverage %s rect checked %d exact %d max offset %s skipped %d" % (
                 name, screen["elements"], verdicts, json.dumps(screen["coverage"]), len(checks), exact,
                 max(off) if off else None, len(screen["rectChecks"] or []) - len(checks)))
-        for b in s["broken"]:
+        for b in s.get("broken", []):
             lines.append("broken %s: ok=%s error=%s errorMs=%.0f errorToGood=%.0f alive=%s" % (
                 b["case"], b["errorOk"], b["error"], b["errorMs"] or -1, b["errorToGoodImageMs"], b["processAlive"]))
-        p = s["pointer"]
+        p = s.get("pointer")
+        if not p:
+            continue
         lines.append("pointer moves e2e %s changed %s" % (stats([r.get("e2eMs") for r in p["moves"]]), [r.get("changed") for r in p["moves"]]))
         if p["click"]:
             lines.append("click e2e %.0f firstDraw %s changed %s screens %s" % (p["click"]["e2eMs"], p["click"].get("firstDrawMs"),
