@@ -234,6 +234,19 @@ export default async function ({ page, open, capture }) {
     await page.locator('.gu-board [data-pin="title"]').click();
     await page.locator('.gu-pinned [data-go="title"]').click();
     assert.equal(await page.locator('.gu-list [aria-current]').innerText(), 'Title screen');
+    // The font menu shows each font in its own letters, and a choice changes the game at once.
+    await open({ state: 'themes', viewport: 'wide', theme: 'dark' });
+    await page.locator('[data-act="menu-font"]').click();
+    const families = await page.locator('.gu-font-pop [role=option]').evaluateAll(nodes => nodes.map(node => getComputedStyle(node).fontFamily));
+    assert.equal(new Set(families).size, 4, `each font option has its own font: ${families.join(' | ')}`);
+    const menuBox = await page.locator('.gu-font-pop').boundingBox(), panelBox2 = await page.locator('.gu-panel').boundingBox();
+    assert.ok(menuBox.y + menuBox.height <= panelBox2.y + panelBox2.height + 1, 'the font menu is inside the panel');
+    await capture('blend-font-menu');
+    await page.keyboard.press('ArrowDown');
+    await page.locator('.gu-font-pop [data-value="type"]').click();
+    assert.equal(await page.locator('.gu-font-pop').count(), 0);
+    assert.match(await page.locator('[data-act="menu-font"]').innerText(), /Typewriter/);
+    assert.match(await page.locator('[data-game]:not([data-over]) .g').first().getAttribute('style'), /--gf:"Courier New"/);
     // Zoom, the collapsing panels and the narrow window.
     await open({ state: 'title', viewport: 'wide', theme: 'dark' });
     const width = async () => (await main().boundingBox()).width;

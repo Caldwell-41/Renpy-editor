@@ -23,6 +23,8 @@ export type Field = {
   options?: Options; min?: number; max?: number; unit?: string;
   /** With no value of its own, the field shows this game-wide setting. */
   follows?: string; help?: string;
+  /** The options are fonts. Layout B shows each one in its own font. */
+  fontMenu?: boolean;
   /** The element this one setting belongs to, when its group belongs to none. */
   part?: string;
 };
@@ -74,7 +76,7 @@ export const pages: readonly Page[] = [
       { key: 'gui.text', label: 'Text', kind: 'color' },
       { key: 'gui.panel', label: 'Boxes', kind: 'color' }] },
     { title: 'Text', fields: [
-      { key: 'gui.font', label: 'Font', kind: 'select', options: [['sans', 'Clean'], ['serif', 'Bookish'], ['round', 'Rounded'], ['type', 'Typewriter']] },
+      { key: 'gui.font', label: 'Font', kind: 'select', fontMenu: true, options: [['sans', 'Clean'], ['serif', 'Bookish'], ['round', 'Rounded'], ['type', 'Typewriter']] },
       { key: 'gui.size', label: 'Size', kind: 'segment', options: sizes }] },
     { title: 'Buttons', fields: [
       { key: 'gui.shape', label: 'Shape', kind: 'segment', options: shapes },

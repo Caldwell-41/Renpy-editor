@@ -315,3 +315,10 @@
 .gu-pin-strip { height:104px; display:flex; align-items:flex-start; gap:8px; overflow-x:auto; padding-top:10px; border-top:1px solid var(--border-normal); margin-top:8px; }
 .gu-shell .gu-pin-strip .gu-tile { flex:none; width:100px; font-size:11px; }
 @media (max-width:700px) { [data-variant=blend] .gu-look-pinned>.gu-view, [data-variant=blend] .gu-look-pinned>.gu-preview { width:100%; } }
+
+/* Layout B: the font menu. The button and each option show the font's own letters. */
+.gu-shell button.gu-font-button { flex:1; min-width:0; justify-content:space-between; min-height:28px; padding:2px 8px; font-size:14px; }
+.gu-shell .gu-font-button svg { width:13px; height:13px; color:var(--text-secondary); }
+.gu-pop.gu-font-pop { min-width:0; padding:4px; }
+.gu-shell .gu-font-pop button { min-height:32px; padding:3px 8px; font-size:16px; }
+.gu-shell .gu-font-pop button[aria-selected=true] { background:var(--surface-selected); box-shadow:inset 2px 0 var(--accent-primary); }

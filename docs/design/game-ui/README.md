@@ -208,6 +208,12 @@ screen's page, and chose this design on 2026-11-17:
   screen list still opens any page in one click. Kris asked for one way that works on
   Windows and macOS, and a plain click needs no hover, modifier key or right-click.
 
+Kris also asked for the Font setting to show each font in its own letters. The Font
+control is now a menu that the mock draws itself, because the system menu on macOS
+shows every option in the system font. The button shows the font in use, each option
+shows its own font, and the menu opens above its button when the panel has no room
+below. The up and down arrow keys move through the fonts, and Escape closes the menu.
+
 Declined: a neutral Save button, because the header is the shared approved shell
 header; zoom with the mouse wheel, as scope; typing on the canvas with a double-click,
 because Kris chose the Text field only.

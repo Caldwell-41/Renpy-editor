@@ -5,7 +5,7 @@
 import type { LabContext } from '../../contracts.ts';
 import { icon } from '../../../src/icons.ts';
 import { game, type GameContext } from './game.ts';
-import { art, defaults, fieldByKey, follows, groupTitles, ownerOf, pageById, pages, sampleDefaults, themes, type Field, type Group, type Page, type Part, type Sample, type Value, type Values } from './model.ts';
+import { art, defaults, fieldByKey, follows, fonts, groupTitles, ownerOf, pageById, pages, sampleDefaults, themes, type Field, type Group, type Page, type Part, type Sample, type Value, type Values } from './model.ts';
 import { sourceLine } from './source.ts';
 import './game.css';
 import './style.css';
@@ -47,7 +47,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   let variant = initial;
   // What the author looks at. `home` is the board of layout 3, `fine` the game-wide settings of layouts 2 and 3.
   let page: string, level: 'settings' | 'elements', sel: string | null, home: boolean, fine: boolean, more: boolean, tryIt: boolean;
-  let open: '' | 'theme' | 'add' | 'sample' | 'template' | 'changes' | 'elements', hit: string | null, replay: string;
+  let open: '' | 'theme' | 'add' | 'sample' | 'template' | 'changes' | 'elements' | 'font', hit: string | null, replay: string;
   // Layouts A and B: `others` opens the "Other screens" rows, `allParts` the element list, `forced` marks a screen that has no settings page.
   let others: boolean, allParts: boolean | null, forced: boolean;
   // Layout B: the canvas size, and whether the list and the panel are open. `listOpen` null follows the window width.
@@ -127,7 +127,9 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     switch (f.kind) {
       case 'color': return `<span class="gu-color"><input type="color" data-key="${f.key}" value="${value}" aria-label="${label}"><code>${value}</code></span>`;
       case 'segment': return `<div class="gu-seg" role="group" aria-label="${label}">${f.options!.map(([v, text]) => `<button type="button" data-set="${f.key}" data-value="${v}" aria-pressed="${String(value) === v}">${text}</button>`).join('')}</div>`;
-      case 'select': return `<select data-key="${f.key}" aria-label="${label}">${f.options!.map(([v, text]) => `<option value="${v}" ${String(value) === v ? 'selected' : ''}>${text}</option>`).join('')}</select>`;
+      // Layout B: a font menu shows each font in its own letters. The system menu cannot do that on macOS, so this one is drawn here.
+      case 'select': if (variant === 'blend' && f.fontMenu) return `<button type="button" class="gu-font-button" data-act="menu-font" aria-haspopup="listbox" aria-expanded="${open === 'font'}" aria-label="${label}: ${f.options!.find(([v]) => v === String(value))?.[1] ?? value}" style="font-family:${esc(fonts[String(value)] ?? '')}"><span>${f.options!.find(([v]) => v === String(value))?.[1] ?? value}</span>${svg(glyph.down)}</button>`;
+        return `<select data-key="${f.key}" aria-label="${label}">${f.options!.map(([v, text]) => `<option value="${v}" ${String(value) === v ? 'selected' : ''}>${text}</option>`).join('')}</select>`;
       case 'range': return `<span class="gu-range"><input type="range" data-key="${f.key}" min="${f.min}" max="${f.max}" value="${value}" aria-label="${label}"><output>${value}${f.unit ?? ''}</output></span>`;
       case 'image': return `<div class="gu-pics" role="group" aria-label="${label}">${f.options!.map(([v, text]) => `<button type="button" data-set="${f.key}" data-value="${v}" aria-pressed="${String(value) === v}" aria-label="${text}" title="${text}"${v === 'none' ? '>None' : ` style="background-image:url(${art[v]})">`}</button>`).join('')}</div>`;
       case 'checks': { const on = String(value).split(','); return `<div class="gu-checks" role="group" aria-label="${label}">${f.options!.map(([v, text]) => `<label><input type="checkbox" data-check="${f.key}" data-value="${v}" ${on.includes(v) ? 'checked' : ''}>${text}</label>`).join('')}</div>`; }
@@ -448,6 +450,9 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const row = `<div class="gu-preview"><div class="gu-preview-left">${!open2.list && !open2.panel ? `<strong>${pg.title}</strong>` : ''}${pg.samples ? `${open2.stacked ? '' : '<span class="gu-label" title="Sample content never changes your game.">Sample</span>'}${samples(pg, 'select')}` : ''}</div>
       <div class="gu-seg gu-zoom" role="group" aria-label="Canvas size"><button type="button" data-act="zoom-fit" aria-pressed="${zoom === 'fit'}">Fit</button><button type="button" data-act="zoom-100" aria-pressed="${zoom === '100'}">100%</button></div></div>`;
     const view = `<div class="gu-canvas gu-canvas-b gu-pick${zoom === '100' ? ' gu-zoom-100' : ''}"><div class="gu-view" data-scroll="canvas">${stage(pg.id, { main: true })}</div>${row}</div>`;
+    // The font menu sits on the panel, outside its scrolling part, so nothing cuts it. The redraw puts it under its button.
+    const fontField = fieldByKey['gui.font']!;
+    const fontPop = look && open === 'font' ? `<div class="gu-pop gu-menu gu-font-pop" role="listbox" aria-label="Font">${fontField.options!.map(([v, text]) => `<button type="button" class="gu-flat" role="option" aria-selected="${String(read('gui.font')) === v}" data-set="gui.font" data-value="${v}" style="font-family:${esc(fonts[v] ?? '')}">${text}</button>`).join('')}</div>` : '';
     // The pinned view is still the Game-wide look page: one screen large, labelled as a preview, with every screen in a strip
     // under it. The strip keeps the board in view, so the page does not read as that screen's editor. A click in the strip
     // changes the screen. The narrow window has no room for the strip, so it gets Previous and Next.
@@ -460,7 +465,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
         <button type="button" data-go="${shown.id}">Edit ${shown.title}</button></div>
         ${open2.stacked ? '' : `<div class="gu-pin-strip" data-scroll="pinstrip" role="group" aria-label="Screens">${order.map(item => `<button type="button" class="gu-tile" data-pin="${item.id}" aria-pressed="${item.id === pinned}">${stage(item.id)}<span>${item.title}</span></button>`).join('')}</div>`}</div>` : '';
     return `${open2.list ? screenList(false) : ''}<main class="gu-centre">${shown ? large : look ? board : view}${tabs}</main>
-      ${open2.panel ? `<aside class="gu-panel" aria-label="${look ? 'Game-wide look' : 'Settings'}">${panel}${sheet}</aside>` : ''}`;
+      ${open2.panel ? `<aside class="gu-panel" aria-label="${look ? 'Game-wide look' : 'Settings'}">${panel}${sheet}${fontPop}</aside>` : ''}`;
   }
   /** Layout B: names every element on the canvas, for the tag on the pointer and on the selection. */
   function nameParts() {
@@ -625,6 +630,14 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     if (hit) host.querySelector('.gu-group.is-hit')?.scrollIntoView({ block: 'nearest' });
     host.querySelector('.gu-strip [aria-current]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     if (focus) host.querySelector<HTMLElement>(focus)?.focus();
+    const menu = host.querySelector<HTMLElement>('.gu-font-pop'), menuButton = host.querySelector<HTMLElement>('[data-act="menu-font"]');
+    if (menu && menuButton) {
+      // Under its button, or above it when the panel has no room below.
+      const p = menu.parentElement!.getBoundingClientRect(), b = menuButton.getBoundingClientRect();
+      menu.style.left = `${b.left - p.left}px`; menu.style.width = `${b.width}px`;
+      if (p.bottom - b.bottom > menu.offsetHeight + 8) menu.style.top = `${b.bottom - p.top + 3}px`;
+      else { menu.style.top = 'auto'; menu.style.bottom = `${p.bottom - b.top + 3}px`; }
+    }
     if (focusNext) { host.querySelector<HTMLElement>(focusNext)?.focus(); focusNext = ''; }
     host.querySelector('.gu-pin-strip [aria-pressed=true]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     replay = '';
@@ -658,7 +671,11 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       case 'more': more = !more; break;
       case 'deselect': sel = null; break;
       case 'try': tryIt = !tryIt; sel = null; break;
-      case 'menu-theme': case 'menu-add': case 'menu-sample': case 'menu-template': case 'menu-elements': case 'menu-changes': { const which = name.slice(5) as typeof open; open = open === which ? '' : which; return; }
+      case 'menu-theme': case 'menu-add': case 'menu-sample': case 'menu-template': case 'menu-elements': case 'menu-changes': case 'menu-font': {
+        const which = name.slice(5) as typeof open; open = open === which ? '' : which;
+        if (open === 'font') focusNext = '.gu-font-pop [aria-selected=true]';
+        return;
+      }
       case 'others': others = !others; break;
       case 'unpin': focusNext = `[data-pin="${pinned}"]`; pinned = null; break;
       case 'pin-prev': case 'pin-next': pinned = boardStep(name === 'pin-next' ? 1 : -1); break;
@@ -697,6 +714,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     }
     const d = button.dataset;
     const inPop = !!button.closest('.gu-pop');
+    if (button.closest('.gu-font-pop')) focusNext = '[data-act="menu-font"]';
     if (d.go) go(d.go);
     else if (d.set) { if (String(read(d.set)) !== d.value) commit(editName(d.set), next => { next.values[d.set!] = d.value!; }, d.set.startsWith('gui.') ? 'look' : page); }
     else if (d.own) commit(editName(d.own), next => { next.values[d.own!] = read(d.own!); });
@@ -809,6 +827,13 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     return order[(order.findIndex(item => item.id === pinned) + by + order.length) % order.length]!.id;
   }
   function onKey(event: KeyboardEvent) {
+    // The font menu: the up and down arrow keys move through the fonts.
+    const option = (event.target as HTMLElement).closest<HTMLElement>('.gu-font-pop [role=option]');
+    if (option && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      event.preventDefault();
+      ((event.key === 'ArrowDown' ? option.nextElementSibling : option.previousElementSibling) as HTMLElement | null)?.focus();
+      return;
+    }
     // The pinned view: the arrow keys step through the screens, unless the keyboard is in a control that uses them.
     if (pinned && (event.key === 'ArrowLeft' || event.key === 'ArrowRight') && !event.metaKey && !event.ctrlKey && !event.altKey && !(event.target as HTMLElement).closest('input,select,textarea')) {
       event.preventDefault(); pinned = boardStep(event.key === 'ArrowRight' ? 1 : -1); render(); return;
@@ -865,7 +890,9 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     } else if (!tile || !tile.contains((event as MouseEvent).relatedTarget as Node | null)) hidePeek();
   };
   for (const type of ['mouseover', 'mouseout', 'focusin', 'focusout'] as const) host.addEventListener(type, onPeek);
-  host.addEventListener('scroll', hidePeek, true);
+  // A scroll moves what a floating layer points at, so the peek and the font menu close.
+  const onScroll = () => { hidePeek(); if (open === 'font') { open = ''; render(); } };
+  host.addEventListener('scroll', onScroll, true);
   // Layout B: a right-click on a setting row opens the line it writes.
   const onContext = (event: MouseEvent) => {
     const row = variant === 'blend' ? (event.target as HTMLElement).closest<HTMLElement>('[data-row]') : null;
@@ -879,7 +906,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   render();
   return () => {
     host.removeEventListener('click', onClick); host.removeEventListener('input', onInput); host.removeEventListener('change', onChange);
-    host.removeEventListener('pointerdown', onPointerDown); host.removeEventListener('dblclick', onDoubleClick); document.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); host.removeEventListener('contextmenu', onContext); hidePeek(); host.removeEventListener('scroll', hidePeek, true);
+    host.removeEventListener('pointerdown', onPointerDown); host.removeEventListener('dblclick', onDoubleClick); document.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); host.removeEventListener('contextmenu', onContext); hidePeek(); host.removeEventListener('scroll', onScroll, true);
     for (const type of ['mouseover', 'mouseout', 'focusin', 'focusout'] as const) host.removeEventListener(type, onPeek); host.removeEventListener('mouseover', onHover); host.removeEventListener('mouseout', onHover);
     host.replaceChildren();
   };
