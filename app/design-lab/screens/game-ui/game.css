@@ -123,8 +123,8 @@
 .g .g-nvl b { color:var(--ga); }
 .g .g-ticket { position:absolute; right:5cqw; top:6cqw; width:27cqw; display:flex; flex-direction:column; align-items:flex-start; gap:.8cqw; padding:2cqw 2.4cqw; }
 .g .g-ticket-h { font-size:calc(2.6cqw*var(--gz)); font-weight:700; color:var(--ga); }
-.g .g-added { position:absolute; left:50%; top:40%; transform:translate(-50%,-50%); }
-.g .g-added-Text { font-size:calc(2.2cqw*var(--gz)); text-shadow:0 0 .5cqw var(--gp); }
+.g .g-added { position:absolute; }
+.g .g-added-Text { max-width:40cqw; font-size:calc(2.2cqw*var(--gz)); text-align:right; text-shadow:0 0 .5cqw var(--gp); }
 .g .g-added-Image { width:14cqw; height:9cqw; display:grid; place-items:center; font-size:1.4cqw; background:color-mix(in srgb, var(--gp) 70%, transparent); border:.12cqw dashed var(--gt); }
 .g .g-added-Box { width:22cqw; height:12cqw; }
 .g .g-added-Bar { width:20cqw; display:flex; }

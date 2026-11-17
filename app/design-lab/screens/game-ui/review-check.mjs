@@ -171,7 +171,7 @@ export default async function ({ page, open, capture }) {
     await page.locator('[data-act="menu-add"]').click();
     await page.locator('[data-add="Text"]').click();
     await page.locator('[data-act="menu-changes"]').click();
-    await page.locator('[data-revert="a:say:1"]').click();
+    await page.locator('[data-revert="a:say:new2"]').click();
     await page.keyboard.press('Escape');
     assert.equal(await main().locator('[data-part="new1"]').count(), 1);
     assert.equal(await main().locator('[data-part="new2"]').count(), 0);
@@ -182,6 +182,21 @@ export default async function ({ page, open, capture }) {
     await page.locator('[data-act="undo"]').click();
     await page.locator('[data-act="undo"]').click();
     await main().locator('[data-part="box"]').click({ position: { x: 6, y: 6 } });
+    // One template choice is one pending edit with one Revert, and the header keeps its height at every name.
+    await page.locator('[data-act="deselect"]').click();
+    await page.locator('[data-act="menu-template"]').click();
+    assert.equal(await saveState(), '1 unsaved change');
+    await page.locator('[data-template="bare"]').click();
+    assert.equal(await saveState(), '2 unsaved changes');
+    await page.locator('[data-act="menu-changes"]').click();
+    assert.match(await page.locator('.gu-changes').innerText(), /Save writes these 4 lines[\s\S]*Dialogue box · Template: Bare text/);
+    await page.locator('[data-revert="t:say:bare"]').click();
+    assert.equal(await saveState(), '1 unsaved change');
+    await page.keyboard.press('Escape');
+    await main().locator('[data-part="arrow"]').click();
+    const tall = (await page.locator('.gu-el-head').boundingBox()).height;
+    await main().locator('[data-part="box"]').click({ position: { x: 6, y: 6 } });
+    assert.equal((await page.locator('.gu-el-head').boundingBox()).height, tall);
     // At 100% the selected element is in view.
     await page.locator('[data-act="zoom-100"]').click();
     const viewBox = await page.locator('.gu-view').boundingBox(), boxBox = await main().locator('[data-part="box"]').boundingBox();

@@ -106,14 +106,15 @@ rounds, and his say on any major change or new feature. The lab pins the approve
 source, so the work continues as a draft, `game-ui` / `blend-v2`, revision `blend-v2`.
 `blend-v1` stays the approved revision until Kris approves this one.
 
-| Reviewer | Round 1 | Round 2 |
-| --- | --- | --- |
-| Claude Opus 5.5 (`xhigh`) | 7.8/10 | 8.8/10 |
-| GPT-6.1 Sol (`xhigh`) | 8.3/10 | 9.0/10 |
-| Claude Fable 5.2 (medium) | 8.3/10 | 9.0/10 |
+| Reviewer | Round 1 | Round 2 | Round 3 |
+| --- | --- | --- | --- |
+| Claude Opus 5.5 (`xhigh`) | 7.8/10 | 8.8/10 | 9.1/10 |
+| GPT-6.1 Sol (`xhigh`) | 8.3/10 | 9.0/10 | 9.3/10 |
+| Claude Fable 5.2 (medium) | 8.3/10 | 9.0/10 | 9.2/10 |
 
-Round two found only polish, and every finding is fixed. Kris set two rounds, so no
-reviewer has scored the layout after those fixes. The measured score is 9.0, not 9.5.
+Kris set two rounds and then asked for a third. Rounds two and three found only polish,
+and every finding is fixed. No reviewer has scored the layout after the round three
+fixes. The measured score is 9.2, the mean of round three, and not 9.5.
 
 Changes Kris approved after round one:
 
@@ -158,6 +159,28 @@ Polish from both rounds:
   the panel, and the sample row stays on one line.
 - **Removed.** The "Reset" row, the second "Button states" control, the note under
   "Other screens", and collapse control 2, which Kris rejected.
+
+Polish from round three:
+
+- **The selected element's header** has two lines at every name: the way back with
+  "Add element", then the name. The kind is in the element list, which now shows it on
+  every row.
+- **New elements.** Each one keeps the place it got when it was made, under the lowest
+  one already added, so two never overlap and Revert of one leaves the others in place.
+  Added text is at most 40% of the canvas wide. A Text element's field grows to three
+  lines.
+- **The list of pending lines** shows one template or theme choice as one edit with
+  its lines under it and one Revert. The header counts edits, and the list's title
+  counts lines. This changes the approved rule that the count is the number of lines.
+- **The joined chain** names the setting it follows, such as "Boxes" under Colors, and
+  opens as soon as the author starts to change the value.
+- **The name tag** hangs from the element's right corner when it would pass the canvas
+  edge.
+- **The template sheet** says what a template replaces above the pictures. In the
+  narrow window it uses the whole panel.
+- **Smaller things.** "All elements" also shows for an element that another screen
+  owns. The status line returns to "Ready" on another screen. The 100% view always
+  shows its scroll bars. The narrow sample row drops the word "Sample".
 
 Declined: a neutral Save button, because the header is the shared approved shell
 header; zoom with the mouse wheel, as scope; typing on the canvas with a double-click,
