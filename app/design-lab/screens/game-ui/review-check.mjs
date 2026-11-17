@@ -132,6 +132,10 @@ export default async function ({ page, open, capture }) {
     await open({ state: 'dialogue', viewport: 'wide', theme: 'dark' });
     await main().locator('[data-part="arrow"]').click();
     assert.equal(await page.locator('.gu-panel [data-key="say.arrow"]').count(), 1);
+    // A checkbox row opens its source line from its own button.
+    await page.locator('.gu-panel [data-what="say.arrow"]').click();
+    assert.match(await page.locator('.gu-writes').innerText(), /define gui\.textbox_arrow = True/);
+    await page.locator('.gu-panel [data-what="say.arrow"]').click();
     // Undo on the screen in view keeps the selection.
     await page.locator('.gu-panel [data-key="say.arrow"]').click();
     await page.locator('[data-act="undo"]').click();
@@ -143,6 +147,26 @@ export default async function ({ page, open, capture }) {
     await page.locator('[data-open-part="say:box"]').click();
     assert.equal(await page.locator('.gu-list [aria-current]').innerText(), 'Dialogue box');
     assert.equal(await page.locator('.gu-panel h2').first().innerText(), 'Box');
+    // An inherited setting keeps its control. The first change gives the screen its own value, and the chain returns it.
+    assert.equal(await page.locator('[data-row="say.fill"] .gu-linked').count(), 1);
+    await page.locator('[data-key="say.fill"]').fill('#22384a');
+    await page.locator('[data-key="say.fill"]').dispatchEvent('change');
+    assert.match(await main().locator('[data-part="box"]').getAttribute('style'), /--gp:#22384a/);
+    await page.locator('[data-same="say.fill"]').click();
+    assert.equal(await page.locator('[data-row="say.fill"] .gu-linked').count(), 1);
+    // A new button takes its words from the Text field, and the element list stays open across a selection.
+    await page.locator('[data-act="deselect"]').click();
+    await page.locator('[data-act="menu-add"]').click();
+    await page.locator('[data-add="Button"]').click();
+    await page.locator('[data-added-text]').fill('Chapters');
+    await page.locator('[data-added-text]').press('Enter');
+    assert.equal(await main().locator('[data-part="new1"]').innerText(), 'Chapters');
+    await page.locator('[data-act="all-parts"]').click();
+    await page.locator('.gu-els [data-select="box"]').click();
+    assert.equal(await page.locator('.gu-els [data-select="box"]').getAttribute('aria-pressed'), 'true');
+    await page.locator('[data-act="undo"]').click();
+    await page.locator('[data-act="undo"]').click();
+    await main().locator('[data-part="box"]').click({ position: { x: 6, y: 6 } });
     // At 100% the selected element is in view.
     await page.locator('[data-act="zoom-100"]').click();
     const viewBox = await page.locator('.gu-view').boundingBox(), boxBox = await main().locator('[data-part="box"]').boundingBox();

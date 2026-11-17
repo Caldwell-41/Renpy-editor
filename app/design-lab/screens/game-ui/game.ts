@@ -12,7 +12,7 @@ export type GameContext = {
   parts: boolean;
   sel: string | null;
   offsets: Record<string, { x: number; y: number }>;
-  added: readonly { id: string; kind: string }[];
+  added: readonly { id: string; kind: string; text?: string }[];
   /** A one-shot animation class for the dialogue box, or ''. */
   replay: string;
 };
@@ -111,7 +111,8 @@ export function game(id: string, c: GameContext): string {
   };
   const extra: Record<string, string> = { Text: 'New text', Button: 'New button', Image: 'Picture', Bar: '<i class="g-slider"><i style="width:55%"></i></i>', Box: '' };
   // Each new element lands a step away from the last one, in the upper right where most screens are empty.
-  const added = c.added.map((item, i) => part(item.id, `g-added g-added-${item.kind}${item.kind === 'Button' ? ' g-btn' : item.kind === 'Box' ? ' g-panel' : ''}`, extra[item.kind] ?? '', `left:${84 - (i % 4) * 3}%;top:${18 + (i % 4) * 9}%;`)).join('');
+  const safe = (text: string) => text.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]!);
+  const added = c.added.map((item, i) => part(item.id, `g-added g-added-${item.kind}${item.kind === 'Button' ? ' g-btn' : item.kind === 'Box' ? ' g-panel' : ''}`, item.text !== undefined ? safe(item.text) : extra[item.kind] ?? '', `left:${84 - (i % 4) * 3}%;top:${18 + (i % 4) * 9}%;`)).join('');
   const accent = g('gui.accent');
   const style = `--ga:${accent};--gon:${onColor(accent)};--gt:${g('gui.text')};--gp:${g('gui.panel')};--gf:${fonts[g('gui.font')]};--gz:${{ s: 0.86, m: 1, l: 1.16 }[g('gui.size')] ?? 1};--gr:${px(Number(c.g('gui.corners')))};--br:${radius(c.g('gui.shape'))};--gbw:${{ none: '0cqw', thin: '.1cqw', thick: '.28cqw' }[g('gui.border')]};--gsh:${c.g('gui.shadow') ? '0 .5cqw 1.8cqw rgb(0 0 0 / 45%)' : 'none'}`;
   return `<div class="g" data-fill="${g('gui.fill')}" style='${style}'>${(screens[id] ?? screens.say!)()}${added}</div>`;

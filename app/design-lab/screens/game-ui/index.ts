@@ -20,7 +20,7 @@ const traits: Record<Variant, { lookPage: boolean; modeless: boolean }> = {
   pages: { lookPage: true, modeless: false }, click: { lookPage: false, modeless: true }, board: { lookPage: false, modeless: false },
 };
 
-type Doc = { values: Values; offsets: Record<string, { x: number; y: number }>; added: Record<string, { id: string; kind: string }[]> };
+type Doc = { values: Values; offsets: Record<string, { x: number; y: number }>; added: Record<string, { id: string; kind: string; text?: string }[]> };
 type Entry = { name: string; page: string; before: Doc; after: Doc };
 
 const esc = (value: string) => value.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -29,6 +29,7 @@ const glyph = {
   undo: 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11', redo: 'm15 14 5-5-5-5m5 5H9.5a5.5 5.5 0 0 0 0 11H13',
   gameUi: 'M3 4h18v13H3zM8 21h8M12 17v4M7 12h6M7 9h3', plus: 'M12 5v14M5 12h14', back: 'm14 5-7 7 7 7', next: 'm10 5 7 7-7 7',
   link: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1',
+  linked: 'M9 17H7a5 5 0 0 1 0-10h2M15 7h2a5 5 0 0 1 0 10h-2M8 12h8', unlinked: 'M9 17H7a5 5 0 0 1 0-10h2M15 7h2a5 5 0 0 1 0 10h-2', code: 'M8 8l-4 4 4 4M16 8l4 4-4 4',
   elements: 'M4 4h7v7H4zM13 13h7v7h-7zM14 4l5 5M19 4l-5 5', down: 'm6 9 6 6 6-6', play: 'M7 4v16l13-8z',
 };
 const mac = /Mac|iPhone|iPad/.test(navigator.platform);
@@ -110,7 +111,8 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     }
   }
   const editName = (key: string) => `${ownerOf[key]?.title ?? 'Game UI'} ${fieldByKey[key]?.label.toLowerCase() ?? key}`;
-  const partsOf = (pg: Page): Part[] => [...pg.parts, ...(doc.added[pg.id] ?? []).map(item => [item.id, `New ${item.kind.toLowerCase()}`, item.kind] as const)];
+  // An added element is named by its words, when it has some.
+  const partsOf = (pg: Page): Part[] => [...pg.parts, ...(doc.added[pg.id] ?? []).map(item => [item.id, item.text?.trim() || `New ${item.kind.toLowerCase()}`, item.kind] as const)];
   const partOf = (pg: Page, id: string | null) => partsOf(pg).find(item => item[0] === id);
   const themeNow = () => themes.find(theme => Object.entries(theme.values).every(([key, value]) => doc.values[key] === value));
 
@@ -129,9 +131,18 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     }
   }
   function field(f: Field): string {
-    if (f.kind === 'toggle') return `<label class="gu-toggle" data-row="${f.key}"${f.part ? ` data-hover-part="${f.part}"` : ''}><input type="checkbox" data-key="${f.key}" ${read(f.key) ? 'checked' : ''}>${esc(f.label)}</label>${writes(f.key)}`;
+    const hover = f.part ? ` data-hover-part="${f.part}"` : '';
+    // Layout B: a checkbox label ticks the box, so its source line opens from a button that shows on the pointer and on focus.
+    if (f.kind === 'toggle' && variant === 'blend') return `<div class="gu-toggle-row" data-row="${f.key}"${hover}><label class="gu-toggle"><input type="checkbox" data-key="${f.key}" ${read(f.key) ? 'checked' : ''}>${esc(f.label)}</label><button type="button" class="gu-flat gu-what-button" data-what="${f.key}" aria-expanded="${what === f.key}" aria-label="Show what ${esc(f.label)} writes" title="Show what this writes">${svg(glyph.code)}</button></div>${writes(f.key)}`;
+    if (f.kind === 'toggle') return `<label class="gu-toggle" data-row="${f.key}"${hover}><input type="checkbox" data-key="${f.key}" ${read(f.key) ? 'checked' : ''}>${esc(f.label)}</label>${writes(f.key)}`;
     let body = control(f);
-    if (f.follows) {
+    if (f.follows && variant === 'blend') {
+      // Layout B: the control always shows. A setting with no value of its own shows the game-wide value and a joined chain.
+      // The first change gives the screen its own value, and the open chain then returns it to the game-wide look.
+      body += doc.values[f.key] === null
+        ? `<span class="gu-linked" role="img" aria-label="Same as the game-wide look" title="Same as the game-wide look. Change it to give this screen its own value.">${svg(glyph.linked)}</span>`
+        : `<button type="button" class="gu-flat gu-same" data-same="${f.key}" title="Use the game-wide look again" aria-label="${esc(f.label)}: use the game-wide look again">${svg(glyph.unlinked)}</button>`;
+    } else if (f.follows) {
       if (doc.values[f.key] === null) {
         const shown = read(f.key);
         const what = f.kind === 'color' ? `<i class="gu-swatch" style="background:${shown}"></i>` : '';
@@ -168,8 +179,12 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       const [id, part] = key.split('.') as [string, string];
       list.push({ id: `o:${key}`, file: 'screens.rpy', line: 300 + key.length * 7, title: `${pageById(id).title} · ${partOf(pageById(id), part)?.[1] ?? part} position`, page: id, old, now });
     }
-    for (const id of Object.keys(doc.added)) (doc.added[id] ?? []).slice(savedDoc.added[id]?.length ?? 0).forEach((item, i) =>
-      list.push({ id: `a:${id}`, file: 'screens.rpy', line: 340 + i, title: `${pageById(id).title} · new ${item.kind.toLowerCase()}`, page: id, old: '', now: `${item.kind.toLowerCase()} "New ${item.kind.toLowerCase()}"` }));
+    // One line for each added element. An element that was saved and then renamed shows its old line and its new one.
+    const line = (item?: { kind: string; text?: string }) => item ? `${item.kind === 'Button' ? 'textbutton' : item.kind.toLowerCase()} "${item.text ?? `New ${item.kind.toLowerCase()}`}"` : '';
+    for (const id of Object.keys(doc.added)) (doc.added[id] ?? []).forEach((item, i) => {
+      const old = line(savedDoc.added[id]?.[i]), now = line(item);
+      if (old !== now) list.push({ id: `a:${id}`, file: 'screens.rpy', line: 340 + i, title: `${pageById(id).title} · ${old ? 'element text' : `new ${item.kind.toLowerCase()}`}`, page: id, old, now });
+    });
     return list.sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line);
   }
   function revert(id: string) {
@@ -179,7 +194,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     commit(`revert ${change.title}`, next => {
       if (id.startsWith('v:')) next.values[key] = savedDoc.values[key] ?? null;
       else if (id.startsWith('o:')) { if (savedDoc.offsets[key]) next.offsets[key] = { ...savedDoc.offsets[key] }; else delete next.offsets[key]; }
-      else next.added[key] = (next.added[key] ?? []).slice(0, savedDoc.added[key]?.length ?? 0);
+      else next.added[key] = structuredClone(savedDoc.added[key] ?? []);
     }, change.page);
   }
   function changesPop(list: Change[]) {
@@ -328,6 +343,12 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const off = doc.offsets[`${pg.id}.${id}`] ?? { x: 0, y: 0 };
     return `<section class="gu-group"><div class="gu-field"><span class="gu-label">Offset</span><span class="gu-control gu-xy"><label>X<input type="number" data-offset="x" value="${off.x}"></label><label>Y<input type="number" data-offset="y" value="${off.y}"></label></span><p class="gu-help">Drag it on the canvas, or type.</p></div></section>`;
   };
+  /** The optional element list. It starts closed, stays as the author left it, and marks the selected element. */
+  function allElements(pg: Page, startOpen: boolean) {
+    const list = ownParts(pg), shown = allParts || startOpen;
+    return `<button type="button" class="gu-flat gu-disclose" data-act="all-parts" aria-expanded="${shown}">${svg(shown ? glyph.down : glyph.next)}All elements<span class="gu-muted">${list.length}</span></button>
+      ${shown ? `<section class="gu-group"><div class="gu-els">${list.map(([id, name, kind]) => `<button type="button" class="gu-row gu-el${isHidden(id) ? ' gu-el-hidden' : ''}" data-select="${id}" data-hover-part="${id}" aria-pressed="${sel === id}"><span>${name}</span><span class="gu-muted">${isHidden(id) ? 'Hidden' : kind === name ? '' : kind}</span></button>`).join('')}</div></section>` : ''}`;
+  }
   function layoutBlend(pg: Page) {
     const look = pg.id === 'look';
     const open2 = frame();
@@ -349,19 +370,19 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
         // An element that another screen owns. Its settings are on that screen, and it does not move here.
         panel = `${head}<div class="gu-scroll" data-scroll="panel"><section class="gu-group"><p>This is part of ${pageById(owner).title}. It looks the same on every screen that shows it.</p><div><button type="button" data-open-part="${owner}:${sel}">Open ${pageById(owner).title}</button></div></section></div>`;
       } else {
-        const plain = partSettings(pg, sel);
-        const added = (doc.added[pg.id] ?? []).some(item => item.id === sel);
+        const item = (doc.added[pg.id] ?? []).find(entry => entry.id === sel);
+        const added = !!item;
+        // An element the author added: a Text or a Button takes its words here.
+        const words = item && (item.kind === 'Text' || item.kind === 'Button') ? `<section class="gu-group"><div class="gu-field"><span class="gu-label">Text</span><span class="gu-control"><input type="text" data-added-text="${item.id}" value="${esc(item.text ?? `New ${item.kind.toLowerCase()}`)}" aria-label="Text"></span></div></section>` : '';
+        const plain = `${words}${partSettings(pg, sel)}`;
         // An element with no plain settings shows its properties at once.
         panel = `${head}<div class="gu-scroll" data-scroll="panel">${plain || (added ? '' : '<p class="gu-note">It follows the game-wide look.</p>')}
-          ${plain ? `<button type="button" class="gu-flat gu-disclose" data-act="more" aria-expanded="${more}">${svg(more ? glyph.down : glyph.next)}All properties</button>${more ? offsetRow(pg, sel) : ''}` : offsetRow(pg, sel)}</div>`;
+          ${plain ? `<button type="button" class="gu-flat gu-disclose" data-act="more" aria-expanded="${more}">${svg(more ? glyph.down : glyph.next)}All properties</button>${more ? offsetRow(pg, sel) : ''}` : offsetRow(pg, sel)}${allElements(pg, false)}</div>`;
       }
     } else if (!look) {
-      const showParts = allParts || !pg.groups;
-      const list = ownParts(pg);
       panel = `<div class="gu-panel-top"><div class="gu-panel-head"><h2>${pg.title}</h2><span class="gu-spacer"></span>${addMenu()}</div>${open2.stacked ? '' : template}</div>
         <div class="gu-scroll" data-scroll="panel">${open2.stacked ? template : ''}${pg.groups ? groupsHtml(pg.groups) : `<p class="gu-note">${pg.title} follows the game-wide look. Click an element to change it.</p>`}
-        <button type="button" class="gu-flat gu-disclose" data-act="all-parts" aria-expanded="${showParts}">${svg(showParts ? glyph.down : glyph.next)}All elements<span class="gu-muted">${list.length}</span></button>
-        ${showParts ? `<section class="gu-group"><div class="gu-els">${list.map(([id, name, kind]) => `<button type="button" class="gu-row gu-el${isHidden(id) ? ' gu-el-hidden' : ''}" data-select="${id}" data-hover-part="${id}"><span>${name}</span><span class="gu-muted">${isHidden(id) ? 'Hidden' : kind === name ? '' : kind}</span></button>`).join('')}</div></section>` : ''}</div>`;
+        ${allElements(pg, !pg.groups)}</div>`;
     }
     // The board groups the screens as the list does.
     const tile = (item: Page) => `<button type="button" class="gu-tile" data-go="${item.id}">${stage(item.id)}<span>${item.title}</span></button>`;
@@ -380,7 +401,13 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   function nameParts() {
     if (variant !== 'blend' || page === 'look') return;
     const pg = pageById(page);
-    host.querySelectorAll<HTMLElement>('[data-main] [data-part]').forEach(node => { node.dataset.name = partName(pg, node.dataset.part!); });
+    const stage = host.querySelector<HTMLElement>('[data-main]')?.getBoundingClientRect();
+    host.querySelectorAll<HTMLElement>('[data-main] [data-part]').forEach(node => {
+      node.dataset.name = partName(pg, node.dataset.part!);
+      // The tag sits above the element's left corner. Near the right or the top edge of the canvas it moves, so it is never cut off.
+      const box = node.getBoundingClientRect();
+      if (stage) { node.classList.toggle('g-tag-right', box.left > stage.left + stage.width * 0.72); node.classList.toggle('g-tag-below', box.top < stage.top + 26); }
+    });
   }
   /** Layout B at 100%: brings the selected element into view, or the screen's first element. A scroll by the author stays. */
   function focusZoom() {
@@ -505,10 +532,13 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       const value = el.dataset[name];
       if (value !== undefined) return `[data-${name}="${value}"]${el.dataset.value !== undefined ? `[data-value="${el.dataset.value}"]` : ''}`;
     }
+    if (el.dataset.addedText) return `[data-added-text="${el.dataset.addedText}"]`;
     return el.dataset.sampleKey ? `[data-sample-key="${el.dataset.sampleKey}"]` : null;
   }
   function render() {
     const active = document.activeElement as HTMLElement | null;
+    // A text or number field commits on blur. Commit it now, before the redraw removes it, so its change event cannot fire inside the redraw.
+    if (active instanceof HTMLInputElement && host.contains(active) && (active.type === 'text' || active.type === 'number')) active.blur();
     const focus = active && host.contains(active) ? focusSelector(active) : null;
     const scroll = new Map<string, [number, number]>();
     host.querySelectorAll<HTMLElement>('[data-scroll]').forEach(node => scroll.set(node.dataset.scroll!, [node.scrollTop, node.scrollLeft]));
@@ -616,6 +646,12 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   }
   function onInput(event: Event) {
     const el = event.target as HTMLInputElement;
+    if (el.dataset.addedText) {
+      pending ??= clone(doc);
+      const item = doc.added[page]?.find(entry => entry.id === el.dataset.addedText);
+      if (item) item.text = el.value;
+      refreshStages(); return;
+    }
     const key = el.dataset.key;
     if (!key) return;
     pending ??= clone(doc);
@@ -629,6 +665,13 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const d = el.dataset;
     if (el.hasAttribute('data-variant-select')) { switchVariant(el.value as Variant); return; }
     if (d.sampleKey) { sample[d.sampleKey] = el.value; status = 'Sample content changed. Your game is unchanged.'; render(); return; }
+    if (d.addedText) {
+      onInput(event);
+      const before = pending!; pending = null;
+      const text = (from: Doc) => from.added[page]?.find(entry => entry.id === d.addedText)?.text;
+      if (text(before) !== text(doc)) { push('change element text', before); render(); }
+      return;
+    }
     if (el.hasAttribute('data-el-select')) { sel = el.value || null; render(); return; }
     if (d.check) {
       const options = fieldByKey[d.check]!.options!.map(([v]) => v);

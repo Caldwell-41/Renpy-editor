@@ -266,3 +266,11 @@
   [data-variant=blend] .gu-runtime { gap:4px; padding-left:6px; }
   [data-variant=blend] .gu-template-pop .gu-tiles-4 { grid-template-columns:repeat(2, 150px); }
 }
+
+/* Layout B, revision 2: an inherited setting keeps its control, and a checkbox row gets a source button on the pointer and on focus. */
+.gu-linked { width:24px; height:24px; flex:none; display:inline-flex; align-items:center; justify-content:center; color:var(--accent-hover); }
+.gu-toggle-row { display:flex; align-items:center; gap:6px; min-height:22px; }
+.gu-toggle-row .gu-toggle { flex:1; min-width:0; }
+.gu-shell button.gu-what-button { width:22px; min-height:22px; padding:0; color:var(--text-secondary); opacity:0; }
+.gu-toggle-row:hover .gu-what-button, .gu-toggle-row:focus-within .gu-what-button, .gu-shell button.gu-what-button[aria-expanded=true] { opacity:1; }
+.gu-shell .gu-control>input[type=text]:not([type=checkbox]):not([type=radio]) { flex:1; min-width:0; height:24px; min-height:24px; padding:1px 6px; }

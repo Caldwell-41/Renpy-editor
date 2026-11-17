@@ -137,7 +137,9 @@
 .g .is-sel::before, .gu-pick .g [data-part]:hover:not(:has([data-part]:hover))::before, .g [data-part].is-hover::before { content:''; position:absolute; inset:-5px; border:1.5px solid rgb(10 12 14 / 75%); pointer-events:none; }
 /* The element's name, on the pointer and on the selection. Layout B sets data-name. */
 .g .is-sel[data-name]::after, .g [data-name].is-hover::after, .gu-pick .g [data-name]:hover:not(:has([data-part]:hover))::after { content:attr(data-name); position:absolute; left:-5px; bottom:calc(100% + 6px); z-index:4; padding:0 6px; font:400 11px/1.6 var(--font-ui); color:var(--text-primary); text-align:left; text-shadow:none; white-space:nowrap; background:var(--surface-raised); border:1px solid var(--border-strong); pointer-events:none; }
-.g .g-bg[data-name]::after { left:8px; top:8px; bottom:auto; }
+.g .g-tag-right[data-name]::after { left:auto; right:-5px; }
+.g .g-tag-below[data-name]::after { bottom:auto; top:calc(100% + 6px); }
+.g .g-bg[data-name]::after { left:8px; right:auto; top:8px; bottom:auto; }
 .g .g-h { position:absolute; z-index:3; width:8px; height:8px; background:#fff; border:1.5px solid #14161a; pointer-events:none; }
 .g .g-h1 { left:-7px; top:-7px; }
 .g .g-h2 { right:-7px; top:-7px; }
