@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "screenId": "game-ui",
-  "currentApproved": null,
+  "currentApproved": "blend-v1",
   "revisions": [
     {
       "id": "refined-v1",
@@ -11,7 +11,98 @@
     {
       "id": "blend-v1",
       "variantId": "blend",
-      "approval": null
+      "approval": {
+        "date": "2026-11-17",
+        "decision": "Kris approved layout B, \"Recommended blend\", for the Game UI workspace: screen game-ui / blend, revision blend-v1. He chose it over layouts 1, 2 and 3 of the first round and over A and C of the second (\"I like B\"). He asked for no template strip under the canvas, chose collapse control 1, the chevron tab on the panel's edge (\"i like Collapse control 1\"), and accepted the two source views (\"the source implementation is good\"). The decision is recorded in issue #197.",
+        "reason": "Templates do not need to be in view at all times. Kris gave no other reason.",
+        "supersedes": null,
+        "source": {
+          "commit": "d83c8c5bad46d8f859adc50c0ad33a9aefc9953f",
+          "fingerprint": "891a629e6f97284675d8ff49cc6a217c81dbc0580557ec32321d817dfa6c6013"
+        },
+        "captures": [
+          {
+            "path": "docs/design/game-ui/captures/blend-v1-dialogue-dark-wide.png",
+            "sha256": "76b3c7ed07391a67a843d6da9d61ecbbdcabd89be94eea327e7bdd06782975ea",
+            "state": "dialogue",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui/captures/blend-v1-title-dark-wide.png",
+            "sha256": "805327966dfa23bf9d88c5cd9cf67e2d1265b97aa020697a47b98f3a8389e423",
+            "state": "title",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui/captures/blend-v1-themes-dark-wide.png",
+            "sha256": "85387552c6199a1ba1e8bec167bcbbffd959b6a7239894fc536e3b54a1dd1f9d",
+            "state": "themes",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui/captures/blend-v1-detailed-dark-wide.png",
+            "sha256": "016123ca33adf59d36190f1f7161b89c5fd77bc982455cde71f0e4cbaba24b4e",
+            "state": "detailed",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui/captures/blend-v1-dialogue-dark-compact.png",
+            "sha256": "0b0081d208e13514274e91be9fb0d3e480ead1a25c94b2fae18c529447b219d6",
+            "state": "dialogue",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui/captures/blend-v1-dialogue-light-wide.png",
+            "sha256": "b2c978ebbf38c8ba04ab6ad145630e8f600faf2deb8e780465e7d2dfa2ad3156",
+            "state": "dialogue",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Three columns under the shell header: a text list of screens, the screen canvas, and one panel. The header is the shell's own (save state, Undo, Redo, Save, Validate, Run, Stop). Game UI adds no Save or Undo of its own.",
+          "The list opens with \"Game-wide look\", then the screens with a settings page under \"During the story\" and \"Menus\", then \"Your screens\" with \"New screen\". The six screens with no settings page sit under one closed \"Other screens\" row. The list has no markers.",
+          "There is no toolbar above the canvas. One row under it holds the sample content menus on the left and Fit and 100% on the right. Sample content never counts as an edit. At 100% the canvas scrolls.",
+          "There is no Settings / Elements switch. With nothing selected the panel shows the screen's name, \"Add element\", the template row and every settings group. A click on a part of the canvas selects it and narrows the panel to that part: its plain settings, then \"All properties\" with its position and button states. A drag moves the selected part. The link at the top of the panel returns to the whole screen.",
+          "A settings group that belongs to a part has an arrow that selects the part. \"All elements\" at the foot of the page is the optional element list, closed by default. A screen with no settings page opens with that list open.",
+          "The template in use is one row at the top of the panel. It opens a sheet of large live pictures. No template strip sits under the canvas.",
+          "\"Game-wide look\" shows a board of every screen on the canvas, with the themes and the game-wide settings in the panel. A theme change redraws every screen on the board. A click on a screen opens it.",
+          "A setting either reads \"Same as game-wide look\" or has its own value, with a chain button that returns it to the game-wide look.",
+          "Every setting redraws the canvas at once, with no Apply button. Each edit is one named Undo step, and Undo returns to the page of the edit.",
+          "A chevron tab on the edge of the screen list and of the panel collapses it. A collapsed panel takes no width, the tab stays in place, and focus stays on it.",
+          "Below 900 px the list starts collapsed. At 700 px or less the panel sits under the canvas, the header hides the project name and the save state reads \"3 unsaved\".",
+          "A setting's label opens the line it writes, under the row: file, line number, saved line, new line, side effects and \"Open in Source\". A right-click on the row does the same.",
+          "The header's unsaved count is a button that lists every line that differs from the saved project, grouped by file, each with Revert. The count is the number of those lines."
+        ],
+        "deviations": [
+          "Fictional browser-memory mock. A browser drawing stands in for the hidden Ren'Py process. It has no source transaction, revision check or save. Save, Validate, Run, \"New screen\" and \"Open in Source\" only write a status message.",
+          "The settings on each page, the themes Lantern, Harbor and Paper, and the file names, variable names and line numbers in the source views are sample values.",
+          "The list of pending lines assumes one workspace Save. Issue #200 owns that choice. If each edit writes at once, the list has nothing to show and the approval of that part lapses.",
+          "The reviewed source still holds collapse control 2, the buttons under the canvas, behind a \"Collapse control\" menu in the dashed bar. Kris chose control 1, the default. Control 2 is not approved.",
+          "The dashed bar still reads \"Game UI layout study · unapproved\" in the reviewed source. The approval record owns the design status.",
+          "Checkbox settings have no label button, so their source line opens by right-click only.",
+          "Resizing, deleting and reordering elements, box effects, image frames, per-state looks, animation, button actions and the keyboard on the canvas are not in this mock. Issue #205 owns the detailed level.",
+          "\"Try it\" from layout 2 is not in B. Issue #198 measures the pointer response first.",
+          "Layouts A, C, 1, 2 and 3 remain in the lab as unapproved drafts for comparison."
+        ]
+      }
     },
     {
       "id": "council-v1",

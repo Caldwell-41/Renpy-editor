@@ -3,8 +3,16 @@
 This Design Lab screen, `game-ui`, mocks layouts of the Game UI workspace for
 [Lay out the Game UI workspace](https://github.com/Caldwell-41/Renpy-editor/issues/197).
 The first round has three layouts: 1, 2 and 3. On 2026-11-17 Kris said he likes
-layout 1 the most and asked for a second round: A, B and C. All are unapproved
-drafts, and the [approval record](approval.json) lists each revision with no approval.
+layout 1 the most and asked for a second round: A, B and C.
+
+Kris approved layout B on 2026-11-17: `game-ui` / `blend`, revision `blend-v1`, source
+commit `d83c8c5b`. The [approval record](approval.json) sets `currentApproved` to
+`blend-v1` and lists the agreed behaviour and the known deviations. A, C, 1, 2 and 3
+stay in the lab as unapproved drafts. The approved captures are under
+[captures](captures/). Three more show the source line of a setting
+(`blend-v1-what-this-writes-dark-wide.png`), the list of pending lines
+(`blend-v1-changes-dark-wide.png`) and both panels collapsed
+(`blend-v1-panels-collapsed-dark-wide.png`).
 
 Scope comes from [Set the destination and scope of Game UI](https://github.com/Caldwell-41/Renpy-editor/issues/192):
 one workspace with settings pages and a detailed level, stock screens first, no Apply
@@ -13,7 +21,7 @@ button, themes and templates.
 ## Open it
 
 From `app/`, run `npm run design:dev`, then open
-`http://127.0.0.1:5174/preview.html?screen=game-ui&variant=refined&state=dialogue&theme=dark`.
+`http://127.0.0.1:5174/preview.html?screen=game-ui&variant=blend&state=dialogue&theme=dark`.
 The `variant` values are `refined` (A), `blend` (B), `council` (C), `pages` (1),
 `click` (2) and `board` (3). The Layout menu in the dashed bar at the top also switches between them. The preview fills the browser window, so a wide window shows the layouts at
 their real proportions.
