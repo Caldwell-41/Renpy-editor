@@ -187,7 +187,7 @@
 .gu-cstrip { box-sizing:border-box; width:100%; max-width:658px; height:136px; justify-self:center; display:grid; align-content:start; gap:5px; padding:0 14px 8px; }
 .gu-cstrip .gu-tiles { grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; }
 /* The app's global input rule sets a 40 px minimum height, so this needs its specificity. */
-.gu-shell[data-variant=council] .gu-xy input[data-offset]:not([type=checkbox]):not([type=radio]) { height:24px; min-height:24px; padding:1px 5px; }
+.gu-shell .gu-xy input[data-offset]:not([type=checkbox]):not([type=radio]) { height:24px; min-height:24px; padding:1px 5px; }
 .gu-el-head { display:flex; align-items:center; gap:6px; padding:6px 12px; border-bottom:1px solid var(--border-normal); }
 .gu-el-anchor { flex:1; min-width:0; }
 .gu-shell button.gu-el-pick { flex:1; min-width:0; justify-content:flex-start; gap:8px; padding:3px 6px 3px 9px; }
@@ -195,4 +195,4 @@
 .gu-shell .gu-el-pick svg { margin-left:auto; }
 .gu-pop.gu-el-pop { gap:0; min-width:100%; padding:4px 0; }
 .gu-el-pop .gu-els { margin:0; }
-[data-variant=council] .gu-control>.gu-pics { flex:1; min-width:0; }
+.gu-control>.gu-pics { flex:1; min-width:0; }
