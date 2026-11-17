@@ -210,13 +210,25 @@
 .gu-shell button.gu-tab-list { left:0; border-left:0; border-radius:0 4px 4px 0; }
 .gu-shell button.gu-tab-panel { right:0; border-right:0; border-radius:4px 0 0 4px; }
 .gu-shell .gu-tab svg { width:11px; height:11px; }
-/* Collapse control 2: one button at each end of the row under the canvas. */
-.gu-shell button.gu-side { color:var(--text-secondary); }
-.gu-shell .gu-side svg { width:17px; height:17px; }
+/* The canvas and the row of sample content and zoom are one block, centred together. */
+.gu-canvas-b { place-content:center; grid-template-columns:auto; padding:12px 14px 6px; }
+.gu-canvas-b>.gu-view, .gu-canvas-b>.gu-preview { width:min(100cqw, calc((100cqh - 40px) * 16 / 9)); }
+.gu-canvas-b>.gu-view>.gu-stage { width:100%; border:1px solid var(--stage-edge); }
+.gu-canvas-b>.gu-preview { min-height:40px; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start; gap:10px; padding:7px 0 0; }
+.gu-preview-left { min-width:0; display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; }
+.gu-preview-left strong { font-size:13px; font-weight:650; }
 .gu-zoom { flex:none; }
 .gu-shell .gu-zoom button { flex:none; padding:1px 9px; }
-.gu-canvas.gu-zoom-100 { display:block; overflow:auto; padding:0; }
-.gu-canvas.gu-zoom-100>.gu-stage { width:1920px; }
+.gu-canvas-b.gu-zoom-100>.gu-view { width:100cqw; height:calc(100cqh - 40px); overflow:auto; border:1px solid var(--stage-edge); }
+.gu-canvas-b.gu-zoom-100>.gu-view>.gu-stage { width:1920px; border:0; }
+.gu-canvas-b.gu-zoom-100>.gu-preview { width:100cqw; }
+.gu-board-note { padding:0 16px 10px; font-size:12px; color:var(--text-secondary); }
+/* A group heading that selects its element. The arrow shows on the pointer and on focus. */
+.gu-shell button.gu-group-pick { width:100%; justify-content:space-between; min-height:0; padding:0; font-size:12px; font-weight:650; }
+.gu-shell button.gu-group-pick:hover:not(:disabled):not([aria-disabled=true]) { background:transparent; }
+.gu-group-pick svg { color:var(--text-secondary); opacity:0; }
+.gu-group-pick:hover svg, .gu-group-pick:focus-visible svg { opacity:1; }
+.gu-el-hidden>span:first-child { color:var(--text-muted); }
 .gu-proto { flex-wrap:wrap; }
 /* What a setting writes: the label opens its source line under the row. */
 .gu-shell button.gu-what { justify-content:flex-start; min-height:0; padding:0; border:0; font-size:12px; text-align:left; white-space:normal; cursor:help; }
@@ -243,7 +255,10 @@
   [data-variant=blend] .gu-rail, [data-variant=blend] .gu-list { grid-row:1 / 3; }
   [data-variant=blend] .gu-centre { grid-column:3; grid-row:1; grid-template-rows:auto auto; }
   [data-variant=blend][data-look=true] .gu-centre { grid-template-rows:minmax(0,1fr) auto; }
-  [data-variant=blend] .gu-canvas { aspect-ratio:16/9; padding:8px 8px 8px 16px; }
+  [data-variant=blend] .gu-canvas-b { display:block; container-type:inline-size; padding:8px 8px 4px 16px; }
+  [data-variant=blend] .gu-canvas-b>.gu-view, [data-variant=blend] .gu-canvas-b>.gu-preview { width:100%; }
+  [data-variant=blend] .gu-canvas-b.gu-zoom-100>.gu-view { width:100%; height:56cqw; }
+  [data-variant=blend] .gu-template-thumb, [data-variant=blend] .gu-board-note { display:none; }
   [data-variant=blend] .gu-panel { grid-column:3; grid-row:2; border-left:0; border-top:1px solid var(--border-normal); }
   [data-variant=blend] .gu-header { gap:6px; padding-inline:8px; }
   [data-variant=blend] .gu-project, [data-variant=blend] .gu-long { display:none; }

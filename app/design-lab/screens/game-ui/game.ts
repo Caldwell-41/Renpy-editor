@@ -41,7 +41,10 @@ export function game(id: string, c: GameContext): string {
   const btn = (label: string, o: { goto?: string; cls?: string; state?: string } = {}) =>
     `<span class="g-btn${o.cls ? ` ${o.cls}` : ''}${o.state && o.state !== 'idle' ? ` is-${o.state}` : ''}"${o.goto ? ` data-goto="${o.goto}"` : ''}>${label}</span>`;
   const bg = () => `<div class="g-bg" style="background-image:url(${art[c.s('backdrop')]})"></div>`;
-  const sprite = () => c.s('who') === 'none' ? '' : `<img class="g-sprite" src="${art[c.s('who')]}" alt="">`;
+  // The sample cast: the name the game shows and the picture it uses. "long" tests a name box with a long name.
+  const cast: Record<string, [name: string, picture: string]> = { mara: ['Mara', 'mara'], eli: ['Eli', 'eli'], long: ['Marguerite Ellingsworth-Vance', 'mara'] };
+  const who = cast[c.s('who')];
+  const sprite = () => who ? `<img class="g-sprite" src="${art[who[1]]}" alt="">` : '';
   const dim = (key: string, dark = false) => `<div class="g-dim${dark ? ' g-dim-dark' : ''}" style="opacity:${Number(c.g(key)) / 100}"></div>`;
 
   function quick() {
@@ -49,10 +52,10 @@ export function game(id: string, c: GameContext): string {
     const to: Record<string, string> = { History: 'history', Save: 'save', Prefs: 'prefs' };
     return part('quick', `g-quick g-quick-${g('quick.place')} g-quick-${g('quick.size')}`, g('quick.items').split(',').filter(Boolean).map(item => `<span${to[item] ? ` data-goto="${to[item]}"` : ''}>${item}</span>`).join(''));
   }
-  function say(text = lines[c.s('line')]!, speaker = c.s('line') === 'narration' || c.s('who') === 'none' ? '' : c.s('who') === 'mara' ? 'Mara' : 'Eli') {
+  function say(text = lines[c.s('line')]!, speaker = c.s('line') === 'narration' || !who ? '' : who[0]) {
     const layout = g('say.layout');
     const name = speaker ? part('name', `g-name g-name-${g('say.namePlace')}${layout === 'tab' ? ' g-panel' : ''}`, speaker, `color:${g('say.nameColor')};`) : '';
-    const side = c.g('say.side') && speaker ? part('side', 'g-side', `<img src="${art[speaker.toLowerCase()]}" alt="">`) : '';
+    const side = c.g('say.side') && speaker ? part('side', 'g-side', `<img src="${art[who?.[1] ?? 'mara']}" alt="">`) : '';
     const arrow = c.g('say.arrow') ? part('arrow', 'g-arrow', '▼') : '';
     const box = part('box', `g-box${layout === 'bare' ? '' : ' g-panel'}${c.replay ? ` ${c.replay}` : ''}`, `${side}<div class="g-box-in">${name}${part('text', 'g-text', text, `text-align:${g('say.align')};`)}</div>${arrow}`, `--gp:${g('say.fill')};--go:${g('say.opacity')};`);
     return `<div class="g-say g-say-${layout} g-say-${g('say.place')} g-say-${g('say.height')}">${box}</div>${quick()}`;
@@ -107,7 +110,8 @@ export function game(id: string, c: GameContext): string {
     ticket: () => `${bg()}${sprite()}${part('frame', 'g-ticket g-panel', `${part('heading', 'g-ticket-h', 'Night service')}${part('detail', 'g-quiet', 'Platform 4 · 23:52 · one way')}${part('board', 'g-btn', 'Board the tram')}`)}`,
   };
   const extra: Record<string, string> = { Text: 'New text', Button: 'New button', Image: 'Picture', Bar: '<i class="g-slider"><i style="width:55%"></i></i>', Box: '' };
-  const added = c.added.map(item => part(item.id, `g-added g-added-${item.kind}${item.kind === 'Button' ? ' g-btn' : item.kind === 'Box' ? ' g-panel' : ''}`, extra[item.kind] ?? '')).join('');
+  // Each new element lands a step away from the last one, in the upper right where most screens are empty.
+  const added = c.added.map((item, i) => part(item.id, `g-added g-added-${item.kind}${item.kind === 'Button' ? ' g-btn' : item.kind === 'Box' ? ' g-panel' : ''}`, extra[item.kind] ?? '', `left:${84 - (i % 4) * 3}%;top:${18 + (i % 4) * 9}%;`)).join('');
   const accent = g('gui.accent');
   const style = `--ga:${accent};--gon:${onColor(accent)};--gt:${g('gui.text')};--gp:${g('gui.panel')};--gf:${fonts[g('gui.font')]};--gz:${{ s: 0.86, m: 1, l: 1.16 }[g('gui.size')] ?? 1};--gr:${px(Number(c.g('gui.corners')))};--br:${radius(c.g('gui.shape'))};--gbw:${{ none: '0cqw', thin: '.1cqw', thick: '.28cqw' }[g('gui.border')]};--gsh:${c.g('gui.shadow') ? '0 .5cqw 1.8cqw rgb(0 0 0 / 45%)' : 'none'}`;
   return `<div class="g" data-fill="${g('gui.fill')}" style='${style}'>${(screens[id] ?? screens.say!)()}${added}</div>`;

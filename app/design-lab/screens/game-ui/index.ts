@@ -53,8 +53,8 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   let zoom: 'fit' | '100', listOpen: boolean | null, panelOpen: boolean;
   // Layout B: the project as last saved, and the setting whose source line is open.
   let savedDoc: Doc, what: string | null;
-  // Lab only: which collapse control layout B shows. It survives Reset.
-  let collapseStyle: 'edge' | 'buttons' = 'edge';
+  // Layout B: the page and element that the 100% view last scrolled to.
+  let zoomFocus = '';
   let doc: Doc, done: Entry[], undone: Entry[], saved: number, status: string, sample: Record<string, string>;
   let pending: Doc | null = null;
 
@@ -86,14 +86,14 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     host.querySelectorAll<HTMLElement>('[data-game]').forEach(node => {
       node.innerHTML = game(node.dataset.game!, gameContext(node.dataset.game!, node.dataset.over ? JSON.parse(node.dataset.over) as Values : undefined, node.hasAttribute('data-main')));
     });
-    markHit();
+    markHit(); nameParts();
   }
   /** Records one edit. `at` is the page Undo returns to. */
   function push(name: string, before: Doc, at = page) { done.push({ name, page: at, before, after: clone(doc) }); undone = []; status = 'Ready'; }
   function commit(name: string, change: (next: Doc) => void, at = page) { const before = clone(doc); change(doc); push(name, before, at); }
   function reveal(entry: Entry) {
     // Layout C: Undo on the screen in view keeps the level and the selected element.
-    if (variant === 'council' && entry.page === page) { if (!partOf(pageById(page), sel)) sel = null; return; }
+    if ((variant === 'council' || variant === 'blend') && entry.page === page) { if (!partOf(pageById(page), sel)) sel = null; return; }
     go(entry.page);
     if (entry.page === 'look' && !traits[variant].lookPage) { page = 'say'; fine = true; home = variant === 'board'; }
   }
@@ -129,7 +129,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     }
   }
   function field(f: Field): string {
-    if (f.kind === 'toggle') return `<label class="gu-toggle" data-row="${f.key}"><input type="checkbox" data-key="${f.key}" ${read(f.key) ? 'checked' : ''}>${esc(f.label)}</label>${writes(f.key)}`;
+    if (f.kind === 'toggle') return `<label class="gu-toggle" data-row="${f.key}"${f.part ? ` data-hover-part="${f.part}"` : ''}><input type="checkbox" data-key="${f.key}" ${read(f.key) ? 'checked' : ''}>${esc(f.label)}</label>${writes(f.key)}`;
     let body = control(f);
     if (f.follows) {
       if (doc.values[f.key] === null) {
@@ -143,7 +143,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const label = variant === 'blend' ? `<button type="button" class="gu-flat gu-label gu-what" data-what="${f.key}" aria-expanded="${what === f.key}" title="Show what this writes">${esc(f.label)}</button>` : `<span class="gu-label">${esc(f.label)}</span>`;
     return `<div class="gu-field" data-row="${f.key}">${label}<span class="gu-control">${body}</span>${f.help ? `<p class="gu-help">${esc(f.help)}</p>` : ''}</div>${writes(f.key)}`;
   }
-  const diffLines = (old: string, now: string, also?: string) => `${old && old !== now ? `<code class="gu-del">- ${esc(old)}</code><code class="gu-add">+ ${esc(now)}</code>` : `<code>${esc(now || old)}</code>`}${also ? `<p class="gu-help gu-help-wide">${also}</p>` : ''}`;
+  const diffLines = (old: string, now: string, also?: string) => `${old === now ? `<code>${esc(now)}</code>` : `${old ? `<code class="gu-del">- ${esc(old)}</code>` : ''}${now ? `<code class="gu-add">+ ${esc(now)}</code>` : ''}`}${also ? `<p class="gu-help gu-help-wide">${also}</p>` : ''}`;
   /** Layout B: the source line of one setting, with the saved line above it when the two differ. */
   function writes(key: string) {
     if (variant !== 'blend' || what !== key) return '';
@@ -157,7 +157,9 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     for (const key of Object.keys(doc.values)) {
       if (doc.values[key] === savedDoc.values[key]) continue;
       const now = sourceLine(key, doc.values[key] ?? null);
-      list.push({ id: `v:${key}`, file: now.file, line: now.line, title: `${ownerOf[key]?.title ?? 'Game UI'} · ${fieldByKey[key]?.label ?? key}`, page: ownerOf[key]?.id ?? page, old: sourceLine(key, savedDoc.values[key] ?? null).text, now: now.text, also: now.also });
+      // A template key has no setting of its own, so it is named after its screen.
+      const owner = ownerOf[key] ?? pages.find(item => item.id === key.split('.')[0]);
+      list.push({ id: `v:${key}`, file: now.file, line: now.line, title: `${owner?.title ?? 'Game UI'} · ${fieldByKey[key]?.label ?? 'Template'}`, page: owner?.id ?? page, old: sourceLine(key, savedDoc.values[key] ?? null).text, now: now.text, also: now.also });
     }
     const at = (o?: { x: number; y: number }) => o && (o.x || o.y) ? `xoffset ${o.x} yoffset ${o.y}` : '';
     for (const key of new Set([...Object.keys(doc.offsets), ...Object.keys(savedDoc.offsets)])) {
@@ -190,7 +192,9 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     // Layout A: the group of the part the author clicked offers the way into the detailed level.
     // Layout B: every group that belongs to a part can select that part.
     const more = variant === 'refined' && isHit ? '<button type="button" class="gu-flat gu-edit" data-act="edit-hit">Edit element</button>'
-      : variant === 'blend' && group.part && !sel ? `<button type="button" class="gu-flat gu-edit" data-select="${group.part}" aria-label="Select ${esc(group.title)} on the canvas" title="Select it on the canvas">${svg(glyph.next)}</button>` : '';
+      : '';
+    // Layout B: the heading of a group that belongs to an element selects that element. Pointing at it outlines the element.
+    if (variant === 'blend' && group.part && !sel) return `<section class="gu-group"><h3><button type="button" class="gu-flat gu-group-pick" data-select="${group.part}" data-hover-part="${group.part}" title="Select it on the canvas">${esc(group.title)}${svg(glyph.next)}</button></h3>${group.fields.map(field).join('')}</section>`;
     return `<section class="gu-group${isHit ? ' is-hit' : ''}"><div class="gu-group-head"><h3>${esc(group.title)}</h3>${more}</div>${group.fields.map(field).join('')}</section>`;
   }
   const groupsHtml = (groups: readonly Group[]) => groups.map(groupHtml).join('');
@@ -252,7 +256,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   const rail = () => `<nav class="gu-rail" aria-label="Workspaces"><span data-icon="story" title="Story"></span><span data-icon="source" title="Source"></span><span data-icon="branches" title="Branches"></span>
     <button type="button" class="gu-flat" aria-pressed="true" aria-label="Game UI" title="Game UI">${svg(glyph.gameUi)}</button>
     <span data-icon="characters" title="Characters"></span><span data-icon="assets" title="Assets"></span><span data-icon="variables" title="Variables"></span></nav>`;
-  const canvas = (pg: Page) => `<div class="gu-canvas${canSelect() || variant === 'refined' || variant === 'council' ? ' gu-pick' : ''}${tryIt ? ' gu-try' : ''}${variant === 'blend' && zoom === '100' ? ' gu-zoom-100" data-scroll="canvas' : ''}">${stage(pg.id, { main: true })}</div>`;
+  const canvas = (pg: Page) => `<div class="gu-canvas${canSelect() || variant === 'refined' || variant === 'council' ? ' gu-pick' : ''}${tryIt ? ' gu-try' : ''}">${stage(pg.id, { main: true })}</div>`;
   /** Layout B: which side panels are open. Below 900 px the list starts closed. At 700 px or less the panel sits under the canvas and stays open. */
   function frame() {
     const stacked = innerWidth <= 700;
@@ -264,16 +268,16 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
 
   // ---- pieces shared by layouts A and B ----
   /** The screen list after the refinement: no markers, and the screens with no settings page sit under one closed row. */
-  function screenList(head = '') {
+  function screenList(note = true) {
     const row = (item: Page) => `<button type="button" class="gu-row" data-go="${item.id}" ${item.id === page ? 'aria-current="page"' : ''}>${item.title}</button>`;
     const withPage = (group: Page['group']) => pages.filter(item => item.group === group && (item.groups || group === 'yours'));
     const other = pages.filter(item => !item.groups && item.group !== 'yours');
     const showOther = others || other.some(item => item.id === page);
-    return `<aside class="gu-list gu-list-a" data-scroll="list" aria-label="Game UI screens">${head}${row(pageById('look'))}
+    return `<aside class="gu-list gu-list-a" data-scroll="list" aria-label="Game UI screens">${row(pageById('look'))}
       ${(['story', 'menus'] as const).map(group => `<h3>${groupTitles[group]}</h3>${withPage(group).map(row).join('')}`).join('')}
       <h3>${groupTitles.yours}</h3>${withPage('yours').map(row).join('')}<button type="button" class="gu-row gu-row-new" data-act="new-screen">${svg(glyph.plus)}New screen</button>
       <button type="button" class="gu-flat gu-disclose gu-other" data-act="others" aria-expanded="${showOther}">${svg(showOther ? glyph.down : glyph.next)}Other screens<span class="gu-muted">${other.length}</span></button>
-      ${showOther ? `${other.map(row).join('')}<p class="gu-note">These follow the game-wide look. You edit their elements.</p>` : ''}</aside>`;
+      ${showOther ? `${other.map(row).join('')}${note ? '<p class="gu-note">These follow the game-wide look. You edit their elements.</p>' : ''}` : ''}</aside>`;
   }
   /** One row for the template in use. The four pictures open in a sheet, so the settings start at the top of the panel. */
   function templateRow(pg: Page) {
@@ -281,7 +285,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const now = pg.templates.find(t => Object.entries(t.values).every(([key, value]) => doc.values[key] === value));
     return `<div class="gu-template"><span class="gu-anchor"><button type="button" class="gu-flat gu-template-button" data-act="menu-template" aria-expanded="${open === 'template'}">
         <span class="gu-template-thumb">${stage(pg.id)}</span><span class="gu-template-text"><span class="gu-label">Template</span><span>${now ? now.name : 'Your own'}</span></span>${svg(glyph.down)}</button>
-      ${open === 'template' ? `<div class="gu-pop gu-pop-right gu-template-pop"><h3>Start from a template</h3>${templateTiles(pg, 'gu-tiles-4')}<p class="gu-help gu-help-wide">A template changes this screen only. Every setting stays editable afterwards.</p></div>` : ''}</span></div>`;
+      ${open === 'template' ? `<div class="gu-pop gu-pop-right gu-template-pop"><h3>Template</h3>${templateTiles(pg, 'gu-tiles-4')}<p class="gu-help gu-help-wide">A template replaces this screen's layout settings. Undo brings them back.</p></div>` : ''}</span></div>`;
   }
   const previewRow = (pg: Page) => `<div class="gu-preview" title="Sample content never changes your game.">${pg.samples ? `<span class="gu-label">Sample content</span>${samples(pg, 'select')}` : ''}</div>`;
   const lookPanel = (pg: Page, extra = '') => `<div class="gu-panel-top"><div class="gu-panel-head"><h2>Game-wide look</h2>${extra}</div></div>
@@ -309,41 +313,87 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   }
 
   // ---- layout B: the recommendation. Layout 1's list and panel, layout 2's click-a-part with no level switch, layout 3's board. ----
+  /** The screen that owns an element drawn on screen `id`. The dialogue box and the quick menu also show behind other screens. */
+  const partOwner = (id: string, part: string) => part === 'quick' && id !== 'quick' ? 'quick' : ['box', 'name', 'text', 'arrow', 'side'].includes(part) && id !== 'say' && id !== 'input' ? 'say' : id;
+  const ownParts = (pg: Page) => partsOf(pg).filter(([id]) => partOwner(pg.id, id) === pg.id);
+  const partName = (pg: Page, id: string) => partOf(pageById(partOwner(pg.id, id)), id)?.[1] ?? id;
+  /** An element that a setting has switched off. The list still names it, so the author can find the setting. */
+  const isHidden = (id: string) => ({ arrow: !read('say.arrow'), side: !read('say.side'), panel: !read('title.panel'), title: !read('title.showName'), quick: read('quick.place') === 'hidden' } as Record<string, boolean>)[id] ?? false;
+  /** The plain settings of one element: its own group, and single settings in other groups that belong to it. */
+  function partSettings(pg: Page, id: string) {
+    const groups = (pg.groups ?? []).map(group => group.part === id ? group : { ...group, fields: group.fields.filter(f => f.part === id) }).filter(group => group.fields.length);
+    return groups.map(group => groups.length === 1 ? `<section class="gu-group">${group.fields.map(field).join('')}</section>` : groupHtml(group)).join('');
+  }
+  const offsetRow = (pg: Page, id: string) => {
+    const off = doc.offsets[`${pg.id}.${id}`] ?? { x: 0, y: 0 };
+    return `<section class="gu-group"><div class="gu-field"><span class="gu-label">Offset</span><span class="gu-control gu-xy"><label>X<input type="number" data-offset="x" value="${off.x}"></label><label>Y<input type="number" data-offset="y" value="${off.y}"></label></span><p class="gu-help">Drag it on the canvas, or type.</p></div></section>`;
+  };
   function layoutBlend(pg: Page) {
     const look = pg.id === 'look';
-    const part = look ? undefined : partOf(pg, sel);
     const open2 = frame();
-    // A collapsed side panel takes no width. Its control stays where it was, so focus stays on it.
-    // "edge": a chevron tab on the panel's edge. "buttons": a button at each end of the row under the canvas.
-    const side = (which: 'list' | 'panel') => {
+    // A collapsed side panel takes no width. Its tab stays where it was, so focus stays on it.
+    const tab = (which: 'list' | 'panel') => {
       const shown = open2[which];
       const name = `${shown ? 'Hide' : 'Show'} the ${which === 'list' ? 'screen list' : 'settings panel'}`;
-      const attrs = `data-act="toggle-${which}" aria-expanded="${shown}" aria-label="${name}" title="${name}"`;
-      if (collapseStyle === 'edge') return `<button type="button" class="gu-tab gu-tab-${which}" ${attrs}>${svg((which === 'list') === shown ? glyph.back : glyph.next)}</button>`;
-      return `<button type="button" class="gu-flat gu-icon gu-side" ${attrs}><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="${which === 'list' ? 3.5 : 14.5}" y="5.5" width="6" height="13" rx="1" fill="currentColor" opacity="${shown ? 0.85 : 0.2}"/></svg></button>`;
+      return `<button type="button" class="gu-tab gu-tab-${which}" data-act="toggle-${which}" aria-expanded="${shown}" aria-label="${name}" title="${name}">${svg((which === 'list') === shown ? glyph.back : glyph.next)}</button>`;
     };
-    const listControl = side('list'), panelControl = open2.stacked ? '' : side('panel');
-    const edge = collapseStyle === 'edge';
+    const tabs = `${tab('list')}${open2.stacked ? '' : tab('panel')}`;
+    const template = templateRow(pg);
     let panel = look ? lookPanel(pg) : '';
-    if (part) {
-      const plain = settingsFor(pg, part[0]);
-      panel = `<div class="gu-panel-top"><div class="gu-panel-head"><button type="button" class="gu-flat gu-crumb" data-act="deselect">${svg(glyph.back)}${pg.title}</button><h2>${part[1]}</h2><span class="gu-muted">${part[2]}</span></div></div>
-        <div class="gu-scroll" data-scroll="panel">${plain || '<p class="gu-note">It has no plain settings. It follows the game-wide look.</p>'}
-        <button type="button" class="gu-flat gu-disclose" data-act="more" aria-expanded="${more}">${svg(more ? glyph.down : glyph.next)}All properties</button>${more ? deeper(pg, part[0]) : ''}</div>`;
+    if (!look && sel) {
+      const owner = partOwner(pg.id, sel);
+      const kind = partOf(pg, sel)?.[2] ?? '';
+      const name = partName(pg, sel);
+      const head = `<div class="gu-panel-top"><div class="gu-panel-head"><button type="button" class="gu-flat gu-crumb" data-act="deselect">${svg(glyph.back)}${pg.title}</button><h2>${name}</h2>${kind && kind !== name ? `<span class="gu-muted">${kind}</span>` : ''}</div></div>`;
+      if (owner !== pg.id) {
+        // An element that another screen owns. Its settings are on that screen, and it does not move here.
+        panel = `${head}<div class="gu-scroll" data-scroll="panel"><section class="gu-group"><p>This is part of ${pageById(owner).title}. It looks the same on every screen that shows it.</p><div><button type="button" data-open-part="${owner}:${sel}">Open ${pageById(owner).title}</button></div></section></div>`;
+      } else {
+        const plain = partSettings(pg, sel);
+        const added = (doc.added[pg.id] ?? []).some(item => item.id === sel);
+        // An element with no plain settings shows its properties at once.
+        panel = `${head}<div class="gu-scroll" data-scroll="panel">${plain || (added ? '' : '<p class="gu-note">It follows the game-wide look.</p>')}
+          ${plain ? `<button type="button" class="gu-flat gu-disclose" data-act="more" aria-expanded="${more}">${svg(more ? glyph.down : glyph.next)}All properties</button>${more ? offsetRow(pg, sel) : ''}` : offsetRow(pg, sel)}</div>`;
+      }
     } else if (!look) {
       const showParts = allParts || !pg.groups;
-      panel = `<div class="gu-panel-top"><div class="gu-panel-head"><h2>${pg.title}</h2><span class="gu-spacer"></span>${addMenu()}</div>${templateRow(pg)}</div>
-        <div class="gu-scroll" data-scroll="panel">${groupsHtml(pg.groups ?? [])}
-        <button type="button" class="gu-flat gu-disclose" data-act="all-parts" aria-expanded="${showParts}">${svg(showParts ? glyph.down : glyph.next)}All elements<span class="gu-muted">${partsOf(pg).length}</span></button>
-        ${showParts ? `<section class="gu-group">${elementList(pg)}</section>` : ''}${pg.groups ? resetRow(pg, true) : ''}</div>`;
+      const list = ownParts(pg);
+      panel = `<div class="gu-panel-top"><div class="gu-panel-head"><h2>${pg.title}</h2><span class="gu-spacer"></span>${addMenu()}</div>${open2.stacked ? '' : template}</div>
+        <div class="gu-scroll" data-scroll="panel">${open2.stacked ? template : ''}${pg.groups ? groupsHtml(pg.groups) : `<p class="gu-note">${pg.title} follows the game-wide look. Click an element to change it.</p>`}
+        <button type="button" class="gu-flat gu-disclose" data-act="all-parts" aria-expanded="${showParts}">${svg(showParts ? glyph.down : glyph.next)}All elements<span class="gu-muted">${list.length}</span></button>
+        ${showParts ? `<section class="gu-group"><div class="gu-els">${list.map(([id, name, kind]) => `<button type="button" class="gu-row gu-el${isHidden(id) ? ' gu-el-hidden' : ''}" data-select="${id}" data-hover-part="${id}"><span>${name}</span><span class="gu-muted">${isHidden(id) ? 'Hidden' : kind === name ? '' : kind}</span></button>`).join('')}</div></section>` : ''}</div>`;
     }
-    const board = `<div class="gu-board" data-scroll="board">${(['story', 'menus', 'yours'] as const).map(group => `<section><h3>${groupTitles[group]}</h3><div class="gu-board-row">${pages.filter(item => item.group === group).map(item =>
-      `<button type="button" class="gu-tile" data-go="${item.id}">${stage(item.id)}<span>${item.title}</span></button>`).join('')}</div></section>`).join('')}</div>`;
-    const zoomSwitch = `<div class="gu-seg gu-zoom" role="group" aria-label="Canvas size"><button type="button" data-act="zoom-fit" aria-pressed="${zoom === 'fit'}">Fit</button><button type="button" data-act="zoom-100" aria-pressed="${zoom === '100'}">100%</button></div>`;
-    const under = `<div class="gu-preview">${edge ? '' : listControl}${look ? '<span class="gu-muted">Every screen follows the game-wide look. Click one to open it.</span><span class="gu-spacer"></span>'
-      : `${pg.samples ? `<span class="gu-label" title="Sample content never changes your game.">Sample</span>${samples(pg, 'select')}` : ''}<span class="gu-spacer"></span>${zoomSwitch}`}${edge ? '' : panelControl}</div>`;
-    return `${open2.list ? screenList() : ''}<main class="gu-centre">${look ? board : canvas(pg)}${under}${edge ? `${listControl}${panelControl}` : ''}</main>
+    // The board groups the screens as the list does.
+    const tile = (item: Page) => `<button type="button" class="gu-tile" data-go="${item.id}">${stage(item.id)}<span>${item.title}</span></button>`;
+    const section = (title: string, items: readonly Page[]) => `<section><h3>${title}</h3><div class="gu-board-row">${items.map(tile).join('')}</div></section>`;
+    const withPage = (group: Page['group']) => pages.filter(item => item.group === group && (item.groups || group === 'yours'));
+    const board = `<div class="gu-board" data-scroll="board">${section(groupTitles.story, withPage('story'))}${section(groupTitles.menus, withPage('menus'))}${section(groupTitles.yours, withPage('yours'))}${section('Other screens', pages.filter(item => !item.groups && item.group !== 'yours'))}</div>
+      <p class="gu-board-note">Click a screen to open it.</p>`;
+    // The sample content and the zoom sit against the canvas. With both panels hidden, the row also names the screen.
+    const row = `<div class="gu-preview"><div class="gu-preview-left">${!open2.list && !open2.panel ? `<strong>${pg.title}</strong>` : ''}${pg.samples ? `<span class="gu-label" title="Sample content never changes your game.">Sample</span>${samples(pg, 'select')}` : ''}</div>
+      <div class="gu-seg gu-zoom" role="group" aria-label="Canvas size"><button type="button" data-act="zoom-fit" aria-pressed="${zoom === 'fit'}">Fit</button><button type="button" data-act="zoom-100" aria-pressed="${zoom === '100'}">100%</button></div></div>`;
+    const view = `<div class="gu-canvas gu-canvas-b gu-pick${zoom === '100' ? ' gu-zoom-100' : ''}"><div class="gu-view" data-scroll="canvas">${stage(pg.id, { main: true })}</div>${row}</div>`;
+    return `${open2.list ? screenList(false) : ''}<main class="gu-centre">${look ? board : view}${tabs}</main>
       ${open2.panel ? `<aside class="gu-panel" aria-label="${look ? 'Game-wide look' : 'Settings'}">${panel}</aside>` : ''}`;
+  }
+  /** Layout B: names every element on the canvas, for the tag on the pointer and on the selection. */
+  function nameParts() {
+    if (variant !== 'blend' || page === 'look') return;
+    const pg = pageById(page);
+    host.querySelectorAll<HTMLElement>('[data-main] [data-part]').forEach(node => { node.dataset.name = partName(pg, node.dataset.part!); });
+  }
+  /** Layout B at 100%: brings the selected element into view, or the screen's first element. A scroll by the author stays. */
+  function focusZoom() {
+    if (variant !== 'blend' || zoom !== '100' || page === 'look') { zoomFocus = ''; return; }
+    const key = `${page}:${sel ?? ''}`;
+    if (key === zoomFocus) return;
+    zoomFocus = key;
+    const view = host.querySelector<HTMLElement>('.gu-view');
+    const target = host.querySelector<HTMLElement>(`[data-main] [data-part="${sel ?? ownParts(pageById(page)).find(([id]) => id !== 'bg' && !isHidden(id))?.[0] ?? ''}"]`);
+    if (!view || !target) return;
+    const a = view.getBoundingClientRect(), b = target.getBoundingClientRect();
+    view.scrollLeft += b.left + b.width / 2 - (a.left + a.width / 2);
+    view.scrollTop += b.top + b.height / 2 - (a.top + a.height / 2);
   }
 
   // ---- layout C: the council blend. Layout 1's list, toolbar and panel, layout 2's click on the canvas and its element panel, layout 3's template strip. ----
@@ -466,14 +516,13 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const sides = variant === 'blend' ? ` data-list="${frame().list ? 'open' : 'gone'}" data-panel="${frame().panel ? 'open' : 'gone'}" data-look="${page === 'look'}"` : '';
     host.innerHTML = `<div class="gu-shell" data-variant="${variant}" data-home="${variant === 'board' && home}"${sides}>
       <section class="gu-proto" aria-label="Prototype controls"><strong>Game UI layout study · unapproved</strong><span>Sample project. Changes stay in this preview.</span>
-        <button type="button" data-act="reset">Reset</button><label>Layout <select data-variant-select aria-label="Game UI layout">${variants.map(v => `<option value="${v}" ${v === variant ? 'selected' : ''}>${names[v]}</option>`).join('')}</select></label>
-        ${variant === 'blend' ? `<label class="gu-proto-extra">Collapse control <select data-collapse-select aria-label="Collapse control"><option value="edge" ${collapseStyle === 'edge' ? 'selected' : ''}>1 · Tab on the edge</option><option value="buttons" ${collapseStyle === 'buttons' ? 'selected' : ''}>2 · Buttons under the canvas</option></select></label>` : ''}</section>
+        <button type="button" data-act="reset">Reset</button><label>Layout <select data-variant-select aria-label="Game UI layout">${variants.map(v => `<option value="${v}" ${v === variant ? 'selected' : ''}>${names[v]}</option>`).join('')}</select></label></section>
       <div class="gu-app"><header class="gu-header">${header()}</header>
         <div class="gu-body">${rail()}${{ refined: layoutRefined, blend: layoutBlend, council: layoutCouncil, pages: layoutPages, click: layoutClick, board: layoutBoard }[variant](pg)}</div>
         <footer class="gu-footer"><span role="status" aria-live="polite">${esc(status)}</span><span class="gu-muted">Local project</span></footer></div></div>`;
     host.querySelectorAll<HTMLElement>('[data-icon]').forEach(node => node.prepend(icon(node.dataset.icon!)));
     host.querySelectorAll<HTMLElement>('[data-scroll]').forEach(node => { const at = scroll.get(node.dataset.scroll!); if (at) { node.scrollTop = at[0]; node.scrollLeft = at[1]; } });
-    markHit();
+    markHit(); nameParts(); focusZoom();
     if (hit) host.querySelector('.gu-group.is-hit')?.scrollIntoView({ block: 'nearest' });
     host.querySelector('.gu-strip [aria-current]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     if (focus) host.querySelector<HTMLElement>(focus)?.focus();
@@ -559,9 +608,10 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       sel = id; if (!traits[variant].modeless) level = 'elements'; open = '';
     } else if (d.what) what = what === d.what ? null : d.what;
     else if (d.revert) revert(d.revert);
+    else if (d.openPart) { const [owner, part] = d.openPart.split(':') as [string, string]; go(owner); sel = part; }
     else if (d.act) act(d.act);
     else return;
-    if (!d.act?.startsWith('menu-') && !(inPop && (d.theme || d.sample || d.template || d.revert))) open = '';
+    if (!d.act?.startsWith('menu-') && !(inPop && (d.theme || d.sample || d.revert))) open = '';
     render();
   }
   function onInput(event: Event) {
@@ -578,7 +628,6 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const el = event.target as HTMLInputElement;
     const d = el.dataset;
     if (el.hasAttribute('data-variant-select')) { switchVariant(el.value as Variant); return; }
-    if (el.hasAttribute('data-collapse-select')) { collapseStyle = el.value as typeof collapseStyle; render(); return; }
     if (d.sampleKey) { sample[d.sampleKey] = el.value; status = 'Sample content changed. Your game is unchanged.'; render(); return; }
     if (el.hasAttribute('data-el-select')) { sel = el.value || null; render(); return; }
     if (d.check) {
@@ -605,7 +654,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const id = target.closest<HTMLElement>('[data-part]')?.dataset.part ?? null;
     if (!canSelect()) { if (hit !== id) { hit = id; render(); } return; }
     if (id !== sel) { sel = id; render(); }
-    if (!id || id === 'bg') return;
+    if (!id || id === 'bg' || (variant === 'blend' && partOwner(page, id) !== page)) return;
     event.preventDefault();
     const key = `${page}.${id}`;
     const start = doc.offsets[key] ?? { x: 0, y: 0 };
@@ -613,7 +662,8 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     let before: Doc | null = null;
     const move = (m: PointerEvent) => {
       const dx = (m.clientX - event.clientX) * scale, dy = (m.clientY - event.clientY) * scale;
-      if (!before) { if (Math.hypot(dx, dy) < 6) return; before = clone(doc); }
+      // The move starts after five pixels on the display, so a click that selects never moves the element.
+      if (!before) { if (Math.hypot(m.clientX - event.clientX, m.clientY - event.clientY) < 5) return; before = clone(doc); }
       const at = doc.offsets[key] = { x: Math.round(start.x + dx), y: Math.round(start.y + dy) };
       host.querySelectorAll<HTMLElement>(`[data-main] [data-part="${id}"]`).forEach(node => { node.style.translate = `${at.x / 19.2}cqw ${at.y / 19.2}cqw`; });
     };
@@ -641,6 +691,13 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   reset(context.state);
   host.addEventListener('click', onClick); host.addEventListener('input', onInput); host.addEventListener('change', onChange);
   host.addEventListener('pointerdown', onPointerDown); host.addEventListener('dblclick', onDoubleClick); document.addEventListener('keydown', onKey);
+  // Layout B: pointing at an element's settings or its row in the list outlines it on the canvas.
+  const onHover = (event: MouseEvent) => {
+    const part = (event.target as HTMLElement).closest<HTMLElement>('[data-hover-part]')?.dataset.hoverPart;
+    host.querySelectorAll('[data-main] .is-hover').forEach(node => node.classList.remove('is-hover'));
+    if (part && event.type === 'mouseover') host.querySelectorAll(`[data-main] [data-part="${part}"]`).forEach(node => node.classList.add('is-hover'));
+  };
+  host.addEventListener('mouseover', onHover); host.addEventListener('mouseout', onHover);
   // Layout B: a right-click on a setting row opens the line it writes.
   const onContext = (event: MouseEvent) => {
     const row = variant === 'blend' ? (event.target as HTMLElement).closest<HTMLElement>('[data-row]') : null;
@@ -654,7 +711,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   render();
   return () => {
     host.removeEventListener('click', onClick); host.removeEventListener('input', onInput); host.removeEventListener('change', onChange);
-    host.removeEventListener('pointerdown', onPointerDown); host.removeEventListener('dblclick', onDoubleClick); document.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); host.removeEventListener('contextmenu', onContext);
+    host.removeEventListener('pointerdown', onPointerDown); host.removeEventListener('dblclick', onDoubleClick); document.removeEventListener('keydown', onKey); window.removeEventListener('resize', onResize); host.removeEventListener('contextmenu', onContext); host.removeEventListener('mouseover', onHover); host.removeEventListener('mouseout', onHover);
     host.replaceChildren();
   };
 }

@@ -23,6 +23,8 @@ export type Field = {
   options?: Options; min?: number; max?: number; unit?: string;
   /** With no value of its own, the field shows this game-wide setting. */
   follows?: string; help?: string;
+  /** The element this one setting belongs to, when its group belongs to none. */
+  part?: string;
 };
 export type Group = { title: string; part?: string; fields: Field[] };
 export type Template = { id: string; name: string; values: Values };
@@ -62,7 +64,7 @@ export const defaults: Values = {
 
 export const sampleDefaults: Record<string, string> = { backdrop: 'platform', line: 'short', who: 'mara', count: '3', slots: 'some', state: 'idle' };
 
-const sayParts: Part[] = [['box', 'Dialogue box', 'Box'], ['name', 'Speaker name', 'Text'], ['text', 'Dialogue text', 'Text'], ['arrow', 'Continue arrow', 'Image'], ['side', 'Side picture', 'Image'], ['quick', 'Quick menu', 'Group']];
+const sayParts: Part[] = [['box', 'Box', 'Box'], ['name', 'Speaker name', 'Text'], ['text', 'Dialogue text', 'Text'], ['arrow', 'Continue arrow', 'Image'], ['side', 'Side picture', 'Image'], ['quick', 'Quick menu', 'Group']];
 const menuParts: Part[] = [['nav', 'Menu buttons', 'Group'], ['body', 'Page content', 'Group']];
 
 export const pages: readonly Page[] = [
@@ -83,7 +85,7 @@ export const pages: readonly Page[] = [
       { key: 'gui.shadow', label: 'Shadow', kind: 'toggle' }] },
   ] },
   { id: 'say', title: 'Dialogue box', group: 'story', parts: sayParts,
-    samples: [{ key: 'line', label: 'Line', options: [['short', 'Short'], ['long', 'Long'], ['narration', 'Narration']] }, { key: 'who', label: 'Character', options: [['mara', 'Mara'], ['eli', 'Eli'], ['none', 'Nobody']] }, backdrop],
+    samples: [{ key: 'line', label: 'Line', options: [['short', 'Short'], ['long', 'Long'], ['narration', 'Narration']] }, { key: 'who', label: 'Character', options: [['mara', 'Mara'], ['eli', 'Eli'], ['long', 'Long name'], ['none', 'Nobody']] }, backdrop],
     templates: [
       { id: 'panel', name: 'Floating panel', values: { 'say.layout': 'panel', 'say.opacity': 82, 'say.align': 'left' } },
       { id: 'bar', name: 'Wide bar', values: { 'say.layout': 'bar', 'say.opacity': 75, 'say.align': 'left' } },
@@ -102,8 +104,8 @@ export const pages: readonly Page[] = [
       { title: 'Dialogue text', part: 'text', fields: [
         { key: 'say.align', label: 'Align', kind: 'segment', options: [['left', 'Left'], ['center', 'Center']] }] },
       { title: 'Extras', fields: [
-        { key: 'say.arrow', label: 'Continue arrow', kind: 'toggle' },
-        { key: 'say.side', label: "Speaker's picture beside the text", kind: 'toggle' }] },
+        { key: 'say.arrow', label: 'Continue arrow', kind: 'toggle', part: 'arrow' },
+        { key: 'say.side', label: "Speaker's picture beside the text", kind: 'toggle', part: 'side' }] },
     ] },
   { id: 'choice', title: 'Choices', group: 'story', parts: [['list', 'Choice list', 'Group'], ['button', 'Choice button', 'Button'], ...sayParts],
     samples: [{ key: 'count', label: 'Options', options: [['2', 'Two'], ['3', 'Three'], ['5', 'Five']] }, pointer, backdrop],
@@ -145,7 +147,7 @@ export const pages: readonly Page[] = [
         { key: 'title.nameSize', label: 'Size', kind: 'segment', options: sizes }] },
       { title: 'Menu', part: 'menu', fields: [
         { key: 'title.shape', label: 'Button shape', kind: 'segment', options: shapes, follows: 'gui.shape' },
-        { key: 'title.panel', label: 'Panel behind the menu', kind: 'toggle' }] },
+        { key: 'title.panel', label: 'Panel behind the menu', kind: 'toggle', part: 'panel' }] },
     ] },
   { id: 'pause', title: 'Pause menu', group: 'menus', parts: menuParts, samples: [pointer, backdrop], groups: [
     { title: 'Menu', part: 'nav', fields: [menuSide, { key: 'pause.dim', label: 'Darken the game', kind: 'range', min: 0, max: 95, unit: '%' }] }] },

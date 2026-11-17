@@ -128,6 +128,26 @@ export default async function ({ page, open, capture }) {
     await page.locator('[data-revert="v:say.height"]').click();
     assert.equal(await saveState(), 'Saved');
     assert.equal(await page.locator('.gu-changes').count(), 0);
+    // An element that a setting switches on or off shows that setting when it is selected.
+    await open({ state: 'dialogue', viewport: 'wide', theme: 'dark' });
+    await main().locator('[data-part="arrow"]').click();
+    assert.equal(await page.locator('.gu-panel [data-key="say.arrow"]').count(), 1);
+    // Undo on the screen in view keeps the selection.
+    await page.locator('.gu-panel [data-key="say.arrow"]').click();
+    await page.locator('[data-act="undo"]').click();
+    assert.equal(await page.locator('.gu-panel h2').first().innerText(), 'Continue arrow');
+    // The dialogue box behind Choices belongs to the Dialogue box screen. It opens there and does not move here.
+    await page.locator('.gu-list [data-go="choice"]').click();
+    await main().locator('[data-part="box"]').click({ position: { x: 6, y: 6 } });
+    assert.match(await page.locator('.gu-panel').innerText(), /This is part of Dialogue box/);
+    await page.locator('[data-open-part="say:box"]').click();
+    assert.equal(await page.locator('.gu-list [aria-current]').innerText(), 'Dialogue box');
+    assert.equal(await page.locator('.gu-panel h2').first().innerText(), 'Box');
+    // At 100% the selected element is in view.
+    await page.locator('[data-act="zoom-100"]').click();
+    const viewBox = await page.locator('.gu-view').boundingBox(), boxBox = await main().locator('[data-part="box"]').boundingBox();
+    assert.ok(boxBox.y < viewBox.y + viewBox.height && boxBox.y + boxBox.height > viewBox.y, 'the selected box shows at 100%');
+    await capture('blend-zoom-on-selection');
     // Zoom, the collapsing panels and the narrow window.
     await open({ state: 'title', viewport: 'wide', theme: 'dark' });
     const width = async () => (await main().boundingBox()).width;
@@ -138,9 +158,6 @@ export default async function ({ page, open, capture }) {
     assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-act')), 'toggle-panel');
     assert.equal(await page.locator('.gu-list, .gu-panel').count(), 0);
     await capture('blend-panels-collapsed');
-    await page.locator('[data-collapse-select]').selectOption('buttons');
-    await capture('blend-collapse-buttons');
-    await page.locator('[data-collapse-select]').selectOption('edge');
     await page.locator('[data-act="toggle-panel"]').click();
     await page.locator('[data-act="toggle-list"]').click();
     await page.locator('[data-act="zoom-100"]').click();
