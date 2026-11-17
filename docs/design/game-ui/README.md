@@ -148,8 +148,11 @@ Polish from both rounds:
   element, from its top left corner when it is larger than the view. The Character
   sample has a long name.
 - **Templates and themes.** The sheet is titled "Template", says what a template
-  replaces and closes on a choice. The theme note names the screens that keep their own
-  values. The board groups the screens as the list does and has no caption.
+  replaces and closes on a choice. The theme note names what a theme leaves alone, by
+  screen and setting: "It does not change: Choices (button shape)." Kris chose that
+  wording after the earlier "Choices keeps its own values" was unclear to him. With
+  nothing to name, the note is only "A theme sets everything below." The board groups
+  the screens as the list does and has no caption.
 - **The list of pending lines.** A template line and an added element are named in
   plain words, an added line shows "+", and Revert takes back one element.
 - **Behaviour.** Undo on the screen in view keeps the selection. A move starts after

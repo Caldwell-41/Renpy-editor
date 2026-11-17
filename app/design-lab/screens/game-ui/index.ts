@@ -338,15 +338,19 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       ${open === 'template' && withPop ? templatePop(pg) : ''}</span></div>`;
   }
   const previewRow = (pg: Page) => `<div class="gu-preview" title="Sample content never changes your game.">${pg.samples ? `<span class="gu-label">Sample content</span>${samples(pg, 'select')}` : ''}</div>`;
-  /** Names the screens that set a value of their own, because a theme change leaves those values alone. */
+  /** Names each screen and setting that has a value of its own, because a theme change leaves those values alone. */
   function ownValueNote() {
-    if (variant !== 'blend') return 'A screen that has its own value keeps it.';
-    const names = pages.filter(item => (item.groups ?? []).some(group => group.fields.some(f => f.follows && doc.values[f.key] !== null))).map(item => item.title);
-    if (!names.length) return 'A screen that has its own value keeps it.';
-    return names.length === 1 ? `${names[0]} keeps its own values.` : `${names.slice(0, -1).join(', ')} and ${names.at(-1)} keep their own values.`;
+    if (variant !== 'blend') return ' A screen that has its own value keeps it.';
+    // The plain name of each setting that can have a value of its own.
+    const plain: Record<string, string> = { 'say.fill': 'box color', 'say.nameColor': 'speaker name color', 'choice.shape': 'button shape', 'title.shape': 'button shape' };
+    const kept = pages.flatMap(item => {
+      const own = (item.groups ?? []).flatMap(group => group.fields.filter(f => f.follows && doc.values[f.key] !== null).map(f => plain[f.key] ?? `${group.title} ${f.label}`.toLowerCase()));
+      return own.length ? [`${item.title} (${own.join(', ')})`] : [];
+    });
+    return kept.length ? ` It does not change: ${kept.join(', ')}.` : '';
   }
   const lookPanel = (pg: Page, extra = '') => `<div class="gu-panel-top"><div class="gu-panel-head"><h2>Game-wide look</h2>${extra}</div></div>
-    <div class="gu-scroll" data-scroll="panel"><section class="gu-group"><h3>Theme</h3>${themeTiles('', false)}<p class="gu-help gu-help-wide">A theme sets everything below. ${ownValueNote()}</p></section>${groupsHtml(pg.groups!)}</div>`;
+    <div class="gu-scroll" data-scroll="panel"><section class="gu-group"><h3>Theme</h3>${themeTiles('', false)}<p class="gu-help gu-help-wide">A theme sets everything below.${ownValueNote()}</p></section>${groupsHtml(pg.groups!)}</div>`;
 
   // ---- layout A: layout 1 after an experience-first pass. Same skeleton, fewer controls. ----
   // Removed: the toolbar above the canvas, the footnote, the list markers, the "no settings page" dead end and the element list.
