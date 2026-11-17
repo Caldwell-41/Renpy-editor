@@ -374,6 +374,34 @@ def coverage(project, screens, geometry):
     return out
 
 
+def with_offset(text, value):
+    """Set the xoffset line that follows id "window", replacing any that is there."""
+    lines = text.split("\n")
+    anchor = next(i for i, l in enumerate(lines) if l.strip() == 'id "window"')
+    if lines[anchor + 1].strip().startswith("xoffset"):
+        del lines[anchor + 1]
+    lines.insert(anchor + 1, "        xoffset %d" % value)
+    return "\n".join(lines)
+
+
+def measure_broken(helper, screens_rpy, session):
+    line, saved = block(screens_rpy, "screen say(")
+    broken = session["broken"] = []
+    for case, bad in (("parse", saved.replace('id "window"', 'id "window"\n        xoffset (', 1)),
+                      ("runtime", saved.replace('id "window"', 'id "window"\n        $ llp_boom = 1 // llp_zero', 1))):
+        for i in range(3):
+            err = helper.ask(dict(kind="load", file=screens_rpy, line=line, text=bad, screen="say"))
+            good_started = time.perf_counter()
+            good = helper.ask(dict(kind="load", file=screens_rpy, line=line, text=with_offset(saved, 10 + 30 * i), screen="say"))
+            broken.append(dict(case=case, errorOk=err.get("ok"), error=err.get("error"),
+                               messages=err.get("messages"), trace=(err.get("trace") or "")[-600:],
+                               errorMs=err.get("e2eMs"), errorToGoodImageMs=(good["_seen"] - err["_seen"]) * 1000,
+                               goodAfterErrorMs=(good["_seen"] - good_started) * 1000, goodOk=good.get("ok"),
+                               goodMessages=good.get("messages"), goodSha=good.get("_sha"),
+                               processAlive=helper.process.poll() is None))
+    helper.ask(dict(kind="load", file=screens_rpy, line=line, text=saved, screen="say"))
+
+
 def measure_session(helper, project, variant, reps, out, session):
     screens_rpy = os.path.join(project, "game", "screens.rpy")
     gui_rpy = os.path.join(project, "game", "gui.rpy")
@@ -454,22 +482,7 @@ def measure_session(helper, project, variant, reps, out, session):
     session["drafts"] = drafts
     helper.ask(dict(kind="load", file=screens_rpy, line=line, text=saved, screen="say"))
 
-    # Drafts with errors, each followed by a good draft.
-    broken = session["broken"] = []
-    for case, bad in (("parse", saved.replace('id "window"', 'id "window"\n        xoffset (', 1)),
-                      ("runtime", saved.replace('id "window"', 'id "window"\n        $ llp_boom = 1 // llp_zero', 1))):
-        for i in range(3):
-            err = helper.ask(dict(kind="load", file=screens_rpy, line=line, text=bad, screen="say"))
-            good_started = time.perf_counter()
-            good = helper.ask(dict(kind="load", file=screens_rpy, line=line,
-                                   text=saved.replace('id "window"', 'id "window"\n        xoffset %d' % (10 + i), 1), screen="say"))
-            broken.append(dict(case=case, errorOk=err.get("ok"), error=err.get("error"),
-                               messages=err.get("messages"), trace=(err.get("trace") or "")[-600:],
-                               errorMs=err.get("e2eMs"), errorToGoodImageMs=(good["_seen"] - err["_seen"]) * 1000,
-                               goodAfterErrorMs=(good["_seen"] - good_started) * 1000, goodOk=good.get("ok"),
-                               processAlive=helper.process.poll() is None))
-    session["broken"] = broken
-    helper.ask(dict(kind="load", file=screens_rpy, line=line, text=saved, screen="say"))
+    measure_broken(helper, screens_rpy, session)
 
     # Try it: pointer moves and clicks.
     menu = helper.ask(dict(kind="scene", scene=dict(screen="main_menu"), geometry=True))
@@ -541,7 +554,7 @@ def main():
     ap.add_argument("--sdk", required=True)
     ap.add_argument("--work", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--phase", default="all", choices=["all", "smoke"])
+    ap.add_argument("--phase", default="all", choices=["all", "smoke", "broken"])
     ap.add_argument("--max-processes", type=int, default=15)
     ap.add_argument("--max-seconds", type=int, default=600)
     args = ap.parse_args()
@@ -560,7 +573,7 @@ def main():
     if args.phase == "all":
         results["largeStoryLines"] = write_large(stock, large)
 
-    plan = [("stock", stock, 4)] if args.phase == "smoke" else [("stock", stock, 4), ("large", large, 3)]
+    plan = [("stock", stock, 4)] if args.phase in ("smoke", "broken") else [("stock", stock, 4), ("large", large, 3)]
     reps = {"stock": 10, "large": 6}
     try:
         for variant, source, starts in plan:
@@ -570,13 +583,17 @@ def main():
             began = time.perf_counter()
             shutil.copytree(source, copy)
             data["copyMs"] = (time.perf_counter() - began) * 1000
-            for k in range(1 if args.phase == "smoke" else starts):
+            for k in range(1 if args.phase in ("smoke", "broken") else starts):
                 io = os.path.join(args.work, "io-%s-%d" % (variant, k))
                 helper = Helper(args.sdk, copy, io, budget, log)
                 start = dict(compiled=k == 0, launchToImageMs=helper.first["launchToImageMs"],
                              helperFirst={key: helper.first.get(key) for key in ("tInit", "tCommand", "tMain", "tRequest", "tPng", "native", "renderer", "physical", "drawPerVirt")})
                 try:
-                    if args.phase == "smoke" or k == 1:
+                    if args.phase == "broken":
+                        data["session"] = {}
+                        helper.ask(dict(kind="scene", scene=dict(screen="say", who="Eileen", what="A sample line.")))
+                        measure_broken(helper, os.path.join(copy, "game", "screens.rpy"), data["session"])
+                    elif args.phase == "smoke" or k == 1:
                         if args.phase == "smoke":
                             data["session"] = None
                             r = helper.ask(dict(kind="scene", scene=dict(screen="preferences"), geometry=True))
@@ -589,7 +606,7 @@ def main():
                 finally:
                     stopped = helper.stop()
                     start["stop"] = stopped
-                    if k == 1 or args.phase == "smoke":
+                    if k == 1 or args.phase in ("smoke", "broken"):
                         data["focus"] = stopped["focus"]
                 data["starts"].append(start)
                 shutil.copy(os.path.join(io, "frame-0.png"), os.path.join(args.out, "%s-first-%d.png" % (variant, k)))
