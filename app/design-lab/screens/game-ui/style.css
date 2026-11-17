@@ -219,6 +219,7 @@
 .gu-canvas.gu-zoom-100>.gu-stage { width:1920px; }
 .gu-proto { flex-wrap:wrap; }
 /* What a setting writes: the label opens its source line under the row. */
+[data-variant=blend] .gu-field { grid-template-columns:86px minmax(0,1fr); }
 .gu-shell button.gu-what { justify-content:flex-start; min-height:0; padding:0; border:0; text-align:left; white-space:normal; cursor:help; }
 .gu-shell button.gu-what:hover:not(:disabled):not([aria-disabled=true]), .gu-shell button.gu-what[aria-expanded=true] { color:var(--text-primary); background:transparent; text-decoration:underline dotted; text-underline-offset:3px; }
 .gu-writes, .gu-change { display:grid; gap:2px; }
