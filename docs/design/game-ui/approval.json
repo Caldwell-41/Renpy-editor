@@ -105,6 +105,11 @@
       }
     },
     {
+      "id": "blend-v2",
+      "variantId": "blend-v2",
+      "approval": null
+    },
+    {
       "id": "council-v1",
       "variantId": "council",
       "approval": null

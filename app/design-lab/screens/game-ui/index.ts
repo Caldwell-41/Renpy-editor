@@ -12,7 +12,7 @@ import './style.css';
 
 export type Variant = 'refined' | 'blend' | 'council' | 'pages' | 'click' | 'board';
 const variants: Variant[] = ['refined', 'blend', 'council', 'pages', 'click', 'board'];
-const names: Record<Variant, string> = { refined: 'A · Layout 1, refined', blend: 'B · Recommended blend', council: 'C · Council blend', pages: '1 · Pages and panel', click: '2 · Click the game', board: '3 · Whole-game board' };
+const names: Record<Variant, string> = { refined: 'A · Layout 1, refined', blend: 'B · Recommended blend, revision 2', council: 'C · Council blend', pages: '1 · Pages and panel', click: '2 · Click the game', board: '3 · Whole-game board' };
 /** What the shared behaviour needs to know about a layout. `lookPage`: the game-wide look is a page in the screen list.
  *  `modeless`: a click on the canvas always selects, and there is no Settings / Elements switch. */
 const traits: Record<Variant, { lookPage: boolean; modeless: boolean }> = {
@@ -37,6 +37,9 @@ const hasStates = (id: string, kind: string) => kind === 'Button' || ['menu', 'n
 const buttonStates: Sample = { key: 'state', label: 'Button', options: [['idle', 'Idle'], ['hover', 'Hover'], ['selected', 'Selected'], ['disabled', 'Disabled']] };
 /** The screens whose drawing shows the sample button state. */
 const drawsState = ['choice', 'title', 'pause', 'save', 'prefs', 'history', 'confirm', 'about', 'help'];
+
+/** The lab ID that shows a layout. Layout B's approved source is pinned as `blend`, so work on it continues as `blend-v2`. */
+const labId = (variant: Variant) => variant === 'blend' ? 'blend-v2' : variant;
 
 export function mountGameUi(host: HTMLElement, context: LabContext, initial: Variant) {
   document.documentElement.dataset.theme = context.theme;
@@ -481,7 +484,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     if (page === 'look' && !traits[next].lookPage) { page = 'say'; fine = next === 'click'; home = next === 'board'; }
     if (next === 'refined' || next === 'council') go(page);
     if (['http:', 'https:'].includes(location.protocol) && !location.pathname.includes('preview.html')) {
-      try { const url = new URL(location.href); url.searchParams.set('variant', next); history.replaceState(null, '', url); } catch { /* An inline viewer may refuse URL changes. */ }
+      try { const url = new URL(location.href); url.searchParams.set('variant', labId(next)); history.replaceState(null, '', url); } catch { /* An inline viewer may refuse URL changes. */ }
     }
     render();
   }
