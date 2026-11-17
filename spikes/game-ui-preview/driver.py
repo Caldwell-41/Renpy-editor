@@ -330,7 +330,7 @@ def stats(values):
 
 
 DISPLAY_KEYWORDS = {
-    "Text": {"text", "label"}, "Button": {"textbutton", "button", "imagebutton", "hotspot"},
+    "Text": {"text", "label", "textbutton"}, "Button": {"textbutton", "button", "imagebutton", "hotspot"},
     "Window": {"frame", "window", "label"}, "MultiBox": {"vbox", "hbox", "fixed", "side"},
     "Grid": {"grid"}, "Viewport": {"viewport"}, "VPGrid": {"vpgrid"}, "Bar": {"bar", "vbar"},
     "ScreenDisplayable": {"screen"}, "Input": {"input"}, "Null": {"null"},
