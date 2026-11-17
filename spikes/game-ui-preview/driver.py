@@ -374,10 +374,10 @@ def coverage(project, screens, geometry):
     return out
 
 
-def measure_session(helper, project, variant, reps, out):
+def measure_session(helper, project, variant, reps, out, session):
     screens_rpy = os.path.join(project, "game", "screens.rpy")
     gui_rpy = os.path.join(project, "game", "gui.rpy")
-    session = dict(first=helper.first)
+    session["first"] = helper.first
 
     # Geometry, source lines and rectangles on three stock screens.
     scenes = {
@@ -400,7 +400,7 @@ def measure_session(helper, project, variant, reps, out):
 
     # Reload paths after a source write. The say screen stays on the canvas.
     helper.ask(dict(kind="scene", scene=scenes["say"]))
-    paths = {"screen": [], "style": [], "gui": [], "restart": []}
+    paths = session["paths"] = {"screen": [], "style": [], "gui": [], "restart": []}
     prev = None
     for i in range(reps):
         started = time.perf_counter()
@@ -436,7 +436,7 @@ def measure_session(helper, project, variant, reps, out):
     session["paths"] = paths
 
     # Values that are not in the source file: drafts loaded without a write.
-    drafts = {"screen": [], "gui": []}
+    drafts = session["drafts"] = {"screen": [], "gui": []}
     line, saved = block(screens_rpy, "screen say(")
     for i in range(reps):
         text = saved.replace('id "window"', 'id "window"\n        yoffset %d' % (-60 if i % 2 == 0 else -20), 1)
@@ -455,7 +455,7 @@ def measure_session(helper, project, variant, reps, out):
     helper.ask(dict(kind="load", file=screens_rpy, line=line, text=saved, screen="say"))
 
     # Drafts with errors, each followed by a good draft.
-    broken = []
+    broken = session["broken"] = []
     for case, bad in (("parse", saved.replace('id "window"', 'id "window"\n        xoffset (', 1)),
                       ("runtime", saved.replace('id "window"', 'id "window"\n        $ llp_boom = 1 // llp_zero', 1))):
         for i in range(3):
@@ -474,10 +474,12 @@ def measure_session(helper, project, variant, reps, out):
     # Try it: pointer moves and clicks.
     menu = helper.ask(dict(kind="scene", scene=dict(screen="main_menu"), geometry=True))
     shutil.copy(os.path.join(helper.io, "frame-%d.png" % menu["id"]), os.path.join(out, "%s-main_menu.png" % variant))
-    buttons = [g for g in menu.get("geometry", []) if g["cls"] == "Button"]
-    rows = check_lines(project, buttons)
-    target = next((g for g, row in zip(buttons, rows) if row["source"] and "Preferences" in row["source"]), None)
-    pointer = dict(buttons=len(buttons), target=target, moves=[], click=None)
+    texts = [g for g in menu.get("geometry", []) if g.get("container")]
+    rows = check_lines(project, texts)
+    found = next((g for g, row in zip(texts, rows) if row["source"] and "Preferences" in row["source"]), None)
+    target = found["container"] if found else None
+    buttons = texts
+    pointer = session["pointer"] = dict(buttons=len(buttons), target=target, moves=[], click=None)
     if target:
         cx, cy = int(target["x"] + target["w"] / 2), int(target["y"] + target["h"] / 2)
         for i in range(reps):
@@ -493,7 +495,6 @@ def measure_session(helper, project, variant, reps, out):
         pointer["click"] = r
         shutil.copy(os.path.join(helper.io, "frame-%d.png" % r["id"]), os.path.join(out, "%s-after-click.png" % variant))
     session["pointer"] = pointer
-    return session
 
 
 def summarize(results):
@@ -515,9 +516,12 @@ def summarize(results):
             verdicts = {}
             for row in screen["lines"]:
                 verdicts[row["verdict"]] = verdicts.get(row["verdict"], 0) + 1
-            errors = [c.get("maxError") for c in (screen["rectChecks"] or [])]
-            lines.append("screen %s: elements %d lines %s coverage %s rect max errors %s" % (
-                name, screen["elements"], verdicts, json.dumps(screen["coverage"]), errors))
+            checks = [c for c in (screen["rectChecks"] or []) if "bestMatch" in c]
+            exact = sum(1 for c in checks if c["zeroMatch"] >= 0.9)
+            off = [max(abs(c["dx"]), abs(c["dy"])) for c in checks if c["bestMatch"] >= 0.9]
+            lines.append("screen %s: elements %d lines %s coverage %s rect checked %d exact %d max offset %s skipped %d" % (
+                name, screen["elements"], verdicts, json.dumps(screen["coverage"]), len(checks), exact,
+                max(off) if off else None, len(screen["rectChecks"] or []) - len(checks)))
         for b in s["broken"]:
             lines.append("broken %s: ok=%s error=%s errorMs=%.0f errorToGood=%.0f alive=%s" % (
                 b["case"], b["errorOk"], b["error"], b["errorMs"] or -1, b["errorToGoodImageMs"], b["processAlive"]))
@@ -578,7 +582,8 @@ def main():
                                                  lines=check_lines(copy, r.get("geometry", []))[:40])
                             shutil.copy(os.path.join(io, "frame-%d.png" % r["id"]), os.path.join(args.out, "smoke-preferences.png"))
                         else:
-                            data["session"] = measure_session(helper, copy, variant, reps[variant], args.out)
+                            data["session"] = {}
+                            measure_session(helper, copy, variant, reps[variant], args.out, data["session"])
                 finally:
                     stopped = helper.stop()
                     start["stop"] = stopped

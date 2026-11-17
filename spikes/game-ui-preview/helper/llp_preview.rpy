@@ -119,20 +119,28 @@ init python:
         button_type = renpy.display.behavior.Button
         window_type = renpy.display.layout.Window
         out, objects, seen = [], [], set()
-        def walk(r, x, y, depth, transformed):
+        def walk(r, x, y, depth, transformed, container):
+            # A textbutton puts its line on the inner Text. Record the nearest
+            # enclosing Button as the element's clickable box.
+            own = container
+            for d in (getattr(r, "render_of", None) or []):
+                if isinstance(d, button_type):
+                    own = dict(x=x, y=y, w=r.width, h=r.height)
             for d in (getattr(r, "render_of", None) or []):
                 location = getattr(d, "_location", None)
                 if location and id(d) not in seen:
                     seen.add(id(d))
                     out.append(dict(file=location[0], line=location[1], cls=type(d).__name__,
                                     x=x, y=y, w=r.width, h=r.height, depth=depth, transformed=transformed,
-                                    button=isinstance(d, button_type), window=isinstance(d, window_type)))
-                    objects.append(d)
+                                    button=isinstance(d, button_type), window=isinstance(d, window_type),
+                                    container=own if own is not container or isinstance(d, button_type) else container))
+                    objects.append(r)
+            inner = transformed or r.forward is not None
             for child in (getattr(r, "children", None) or []):
                 c = child[0]
                 if isinstance(c, render_type):
-                    walk(c, x + child[1], y + child[2], depth + 1, transformed or c.forward is not None)
-        walk(renpy.display.interface.surftree, 0, 0, 0, False)
+                    walk(c, x + child[1], y + child[2], depth + 1, inner, own)
+        walk(renpy.display.interface.surftree, 0, 0, 0, False, None)
         if keep:
             return out, objects
         return out
@@ -141,9 +149,13 @@ init python:
         captured = _llp_perf()
         n = req["id"]
         tmp = _llp_os.path.join(_llp_io, "frame-%d.tmp.png" % n)
-        renpy.display.interface.save_screenshot(tmp)
+        surface = renpy.display.draw.screenshot(renpy.display.interface.surftree)
+        read = _llp_perf()
+        renpy.display.scale.image_save_unscaled(surface, tmp)
         _llp_os.replace(tmp, _llp_os.path.join(_llp_io, "frame-%d.png" % n))
         written = _llp_perf()
+        extra = dict(extra or {}, readbackMs=(read - captured) * 1000, encodeMs=(written - read) * 1000,
+                     frameSize=list(surface.get_size()))
         wait = _llp_S.get("lastWait") or {}
         result = dict(id=n, kind=req["kind"], ok=True, tRequest=_llp_S["t_req"], tCapture=captured, tPng=written,
                       helperMs=(written - _llp_S["t_req"]) * 1000, pngMs=(written - captured) * 1000,
@@ -157,92 +169,64 @@ init python:
             result.update(extra)
         _llp_write("result-%d.json" % n, result)
 
-    def _llp_edge_error(a, b, g, scale):
-        width, height = a.get_size()
-        def differs(x, y):
-            if x < 0 or y < 0 or x >= width or y >= height:
-                return False
-            p, q = a.get_at((x, y)), b.get_at((x, y))
-            return abs(p[0] - q[0]) + abs(p[1] - q[1]) + abs(p[2] - q[2]) > 30
-        x0, y0 = int(round(g["x"] * scale)), int(round(g["y"] * scale))
-        x1, y1 = int(round((g["x"] + g["w"]) * scale)), int(round((g["y"] + g["h"]) * scale))
-        reach = 12
-        samples = [0.2, 0.35, 0.5, 0.65, 0.8]
-        edges = {}
-        def median(values):
-            values = sorted(values)
-            return values[len(values) // 2] if values else None
-        found = []
-        for f in samples:
-            y = int(y0 + (y1 - y0) * f)
-            for x in range(x0 - reach, x0 + reach + 1):
-                if differs(x, y):
-                    found.append(x - x0)
-                    break
-        edges["left"] = median(found)
-        found = []
-        for f in samples:
-            y = int(y0 + (y1 - y0) * f)
-            for x in range(x1 + reach, x1 - reach - 1, -1):
-                if differs(x, y):
-                    found.append(x + 1 - x1)
-                    break
-        edges["right"] = median(found)
-        found = []
-        for f in samples:
-            x = int(x0 + (x1 - x0) * f)
-            for y in range(y0 - reach, y0 + reach + 1):
-                if differs(x, y):
-                    found.append(y - y0)
-                    break
-        edges["top"] = median(found)
-        found = []
-        for f in samples:
-            x = int(x0 + (x1 - x0) * f)
-            for y in range(y1 + reach, y1 - reach - 1, -1):
-                if differs(x, y):
-                    found.append(y + 1 - y1)
-                    break
-        edges["bottom"] = median(found)
-        known = [abs(v) for v in edges.values() if v is not None]
-        return dict(edges=edges, maxError=max(known) if known else None)
+    def _llp_match(frame, iso, g, scale):
+        """Find where the element's own opaque pixels sit in the full frame."""
+        fw, fh = frame.get_size()
+        iw, ih = iso.get_size()
+        step = max(1, min(iw, ih) // 10)
+        points = []
+        for py in range(0, ih, step):
+            for px in range(0, iw, step):
+                c = iso.get_at((px, py))
+                if c[3] >= 250:
+                    points.append((px, py, c))
+        if len(points) > 60:
+            points = points[::len(points) // 60 + 1]
+        if len(points) < 5:
+            return dict(points=len(points), verdict="too-transparent")
+        ox, oy = int(round(g["x"] * scale)), int(round(g["y"] * scale))
+        reach = 8
+        def score(dx, dy):
+            hit = 0
+            for px, py, c in points:
+                x, y = ox + dx + px, oy + dy + py
+                if 0 <= x < fw and 0 <= y < fh:
+                    f = frame.get_at((x, y))
+                    if abs(f[0] - c[0]) + abs(f[1] - c[1]) + abs(f[2] - c[2]) < 24:
+                        hit += 1
+            return hit
+        at_zero = score(0, 0)
+        best = (at_zero, 0, 0)
+        if at_zero < len(points):
+            for dy in range(-reach, reach + 1):
+                for dx in range(-reach, reach + 1):
+                    s = score(dx, dy)
+                    if s > best[0]:
+                        best = (s, dx, dy)
+        return dict(points=len(points), zeroMatch=at_zero / float(len(points)), bestMatch=best[0] / float(len(points)),
+                    dx=best[1] / scale, dy=best[2] / scale, isoSize=[iw, ih])
 
     def _llp_rects(req):
-        surftree = renpy.display.interface.surftree
-        base = renpy.display.draw.screenshot(surftree)
-        geometry, objects = _llp_geometry(keep=True)
+        started = _llp_perf()
+        frame = renpy.display.draw.screenshot(renpy.display.interface.surftree)
+        geometry, renders = _llp_geometry(keep=True)
         scale = renpy.display.draw.draw_per_virt
         checks = []
         for i, g in enumerate(geometry):
-            if not (g["button"] or g["window"]) or g["transformed"] or g["w"] < 6 or g["h"] < 6:
+            if g["cls"] in ("ScreenDisplayable", "Timer") or g["transformed"] or g["w"] < 4 or g["h"] < 4:
                 continue
             if g["w"] >= config.screen_width and g["h"] >= config.screen_height:
                 continue
-            d = objects[i]
-            old = d.style
             try:
-                replacement = renpy.style.Style(old)
-                replacement.background = Solid("#ff00ff")
-                try:
-                    replacement.set_prefix(old.prefix)
-                except Exception:
-                    pass
-                d.style = replacement
+                iso = renpy.display.draw.screenshot(renders[i])
+                check = _llp_match(frame, iso, g, scale)
             except Exception as e:
-                checks.append(dict(index=i, error=repr(e)))
-                continue
-            renpy.display.render.invalidate(d)
-            renpy.display.render.redraw(d, 0)
-            yield dict(timeout=1.0)
-            marked = renpy.display.draw.screenshot(renpy.display.interface.surftree)
-            d.style = old
-            renpy.display.render.invalidate(d)
-            renpy.display.render.redraw(d, 0)
-            check = _llp_edge_error(base, marked, g, scale)
+                check = dict(error=repr(e))
             check.update(index=i, file=g["file"], line=g["line"], cls=g["cls"], x=g["x"], y=g["y"], w=g["w"], h=g["h"])
             checks.append(check)
-        yield dict(timeout=1.0)
-        _llp_capture(req, geometry=True, extra=dict(rectChecks=checks))
+        _llp_capture(req, geometry=True, extra=dict(rectChecks=checks, rectMs=(_llp_perf() - started) * 1000))
+        return
+        yield
 
     def _llp_load(req):
         started = _llp_perf()
@@ -311,8 +295,6 @@ init python:
         elif kind == "restart":
             _llp_S["restart"] = dict(req=req, tRequest=_llp_S["t_req"])
             _llp_S["job"] = None
-            _llp_S["inflight"] = False
-            _llp_S["seq"] += 1
             renpy.utter_restart(keep_renderer=True)
         elif kind == "stop":
             _llp_write("result-%d.json" % req["id"], dict(id=req["id"], kind=kind, ok=True, native=_llp_native()))
