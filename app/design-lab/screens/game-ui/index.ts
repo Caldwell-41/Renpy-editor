@@ -49,7 +49,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   let page: string, level: 'settings' | 'elements', sel: string | null, home: boolean, fine: boolean, more: boolean, tryIt: boolean;
   let open: '' | 'theme' | 'add' | 'sample' | 'template' | 'changes' | 'elements', hit: string | null, replay: string;
   // Layouts A and B: `others` opens the "Other screens" rows, `allParts` the element list, `forced` marks a screen that has no settings page.
-  let others: boolean, allParts: boolean, forced: boolean;
+  let others: boolean, allParts: boolean | null, forced: boolean;
   // Layout B: the canvas size, and whether the list and the panel are open. `listOpen` null follows the window width.
   let zoom: 'fit' | '100', listOpen: boolean | null, panelOpen: boolean;
   // Layout B: the project as last saved, and the setting whose source line is open.
@@ -61,7 +61,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
 
   function reset(state: string) {
     doc = { values: { ...defaults }, offsets: {}, added: {} }; done = []; undone = []; saved = 0; status = 'Ready';
-    sample = { ...sampleDefaults }; page = 'say'; level = 'settings'; sel = null; home = false; fine = false; more = false; tryIt = false; open = ''; hit = null; replay = ''; others = false; allParts = false; forced = false;
+    sample = { ...sampleDefaults }; page = 'say'; level = 'settings'; sel = null; home = false; fine = false; more = false; tryIt = false; open = ''; hit = null; replay = ''; others = false; allParts = null; forced = false;
     zoom = 'fit'; listOpen = null; panelOpen = true; what = null;
     if (state === 'title') page = 'title';
     if (state === 'themes') { if (traits[variant].lookPage) page = 'look'; else if (variant === 'click') open = 'theme'; else home = true; }
@@ -132,6 +132,8 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   }
   function field(f: Field): string {
     const hover = f.part ? ` data-hover-part="${f.part}"` : '';
+    // Layout B: the on/off setting of the selected element reads "Show on screen", so the element's name is not said twice.
+    if (f.kind === 'toggle' && variant === 'blend' && f.part && f.part === sel) f = { ...f, label: 'Show on screen' };
     // Layout B: a checkbox label ticks the box, so its source line opens from a button that shows on the pointer and on focus.
     if (f.kind === 'toggle' && variant === 'blend') return `<div class="gu-toggle-row" data-row="${f.key}"${hover}><label class="gu-toggle"><input type="checkbox" data-key="${f.key}" ${read(f.key) ? 'checked' : ''}>${esc(f.label)}</label><button type="button" class="gu-flat gu-what-button" data-what="${f.key}" aria-expanded="${what === f.key}" aria-label="Show what ${esc(f.label)} writes" title="Show what this writes">${svg(glyph.code)}</button></div>${writes(f.key)}`;
     if (f.kind === 'toggle') return `<label class="gu-toggle" data-row="${f.key}"${hover}><input type="checkbox" data-key="${f.key}" ${read(f.key) ? 'checked' : ''}>${esc(f.label)}</label>${writes(f.key)}`;
@@ -140,7 +142,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       // Layout B: the control always shows. A setting with no value of its own shows the game-wide value and a joined chain.
       // The first change gives the screen its own value, and the open chain then returns it to the game-wide look.
       body += doc.values[f.key] === null
-        ? `<span class="gu-linked" role="img" aria-label="Same as the game-wide look" title="Same as the game-wide look. Change it to give this screen its own value.">${svg(glyph.linked)}</span>`
+        ? `<span class="gu-linked" role="img" aria-label="Same as the game-wide look" data-tip="Same as the game-wide look. Change it to give this screen its own value.">${svg(glyph.linked)}</span>`
         : `<button type="button" class="gu-flat gu-same" data-same="${f.key}" title="Use the game-wide look again" aria-label="${esc(f.label)}: use the game-wide look again">${svg(glyph.unlinked)}</button>`;
     } else if (f.follows) {
       if (doc.values[f.key] === null) {
@@ -183,7 +185,8 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const line = (item?: { kind: string; text?: string }) => item ? `${item.kind === 'Button' ? 'textbutton' : item.kind.toLowerCase()} "${item.text ?? `New ${item.kind.toLowerCase()}`}"` : '';
     for (const id of Object.keys(doc.added)) (doc.added[id] ?? []).forEach((item, i) => {
       const old = line(savedDoc.added[id]?.[i]), now = line(item);
-      if (old !== now) list.push({ id: `a:${id}`, file: 'screens.rpy', line: 340 + i, title: `${pageById(id).title} · ${old ? 'element text' : `new ${item.kind.toLowerCase()}`}`, page: id, old, now });
+      const kind = `${old ? '' : 'new '}${item.kind.toLowerCase()}`;
+      if (old !== now) list.push({ id: `a:${id}:${i}`, file: 'screens.rpy', line: 340 + i, title: `${pageById(id).title} · ${item.text?.trim() ? `${item.text.trim()} (${kind})` : kind}`, page: id, old, now });
     });
     return list.sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line);
   }
@@ -194,7 +197,12 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     commit(`revert ${change.title}`, next => {
       if (id.startsWith('v:')) next.values[key] = savedDoc.values[key] ?? null;
       else if (id.startsWith('o:')) { if (savedDoc.offsets[key]) next.offsets[key] = { ...savedDoc.offsets[key] }; else delete next.offsets[key]; }
-      else next.added[key] = structuredClone(savedDoc.added[key] ?? []);
+      else {
+        // One added element: put its saved words back, or take it away if it was never saved.
+        const [screen, at] = key.split(':') as [string, string];
+        const saved = savedDoc.added[screen]?.[Number(at)];
+        if (saved) next.added[screen]![Number(at)] = { ...saved }; else next.added[screen]?.splice(Number(at), 1);
+      }
     }, change.page);
   }
   function changesPop(list: Change[]) {
@@ -295,16 +303,24 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       ${showOther ? `${other.map(row).join('')}${note ? '<p class="gu-note">These follow the game-wide look. You edit their elements.</p>' : ''}` : ''}</aside>`;
   }
   /** One row for the template in use. The four pictures open in a sheet, so the settings start at the top of the panel. */
-  function templateRow(pg: Page) {
+  const templatePop = (pg: Page, cls = 'gu-pop-right') => `<div class="gu-pop ${cls} gu-template-pop"><h3>Template</h3>${templateTiles(pg, 'gu-tiles-4')}<p class="gu-help gu-help-wide">A template replaces this screen's layout settings. Undo brings them back.</p></div>`;
+  function templateRow(pg: Page, withPop = true) {
     if (!pg.templates) return '';
     const now = pg.templates.find(t => Object.entries(t.values).every(([key, value]) => doc.values[key] === value));
     return `<div class="gu-template"><span class="gu-anchor"><button type="button" class="gu-flat gu-template-button" data-act="menu-template" aria-expanded="${open === 'template'}">
         <span class="gu-template-thumb">${stage(pg.id)}</span><span class="gu-template-text"><span class="gu-label">Template</span><span>${now ? now.name : 'Your own'}</span></span>${svg(glyph.down)}</button>
-      ${open === 'template' ? `<div class="gu-pop gu-pop-right gu-template-pop"><h3>Template</h3>${templateTiles(pg, 'gu-tiles-4')}<p class="gu-help gu-help-wide">A template replaces this screen's layout settings. Undo brings them back.</p></div>` : ''}</span></div>`;
+      ${open === 'template' && withPop ? templatePop(pg) : ''}</span></div>`;
   }
   const previewRow = (pg: Page) => `<div class="gu-preview" title="Sample content never changes your game.">${pg.samples ? `<span class="gu-label">Sample content</span>${samples(pg, 'select')}` : ''}</div>`;
+  /** Names the screens that set a value of their own, because a theme change leaves those values alone. */
+  function ownValueNote() {
+    if (variant !== 'blend') return 'A screen that has its own value keeps it.';
+    const names = pages.filter(item => (item.groups ?? []).some(group => group.fields.some(f => f.follows && doc.values[f.key] !== null))).map(item => item.title);
+    if (!names.length) return 'A screen that has its own value keeps it.';
+    return names.length === 1 ? `${names[0]} keeps its own values.` : `${names.slice(0, -1).join(', ')} and ${names.at(-1)} keep their own values.`;
+  }
   const lookPanel = (pg: Page, extra = '') => `<div class="gu-panel-top"><div class="gu-panel-head"><h2>Game-wide look</h2>${extra}</div></div>
-    <div class="gu-scroll" data-scroll="panel"><section class="gu-group"><h3>Theme</h3>${themeTiles('', false)}<p class="gu-help gu-help-wide">A theme sets everything below. A screen that has its own value keeps it.</p></section>${groupsHtml(pg.groups!)}</div>`;
+    <div class="gu-scroll" data-scroll="panel"><section class="gu-group"><h3>Theme</h3>${themeTiles('', false)}<p class="gu-help gu-help-wide">A theme sets everything below. ${ownValueNote()}</p></section>${groupsHtml(pg.groups!)}</div>`;
 
   // ---- layout A: layout 1 after an experience-first pass. Same skeleton, fewer controls. ----
   // Removed: the toolbar above the canvas, the footnote, the list markers, the "no settings page" dead end and the element list.
@@ -345,12 +361,14 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   };
   /** The optional element list. It starts closed, stays as the author left it, and marks the selected element. */
   function allElements(pg: Page, startOpen: boolean) {
-    const list = ownParts(pg), shown = allParts || startOpen;
+    const list = ownParts(pg), shown = allParts ?? startOpen;
     return `<button type="button" class="gu-flat gu-disclose" data-act="all-parts" aria-expanded="${shown}">${svg(shown ? glyph.down : glyph.next)}All elements<span class="gu-muted">${list.length}</span></button>
-      ${shown ? `<section class="gu-group"><div class="gu-els">${list.map(([id, name, kind]) => `<button type="button" class="gu-row gu-el${isHidden(id) ? ' gu-el-hidden' : ''}" data-select="${id}" data-hover-part="${id}" aria-pressed="${sel === id}"><span>${name}</span><span class="gu-muted">${isHidden(id) ? 'Hidden' : kind === name ? '' : kind}</span></button>`).join('')}</div></section>` : ''}`;
+      ${shown ? `<section class="gu-group"><div class="gu-els">${list.map(([id, name, kind]) => `<button type="button" class="gu-row gu-el${isHidden(id) ? ' gu-el-hidden' : ''}" data-select="${id}" data-hover-part="${id}" aria-pressed="${sel === id}" title="${esc(name)}"><span class="gu-clip">${esc(name)}</span><span class="gu-muted">${isHidden(id) ? 'Hidden' : kind === name ? '' : kind}</span></button>`).join('')}</div></section>` : ''}`;
   }
   function layoutBlend(pg: Page) {
     const look = pg.id === 'look';
+    // An element that Undo or Revert took away cannot stay selected.
+    if (sel && !look && partOwner(pg.id, sel) === pg.id && !partOf(pg, sel)) sel = null;
     const open2 = frame();
     // A collapsed side panel takes no width. Its tab stays where it was, so focus stays on it.
     const tab = (which: 'list' | 'panel') => {
@@ -359,13 +377,15 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       return `<button type="button" class="gu-tab gu-tab-${which}" data-act="toggle-${which}" aria-expanded="${shown}" aria-label="${name}" title="${name}">${svg((which === 'list') === shown ? glyph.back : glyph.next)}</button>`;
     };
     const tabs = `${tab('list')}${open2.stacked ? '' : tab('panel')}`;
-    const template = templateRow(pg);
+    // In the narrow window the template row scrolls with the settings, and its sheet opens over the panel so nothing clips it.
+    const template = templateRow(pg, !open2.stacked);
+    const sheet = open2.stacked && open === 'template' && pg.templates ? templatePop(pg, 'gu-pop-panel') : '';
     let panel = look ? lookPanel(pg) : '';
     if (!look && sel) {
       const owner = partOwner(pg.id, sel);
       const kind = partOf(pg, sel)?.[2] ?? '';
       const name = partName(pg, sel);
-      const head = `<div class="gu-panel-top"><div class="gu-panel-head"><button type="button" class="gu-flat gu-crumb" data-act="deselect">${svg(glyph.back)}${pg.title}</button><h2>${name}</h2>${kind && kind !== name ? `<span class="gu-muted">${kind}</span>` : ''}</div></div>`;
+      const head = `<div class="gu-panel-top"><div class="gu-panel-head"><button type="button" class="gu-flat gu-crumb" data-act="deselect">${svg(glyph.back)}${pg.title}</button><h2 class="gu-clip" title="${esc(name)}">${esc(name)}</h2>${kind && kind !== name ? `<span class="gu-muted">${kind}</span>` : ''}<span class="gu-spacer"></span>${addMenu()}</div></div>`;
       if (owner !== pg.id) {
         // An element that another screen owns. Its settings are on that screen, and it does not move here.
         panel = `${head}<div class="gu-scroll" data-scroll="panel"><section class="gu-group"><p>This is part of ${pageById(owner).title}. It looks the same on every screen that shows it.</p><div><button type="button" data-open-part="${owner}:${sel}">Open ${pageById(owner).title}</button></div></section></div>`;
@@ -373,7 +393,9 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
         const item = (doc.added[pg.id] ?? []).find(entry => entry.id === sel);
         const added = !!item;
         // An element the author added: a Text or a Button takes its words here.
-        const words = item && (item.kind === 'Text' || item.kind === 'Button') ? `<section class="gu-group"><div class="gu-field"><span class="gu-label">Text</span><span class="gu-control"><input type="text" data-added-text="${item.id}" value="${esc(item.text ?? `New ${item.kind.toLowerCase()}`)}" aria-label="Text"></span></div></section>` : '';
+        const looks = item ? ({ Button: "It looks like the game's other buttons.", Text: "It uses the game's text font and color." } as Record<string, string>)[item.kind] ?? 'It follows the game-wide look.' : '';
+        const words = item && (item.kind === 'Text' || item.kind === 'Button') ? `<section class="gu-group"><div class="gu-field"><span class="gu-label">Text</span><span class="gu-control"><input type="text" data-added-text="${item.id}" value="${esc(item.text ?? `New ${item.kind.toLowerCase()}`)}" aria-label="Text"></span><p class="gu-help">${looks}</p></div></section>`
+          : item ? `<p class="gu-note">${looks}</p>` : '';
         const plain = `${words}${partSettings(pg, sel)}`;
         // An element with no plain settings shows its properties at once.
         panel = `${head}<div class="gu-scroll" data-scroll="panel">${plain || (added ? '' : '<p class="gu-note">It follows the game-wide look.</p>')}
@@ -388,14 +410,13 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const tile = (item: Page) => `<button type="button" class="gu-tile" data-go="${item.id}">${stage(item.id)}<span>${item.title}</span></button>`;
     const section = (title: string, items: readonly Page[]) => `<section><h3>${title}</h3><div class="gu-board-row">${items.map(tile).join('')}</div></section>`;
     const withPage = (group: Page['group']) => pages.filter(item => item.group === group && (item.groups || group === 'yours'));
-    const board = `<div class="gu-board" data-scroll="board">${section(groupTitles.story, withPage('story'))}${section(groupTitles.menus, withPage('menus'))}${section(groupTitles.yours, withPage('yours'))}${section('Other screens', pages.filter(item => !item.groups && item.group !== 'yours'))}</div>
-      <p class="gu-board-note">Click a screen to open it.</p>`;
+    const board = `<div class="gu-board" data-scroll="board">${section(groupTitles.story, withPage('story'))}${section(groupTitles.menus, withPage('menus'))}${section(groupTitles.yours, withPage('yours'))}${section('Other screens', pages.filter(item => !item.groups && item.group !== 'yours'))}</div>`;
     // The sample content and the zoom sit against the canvas. With both panels hidden, the row also names the screen.
     const row = `<div class="gu-preview"><div class="gu-preview-left">${!open2.list && !open2.panel ? `<strong>${pg.title}</strong>` : ''}${pg.samples ? `<span class="gu-label" title="Sample content never changes your game.">Sample</span>${samples(pg, 'select')}` : ''}</div>
       <div class="gu-seg gu-zoom" role="group" aria-label="Canvas size"><button type="button" data-act="zoom-fit" aria-pressed="${zoom === 'fit'}">Fit</button><button type="button" data-act="zoom-100" aria-pressed="${zoom === '100'}">100%</button></div></div>`;
     const view = `<div class="gu-canvas gu-canvas-b gu-pick${zoom === '100' ? ' gu-zoom-100' : ''}"><div class="gu-view" data-scroll="canvas">${stage(pg.id, { main: true })}</div>${row}</div>`;
     return `${open2.list ? screenList(false) : ''}<main class="gu-centre">${look ? board : view}${tabs}</main>
-      ${open2.panel ? `<aside class="gu-panel" aria-label="${look ? 'Game-wide look' : 'Settings'}">${panel}</aside>` : ''}`;
+      ${open2.panel ? `<aside class="gu-panel" aria-label="${look ? 'Game-wide look' : 'Settings'}">${panel}${sheet}</aside>` : ''}`;
   }
   /** Layout B: names every element on the canvas, for the tag on the pointer and on the selection. */
   function nameParts() {
@@ -403,7 +424,9 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const pg = pageById(page);
     const stage = host.querySelector<HTMLElement>('[data-main]')?.getBoundingClientRect();
     host.querySelectorAll<HTMLElement>('[data-main] [data-part]').forEach(node => {
-      node.dataset.name = partName(pg, node.dataset.part!);
+      const owner = partOwner(pg.id, node.dataset.part!);
+      node.dataset.name = owner === pg.id ? partName(pg, node.dataset.part!) : `${partName(pg, node.dataset.part!)} · ${pageById(owner).title}`;
+      node.classList.toggle('is-fixed', owner !== pg.id || node.dataset.part === 'bg');
       // The tag sits above the element's left corner. Near the right or the top edge of the canvas it moves, so it is never cut off.
       const box = node.getBoundingClientRect();
       if (stage) { node.classList.toggle('g-tag-right', box.left > stage.left + stage.width * 0.72); node.classList.toggle('g-tag-below', box.top < stage.top + 26); }
@@ -419,8 +442,9 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const target = host.querySelector<HTMLElement>(`[data-main] [data-part="${sel ?? ownParts(pageById(page)).find(([id]) => id !== 'bg' && !isHidden(id))?.[0] ?? ''}"]`);
     if (!view || !target) return;
     const a = view.getBoundingClientRect(), b = target.getBoundingClientRect();
-    view.scrollLeft += b.left + b.width / 2 - (a.left + a.width / 2);
-    view.scrollTop += b.top + b.height / 2 - (a.top + a.height / 2);
+    // An element that fits is centred. One that is larger than the view shows from its top left corner, where its content starts.
+    view.scrollLeft += b.width > a.width - 48 ? b.left - a.left - 24 : b.left + b.width / 2 - (a.left + a.width / 2);
+    view.scrollTop += b.height > a.height - 48 ? b.top - a.top - 24 : b.top + b.height / 2 - (a.top + a.height / 2);
   }
 
   // ---- layout C: the council blend. Layout 1's list, toolbar and panel, layout 2's click on the canvas and its element panel, layout 3's template strip. ----
@@ -594,7 +618,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       case 'toggle-panel': panelOpen = !panelOpen; break;
       case 'zoom-fit': zoom = 'fit'; break;
       case 'zoom-100': zoom = '100'; break;
-      case 'all-parts': allParts = !allParts; break;
+      case 'all-parts': allParts = !(allParts ?? (variant === 'blend' && !sel && !pageById(page).groups)); break;
       case 'edit-hit': level = 'elements'; sel = hit; hit = null; break;
       case 'new-screen': status = 'New screen opens the visual starters. They are not part of this mock.'; break;
       case 'reset-page': {
@@ -737,8 +761,9 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   // Layout B: pointing at an element's settings or its row in the list outlines it on the canvas.
   const onHover = (event: MouseEvent) => {
     const part = (event.target as HTMLElement).closest<HTMLElement>('[data-hover-part]')?.dataset.hoverPart;
-    host.querySelectorAll('[data-main] .is-hover').forEach(node => node.classList.remove('is-hover'));
-    if (part && event.type === 'mouseover') host.querySelectorAll(`[data-main] [data-part="${part}"]`).forEach(node => node.classList.add('is-hover'));
+    // "is-hover" is the game's own hover look for a button, so the pointing outline has its own class.
+    host.querySelectorAll('[data-main] .is-pointed').forEach(node => node.classList.remove('is-pointed'));
+    if (part && event.type === 'mouseover') host.querySelectorAll(`[data-main] [data-part="${part}"]`).forEach(node => node.classList.add('is-pointed'));
   };
   host.addEventListener('mouseover', onHover); host.addEventListener('mouseout', onHover);
   // Layout B: a right-click on a setting row opens the line it writes.

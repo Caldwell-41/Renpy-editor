@@ -142,6 +142,12 @@ export default async function ({ page, open, capture }) {
     assert.equal(await page.locator('.gu-panel h2').first().innerText(), 'Continue arrow');
     // The dialogue box behind Choices belongs to the Dialogue box screen. It opens there and does not move here.
     await page.locator('.gu-list [data-go="choice"]').click();
+    // The button sample shows the game's hover look, and pointing at the panel does not wipe it.
+    await page.locator('[data-sample-key="state"]').selectOption('hover');
+    await page.locator('[data-hover-part="button"]').first().hover();
+    await page.mouse.move(600, 5);
+    assert.match(await main().locator('[data-part="button"]').first().getAttribute('class'), /is-hover/);
+    await page.locator('[data-sample-key="state"]').selectOption('idle');
     await main().locator('[data-part="box"]').click({ position: { x: 6, y: 6 } });
     assert.match(await page.locator('.gu-panel').innerText(), /This is part of Dialogue box/);
     await page.locator('[data-open-part="say:box"]').click();
@@ -161,6 +167,15 @@ export default async function ({ page, open, capture }) {
     await page.locator('[data-added-text]').fill('Chapters');
     await page.locator('[data-added-text]').press('Enter');
     assert.equal(await main().locator('[data-part="new1"]').innerText(), 'Chapters');
+    // Revert in the list of pending lines takes back one added element and leaves the other.
+    await page.locator('[data-act="menu-add"]').click();
+    await page.locator('[data-add="Text"]').click();
+    await page.locator('[data-act="menu-changes"]').click();
+    await page.locator('[data-revert="a:say:1"]').click();
+    await page.keyboard.press('Escape');
+    assert.equal(await main().locator('[data-part="new1"]').count(), 1);
+    assert.equal(await main().locator('[data-part="new2"]').count(), 0);
+    assert.equal(await page.locator('.gu-panel h2').first().innerText(), 'Dialogue box');
     await page.locator('[data-act="all-parts"]').click();
     await page.locator('.gu-els [data-select="box"]').click();
     assert.equal(await page.locator('.gu-els [data-select="box"]').getAttribute('aria-pressed'), 'true');

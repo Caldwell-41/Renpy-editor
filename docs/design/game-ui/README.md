@@ -21,8 +21,9 @@ button, themes and templates.
 ## Open it
 
 From `app/`, run `npm run design:dev`, then open
-`http://127.0.0.1:5174/preview.html?screen=game-ui&variant=blend&state=dialogue&theme=dark`.
-The `variant` values are `refined` (A), `blend` (B), `council` (C), `pages` (1),
+`http://127.0.0.1:5174/preview.html?screen=game-ui&variant=blend-v2&state=dialogue&theme=dark`.
+The `variant` values are `blend-v2` (B after the council review), `blend` (B as
+approved), `refined` (A), `council` (C), `pages` (1),
 `click` (2) and `board` (3). The Layout menu in the dashed bar at the top also switches between them. The preview fills the browser window, so a wide window shows the layouts at
 their real proportions.
 
@@ -96,6 +97,71 @@ Neither adds anything to the layout at rest.
   choosing one workspace Save. If each edit writes at once, it has nothing to show.
 
 The file names, variable names and line numbers in both are sample values.
+
+### B, revision 2: the council review
+
+After the approval, Kris asked for a council review of layout B against his
+requirements and his experience-first principle, with a target score of 9.5, two
+rounds, and his say on any major change or new feature. The lab pins the approved
+source, so the work continues as a draft, `game-ui` / `blend-v2`, revision `blend-v2`.
+`blend-v1` stays the approved revision until Kris approves this one.
+
+| Reviewer | Round 1 | Round 2 |
+| --- | --- | --- |
+| Claude Opus 5.5 (`xhigh`) | 7.8/10 | 8.8/10 |
+| GPT-6.1 Sol (`xhigh`) | 8.3/10 | 9.0/10 |
+| Claude Fable 5.2 (medium) | 8.3/10 | 9.0/10 |
+
+Round two found only polish, and every finding is fixed. Kris set two rounds, so no
+reviewer has scored the layout after those fixes. The measured score is 9.0, not 9.5.
+
+Changes Kris approved after round one:
+
+- A setting that follows the game-wide look always shows its real control at the
+  inherited value, with a joined chain in a muted color. The first change gives the
+  screen its own value. An open chain in the accent color then returns it.
+- A Text or Button element that the author added has one "Text" field, and the element
+  is named by its words.
+- "All elements" is also at the foot of a selected element's panel. It starts closed
+  and stays as the author left it.
+- A checkbox row has a small source button that shows on the pointer and on focus.
+
+Polish from both rounds:
+
+- **The canvas and the panel agree.** Selecting the continue arrow, the speaker's
+  picture or the menu panel shows the setting that switches it on or off, labelled
+  "Show on screen". The list marks an element that a setting has hidden. One element
+  has one name everywhere.
+- **Elements that another screen owns.** The dialogue box behind Choices says "This is
+  part of Dialogue box" with a button that opens it there. It has no handles and does
+  not move. Its name tag names the owner.
+- **Finding an element.** A settings heading selects its element. Pointing at the
+  heading, a list row or a checkbox outlines the element. The element under the pointer
+  and the selected element show a name tag. The selection is a white line with a dark
+  line outside it, so it shows on a game of any color.
+- **The selected element's panel.** The header says the name once and keeps "Add
+  element". "All properties" holds one "Offset" row, and an element with no plain
+  settings shows it at once. A new element says where its look comes from.
+- **The canvas block.** The sample row and the zoom sit directly under the canvas. With
+  both panels hidden the row names the screen. At 100% the canvas shows the selected
+  element, from its top left corner when it is larger than the view. The Character
+  sample has a long name.
+- **Templates and themes.** The sheet is titled "Template", says what a template
+  replaces and closes on a choice. The theme note names the screens that keep their own
+  values. The board groups the screens as the list does and has no caption.
+- **The list of pending lines.** A template line and an added element are named in
+  plain words, an added line shows "+", and Revert takes back one element.
+- **Behaviour.** Undo on the screen in view keeps the selection. A move starts after
+  five pixels on the display. A new element lands in the upper right, a step from the
+  last one. A three-option switch beside a chain fits its words.
+- **Narrow window.** The template row scrolls with the settings, its sheet opens over
+  the panel, and the sample row stays on one line.
+- **Removed.** The "Reset" row, the second "Button states" control, the note under
+  "Other screens", and collapse control 2, which Kris rejected.
+
+Declined: a neutral Save button, because the header is the shared approved shell
+header; zoom with the mouse wheel, as scope; typing on the canvas with a double-click,
+because Kris chose the Text field only.
 
 ### C · Council blend
 

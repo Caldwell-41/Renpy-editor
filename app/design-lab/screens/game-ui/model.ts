@@ -64,7 +64,7 @@ export const defaults: Values = {
 
 export const sampleDefaults: Record<string, string> = { backdrop: 'platform', line: 'short', who: 'mara', count: '3', slots: 'some', state: 'idle' };
 
-const sayParts: Part[] = [['box', 'Box', 'Box'], ['name', 'Speaker name', 'Text'], ['text', 'Dialogue text', 'Text'], ['arrow', 'Continue arrow', 'Image'], ['side', 'Side picture', 'Image'], ['quick', 'Quick menu', 'Group']];
+const sayParts: Part[] = [['box', 'Box', 'Box'], ['name', 'Speaker name', 'Text'], ['text', 'Dialogue text', 'Text'], ['arrow', 'Continue arrow', 'Image'], ['side', "Speaker's picture", 'Image'], ['quick', 'Quick menu', 'Group']];
 const menuParts: Part[] = [['nav', 'Menu buttons', 'Group'], ['body', 'Page content', 'Group']];
 
 export const pages: readonly Page[] = [
@@ -104,8 +104,8 @@ export const pages: readonly Page[] = [
       { title: 'Dialogue text', part: 'text', fields: [
         { key: 'say.align', label: 'Align', kind: 'segment', options: [['left', 'Left'], ['center', 'Center']] }] },
       { title: 'Extras', fields: [
-        { key: 'say.arrow', label: 'Continue arrow', kind: 'toggle', part: 'arrow' },
-        { key: 'say.side', label: "Speaker's picture beside the text", kind: 'toggle', part: 'side' }] },
+        { key: 'say.arrow', label: 'Show the continue arrow', kind: 'toggle', part: 'arrow' },
+        { key: 'say.side', label: "Show the speaker's picture", kind: 'toggle', part: 'side' }] },
     ] },
   { id: 'choice', title: 'Choices', group: 'story', parts: [['list', 'Choice list', 'Group'], ['button', 'Choice button', 'Button'], ...sayParts],
     samples: [{ key: 'count', label: 'Options', options: [['2', 'Two'], ['3', 'Three'], ['5', 'Five']] }, pointer, backdrop],
@@ -147,7 +147,7 @@ export const pages: readonly Page[] = [
         { key: 'title.nameSize', label: 'Size', kind: 'segment', options: sizes }] },
       { title: 'Menu', part: 'menu', fields: [
         { key: 'title.shape', label: 'Button shape', kind: 'segment', options: shapes, follows: 'gui.shape' },
-        { key: 'title.panel', label: 'Panel behind the menu', kind: 'toggle', part: 'panel' }] },
+        { key: 'title.panel', label: 'Show the menu panel', kind: 'toggle', part: 'panel' }] },
     ] },
   { id: 'pause', title: 'Pause menu', group: 'menus', parts: menuParts, samples: [pointer, backdrop], groups: [
     { title: 'Menu', part: 'nav', fields: [menuSide, { key: 'pause.dim', label: 'Darken the game', kind: 'range', min: 0, max: 95, unit: '%' }] }] },

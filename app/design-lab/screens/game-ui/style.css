@@ -222,7 +222,6 @@
 .gu-canvas-b.gu-zoom-100>.gu-view { width:100cqw; height:calc(100cqh - 40px); overflow:auto; border:1px solid var(--stage-edge); }
 .gu-canvas-b.gu-zoom-100>.gu-view>.gu-stage { width:1920px; border:0; }
 .gu-canvas-b.gu-zoom-100>.gu-preview { width:100cqw; }
-.gu-board-note { padding:0 16px 10px; font-size:12px; color:var(--text-secondary); }
 /* A group heading that selects its element. The arrow shows on the pointer and on focus. */
 .gu-shell button.gu-group-pick { width:100%; justify-content:space-between; min-height:0; padding:0; font-size:12px; font-weight:650; }
 .gu-shell button.gu-group-pick:hover:not(:disabled):not([aria-disabled=true]) { background:transparent; }
@@ -258,7 +257,8 @@
   [data-variant=blend] .gu-canvas-b { display:block; container-type:inline-size; padding:8px 8px 4px 16px; }
   [data-variant=blend] .gu-canvas-b>.gu-view, [data-variant=blend] .gu-canvas-b>.gu-preview { width:100%; }
   [data-variant=blend] .gu-canvas-b.gu-zoom-100>.gu-view { width:100%; height:56cqw; }
-  [data-variant=blend] .gu-template-thumb, [data-variant=blend] .gu-board-note { display:none; }
+  [data-variant=blend] .gu-template-thumb { display:none; }
+  [data-variant=blend] .gu-preview-left { flex-wrap:nowrap; overflow-x:auto; }
   [data-variant=blend] .gu-panel { grid-column:3; grid-row:2; border-left:0; border-top:1px solid var(--border-normal); }
   [data-variant=blend] .gu-header { gap:6px; padding-inline:8px; }
   [data-variant=blend] .gu-project, [data-variant=blend] .gu-long { display:none; }
@@ -268,7 +268,19 @@
 }
 
 /* Layout B, revision 2: an inherited setting keeps its control, and a checkbox row gets a source button on the pointer and on focus. */
-.gu-linked { width:24px; height:24px; flex:none; display:inline-flex; align-items:center; justify-content:center; color:var(--accent-hover); }
+.gu-linked { position:relative; width:22px; height:24px; flex:none; display:inline-flex; align-items:center; justify-content:center; color:var(--text-muted); }
+/* The open chain acts, and it marks what this screen changed, so it takes the accent. */
+.gu-shell[data-variant=blend] button.gu-same { width:22px; color:var(--accent-hover); }
+/* Its meaning shows on the pointer, and while the keyboard is on the setting's control. */
+.gu-linked:hover::after, .gu-control:focus-within>.gu-linked::after { content:attr(data-tip); position:absolute; z-index:6; right:0; top:calc(100% + 4px); width:190px; padding:4px 8px; font-size:11px; line-height:1.4; color:var(--surface-app); background:var(--text-primary); border-radius:3px; white-space:normal; text-align:left; }
+/* A switch beside a chain sizes its options by their words, so no word is cut. */
+.gu-shell[data-variant=blend] .gu-control>.gu-seg button { flex:1 1 auto; padding-inline:4px; }
+.gu-clip { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+[data-variant=blend] .gu-els { grid-template-columns:minmax(0,1fr); }
+[data-variant=blend] .gu-el { gap:10px; }
+[data-variant=blend] .gu-el>.gu-clip { flex:1; text-align:left; }
+.gu-panel-head>h2.gu-clip { flex:0 1 auto; }
+.gu-pop.gu-pop-panel { left:8px; right:8px; top:44px; width:auto; max-height:calc(100% - 52px); overflow:auto; }
 .gu-toggle-row { display:flex; align-items:center; gap:6px; min-height:22px; }
 .gu-toggle-row .gu-toggle { flex:1; min-width:0; }
 .gu-shell button.gu-what-button { width:22px; min-height:22px; padding:0; color:var(--text-secondary); opacity:0; }
