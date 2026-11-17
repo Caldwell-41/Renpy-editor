@@ -59,6 +59,18 @@ other first-round layouts.
 - "Add element" sits in the panel head. "Try it" is left out until someone has measured
   whether the hidden process can answer the pointer.
 
+On 2026-11-17 Kris chose B and asked for no template strip under the canvas, because
+templates do not need to be in view at all times. B then gained three things that no
+other ticket owned:
+
+- Fit and 100% for the canvas, at the right of the row under it. At 100% the canvas
+  scrolls.
+- A collapse control on the screen list and on the settings panel. Collapsed, each is
+  a thin column with the control that restores it, and focus stays on that control.
+- The narrow window. Below 900 px the list starts collapsed. At 700 px or less the
+  panel sits under the canvas, and the header hides the project name and shortens the
+  save state.
+
 ### C · Council blend
 
 A subagent built C with the council skill. It asked three models which combination of

@@ -109,6 +109,28 @@ export default async function ({ page, open, capture }) {
     assert.equal(await page.locator('.gu-panel h2').first().innerText(), 'Notices');
     assert.equal(await page.locator('.gu-panel [data-act="level-settings"]').count(), 0);
   }
+  if (variant === 'blend') {
+    // Zoom, the collapsing panels and the narrow window.
+    await open({ state: 'title', viewport: 'wide', theme: 'dark' });
+    const width = async () => (await main().boundingBox()).width;
+    const fit = await width();
+    await page.locator('[data-act="toggle-list"]').click();
+    await page.locator('[data-act="toggle-panel"]').click();
+    assert.ok(await width() > fit + 300, 'the canvas takes the space of both panels');
+    assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-act')), 'toggle-panel');
+    await capture('blend-panels-collapsed');
+    await page.locator('[data-act="toggle-panel"]').click();
+    await page.locator('[data-act="toggle-list"]').click();
+    await page.locator('[data-act="zoom-100"]').click();
+    assert.equal(Math.round(await width()), 1920);
+    await capture('blend-zoom-100');
+    await open({ state: 'dialogue', viewport: 'compact', theme: 'dark' });
+    const canvasBox = await main().boundingBox(), panelBox = await page.locator('.gu-panel').boundingBox();
+    assert.ok(panelBox.y >= canvasBox.y + canvasBox.height, 'the panel sits under the canvas');
+    assert.equal(await page.locator('[data-act="toggle-list"]').getAttribute('aria-expanded'), 'false');
+    assert.ok(await page.locator('[data-key="say.opacity"]').isVisible());
+    await capture('blend-compact');
+  }
   if (variant === 'board') {
     await page.locator('[data-act="level-settings"]').click();
     await page.locator('[data-act="home"]').click();
