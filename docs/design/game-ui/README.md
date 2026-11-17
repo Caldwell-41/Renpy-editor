@@ -179,8 +179,9 @@ Polish from round three:
 - **The template sheet** says what a template replaces above the pictures. In the
   narrow window it uses the whole panel.
 - **Smaller things.** "All elements" also shows for an element that another screen
-  owns. The status line returns to "Ready" on another screen. The 100% view always
-  shows its scroll bars. The narrow sample row drops the word "Sample".
+  owns. The status line returns to "Ready" on another screen. The 100% view
+  styles its scroll bars so that they stay in view. The check browser hides scroll
+  bars, so nobody has seen this work. The narrow sample row drops the word "Sample".
 
 Declined: a neutral Save button, because the header is the shared approved shell
 header; zoom with the mouse wheel, as scope; typing on the canvas with a double-click,
