@@ -308,4 +308,10 @@
 .gu-shell .gu-board .gu-tile { cursor:zoom-in; }
 .gu-canvas-b>.gu-preview.gu-pinned { align-items:center; }
 .gu-pinned .gu-preview-left { flex-wrap:nowrap; gap:6px; }
-.gu-pinned strong { margin-left:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.gu-pinned-name { min-width:0; display:flex; align-items:baseline; gap:6px; margin-left:8px; white-space:nowrap; }
+.gu-pinned-name strong { overflow:hidden; text-overflow:ellipsis; }
+/* The strip of every screen under the pinned preview. The large view gives up height for it. */
+.gu-look-pinned>.gu-view, .gu-look-pinned>.gu-preview, .gu-look-pinned>.gu-pin-strip { width:min(100cqw, calc((100cqh - 40px - 104px) * 16 / 9)); }
+.gu-pin-strip { height:104px; display:flex; align-items:flex-start; gap:8px; overflow-x:auto; padding-top:10px; border-top:1px solid var(--border-normal); margin-top:8px; }
+.gu-shell .gu-pin-strip .gu-tile { flex:none; width:100px; font-size:11px; }
+@media (max-width:700px) { [data-variant=blend] .gu-look-pinned>.gu-view, [data-variant=blend] .gu-look-pinned>.gu-preview { width:100%; } }

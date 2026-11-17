@@ -196,9 +196,14 @@ screen's page, and chose this design on 2026-11-17:
   screen, and the pointer passes through it. Keyboard focus shows it at once.
 - A click, or Enter, pins the large view where a screen's canvas sits. It stays and
   follows the game-wide settings while the author changes them.
-- The row under the pinned view has "All screens", Previous and Next, the screen's
-  name and "Edit" with the screen's name, which opens that screen's page. The arrow
-  keys step through the screens, and Escape returns to the board.
+- The row under the pinned view has "All screens", the word "Preview" with the
+  screen's name, and "Edit" with the screen's name, which opens that screen's page.
+  Escape returns to the board.
+- A strip of every screen sits under that row, with the pinned one marked. A click in
+  the strip, or an arrow key, changes the screen. Kris asked for the pinned view to
+  read as the Game-wide look page and not as a screen's editor. The strip keeps the
+  board in view, which a screen's page never has. The narrow window has no room for
+  the strip, so it has Previous and Next.
 - This replaces the approved rule that a click on a board screen opens its page. The
   screen list still opens any page in one click. Kris asked for one way that works on
   Windows and macOS, and a plain click needs no hover, modifier key or right-click.

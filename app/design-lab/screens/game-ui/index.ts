@@ -448,13 +448,17 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     const row = `<div class="gu-preview"><div class="gu-preview-left">${!open2.list && !open2.panel ? `<strong>${pg.title}</strong>` : ''}${pg.samples ? `${open2.stacked ? '' : '<span class="gu-label" title="Sample content never changes your game.">Sample</span>'}${samples(pg, 'select')}` : ''}</div>
       <div class="gu-seg gu-zoom" role="group" aria-label="Canvas size"><button type="button" data-act="zoom-fit" aria-pressed="${zoom === 'fit'}">Fit</button><button type="button" data-act="zoom-100" aria-pressed="${zoom === '100'}">100%</button></div></div>`;
     const view = `<div class="gu-canvas gu-canvas-b gu-pick${zoom === '100' ? ' gu-zoom-100' : ''}"><div class="gu-view" data-scroll="canvas">${stage(pg.id, { main: true })}</div>${row}</div>`;
-    // The pinned view puts one screen where a screen's canvas sits, with its controls in the row under it.
+    // The pinned view is still the Game-wide look page: one screen large, labelled as a preview, with every screen in a strip
+    // under it. The strip keeps the board in view, so the page does not read as that screen's editor. A click in the strip
+    // changes the screen. The narrow window has no room for the strip, so it gets Previous and Next.
     const shown = look && pinned ? pageById(pinned) : null;
-    const large = shown ? `<div class="gu-canvas gu-canvas-b"><div class="gu-view">${stage(shown.id)}</div><div class="gu-preview gu-pinned">
+    const order = [...withPage('story'), ...withPage('menus'), ...withPage('yours'), ...pages.filter(item => !item.groups && item.group !== 'yours')];
+    const large = shown ? `<div class="gu-canvas gu-canvas-b gu-look-pinned"><div class="gu-view">${stage(shown.id)}</div><div class="gu-preview gu-pinned">
         <div class="gu-preview-left"><button type="button" data-act="unpin">${svg(glyph.back)}All screens</button>
-          <button type="button" class="gu-icon" data-act="pin-prev" aria-label="Previous screen" title="Previous screen">${svg(glyph.back)}</button><button type="button" class="gu-icon" data-act="pin-next" aria-label="Next screen" title="Next screen">${svg(glyph.next)}</button>
-          <strong>${shown.title}</strong></div>
-        <button type="button" data-go="${shown.id}">Edit ${shown.title}</button></div></div>` : '';
+          ${open2.stacked ? `<button type="button" class="gu-icon" data-act="pin-prev" aria-label="Previous screen" title="Previous screen">${svg(glyph.back)}</button><button type="button" class="gu-icon" data-act="pin-next" aria-label="Next screen" title="Next screen">${svg(glyph.next)}</button>` : ''}
+          <span class="gu-pinned-name"><span class="gu-label">Preview</span><strong>${shown.title}</strong></span></div>
+        <button type="button" data-go="${shown.id}">Edit ${shown.title}</button></div>
+        ${open2.stacked ? '' : `<div class="gu-pin-strip" data-scroll="pinstrip" role="group" aria-label="Screens">${order.map(item => `<button type="button" class="gu-tile" data-pin="${item.id}" aria-pressed="${item.id === pinned}">${stage(item.id)}<span>${item.title}</span></button>`).join('')}</div>`}</div>` : '';
     return `${open2.list ? screenList(false) : ''}<main class="gu-centre">${shown ? large : look ? board : view}${tabs}</main>
       ${open2.panel ? `<aside class="gu-panel" aria-label="${look ? 'Game-wide look' : 'Settings'}">${panel}${sheet}</aside>` : ''}`;
   }
@@ -622,6 +626,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
     host.querySelector('.gu-strip [aria-current]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     if (focus) host.querySelector<HTMLElement>(focus)?.focus();
     if (focusNext) { host.querySelector<HTMLElement>(focusNext)?.focus(); focusNext = ''; }
+    host.querySelector('.gu-pin-strip [aria-pressed=true]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     replay = '';
   }
   function switchVariant(next: Variant) {
@@ -711,7 +716,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       sel = id; if (!traits[variant].modeless) level = 'elements'; open = '';
     } else if (d.what) what = what === d.what ? null : d.what;
     else if (d.revert) revert(d.revert);
-    else if (d.pin) { pinned = d.pin; focusNext = '[data-act="unpin"]'; }
+    else if (d.pin) { if (!pinned) focusNext = '[data-act="unpin"]'; pinned = d.pin; }
     else if (d.openPart) { const [owner, part] = d.openPart.split(':') as [string, string]; go(owner); sel = part; }
     else if (d.act) act(d.act);
     else return;
@@ -805,7 +810,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   }
   function onKey(event: KeyboardEvent) {
     // The pinned view: the arrow keys step through the screens, unless the keyboard is in a control that uses them.
-    if (pinned && (event.key === 'ArrowLeft' || event.key === 'ArrowRight') && !event.metaKey && !event.ctrlKey && !event.altKey && !(event.target as HTMLElement).closest('input,select,textarea,[role=group]')) {
+    if (pinned && (event.key === 'ArrowLeft' || event.key === 'ArrowRight') && !event.metaKey && !event.ctrlKey && !event.altKey && !(event.target as HTMLElement).closest('input,select,textarea')) {
       event.preventDefault(); pinned = boardStep(event.key === 'ArrowRight' ? 1 : -1); render(); return;
     }
     // Enter in the Text field of a new element commits it. The field takes one paragraph.

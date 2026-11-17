@@ -222,8 +222,13 @@ export default async function ({ page, open, capture }) {
     assert.match(await page.locator('.gu-view .g').getAttribute('style'), /--ga:#3366cc/);
     assert.equal(await page.locator('.gu-pinned strong').innerText(), 'Choices');
     await capture('blend-board-pinned');
-    await page.locator('[data-act="pin-next"]').click();
+    // The strip under the preview keeps every screen in view and changes the screen.
+    assert.equal(await page.locator('.gu-pin-strip [aria-pressed=true]').getAttribute('data-pin'), 'choice');
+    assert.equal(await page.locator('.gu-pinned .gu-label').innerText(), 'Preview');
+    await page.locator('.gu-pin-strip [data-pin="quick"]').click();
     assert.equal(await page.locator('.gu-pinned strong').innerText(), 'Quick menu');
+    await page.keyboard.press('ArrowRight');
+    assert.equal(await page.locator('.gu-pinned strong').innerText(), 'Title screen');
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('.gu-board').count(), 1);
     await page.locator('.gu-board [data-pin="title"]').click();
