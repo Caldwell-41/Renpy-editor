@@ -280,8 +280,17 @@ class Helper:
             self.budget.check()
             time.sleep(0.001)
         seen = time.perf_counter()
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
+        while True:
+            # On Windows a file just moved into place by os.replace can refuse
+            # a reader for a moment with a sharing violation.
+            try:
+                with open(path, encoding="utf-8") as f:
+                    data = json.load(f)
+                break
+            except PermissionError:
+                if time.perf_counter() > deadline:
+                    raise
+                time.sleep(0.001)
         data["_seen"] = seen
         png = os.path.join(self.io, "frame-%d.png" % n)
         if os.path.exists(png):

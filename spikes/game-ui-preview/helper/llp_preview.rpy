@@ -342,8 +342,12 @@ init python:
         path = _llp_os.path.join(_llp_io, "request-%d.json" % S["seq"])
         if not _llp_os.path.exists(path):
             return
-        with open(path, encoding="utf-8") as source:
-            req = _llp_json.load(source)
+        try:
+            with open(path, encoding="utf-8") as source:
+                req = _llp_json.load(source)
+        except PermissionError:
+            # Windows: the driver's os.replace can briefly lock the file. Retry next tick.
+            return
         S["t_req"] = _llp_perf()
         S["req"] = req
         S["inflight"] = True
