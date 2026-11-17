@@ -9,13 +9,13 @@ import { art, defaults, fieldByKey, follows, groupTitles, ownerOf, pageById, pag
 import './game.css';
 import './style.css';
 
-export type Variant = 'refined' | 'blend' | 'pages' | 'click' | 'board';
-const variants: Variant[] = ['refined', 'blend', 'pages', 'click', 'board'];
-const names: Record<Variant, string> = { refined: 'A · Layout 1, refined', blend: 'B · Recommended blend', pages: '1 · Pages and panel', click: '2 · Click the game', board: '3 · Whole-game board' };
+export type Variant = 'refined' | 'blend' | 'council' | 'pages' | 'click' | 'board';
+const variants: Variant[] = ['refined', 'blend', 'council', 'pages', 'click', 'board'];
+const names: Record<Variant, string> = { refined: 'A · Layout 1, refined', blend: 'B · Recommended blend', council: 'C · Council blend', pages: '1 · Pages and panel', click: '2 · Click the game', board: '3 · Whole-game board' };
 /** What the shared behaviour needs to know about a layout. `lookPage`: the game-wide look is a page in the screen list.
  *  `modeless`: a click on the canvas always selects, and there is no Settings / Elements switch. */
 const traits: Record<Variant, { lookPage: boolean; modeless: boolean }> = {
-  refined: { lookPage: true, modeless: false }, blend: { lookPage: true, modeless: true },
+  refined: { lookPage: true, modeless: false }, blend: { lookPage: true, modeless: true }, council: { lookPage: true, modeless: false },
   pages: { lookPage: true, modeless: false }, click: { lookPage: false, modeless: true }, board: { lookPage: false, modeless: false },
 };
 
@@ -33,13 +33,16 @@ const glyph = {
 const mac = /Mac|iPhone|iPad/.test(navigator.platform);
 const clone = (doc: Doc): Doc => structuredClone(doc);
 const hasStates = (id: string, kind: string) => kind === 'Button' || ['menu', 'nav', 'list'].includes(id);
+const buttonStates: Sample = { key: 'state', label: 'Button', options: [['idle', 'Idle'], ['hover', 'Hover'], ['selected', 'Selected'], ['disabled', 'Disabled']] };
+/** The screens whose drawing shows the sample button state. */
+const drawsState = ['choice', 'title', 'pause', 'save', 'prefs', 'history', 'confirm', 'about', 'help'];
 
 export function mountGameUi(host: HTMLElement, context: LabContext, initial: Variant) {
   document.documentElement.dataset.theme = context.theme;
   let variant = initial;
   // What the author looks at. `home` is the board of layout 3, `fine` the game-wide settings of layouts 2 and 3.
   let page: string, level: 'settings' | 'elements', sel: string | null, home: boolean, fine: boolean, more: boolean, tryIt: boolean;
-  let open: '' | 'theme' | 'add' | 'sample' | 'template', hit: string | null, replay: string;
+  let open: '' | 'theme' | 'add' | 'sample' | 'template' | 'elements', hit: string | null, replay: string;
   // Layouts A and B: `others` opens the "Other screens" rows, `allParts` the element list, `forced` marks a screen that has no settings page.
   let others: boolean, allParts: boolean, forced: boolean;
   let doc: Doc, done: Entry[], undone: Entry[], saved: number, status: string, sample: Record<string, string>;
@@ -77,6 +80,8 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   function push(name: string, before: Doc, at = page) { done.push({ name, page: at, before, after: clone(doc) }); undone = []; status = 'Ready'; }
   function commit(name: string, change: (next: Doc) => void, at = page) { const before = clone(doc); change(doc); push(name, before, at); }
   function reveal(entry: Entry) {
+    // Layout C: Undo on the screen in view keeps the level and the selected element.
+    if (variant === 'council' && entry.page === page) { if (!partOf(pageById(page), sel)) sel = null; return; }
     go(entry.page);
     if (entry.page === 'look' && !traits[variant].lookPage) { page = 'say'; fine = true; home = variant === 'board'; }
   }
@@ -85,7 +90,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   function go(id: string) {
     page = id; sel = null; home = false; fine = false; open = ''; hit = null;
     if (id === 'look') level = 'settings';
-    else if (variant === 'refined') {
+    else if (variant === 'refined' || variant === 'council') {
       // A screen with no settings page opens on its elements. Leaving it returns to Settings.
       const plain = !!pageById(id).groups;
       if (!plain) level = 'elements'; else if (forced) level = 'settings';
@@ -150,14 +155,14 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   }
   const elementList = (pg: Page) => `<div class="gu-els">${partsOf(pg).map(([id, name, kind]) => `<button type="button" class="gu-row gu-el" data-select="${id}" aria-pressed="${sel === id}"><span>${name}</span><span class="gu-muted">${kind}</span></button>`).join('')}</div>`;
   /** The detailed level's own properties for one element. The plain settings for it sit above these. */
-  function deeper(pg: Page, id: string) {
+  function deeper(pg: Page, id: string, full = true) {
     const off = doc.offsets[`${pg.id}.${id}`] ?? { x: 0, y: 0 };
     const kind = partOf(pg, id)?.[2] ?? '';
     return `<section class="gu-group"><h3>Position</h3>
         <div class="gu-field"><span class="gu-label">Moved by</span><span class="gu-control gu-xy"><label>X<input type="number" data-offset="x" value="${off.x}"></label><label>Y<input type="number" data-offset="y" value="${off.y}"></label></span>
         <p class="gu-help">Drag the element on the canvas, or type how far it sits from its place in the layout.</p></div></section>
-      ${hasStates(id, kind) ? `<section class="gu-group"><h3>Button states</h3>${sampleControl({ key: 'state', label: 'Show', options: [['idle', 'Idle'], ['hover', 'Hover'], ['selected', 'Selected'], ['disabled', 'Disabled']] }, 'segment')}<p class="gu-help gu-help-wide">The canvas shows the first button in this state. Each state takes its own colors, border and picture.</p></section>` : ''}
-      <p class="gu-note">Box effects, image frames and animation belong to the next mock, "Design the detailed level on the screen canvas".</p>`;
+      ${full && hasStates(id, kind) ? `<section class="gu-group"><h3>Button states</h3>${sampleControl({ ...buttonStates, label: 'Show' }, 'segment')}<p class="gu-help gu-help-wide">The canvas shows the first button in this state. Each state takes its own colors, border and picture.</p></section>` : ''}
+      ${full ? '<p class="gu-note">Box effects, image frames and animation belong to the next mock, "Design the detailed level on the screen canvas".</p>' : ''}`;
   }
   const settingsFor = (pg: Page, id: string) => groupsHtml((pg.groups ?? []).filter(group => group.part === id));
   function elementsPanel(pg: Page, withAdd = true) {
@@ -187,7 +192,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   const rail = () => `<nav class="gu-rail" aria-label="Workspaces"><span data-icon="story" title="Story"></span><span data-icon="source" title="Source"></span><span data-icon="branches" title="Branches"></span>
     <button type="button" class="gu-flat" aria-pressed="true" aria-label="Game UI" title="Game UI">${svg(glyph.gameUi)}</button>
     <span data-icon="characters" title="Characters"></span><span data-icon="assets" title="Assets"></span><span data-icon="variables" title="Variables"></span></nav>`;
-  const canvas = (pg: Page) => `<div class="gu-canvas${canSelect() || variant === 'refined' ? ' gu-pick' : ''}${tryIt ? ' gu-try' : ''}">${stage(pg.id, { main: true })}</div>`;
+  const canvas = (pg: Page) => `<div class="gu-canvas${canSelect() || variant === 'refined' || variant === 'council' ? ' gu-pick' : ''}${tryIt ? ' gu-try' : ''}">${stage(pg.id, { main: true })}</div>`;
   /** Layout A, Settings level: outlines the part the author clicked, with no resize handles. */
   function markHit() { if (hit && !canSelect()) host.querySelectorAll(`[data-main] [data-part="${hit}"]`).forEach(node => node.classList.add('is-hit')); }
   const elementsOnly = `<span class="gu-only" title="No settings page yet. You edit its elements.">${svg(glyph.elements)}</span>`;
@@ -259,6 +264,44 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       `<button type="button" class="gu-tile" data-go="${item.id}">${stage(item.id)}<span>${item.title}</span></button>`).join('')}</div></section>`).join('')}</div>`;
     return `${screenList()}<main class="gu-centre">${look ? board : canvas(pg)}${look ? '<div class="gu-preview"><span class="gu-muted">Every screen follows the game-wide look. Click one to open it.</span></div>' : previewRow(pg)}</main>
       <aside class="gu-panel" aria-label="${look ? 'Game-wide look' : 'Settings'}">${panel}</aside>`;
+  }
+
+  // ---- layout C: the council blend. Layout 1's list, toolbar and panel, layout 2's click on the canvas and its element panel, layout 3's template strip. ----
+  // Left out: the picture strip and the board of screens, the Theme sheet, Try it, the Edit elements bar, the always-open element list and the "no settings page" dead end.
+  function layoutCouncil(pg: Page) {
+    const look = pg.id === 'look';
+    const editing = level === 'elements';
+    const part = look ? undefined : partOf(pg, editing ? sel : hit);
+    const list = (Object.keys(groupTitles) as Page['group'][]).map(group => `<h3>${groupTitles[group]}</h3>${pages.filter(item => item.group === group).map(item =>
+      `<button type="button" class="gu-row" data-go="${item.id}" ${item.id === page ? 'aria-current="page"' : ''}><span>${item.title}</span>${item.groups ? '' : elementsOnly}</button>`).join('')}`).join('');
+    // Sample content has one home. Every screen that draws a button state lists the Button menu, at both levels.
+    const shown = [...(pg.samples ?? [])];
+    const backdropAt = shown.findIndex(s => s.key === 'backdrop');
+    if (drawsState.includes(pg.id) && !shown.some(s => s.key === 'state')) shown.splice(backdropAt < 0 ? shown.length : backdropAt, 0, buttonStates);
+    const bar = `<div class="gu-bar"><h2>${pg.title}</h2><span class="gu-spacer"></span>${shown.length ? `<span class="gu-label gu-sample-name" title="Sample content never changes your game.">Sample</span>${shown.map(s => sampleControl(s, 'select')).join('')}` : ''}</div>`;
+    const sheet = `<div class="gu-canvas"><div class="gu-sheet">${['say', 'choice', 'title', 'save'].map(id => `<button type="button" class="gu-tile" data-go="${id}">${stage(id)}<span>${pageById(id).title}</span></button>`).join('')}</div></div>`;
+    // The strip's row keeps its height on a screen with no templates, so the canvas stays in one place.
+    const strip = look ? '' : `<div class="gu-cstrip">${pg.templates ? `<h3>Template</h3>${templateTiles(pg)}` : ''}</div>`;
+    const foot = look ? 'Four of your screens with sample content. Click one to open it.'
+      : editing ? 'Click an element to select it. Drag it to move it.' : 'Click an element to find its settings. Double-click it to open it in Elements.';
+    // The toolbar already names the page, so the panel starts with the themes.
+    let panel = look ? `<div class="gu-panel-top"></div><div class="gu-scroll" data-scroll="panel"><section class="gu-group"><h3>Theme</h3>${themeTiles('', false)}<p class="gu-help gu-help-wide">A theme sets everything below. A screen that has its own value keeps it.</p></section>${groupsHtml(pg.groups!)}</div>` : '';
+    if (!look) {
+      const tabs = `<div class="gu-panel-head"><div class="gu-seg gu-level" role="group" aria-label="Level"><button type="button" data-act="level-settings" aria-pressed="${!editing}"${pg.groups ? '' : ` aria-disabled="true" title="${pg.title} has no settings page yet."`}>Settings</button><button type="button" data-act="level-elements" aria-pressed="${editing}">Elements</button></div></div>`;
+      // The element list is a menu behind the selected element's name, so the properties start at the top of the panel.
+      const pick = `<div class="gu-el-head"><span class="gu-anchor gu-el-anchor"><button type="button" class="gu-el-pick" data-act="menu-elements" aria-haspopup="menu" aria-expanded="${open === 'elements'}" title="Elements on this screen">${part ? `<span class="gu-el-name">${part[1]}</span><span class="gu-muted">${part[2]}</span>` : '<span class="gu-muted">Choose an element</span>'}${svg(glyph.down)}</button>
+          ${open === 'elements' ? `<div class="gu-pop gu-el-pop" role="menu">${elementList(pg)}</div>` : ''}</span>
+        <span class="gu-anchor"><button type="button" data-act="menu-add" aria-label="Add element" title="Add element" aria-expanded="${open === 'add'}">${svg(glyph.plus)}Add</button>${open === 'add' ? `<div class="gu-pop gu-menu gu-pop-right" role="menu">${['Text', 'Image', 'Button', 'Bar', 'Box'].map(kind => `<button type="button" class="gu-flat" role="menuitem" data-add="${kind}">${kind}</button>`).join('')}</div>` : ''}</span></div>`;
+      const noGroup = !editing && part && !(pg.groups ?? []).some(group => group.part === part[0])
+        ? `<section class="gu-group is-hit"><h3>${part[1]}</h3><p class="gu-help gu-help-wide">It has no plain settings. Double-click it to open it in Elements.</p></section>` : '';
+      panel = editing
+        ? `<div class="gu-panel-top">${tabs}${pick}</div><div class="gu-scroll" data-scroll="elements">${part ? `${settingsFor(pg, part[0])}${deeper(pg, part[0], false)}`
+          : `<p class="gu-note">${pg.groups ? '' : `${pg.title} has no settings page yet. It follows the game-wide look. `}Click an element on the canvas, or choose one from the menu above.</p>`}</div>`
+        : `<div class="gu-panel-top">${tabs}</div><div class="gu-scroll" data-scroll="panel">${noGroup}${groupsHtml(pg.groups ?? [])}${resetRow(pg, true)}</div>`;
+    }
+    return `<aside class="gu-list" data-scroll="list" aria-label="Game UI screens">${list}<div class="gu-list-foot"><button type="button" data-act="new-screen">${svg(glyph.plus)}New screen</button></div></aside>
+      <main class="gu-centre">${bar}${look ? sheet : canvas(pg)}${strip}<p class="gu-foot">${foot}</p></main>
+      <aside class="gu-panel" aria-label="${look ? 'Game-wide look' : editing ? 'Elements' : 'Settings'}">${panel}</aside>`;
   }
 
   // ---- layout 1: a list of pages, the canvas, and a panel that switches between Settings and Elements ----
@@ -344,7 +387,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       <section class="gu-proto" aria-label="Prototype controls"><strong>Game UI layout study · unapproved</strong><span>Sample project. Changes stay in this preview.</span>
         <button type="button" data-act="reset">Reset</button><label>Layout <select data-variant-select aria-label="Game UI layout">${variants.map(v => `<option value="${v}" ${v === variant ? 'selected' : ''}>${names[v]}</option>`).join('')}</select></label></section>
       <div class="gu-app"><header class="gu-header">${header()}</header>
-        <div class="gu-body">${rail()}${{ refined: layoutRefined, blend: layoutBlend, pages: layoutPages, click: layoutClick, board: layoutBoard }[variant](pg)}</div>
+        <div class="gu-body">${rail()}${{ refined: layoutRefined, blend: layoutBlend, council: layoutCouncil, pages: layoutPages, click: layoutClick, board: layoutBoard }[variant](pg)}</div>
         <footer class="gu-footer"><span role="status" aria-live="polite">${esc(status)}</span><span class="gu-muted">Local project</span></footer></div></div>`;
     host.querySelectorAll<HTMLElement>('[data-icon]').forEach(node => node.prepend(icon(node.dataset.icon!)));
     host.querySelectorAll<HTMLElement>('[data-scroll]').forEach(node => { const at = scroll.get(node.dataset.scroll!); if (at) { node.scrollTop = at[0]; node.scrollLeft = at[1]; } });
@@ -357,7 +400,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   function switchVariant(next: Variant) {
     variant = next; open = ''; home = false; fine = false; forced = false;
     if (page === 'look' && !traits[next].lookPage) { page = 'say'; fine = next === 'click'; home = next === 'board'; }
-    if (next === 'refined') go(page);
+    if (next === 'refined' || next === 'council') go(page);
     if (['http:', 'https:'].includes(location.protocol) && !location.pathname.includes('preview.html')) {
       try { const url = new URL(location.href); url.searchParams.set('variant', next); history.replaceState(null, '', url); } catch { /* An inline viewer may refuse URL changes. */ }
     }
@@ -374,15 +417,16 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
       case 'validate': status = 'No problems found in this sample.'; break;
       case 'run': status = 'Run is not part of this preview. It starts the game at the title screen.'; break;
       case 'reset': reset(new URLSearchParams(location.search).get('state') ?? 'dialogue'); break;
-      case 'level-settings': level = 'settings'; sel = null; break;
-      case 'level-elements': level = 'elements'; hit = null; break;
+      // Layout C carries the element across the switch: the selected element's settings are marked, and the marked part is selected.
+      case 'level-settings': if (variant === 'council') hit = sel; level = 'settings'; sel = null; break;
+      case 'level-elements': if (variant === 'council' && hit) sel = hit; level = 'elements'; hit = null; break;
       case 'home': home = true; open = ''; sel = null; level = 'settings'; break;
       case 'prev': case 'next': go(order[(order.findIndex(item => item.id === page) + (name === 'next' ? 1 : -1) + order.length) % order.length]!.id); break;
       case 'fine': fine = !fine; sel = null; break;
       case 'more': more = !more; break;
       case 'deselect': sel = null; break;
       case 'try': tryIt = !tryIt; sel = null; break;
-      case 'menu-theme': case 'menu-add': case 'menu-sample': case 'menu-template': { const which = name.slice(5) as typeof open; open = open === which ? '' : which; return; }
+      case 'menu-theme': case 'menu-add': case 'menu-sample': case 'menu-template': case 'menu-elements': { const which = name.slice(5) as typeof open; open = open === which ? '' : which; return; }
       case 'others': others = !others; break;
       case 'all-parts': allParts = !allParts; break;
       case 'edit-hit': level = 'elements'; sel = hit; hit = null; break;
@@ -496,7 +540,7 @@ export function mountGameUi(host: HTMLElement, context: LabContext, initial: Var
   }
   function onKey(event: KeyboardEvent) {
     if (event.key === 'Escape') {
-      if (open) open = ''; else if (sel) sel = null; else if (variant === 'board' && level === 'elements') level = 'settings'; else return;
+      if (open) open = ''; else if (variant === 'council' && level === 'elements' && !forced) act('level-settings'); else if (sel) sel = null; else if (variant === 'board' && level === 'elements') level = 'settings'; else return;
       render(); return;
     }
     if (!(event.metaKey || event.ctrlKey) || (event.target as HTMLElement).closest('input:not([type=range]):not([type=checkbox]):not([type=color]),textarea')) return;

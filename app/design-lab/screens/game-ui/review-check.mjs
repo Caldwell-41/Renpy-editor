@@ -37,7 +37,7 @@ export default async function ({ page, open, capture }) {
   // The way into the detailed level, then a drag that moves the element.
   await open({ state: 'title', viewport: 'wide', theme: 'dark' });
   const menu = () => main().locator('[data-part="menu"]');
-  if (variant === 'pages') await menu().dblclick({ position: { x: 3, y: 3 } });
+  if (variant === 'pages' || variant === 'council') await menu().dblclick({ position: { x: 3, y: 3 } });
   else if (variant === 'refined') {
     // Layout A: a click finds the settings, and that group offers the way into the detailed level.
     await menu().click({ position: { x: 3, y: 3 } });
@@ -64,6 +64,43 @@ export default async function ({ page, open, capture }) {
     await main().locator('[data-goto="save"]').first().click();
     assert.equal(await page.locator('.gu-bar h2').innerText(), 'Save and load');
     await capture('click-try-it');
+  }
+  if (variant === 'council') {
+    // Layout C: the element list is a menu, and the element carries across the Settings / Elements switch.
+    await page.locator('[data-act="menu-elements"]').click();
+    await capture('council-element-menu');
+    await page.locator('.gu-el-pop [data-select="title"]').click();
+    assert.match(await main().locator('[data-part="title"]').getAttribute('class'), /is-sel/);
+    await page.locator('[data-act="level-settings"]').click();
+    assert.equal(await page.locator('.gu-group.is-hit h3').innerText(), 'Game title');
+    await page.locator('[data-act="level-elements"]').click();
+    assert.match(await main().locator('[data-part="title"]').getAttribute('class'), /is-sel/);
+    // Undo keeps the element selected, and one Escape returns to its settings.
+    await page.locator('[data-offset="x"]').fill('40');
+    await page.locator('[data-offset="x"]').press('Tab');
+    await page.locator('[data-act="undo"]').click();
+    assert.match(await main().locator('[data-part="title"]').getAttribute('class'), /is-sel/);
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('[data-act="level-settings"]').getAttribute('aria-pressed'), 'true');
+    assert.equal(await page.locator('.gu-group.is-hit h3').innerText(), 'Game title');
+    // A screen with no settings page opens on its elements, and Settings is off for it.
+    await page.locator('.gu-list [data-go="notify"]').click();
+    assert.equal(await page.locator('[data-act="level-elements"]').getAttribute('aria-pressed'), 'true');
+    assert.equal(await page.locator('[data-act="level-settings"]').getAttribute('aria-disabled'), 'true');
+    await capture('council-no-settings-page');
+    // The canvas stays in one place between a screen with templates and a screen with none.
+    const at = await main().boundingBox();
+    await page.locator('.gu-list [data-go="title"]').click();
+    assert.equal((await main().boundingBox()).y, at.y);
+    // A screen that draws a button state lists the Button sample, and the sample menus fit the toolbar.
+    await page.locator('.gu-list [data-go="save"]').click();
+    assert.equal(await page.locator('.gu-bar [data-sample-key="state"]').count(), 1);
+    assert.ok(await page.locator('.gu-bar').evaluate(node => node.scrollWidth <= node.clientWidth), 'the sample menus overflow the toolbar');
+    await page.locator('.gu-list [data-go="choice"]').click();
+    assert.equal(await page.locator('[data-act="level-settings"]').getAttribute('aria-pressed'), 'true');
+    await main().locator('[data-part="button"]').first().click({ position: { x: 3, y: 3 } });
+    assert.equal(await page.locator('.gu-group.is-hit h3').innerText(), 'Buttons');
+    await capture('council-part-clicked');
   }
   if (sheet) {
     // A screen with no settings page opens on its elements with no dead end.

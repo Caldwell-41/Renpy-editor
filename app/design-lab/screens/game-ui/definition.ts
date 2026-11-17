@@ -11,6 +11,7 @@ export const definition: Omit<LabScreen, 'approval'> = {
   variants: [
     { id: 'refined', title: 'A · Layout 1, refined', load: () => import('./refined.ts') },
     { id: 'blend', title: 'B · Recommended blend', load: () => import('./blend.ts') },
+    { id: 'council', title: 'C · Council blend', load: () => import('./council.ts') },
     { id: 'pages', title: '1 · Pages and panel', load: () => import('./pages.ts') },
     { id: 'click', title: '2 · Click the game', load: () => import('./click.ts') },
     { id: 'board', title: '3 · Whole-game board', load: () => import('./board.ts') },

@@ -14,8 +14,8 @@ button, themes and templates.
 
 From `app/`, run `npm run design:dev`, then open
 `http://127.0.0.1:5174/preview.html?screen=game-ui&variant=refined&state=dialogue&theme=dark`.
-The `variant` values are `refined` (A), `blend` (B), `pages` (1), `click` (2) and
-`board` (3). The Layout menu in the dashed bar at the top also switches between them. The preview fills the browser window, so a wide window shows the layouts at
+The `variant` values are `refined` (A), `blend` (B), `council` (C), `pages` (1),
+`click` (2) and `board` (3). The Layout menu in the dashed bar at the top also switches between them. The preview fills the browser window, so a wide window shows the layouts at
 their real proportions.
 
 | State | What it opens on |
@@ -58,6 +58,48 @@ other first-round layouts.
   change redraws all of them at once.
 - "Add element" sits in the panel head. "Try it" is left out until someone has measured
   whether the hidden process can answer the pointer.
+
+### C · Council blend
+
+A subagent built C with the council skill. It asked three models which combination of
+layouts 1, 2 and 3 best meets the criteria, then decided part by part before it read A
+or B. The delegates were Claude Opus 5.5, GPT-6.1 Sol and Claude Fable 5.2. All three
+chose layout 1 as the base. Opus and Sol then reviewed the built layout, each scored
+it 8 out of 10, and C took the changes they asked for.
+
+| Part | Comes from | Reason |
+| --- | --- | --- |
+| List of screens | Layout 1 | A grouped text list shows all 17 entries with no scrolling, and a name is faster to find than a small picture. The marker for a screen with no settings page stays. |
+| Screen canvas | Layout 1 | One canvas in the centre at both levels. It stays in the same place on every screen. Beside a list and a panel the canvas is limited by its width, so the height under it is free. |
+| Settings page | Layout 1, with layout 2's click | Every group of the screen sits in the panel. A click on an element outlines it and marks its group. An element with no plain settings says so. |
+| Way into the detailed level | Layout 1, with parts of layouts 2 and 3 | The Settings / Elements switch and the double-click stay. Escape returns to Settings, as in layout 3. The element carries across the switch in both directions. The panel then shows one element, as in layout 2: its plain settings, then its position. |
+| Themes | Layout 1 | "Game-wide look" is the first page in the list, and its canvas shows four screens. Four large pictures show a font or a border better than seventeen small ones. |
+| Templates | Layout 3 | A strip of live pictures under the canvas, at both levels. It uses the free height, and the settings start at the top of the panel. The strip's row stays empty on a screen with no templates. |
+| Header actions | All three | The shell header, unchanged. |
+| Sample content | Layout 1 | Menus above the canvas, labelled "Sample". The status bar confirms that a sample change leaves the game unchanged. |
+
+Two parts are new. At the detailed level the element list is a menu behind the
+selected element's name, with "Add" beside it, so the list is never always in view and
+the properties start at the top of the panel. A screen with no settings page opens at
+the detailed level with Settings switched off, so the "no settings page yet" page is
+gone.
+
+C leaves out the picture strip of screens, the board of screens, the Theme button and
+its sheet, "Try it", the "Edit elements" bar with "Done", "Parts of this screen", the
+single "Sample" menu and the theme descriptions. The "Button states" control leaves
+the element panel. The button state is sample content, so every screen that draws it
+lists a Button menu with the other sample menus.
+
+Undo on the screen in view keeps the level and the selected element. In the other
+layouts Undo clears the selection.
+
+The delegates disagreed on three parts. Fable wanted layout 3's board on the
+"Game-wide look" page, and Opus and Sol wanted the four screens. Opus wanted the
+template tiles to stay in the panel, and Sol and Fable wanted the strip. Sol wanted
+the sample controls in a row under the canvas and an "Edit elements" button, and Opus
+and Fable wanted the menus above the canvas and the switch. C does not take Sol's
+collapsing screen list or zoom controls. The canvas is about 574 px wide in an
+1100 px window, which is the cost of keeping the list in view.
 
 ## First round: layouts 1, 2 and 3
 

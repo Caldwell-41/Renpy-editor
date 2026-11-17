@@ -14,6 +14,11 @@
       "approval": null
     },
     {
+      "id": "council-v1",
+      "variantId": "council",
+      "approval": null
+    },
+    {
       "id": "pages-v1",
       "variantId": "pages",
       "approval": null
