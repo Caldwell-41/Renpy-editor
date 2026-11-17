@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "screenId": "game-ui",
-  "currentApproved": "blend-v1",
+  "currentApproved": "blend-v2",
   "revisions": [
     {
       "id": "refined-v1",
@@ -107,7 +107,99 @@
     {
       "id": "blend-v2",
       "variantId": "blend-v2",
-      "approval": null
+      "approval": {
+        "date": "2026-11-17",
+        "decision": "Kris approved revision 2 of layout B for the Game UI workspace: screen game-ui / blend-v2, revision blend-v2 (\"good, approved\"). It replaces blend-v1. It holds the council review of blend-v1 that Kris asked for (three rounds; Claude Opus 5.5, GPT-6.1 Sol and Claude Fable 5.2 scored it 9.1, 9.3 and 9.2 in round three), the four changes he approved after round one, and the changes he asked for after round three: no \"Undo brings them back\" on the template sheet, a theme note that names the screen and the setting, a large view of a screen on the Game-wide look board, and a Font menu that shows each font. The decision is recorded in issue #197.",
+        "reason": null,
+        "supersedes": "blend-v1",
+        "source": {
+          "commit": "fa05e09f991a218c2cdb958b81790873691b572c",
+          "fingerprint": "c3c2bf4cdeb75cd6359ddacdaf4e933eb085db03cf342e3eb31a8807d82a5e5b"
+        },
+        "captures": [
+          {
+            "path": "docs/design/game-ui/captures/blend-v2-dialogue-dark-wide.png",
+            "sha256": "9f58f2d301f0173500f6e3878fc12e99d706bcffcd8e9ea144faf8959b4256fa",
+            "state": "dialogue",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui/captures/blend-v2-title-dark-wide.png",
+            "sha256": "8a1a1d8016434785daeac5e94bde185f8888f3edd5bccafb885cf8709eecca93",
+            "state": "title",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui/captures/blend-v2-themes-dark-wide.png",
+            "sha256": "de9326fb663eaa0826f32b38ad28e8dbc41dea50b38099f4f688bbe71dcbe8c4",
+            "state": "themes",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui/captures/blend-v2-detailed-dark-wide.png",
+            "sha256": "834b633d89226ca53baa0604f0457ffb08381fa683641b0086b62a70eab07747",
+            "state": "detailed",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui/captures/blend-v2-dialogue-dark-compact.png",
+            "sha256": "e23451265f7599b4ad5f6dfa2a04b447b48a3b4b9859d81d9579f3a38321ca26",
+            "state": "dialogue",
+            "theme": "dark",
+            "width": 560,
+            "height": 640,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui/captures/blend-v2-dialogue-light-wide.png",
+            "sha256": "bd50c479fe4905daf40e41906b21d173df5834da5d2be4e1bfb14507a0ab3a63",
+            "state": "dialogue",
+            "theme": "light",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Everything in blend-v1 stands unless a line here changes it: three columns under the shell header, the text list of screens with \"Other screens\" closed, no toolbar above the canvas, no Settings / Elements switch, the template row that opens a sheet, the chevron tabs that collapse the list and the panel, Fit and 100%, the narrow window, and the two source views.",
+          "A setting that can follow the game-wide look always shows its real control at the value in use. A muted joined chain beside it means the value comes from the game-wide look, and its tip names that setting, such as \"Boxes\" under Colors. The first change gives the screen its own value. An open chain in the accent color then returns it. This replaces the \"Same as game-wide look\" text of blend-v1.",
+          "The canvas and the panel agree about every element. A settings heading selects its element. Pointing at a heading, a checkbox or a row of the element list outlines the element on the canvas. The element under the pointer and the selected element show a name tag. The selection is a white line with a dark line outside it.",
+          "A selected element's panel has two header lines at every name: the way back with \"Add element\", then the name. Its plain settings follow, then \"All properties\" with one Offset row, then \"All elements\", which starts closed and stays as the author left it. An element with an on/off setting shows it as \"Show on screen\". The list marks a hidden element.",
+          "An element that another screen owns says \"This is part of\" that screen, with a button that opens it there. It has no handles and does not move. The background does not move either.",
+          "A new element lands in the upper right under the lowest one already added, and keeps that place. A new Text or Button has one Text field and is named by its words. Its panel says where its look comes from.",
+          "The sample content menus and the zoom sit directly under the canvas, and the two are centred as one block. With both panels hidden the row names the screen. At 100% the canvas shows the selected element, from its top left corner when it is larger than the view.",
+          "The template sheet is titled \"Template\", says \"A template replaces this screen's layout settings.\" above the pictures, and closes on a choice.",
+          "The header's unsaved count is the number of pending edits, and it opens their list. One template or theme choice is one edit with its lines under it and one Revert. An added element is one edit named by its words. The list's title counts the lines that Save writes. This replaces the blend-v1 rule that the count is the number of lines.",
+          "A checkbox row has a small source button that shows on the pointer and on keyboard focus.",
+          "On the Game-wide look page the board groups the screens as the list does and has no caption. The theme note names what a theme leaves alone, by screen and setting, such as \"It does not change: Choices (button shape).\"",
+          "Pointing at a screen on the board shows it large after about a third of a second, clear of that screen. A click or Enter pins the large view. The pinned view stays on the Game-wide look page and follows the game-wide settings as they change. Under it a row has \"All screens\", the word \"Preview\" with the screen's name, and \"Edit\" with the screen's name, which opens that screen's page. Under the row a strip shows every screen with the pinned one marked. A click in the strip or an arrow key changes the screen, and Escape returns to the board. This replaces the blend-v1 rule that a click on a board screen opens its page.",
+          "The Font setting is a menu that shows each font in its own letters, and its button shows the font in use.",
+          "Undo on the screen in view keeps the selected element. A move starts after five pixels on the display."
+        ],
+        "deviations": [
+          "Fictional browser-memory mock. A browser drawing stands in for the hidden Ren'Py process. It has no source transaction, revision check or save. Save, Validate, Run, \"New screen\" and \"Open in Source\" only write a status message.",
+          "The settings on each page, the themes, the fonts, and the file names, variable names and line numbers in the source views are sample values. The \"Rounded\" sample font exists on macOS and not on Windows.",
+          "The list of pending edits assumes one workspace Save. Issue #200 owns that choice. If each edit writes at once, the list has nothing to show and the approval of that part lapses.",
+          "No reviewer scored the layout after the round three fixes or after the changes Kris asked for. The last measured scores are 9.1, 9.2 and 9.3, under the 9.5 target.",
+          "Not seen working: the always-visible scroll bars of the 100% view, because the check browser hides scroll bars, and the large view on a touch screen, because the check browser has a mouse.",
+          "The dashed bar still reads \"Game UI layout study · unapproved\" in the reviewed source. The approval record owns the design status.",
+          "Resizing, deleting and reordering elements, box effects, image frames, per-state looks, animation, button actions and the keyboard on the canvas are not in this mock. Issue #205 owns the detailed level, and it also owns where a new element is placed.",
+          "\"Try it\" is not in the layout. Issue #198 measures the pointer response first.",
+          "Layouts A, C, 1, 2 and 3 remain in the lab as unapproved drafts. blend-v1 is superseded, and the lab refuses to show it because its source has changed since its approval."
+        ]
+      }
     },
     {
       "id": "council-v1",

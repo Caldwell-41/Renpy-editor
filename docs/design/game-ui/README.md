@@ -5,14 +5,19 @@ This Design Lab screen, `game-ui`, mocks layouts of the Game UI workspace for
 The first round has three layouts: 1, 2 and 3. On 2026-11-17 Kris said he likes
 layout 1 the most and asked for a second round: A, B and C.
 
-Kris approved layout B on 2026-11-17: `game-ui` / `blend`, revision `blend-v1`, source
-commit `d83c8c5b`. The [approval record](approval.json) sets `currentApproved` to
-`blend-v1` and lists the agreed behaviour and the known deviations. A, C, 1, 2 and 3
-stay in the lab as unapproved drafts. The approved captures are under
-[captures](captures/). Three more show the source line of a setting
-(`blend-v1-what-this-writes-dark-wide.png`), the list of pending lines
-(`blend-v1-changes-dark-wide.png`) and both panels collapsed
-(`blend-v1-panels-collapsed-dark-wide.png`).
+Kris approved layout B on 2026-11-17 as `blend-v1` (source commit `d83c8c5b`). He then
+asked for a council review of it and for further changes, and approved the result the
+same day: `game-ui` / `blend-v2`, revision `blend-v2`, source commit `fa05e09f`. The
+[approval record](approval.json) sets `currentApproved` to `blend-v2`, which supersedes
+`blend-v1`, and lists the agreed behaviour and the known deviations. A, C, 1, 2 and 3
+stay in the lab as unapproved drafts. The lab refuses to show `blend-v1`, because its
+source has changed since its approval.
+
+The approved captures are under [captures](captures/), named `blend-v2-` with the
+state, the theme and the size. Six more show single features: the large view on the
+board (`board-peek`, `board-pinned`), the Font menu (`font-menu`), the source line of a
+setting (`what-this-writes`), the list of pending edits (`changes`) and the 100% view on
+a selected element (`zoom-on-selection`).
 
 Scope comes from [Set the destination and scope of Game UI](https://github.com/Caldwell-41/Renpy-editor/issues/192):
 one workspace with settings pages and a detailed level, stock screens first, no Apply
@@ -104,7 +109,7 @@ After the approval, Kris asked for a council review of layout B against his
 requirements and his experience-first principle, with a target score of 9.5, two
 rounds, and his say on any major change or new feature. The lab pins the approved
 source, so the work continues as a draft, `game-ui` / `blend-v2`, revision `blend-v2`.
-`blend-v1` stays the approved revision until Kris approves this one.
+Kris approved it on 2026-11-17, and it supersedes `blend-v1`.
 
 | Reviewer | Round 1 | Round 2 | Round 3 |
 | --- | --- | --- | --- |
