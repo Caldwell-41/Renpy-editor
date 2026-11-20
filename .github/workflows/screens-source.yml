@@ -186,7 +186,7 @@ jobs:
           node scripts/scan-artifacts.mjs "$RUNNER_TEMP/help-production"
       - name: Retain evidence
         if: ${{ always() && steps.privacy.outcome == 'success' }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: help-production-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/help-production/
@@ -342,7 +342,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/owned-screen"
           node scripts/scan-artifacts.mjs "$RUNNER_TEMP/owned-screen"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: ${{ always() && steps.owned-privacy.outcome == 'success' }}
         with:
           name: owned-screen-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -445,7 +445,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/canvas-proof"
           node scripts/scan-artifacts.mjs "$RUNNER_TEMP/canvas-proof"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: ${{ always() && steps.canvas-privacy.outcome == 'success' }}
         with:
           name: canvas-helper-Windows-${{ github.run_id }}-${{ github.run_attempt }}
@@ -525,7 +525,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/canvas-gpu"
           node scripts/scan-artifacts.mjs "$RUNNER_TEMP/canvas-gpu"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: ${{ always() && steps.privacy.outcome == 'success' }}
         with:
           name: canvas-gpu-Windows-${{ github.run_id }}-${{ github.run_attempt }}
