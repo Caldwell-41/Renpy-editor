@@ -12,7 +12,7 @@ is that choice with those answers built in. It waits for his approval.
 ## Open it
 
 From `app/`, run `npm run design:dev`, then open
-`http://127.0.0.1:5174/preview.html?screen=game-ui-detail&variant=point&state=group&theme=dark`.
+`http://127.0.0.1:5174/preview.html?screen=game-ui-detail&variant=chosen&state=group&theme=dark`.
 That is mock D, the chosen mix. The other `variant` values are `point` (A), `boxes` (B)
 and `place` (C).
 
@@ -136,12 +136,47 @@ delegate labelled a finding as a major change. These fixes followed round one:
   commands" has heavier dots. "Background" replaces "Box" for Drawn or Image, "Hover
   animation" replaces "On hover", and "6 other screens" replaces "on 7 screens".
 
-Two points from round one are questions for Kris, not fixes:
+Kris answered two questions from round one on 2026-11-22:
 
-- An element that the author drags out of the Menu leaves the Menu buttons look group.
-  Should a moved element keep its look group?
-- "Glow" names two things: the shadow with no offset, and one of the hover animations.
-  Each name comes from an earlier decision.
+- **An element that moves takes the look group of the place it lands in**, the same
+  as a new element. A button that the author drags out of the Menu leaves the Menu
+  buttons. Kris likes this behavior.
+- **The hover animation "Glow" is now "Brighten".** "Glow" stays the name of a shadow
+  with no offset. The hover animations are Lift, Grow and Brighten. This changes one
+  name in the animation decision.
+
+Round two reviewed the fixed mock at `92a969d8` and scored 8 (Claude Opus 5.5), 8
+(GPT-6.2 Sol) and 8.5 (Claude Fable 5.2). Again no delegate labelled a finding as a
+major change. These fixes followed round two:
+
+- **Round-one fixes that did not work.** The "Leaves Menu" tag was 2 pixels high and
+  now shows. A double click never reached the Text field and now does. A new fill
+  started at the box color and now starts at the game's accent color.
+- **Defects.** A box that holds a source-only part cannot be deleted or duplicated
+  here. A click on a control is no longer lost when it ends a text edit. The direction
+  of a fill that fades has its own value for each state. A new free element lands
+  fully inside the screen or its box. Glow gives back the offset that the shadow had.
+- **What a look change reaches.** The line about own values now sits by the open
+  setting and names only the elements that keep that setting, such as "Board the tram
+  keeps its own fill." The look switch stays in view while the Look section scrolls.
+- **Glow.** It takes the first of the border, the fill and the text color that shows
+  on the game. It sits on the Shadow row, so Blur has its full slider and the Offset
+  row fits the panel.
+- **The canvas.** Empty space and the fixed background clear the selection. The name
+  tag sits under an element when the place above is taken. The key hint says "Arrows
+  move one place" for an element in a row or column.
+- **Words.** Enter ends the edit of a button's words, and Esc ends any text edit. Undo
+  names say "text color" and "the text of". Delete, Paste look, "Use for all" and a
+  drag into a box each leave a sentence in the status line.
+
+No delegate has scored the mock after the round-two fixes. The last measured scores
+are 8, 8 and 8.5, under the 9.5 target.
+
+| Delegate | Round 1 | Round 2 |
+| --- | --- | --- |
+| Claude Opus 5.5 | 8/10 | 8/10 |
+| GPT-6.2 Sol | 7/10 | 8/10 |
+| Claude Fable 5.2 | 7/10 | 8.5/10 |
 
 Known simplifications in mock D:
 
@@ -252,7 +287,9 @@ Kris agreed to a new ticket for each of these on 2026-11-22.
 `npm run design:check -- game-ui-detail <mock> --theme dark --interaction ./screens/game-ui-detail/review-check.mjs`
 covers the group and element clicks, a group change and the chain commands, the
 keyboard, a drag in a column, a new element, the states, actions, variable text and
-the source-only part. For `chosen` it also covers one click with the switch in the
+the source-only part. For `chosen` it also covers a double click and Enter on a
+button's words, a click that ends a text edit, the "Leaves Menu" tag, a box with a
+source-only part, the names of the elements that keep an own value, one click with the switch in the
 panel, the corner marks, the outline that gives way, the color of the selected cell, the Shadow row and Glow, a fill
 that fades, Duplicate, the pin, an alignment guide, a handle on the left edge, Drawn
 or Image, and the Thumb row. Not checked: the light theme and window sizes other than

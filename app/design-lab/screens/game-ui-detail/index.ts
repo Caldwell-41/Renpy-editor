@@ -66,7 +66,7 @@ type Rect = { x: number; y: number; w: number; h: number };
 const boxLook: Setting[] = [
   { key: 'fill', label: 'Fill', type: 'color', perState: true, none: true },
   { key: 'fill2', label: 'Fades to', type: 'color', perState: true, none: true, under: 'fill', needs: 'fill' },
-  { key: 'dir', label: 'Direction', type: 'pick', options: [['v', 'Top to bottom'], ['h', 'Left to right']], under: 'fill', needs: 'fill2' },
+  { key: 'dir', label: 'Direction', type: 'pick', perState: true, options: [['v', 'Top to bottom'], ['h', 'Left to right']], under: 'fill', needs: 'fill2' },
   { key: 'border', label: 'Border', type: 'color', perState: true, none: true },
   { key: 'shadow', label: 'Shadow', type: 'color', perState: true, none: true },
   { key: 'blur', label: 'Blur', type: 'px', max: 60, under: 'shadow', needs: 'shadow' },
@@ -76,7 +76,7 @@ const boxLook: Setting[] = [
 const boxKeys = boxLook.map(def => def.key);
 const looks: Record<string, Setting[]> = {
   Button: [{ key: 'text', label: 'Text', type: 'color', perState: true }, ...boxLook,
-    { key: 'motion', label: 'Hover animation', type: 'pick', options: [['none', 'No animation'], ['lift', 'Lift'], ['grow', 'Grow'], ['glow', 'Glow']] }],
+    { key: 'motion', label: 'Hover animation', type: 'pick', options: [['none', 'No animation'], ['lift', 'Lift'], ['grow', 'Grow'], ['glow', 'Brighten']] }],
   Text: [{ key: 'text', label: 'Color', type: 'color' }, { key: 'size', label: 'Size', type: 'px', max: 120 }],
   Box: boxLook,
   Bar: [{ key: 'track', label: 'Track', type: 'color' }, { key: 'filled', label: 'Filled part', type: 'color' }, { key: 'thumb', label: 'Thumb', type: 'color' }, { key: 'corners', label: 'Corners', type: 'px', max: 20 }],
@@ -163,6 +163,10 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   let light = false;
   // A control to focus after the next redraw, a row to bring into view, the selection the panel last showed, and the tag on the drag outline.
   let focusNext = '', reveal = '', shownSel = '', ghostTag = '';
+  // The last press on the canvas, for a double click. A press on a control while a text edit ends, so the click is not lost in the redraw.
+  let lastPress = { id: '', at: 0 }, pressOnControl = false, owed = false;
+  // The offset a shadow had before Glow took it away.
+  const glowBack: Record<string, { x: number; y: number }> = {};
   let ghost: Rect | null = null, line: Rect | null = null, guides: Rect[] = [], pending: Doc | null = null, focusCanvas = false;
 
   function reset(state: string) {
@@ -243,7 +247,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     let inner = '', cls = `d-${el.kind}`;
     // An Image box shows its file as it is. The stock frame is a dark fill with square corners.
     const box = () => {
-      if (el.mode === 'image') return `background:${light ? '#f1ece2' : '#1d1410d6'}`;
+      if (el.mode === 'image') return `background:${light ? '#f1ece2' : el.kind === 'Button' ? '#cbb994' : '#1d1410d6'}`;
       const fill = v('fill'), to = v('fill2'), shade = v('shadow');
       return `background:${!fill ? 'transparent' : to ? `linear-gradient(${v('dir') === 'h' ? 'to right' : 'to bottom'}, ${fill}, ${to})` : fill};border:${u(Number(v('bwidth')))} solid ${v('border') || 'transparent'};border-radius:${u(Number(v('corners')))}${shade ? `;box-shadow:${u(Number(v('sx')))} ${u(Number(v('sy')))} ${u(Number(v('blur')))} ${shade}` : ''}`;
     };
@@ -305,11 +309,17 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     if (!over) return;
     const quiet = overLook || (!overCanvas && !!host.querySelector('.d-look')?.contains(document.activeElement));
     // The name tag sits above the element. In a column it sits beside it, so it does not cover the neighbor above.
-    const tagHtml = (r: Rect, tag: string, beside = false) => tag ? `<em class="${beside ? 'd-tag-side' : r.y < 24 ? 'd-tag-in' : ''}${r.x + (beside ? r.w : 0) + 250 > over.clientWidth ? ' d-tag-right' : ''}">${esc(tag)}</em>` : '';
+    // "side": beside the element. "under": below it. Otherwise above it, or below when the top of the canvas is too near, or inside when neither has room.
+    const tagHtml = (r: Rect, tag: string, where = '') => {
+      const spot = where === 'side' ? 'd-tag-side' : where === 'under' || r.y < 24 ? (r.y + r.h + 26 > over.clientHeight ? 'd-tag-in' : 'd-tag-under') : '';
+      return tag ? `<em class="${spot}${r.x + (where === 'side' ? r.w : 0) + 250 > over.clientWidth ? ' d-tag-right' : ''}">${esc(tag)}</em>` : '';
+    };
+    // In a column the tag sits beside the element. In a row that has elements above it, the tag sits under the element.
+    const tagSpot = (el: El) => { const f = find(el.id)!; return f.parent.arrange === 'column' ? 'side' : f.parent.arrange === 'row' && f.path.length > 1 ? 'under' : ''; };
     // One element has a full outline. A look group has corner marks, which leave a border or a glow in view.
     const outline = (el: El, cls: string, tag: string) => {
       const r = rectOf(el.id);
-      return r ? `<i class="d-out ${cls}${el.kind === 'Code' ? ' d-src' : ''}" style="${place(r)}">${tagHtml(r, tag, find(el.id)!.parent.arrange === 'column')}</i>` : '';
+      return r ? `<i class="d-out ${cls}${el.kind === 'Code' ? ' d-src' : ''}" style="${place(r)}">${tagHtml(r, tag, tagSpot(el))}</i>` : '';
     };
     const marks = (els: El[], tag: string) => markRuns(els).map((r, i) => `<i class="d-mark" style="${place({ x: r.x - 6, y: r.y - 6, w: r.w + 12, h: r.h + 12 })}">${i === 0 ? tagHtml(r, tag) : ''}</i>`).join('');
     const look = lookTarget();
@@ -409,7 +419,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   function duplicate() {
     const f = sel?.e ? find(sel.e) : null;
     if (!f) { status = 'Select one element to duplicate it.'; return; }
-    if (f.el.fixed || f.el.kind === 'Code') { status = `${nameOf(f.el)} cannot be duplicated here.`; return; }
+    if (f.el.fixed || f.el.kind === 'Code' || all(f.el).some(el => el.kind === 'Code')) { status = `${nameOf(f.el)} cannot be duplicated here. ${f.el.kind === 'Code' ? 'It' : 'A part of it'} is source only.`; return; }
     const copy = structuredClone(f.el);
     const renew = (el: El) => { el.id = `new${nextNew++}`; el.actions = el.actions?.map(a => ({ ...a, id: nextAction++ })); el.kids?.forEach(renew); };
     renew(copy);
@@ -445,7 +455,13 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   function addAt(kind: Kind, target: { box: El; index: number } | null, at: { x: number; y: number }, parent = root()) {
     const el = make(kind);
     commit(`add ${kind.toLowerCase()}`, () => {
-      if (target) { target.box.kids!.splice(target.index, 0, el); regroup(el, target.box); } else { el.at = at; parent.kids!.push(el); regroup(el, parent); }
+      if (target) { target.box.kids!.splice(target.index, 0, el); regroup(el, target.box); }
+      else {
+        // A new free element lands fully inside the screen or its box.
+        const area = areaOf(parent), k = scale(), w = el.w ?? 260, h = el.h ?? 60;
+        el.at = { x: Math.round(Math.max(0, Math.min(at.x, area.w * k - w))), y: Math.round(Math.max(0, Math.min(at.y, area.h * k - h))) };
+        parent.kids!.push(el); regroup(el, parent);
+      }
     });
     const before = target ? target.box.kids![target.index - 1] : null;
     status = target ? `Added to ${nameOf(target.box)}${before ? `, after ${nameOf(before)}` : ', at the start'}${el.group && el.group !== `${kind}:${page}` ? `. It is one of the ${groupName(el.group)}` : ''}.` : `Added to ${parent === root() ? 'the screen' : nameOf(parent)}. It stays where you put it.`;
@@ -470,8 +486,12 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     if (sel.g) { status = 'Select one element to delete it. A group is a shared look, not a thing on the screen.'; return; }
     const f = find(sel.e!)!;
     if (f.el.fixed || f.el.kind === 'Code') { status = f.el.kind === 'Code' ? `${nameOf(f.el)} is source only. Delete its lines in Source.` : `The game needs ${nameOf(f.el)}. Its settings are on the settings page.`; return; }
-    commit(`delete ${nameOf(f.el)}`, () => { f.parent.kids!.splice(f.parent.kids!.indexOf(f.el), 1); });
+    const inside = all(f.el).find(el => el.kind === 'Code');
+    if (inside) { status = `${nameOf(f.el)} contains ${nameOf(inside)}, which is source only. Edit it in Source.`; return; }
+    const name = nameOf(f.el);
+    commit(`delete ${name}`, () => { f.parent.kids!.splice(f.parent.kids!.indexOf(f.el), 1); });
     select(f.parent === root() ? null : { e: f.parent.id });
+    status = `Deleted ${name}. Undo puts it back.`;
   }
   function shift(by: number) {
     const f = sel?.e ? find(sel.e) : null;
@@ -497,8 +517,10 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   }
   /** The text color in use, for a new border, glow or second fill color. */
   const ink = (L: Level[], st: St) => String(selKind(sel) === 'Button' ? resolve(L, 'text', st).value : light ? '#2b2622' : '#f6efe2');
+  const accent = () => light ? '#a3412d' : '#e8a54b';
   function setLook(key: string, value: V) { levels(lookTarget())[0]!.own[key] = value; }
-  const lookWords = (key: string) => `${key.includes('.') ? `${key.split('.')[0]} ` : ''}${looks[selKind(sel)]?.find(def => def.key === key.split('.').pop())?.label.toLowerCase() ?? key}`;
+  const settingWords = (def: Setting) => def.key === 'text' ? 'text color' : def.label.toLowerCase();
+  const lookWords = (key: string) => { const def = looks[selKind(sel)]?.find(d => d.key === key.split('.').pop()); return `${key.includes('.') ? `${key.split('.')[0]} ` : ''}${def ? settingWords(def) : key}`; };
   const lookEdit = (key: string) => `change the ${lookWords(key)} of ${selName(lookTarget())}`;
   const listOf = (names: string[]) => names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
 
@@ -518,7 +540,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     const name = `${st === 'idle' ? '' : `${cap(st)} `}${def.label}`;
     // A setting with no value reads "None" and has an Add button. A setting with a value has a button that removes it.
     const control = def.type === 'color' && value === '' ? `<span class="gu-muted">None</span><button type="button" class="gu-flat gu-edit" data-do="none:${key}" aria-label="Add: ${esc(name)}">Add</button>${def.key === 'shadow' ? `<button type="button" class="gu-flat gu-edit" data-do="glow:${st}" title="A shadow with no offset">Glow</button>` : ''}`
-      : def.type === 'color' ? `<span class="gu-color"><input type="color" data-in="look:${key}" value="${String(value).slice(0, 7)}" aria-label="${esc(name)}"><code>${String(value).slice(0, 7)}</code></span>${def.none ? `<button type="button" class="gu-icon gu-flat d-nonebtn" data-do="none:${key}" aria-label="Remove: ${esc(name)}" title="Remove">${svg(glyph.none)}</button>` : ''}`
+      : def.type === 'color' ? `<span class="gu-color"><input type="color" data-in="look:${key}" value="${String(value).slice(0, 7)}" aria-label="${esc(name)}" title="${String(value).slice(0, 7)}">${def.key === 'shadow' ? '' : `<code>${String(value).slice(0, 7)}</code>`}</span>${def.none ? `<button type="button" class="gu-icon gu-flat d-nonebtn" data-do="none:${key}" aria-label="Remove: ${esc(name)}" title="Remove">${svg(glyph.none)}</button>` : ''}`
       : def.type === 'px' ? `<span class="gu-range"><input type="range" data-in="look:${key}" min="0" max="${def.max}" value="${value}" aria-label="${esc(name)}"><output>${value}px</output></span>`
         : def.type === 'num' ? `<span class="gu-xy"><input type="number" data-in="look:${key}" value="${value}" aria-label="${esc(name)}"></span>`
         : `<select data-in="look:${key}" aria-label="${esc(name)}">${def.options!.map(([v, text]) => `<option value="${v}" ${v === value ? 'selected' : ''}>${text}</option>`).join('')}</select>`;
@@ -533,26 +555,28 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     // "One click, switch in the panel": the switch says what a look change applies to. The canvas marks the same elements.
     const picked = opt.scope === 'panel' && sel?.e ? find(sel.e)!.el : null, count = picked?.group ? members(picked.group).length : 0;
     // A member with an own value keeps it, so the panel names those members.
-    const keeps = picked?.group ? members(picked.group).filter(el => Object.keys(el.own ?? {}).length).map(nameOf) : [];
+    // With the switch on the look group, an element with an own value for a setting keeps it. The panel names those elements by the setting.
+    const keepers = (def: Setting, st: St) => aim?.g ? members(aim.g).filter(el => resolve(levels({ e: el.id }), def.key, st).depth === 0).map(nameOf) : [];
+    const keepLine = (def: Setting, st: St) => { const names = keepers(def, st); return names.length ? `<p class="gu-help gu-help-wide d-keep">${esc(listOf(names))} ${names.length === 1 ? 'keeps its' : 'keep their'} own ${settingWords(def)}.</p>` : ''; };
     const scope = picked && shared(picked) ? `<div class="gu-seg d-scope" role="group" aria-label="Change the look of"><button type="button" data-do="scope:one" aria-pressed="${lookScope === 'one'}">This ${noun[kind]![0]}</button><button type="button" data-do="scope:group" aria-pressed="${lookScope === 'group'}" title="${groupName(picked.group!)} · ${count}"><span class="gu-clip">${groupName(picked.group!)}</span><span>· ${count}</span></button></div>
-      <p class="gu-help gu-help-wide">${lookScope === 'group' ? `A change applies to the ${count} marked ${noun[kind]![1]}${picked.group === 'menu' ? ` here and on <button type="button" class="gu-flat gu-edit d-inline" data-do="say:This link shows the 7 screens together with the unsaved change. That view is in the approved layout mock.">6 other screens</button>` : ''}.${keeps.length ? ` ${esc(listOf(keeps))} ${keeps.length === 1 ? 'has own values and keeps them' : 'have own values and keep them'}.` : ''}` : `A change applies to this ${noun[kind]![0]} only.`}</p>` : '';
+      <p class="gu-help gu-help-wide">${lookScope === 'group' ? `A change applies to the ${count} marked ${noun[kind]![1]}${picked.group === 'menu' ? ` here and on <button type="button" class="gu-flat gu-edit d-inline" data-do="say:This link shows the 7 screens together with the unsaved change. That view is in the approved layout mock.">6 other screens</button>` : ''}.` : `A change applies to this ${noun[kind]![0]} only.`}</p>` : '';
     // A box is Drawn from its box look, or shows an image file. An Image box has no fill, corners, border or shadow to set.
     const boxy = !!one && (one.kind === 'Button' || one.kind === 'Box');
     const mode = boxy ? `<div class="gu-field"><span class="gu-label">Background</span><span class="gu-control"><div class="gu-seg" role="group" aria-label="Background">${[['drawn', 'Drawn'], ['image', 'Image']].map(([v, text]) => `<button type="button" data-do="mode:${v}" aria-pressed="${image === (v === 'image')}">${text}</button>`).join('')}</div></span></div>
-      ${image ? `<div class="gu-field"><span class="gu-label">Image</span><span class="gu-control"><code class="gu-clip">gui/frame.png</code><span class="gu-spacer"></span><button type="button" data-do="say:Change opens the project's pictures. Stretch areas and an image for each state are not part of this mock.">Change</button></span>
+      ${image ? `<div class="gu-field"><span class="gu-label">Image</span><span class="gu-control"><code class="d-file">gui/frame.png</code><span class="gu-spacer"></span><button type="button" data-do="say:Change opens the project's pictures. Stretch areas and an image for each state are not part of this mock.">Change</button></span>
         <p class="gu-help">Loomlight shows this file as it is. Select Drawn to set a fill, corners, a border and a shadow. The file stays in the project.</p></div>` : ''}` : '';
     const defs = looks[kind]!.filter(def => (def.key !== 'thumb' || selEls(aim).some(el => el.drag)) && !(image && boxKeys.includes(def.key)));
-    const shows = (def: Setting, st: St) => !def.needs || resolve(L, def.needs, st).value !== '';
+    const shows = (def: Setting, st: St): boolean => { const need = def.needs ? looks[kind]!.find(d => d.key === def.needs) : null; return !need || (resolve(L, need.key, st).value !== '' && shows(need, st)); };
     const glowing = Number(resolve(L, 'sx', 'idle').value) === 0 && Number(resolve(L, 'sy', 'idle').value) === 0;
-    // Offset X and Y share one row. Glow, on the Blur row, takes the offset away and shows pressed while the offset is 0.
+    // Offset X and Y share one row. Glow, on the Shadow row, takes the offset away and shows pressed while the offset is 0.
     const offset = (st: St) => resolve(L, 'shadow', st).value === '' ? '' : `<div class="gu-field"><span class="gu-label">Offset</span><span class="gu-control gu-xy"><label>X<input type="number" data-in="look:sx" value="${resolve(L, 'sx', 'idle').value}"></label><label>Y<input type="number" data-in="look:sy" value="${resolve(L, 'sy', 'idle').value}"></label>
       <span class="gu-spacer"></span>${chain(L, defs.find(d => d.key === 'sx')!, 'idle')}</span></div>`;
     const glowButton = (st: St) => `<button type="button" class="gu-flat gu-edit" data-do="glow:${st}" aria-pressed="${glowing}" title="A glow is a shadow with no offset">Glow</button>`;
     /** One setting with the settings under it: Fill with its gradient, Shadow with its blur and offset. */
-    const full = (def: Setting, st: St, label?: string) => `${lookRow(L, def, st, label)}${defs.filter(d => d.under === def.key && shows(d, st) && d.key !== 'sx' && d.key !== 'sy').map(d => lookRow(L, d, d.perState ? st : 'idle', d.label, d.key === 'blur' ? glowButton(st) : '')).join('')}${def.key === 'shadow' ? offset(st) : ''}`;
+    const full = (def: Setting, st: St, label?: string) => `${lookRow(L, def, st, label, def.key === 'shadow' && resolve(L, 'shadow', st).value !== '' ? glowButton(st) : '')}${defs.filter(d => d.under === def.key && shows(d, st) && d.key !== 'sx' && d.key !== 'sy').map(d => lookRow(L, d, d.perState ? st : 'idle', d.label)).join('')}${def.key === 'shadow' ? offset(st) : ''}`;
     const top = defs.filter(def => !def.under), per = stateful ? top.filter(def => def.perState) : [], rest = top.filter(def => !per.includes(def));
     let body: string;
-    if (!per.length) body = top.map(def => full(def, 'idle')).join('');
+    if (!per.length) body = top.map(def => `${full(def, 'idle')}${keepLine(def, 'idle')}`).join('');
     else if (opt.states === 'switch') {
       // One state at a time: the switch sets what the rows edit and what the canvas shows.
       body = `<div class="gu-seg" role="group" aria-label="State">${states.map(st => showButton(st)).join('')}</div>${(showState === 'idle' ? top : per).map(def => full(def, showState)).join('')}
@@ -571,7 +595,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
       };
       body = `<div class="d-matrix"><span></span>${states.map(st => showButton(st)).join('')}${per.map(def => `<span class="gu-label">${def.label}</span>${states.map(st => cellHtml(def, st)).join('')}`).join('')}</div>
         <p class="gu-help gu-help-wide">A solid edge marks an own value. A state name shows that state on the canvas.</p>
-        <div class="d-cell-edit">${full(cdef, cst, `${cap(cst)} ${cdef.label.toLowerCase()}`)}</div>${rest.length ? `<div class="d-state-head"><h4>Every state</h4></div>${rest.map(def => full(def, 'idle')).join('')}` : ''}`;
+        <div class="d-cell-edit">${full(cdef, cst, `${cap(cst)} ${cdef.label.toLowerCase()}`)}${keepLine(cdef, cst)}</div>${rest.length ? `<div class="d-state-head"><h4>Every state</h4></div>${rest.map(def => full(def, 'idle')).join('')}` : ''}`;
     } else {
       // Differences from Idle: each other state lists only the settings that differ from Idle.
       body = `<div class="d-state-head"><h4>Idle</h4><span class="gu-spacer"></span>${showButton('idle', 'Show')}</div>${top.map(def => full(def, 'idle')).join('')}${states.slice(1).map(st => {
@@ -682,7 +706,8 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   function shell(): string {
     const count = Math.abs(done.length - saved);
     const pick = <K extends keyof Opt>(key: K) => `<label>${optNames[key][0]} <select data-opt="${key}">${(optNames[key][1] as [string, string][]).map(([v, text]) => `<option value="${v}" ${opt[key] === v ? 'selected' : ''}>${text}</option>`).join('')}</select></label>`;
-    const keys = `Tab next · ${opt.drag === 'reorder' ? 'Arrows move' : 'Arrows shift'} · Shift+Arrows by 10 · Enter in · Esc out · ${mac ? '⌫' : 'Del'} delete`;
+    const held = sel?.e ? find(sel.e) : null;
+    const keys = `Tab next · ${held && arranged(held) && opt.drag === 'reorder' ? 'Arrows move one place' : 'Arrows move 1 · Shift+Arrows move 10'} · Enter in · Esc out · ${mac ? '⌫' : 'Del'} delete`;
     return `<div class="gu-shell" data-variant="detail">
       <section class="gu-proto d-proto" aria-label="Prototype controls"><strong>Game UI detailed level · unapproved</strong><button type="button" data-do="reset">Reset</button>
         <label>Mock <select data-preset aria-label="Mock">${(Object.keys(presets) as Preset[]).map(p => `<option value="${p}" ${p === preset ? 'selected' : ''}>${presetNames[p]}</option>`).join('')}${preset ? '' : '<option value="" selected>Your mix</option>'}</select></label>
@@ -752,10 +777,14 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
       case 'duplicate': duplicate(); break;
       case 'glow': { const L = levels(lookTarget()), st = arg as St, key = st === 'idle' ? 'shadow' : `${st}.shadow`, has = resolve(L, 'shadow', st).value !== '';
         const on = has && Number(resolve(L, 'sx', 'idle').value) === 0 && Number(resolve(L, 'sy', 'idle').value) === 0;
-        // Glow gives a shadow with no offset, in the fill color or the text color. A second click gives the offset back.
+        // Glow gives a shadow with no offset. A second click gives back the offset it had.
         commit(on ? `give the shadow of ${selName(lookTarget())} an offset` : `give ${selName(lookTarget())} a glow`, () => {
-          if (!has) setLook(key, String(resolve(L, 'fill', st).value || ink(L, st)));
-          setLook('sx', 0); setLook('sy', on ? 4 : 0);
+          // The glow takes the first of the border, the fill and the text color that shows on this game.
+          const shows = (c: V) => { const n = parseInt(String(c).slice(1, 7), 16), lum = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; return !!c && (light ? lum < 0.75 : lum > 0.25); };
+          if (!has) setLook(key, String([resolve(L, 'border', st).value, resolve(L, 'fill', st).value, ink(L, st)].find(shows) ?? accent()));
+          const id = selName(lookTarget()), back = glowBack[id] ?? { x: 0, y: 4 };
+          if (!on) glowBack[id] = { x: Number(resolve(L, 'sx', 'idle').value), y: Number(resolve(L, 'sy', 'idle').value) || 4 };
+          setLook('sx', on ? back.x : 0); setLook('sy', on ? back.y : 0);
         }); break; }
       case 'mode': if ((f!.el.mode === 'image') !== (arg === 'image')) commit(arg === 'image' ? `use an image for ${nameOf(f!.el)}` : `draw ${nameOf(f!.el)} from a box look`, () => { if (arg === 'image') f!.el.mode = 'image'; else delete f!.el.mode; }); break;
       case 'pin': if ((f!.el.pin ?? 'tl') !== arg) commit(`pin ${nameOf(f!.el)} to the ${pinName(arg)}`, () => {
@@ -775,12 +804,12 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
         if (arg === 'free') { f!.el.w ??= Math.round(box.w * s); f!.el.h ??= Math.round(box.h * s); }
       }); break;
       case 'none': { const L = levels(lookTarget()), def = looks[selKind(sel)]!.find(d => d.key === arg.split('.').pop())!, st = (arg.includes('.') ? arg.split('.')[0] : 'idle') as St;
-        // A new value starts at a color that shows: the box color for a fill, black for a shadow, the text color for a border and a second fill color.
-        const start = def.key === 'fill' ? String(doc.game.Box!.fill) : def.key === 'shadow' ? '#000000' : ink(L, st);
+        // A new value starts at a color that shows: the game's accent for a fill, black for a shadow, the text color for a border and a second fill color.
+        const start = def.key === 'fill' ? accent() : def.key === 'shadow' ? '#000000' : ink(L, st);
         commit(lookEdit(arg), () => setLook(arg, resolve(L, def.key, st).value === '' ? start : '')); break; }
       case 'own': { const [st, key] = arg.split('.') as [St, string]; commit(lookEdit(arg), () => setLook(arg, resolve(levels(lookTarget()), key, st).value)); break; }
       case 'same': commit(`make the ${lookWords(arg)} of ${selName(lookTarget())} follow the level above`, () => { const own = levels(lookTarget())[0]!.own; delete own[arg]; if (arg === 'sx') delete own.sy; }); break;
-      case 'forall': { const L = levels(lookTarget()); commit(`use the ${lookWords(arg)} of ${selName(lookTarget())} for all ${L[1]!.label}`, () => { for (const key of arg === 'sx' ? ['sx', 'sy'] : [arg]) if (key in L[0]!.own) { L[1]!.own[key] = L[0]!.own[key]!; delete L[0]!.own[key]; } }); break; }
+      case 'forall': { const L = levels(lookTarget()); commit(`use the ${lookWords(arg)} of ${selName(lookTarget())} for all ${L[1]!.label}`, () => { for (const key of arg === 'sx' ? ['sx', 'sy'] : [arg]) if (key in L[0]!.own) { L[1]!.own[key] = L[0]!.own[key]!; delete L[0]!.own[key]; } }); status = `All ${L[1]!.label} now have this ${lookWords(arg)}.`; break; }
       case 'copylook': { const L = levels(lookTarget()), values: Record<string, V> = {};
         for (const def of looks[selKind(sel)]!) for (const st of def.perState ? states : ['idle' as St]) values[st === 'idle' ? def.key : `${st}.${def.key}`] = resolve(L, def.key, st).value;
         copied = { kind: selKind(sel), values, from: selName(lookTarget()) }; status = `Copied the look of ${selName(lookTarget())}.`; break; }
@@ -788,8 +817,8 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
         // An own value only where the result differs, so a chain that already gives the same value stays joined.
         const L = levels(lookTarget());
         for (const [key, value] of Object.entries(copied!.values)) { const [st, k] = key.includes('.') ? key.split('.') as [St, string] : ['idle' as St, key]; if (resolve(L, k, st).value !== value) L[0]!.own[key] = value; }
-      }); break;
-      case 'var': commit('change element text', () => { f!.el.text = `${f!.el.text ?? ''}${f!.el.text?.endsWith(' ') || !f!.el.text ? '' : ' '}[${arg}]`; }); break;
+      }); if (copied && copied.kind === selKind(sel)) status = `Pasted the look of ${copied.from} to ${selName(lookTarget())}.`; break;
+      case 'var': commit(`change the text of ${nameOf(f!.el)}`, () => { f!.el.text = `${f!.el.text ?? ''}${f!.el.text?.endsWith(' ') || !f!.el.text ? '' : ' '}[${arg}]`; }); break;
       case 'expand': expanded = expanded === Number(arg) ? null : Number(arg); break;
       case 'actadd': { const id = nextAction++; commit(`add action to ${nameOf(f!.el)}`, () => { (f!.el.actions ??= []).push(arg === 'set' ? { id, type: 'set', name: 'boarded', op: 'set', value: 'True' } : { id, type: arg as 'show' | 'hide', screen: 'ticket' }); }); expanded = id; break; }
       case 'actdel': commit(`remove action from ${nameOf(f!.el)}`, () => { f!.el.actions = f!.el.actions!.filter(a => a.id !== Number(arg)); }); break;
@@ -800,9 +829,9 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   }
   function onClick(event: MouseEvent) {
     const target = event.target as HTMLElement, button = target.closest<HTMLButtonElement>('button[data-do]');
-    if (!button || button.getAttribute('aria-disabled') === 'true') { if (open && !target.closest('.gu-pop')) { open = ''; render(); } return; }
+    if (!button || button.getAttribute('aria-disabled') === 'true') { if ((open && !target.closest('.gu-pop')) || owed) { if (!target.closest('.gu-pop')) open = ''; owed = false; render(); } return; }
     const [name, ...rest] = button.dataset.do!.split(':');
-    act(name!, rest.join(':')); render();
+    owed = false; act(name!, rest.join(':')); render();
   }
   function onInput(event: Event) {
     const el = event.target as HTMLInputElement, [name, key] = (el.dataset.in ?? '').split(':');
@@ -826,7 +855,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     if (name === 'look' || name === 'text') {
       onInput(event);
       const before = pending!; pending = null;
-      if (JSON.stringify(before) !== JSON.stringify(doc)) push(name === 'text' ? 'change element text' : lookEdit(a!), before);
+      if (JSON.stringify(before) !== JSON.stringify(doc)) push(name === 'text' ? `change the text of ${f ? nameOf(f.el) : 'the element'}` : lookEdit(a!), before);
     } else if (f) {
       const n = Number(el.value) || 0, axis = a as 'x' | 'y';
       if (name === 'pos') commit(`move ${nameOf(f.el)}`, () => { f.el.at = { ...(f.el.at ?? { x: 0, y: 0 }), [axis]: n }; });
@@ -839,6 +868,8 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
       if (name === 'max') commit(`change the range of ${nameOf(f.el)}`, () => { f.el.max = Math.max(1, n); });
       if (name === 'act') commit(`change action of ${nameOf(f.el)}`, () => { const action = f.el.actions!.find(item => item.id === Number(a))!; (action as unknown as Record<string, unknown>)[b!] = el.value; });
     }
+    // A text or number edit can end because the author pressed a different control. The redraw then waits for that click, so the click is not lost.
+    if (pressOnControl && (el instanceof HTMLTextAreaElement || el.type === 'text' || el.type === 'number')) { owed = true; window.setTimeout(() => { if (owed) { owed = false; render(); } }, 250); return; }
     render();
   }
   /** With one click for an element, no look group stays selected. */
@@ -848,6 +879,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     if (event.button !== 0) return;
     const handle = target.closest<HTMLElement>('[data-handle]');
     if (handle && sel?.e) { resize(event, handle.dataset.handle!); return; }
+    pressOnControl = !target.closest('[data-main]');
     if (!target.closest('[data-main]')) return;
     // A text edit ends on the element it began on, before the selection changes.
     const typing = document.activeElement;
@@ -859,8 +891,13 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
       addAt(kind, t, { x: Math.round((event.clientX - stage.left) * s), y: Math.round((event.clientY - stage.top) * s) }); render(); return;
     }
     const id = target.closest<HTMLElement>('[data-el]')?.dataset.el;
-    if (!id) { select(null); render(); return; }
+    // Empty space and the fixed background clear the selection. The background stays in the element list.
+    if (!id || find(id)!.el.fixed) { select(null); render(); return; }
     const hit = find(id)!.el, lad = ladder(id), i = lad.findIndex(s => same(s, sel));
+    // A second press on the selected text or button, soon after the first, goes to its words.
+    const again = lastPress.id === id && event.timeStamp - lastPress.at < 400 && sel?.e === id && (hit.kind === 'Text' || hit.kind === 'Button');
+    lastPress = { id, at: event.timeStamp };
+    if (again) { focusCanvas = false; focusNext = '[data-in="text"]'; render(); return; }
     // A click on the selection goes one step in. Inside a group, a click on another member selects that member.
     let advance: Sel = null;
     if (i >= 0) advance = lad[Math.min(i + 1, lad.length - 1)]!;
@@ -894,7 +931,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
       const dx = Math.round((m.clientX - event.clientX) * s), dy = Math.round((m.clientY - event.clientY) * s), name = nameOf(f.el);
       const stage = host.querySelector('.gu-view')!.getBoundingClientRect(), origin = gameBox();
       const free = { x: Math.round((ghost!.x - (origin.left - stage.left)) * s), y: Math.round((ghost!.y - (origin.top - stage.top)) * s) };
-      if (opt.drag === 'reorder' && drop) { const t = drop; commit(`move ${name} ${t.box === f.parent ? 'in' : 'into'} ${nameOf(t.box)}`, () => moveInto(dragId, t.box, t.index)); }
+      if (opt.drag === 'reorder' && drop) { const t = drop, joins = t.box !== f.parent; commit(`move ${name} ${joins ? 'into' : 'in'} ${nameOf(t.box)}`, () => moveInto(dragId, t.box, t.index)); if (joins) status = `${name} is in ${nameOf(t.box)}${f.el.group && shared(f.el) ? ` and is one of the ${groupName(f.el.group)}` : ''}.`; }
       else if (opt.drag === 'reorder' && arranged(f)) { const from = nameOf(f.parent), was = f.el.group; commit(`take ${name} out of ${from}`, () => moveFree(dragId, free)); status = `${name} left ${from}${was && was !== f.el.group ? ` and the ${groupName(was)} look` : ''}. Undo puts it back.`; }
       else if (arranged(f)) commit(`move ${name}`, () => { f.el.off = { x: (f.el.off?.x ?? 0) + dx, y: (f.el.off?.y ?? 0) + dy }; });
       else { const gx = Math.round((ghost!.x - start.x) * s), gy = Math.round((ghost!.y - start.y) * s); commit(`move ${name}`, () => { f.el.at = { x: (f.el.at?.x ?? 0) + gx, y: (f.el.at?.y ?? 0) + gy }; }); }
@@ -941,7 +978,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     }
     if (ghost) return;
     // The outline on the pointer shows what a click selects next.
-    const id = target.closest('[data-main]') ? target.closest<HTMLElement>('[data-el]')?.dataset.el : undefined;
+    const over = target.closest('[data-main]') ? target.closest<HTMLElement>('[data-el]')?.dataset.el : undefined, id = over && !find(over)?.el.fixed ? over : undefined;
     const row = target.closest<HTMLElement>('[data-hover-el]')?.dataset.hoverEl, crumb = target.closest<HTMLElement>('[data-hover-sel]')?.dataset.hoverSel;
     let next: Sel = row ? { e: row } : crumb ? parseSel(crumb) : null;
     if (id) {
@@ -952,6 +989,10 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   }
   function onKey(event: KeyboardEvent) {
     const target = event.target as HTMLElement, typing = !!target.closest('input:not([type=range]):not([type=color]),textarea,select');
+    // In the Text field, Esc ends the edit. Enter ends it for a button, and makes a new line for a text.
+    if (target.matches('[data-in="text"]') && (event.key === 'Escape' || (event.key === 'Enter' && !event.shiftKey && find(sel?.e ?? '')?.el.kind === 'Button'))) {
+      event.preventDefault(); target.blur(); focusCanvas = true; render(); return;
+    }
     if (event.key === 'Escape') {
       if (open) open = ''; else if (placing) { placing = null; ghost = line = null; status = 'Ready'; } else if (sel && !typing) { select(pathOf(sel).at(-2) ?? null); focusCanvas = true; } else return;
       render(); return;
@@ -980,11 +1021,8 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   reset(context.state);
   host.addEventListener('click', onClick); host.addEventListener('input', onInput); host.addEventListener('change', onChange);
   host.addEventListener('pointerdown', onPointerDown); host.addEventListener('mousemove', onMove); document.addEventListener('keydown', onKey);
-  const onDouble = (event: MouseEvent) => {
-    const id = (event.target as HTMLElement).closest('[data-main]') ? (event.target as HTMLElement).closest<HTMLElement>('[data-el]')?.dataset.el : undefined, el = id ? find(id)?.el : null;
-    if (el && (el.kind === 'Text' || el.kind === 'Button') && sel?.e === id) { focusNext = '[data-in="text"]'; render(); }
-  };
-  host.addEventListener('dblclick', onDouble);
+  const onUp = () => { pressOnControl = false; };
+  document.addEventListener('pointerup', onUp);
   const onLeave = () => { if (hover) { hover = null; drawOver(); } };
   host.addEventListener('mouseleave', onLeave);
   const onFocus = () => drawOver();
@@ -995,6 +1033,6 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   return () => {
     host.removeEventListener('click', onClick); host.removeEventListener('input', onInput); host.removeEventListener('change', onChange);
     host.removeEventListener('pointerdown', onPointerDown); host.removeEventListener('mousemove', onMove); document.removeEventListener('keydown', onKey);
-    host.removeEventListener('mouseleave', onLeave); host.removeEventListener('dblclick', onDouble); host.removeEventListener('focusin', onFocus); host.removeEventListener('focusout', onFocus); window.removeEventListener('resize', onResize); host.replaceChildren();
+    host.removeEventListener('mouseleave', onLeave); document.removeEventListener('pointerup', onUp); host.removeEventListener('focusin', onFocus); host.removeEventListener('focusout', onFocus); window.removeEventListener('resize', onResize); host.replaceChildren();
   };
 }

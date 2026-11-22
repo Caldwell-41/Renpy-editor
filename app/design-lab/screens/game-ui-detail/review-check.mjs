@@ -147,10 +147,43 @@ export default async function ({ page, open, capture }) {
   await capture(`${preset}-box`);
   if (preset !== 'chosen') return;
 
+  // Round two of the council. A double click on a button goes to its words, and Enter ends the edit.
+  await open({ state: 'group', viewport: 'wide', theme: 'dark' });
+  await el('quit').click(); await el('quit').click();
+  assert.equal(await page.evaluate(() => document.activeElement?.dataset.in), 'text');
+  await page.keyboard.type('Exit'); await page.keyboard.press('Enter');
+  assert.equal(await el('quit').innerText(), 'Exit');
+  assert.ok(await page.evaluate(() => document.activeElement?.hasAttribute('data-canvas')));
+  // A click on a control is not lost when it ends a text edit.
+  await el('start').click();
+  await page.locator('[data-in="text"]').fill('Begin');
+  await page.locator('[data-do="scope:one"]').click();
+  assert.equal(await page.locator('[data-do="scope:one"]').getAttribute('aria-pressed'), 'true');
+  assert.equal(await el('start').innerText(), 'Begin');
+  // A drag out of the Menu says so on the outline before the drop.
+  const out = await el('help').boundingBox();
+  await page.mouse.move(out.x + out.width / 2, out.y + out.height / 2); await page.mouse.down();
+  await page.mouse.move(out.x + out.width + 90, out.y + out.height / 2, { steps: 6 });
+  assert.equal(await page.locator('.d-ghost em').innerText(), 'Leaves Menu');
+  assert.ok((await page.locator('.d-ghost em').boundingBox()).height > 10);
+  await capture('chosen-leaves');
+  await page.mouse.up();
+  assert.match(await status(), /Help left Menu and the Menu buttons look/);
+  // Empty space on the Title screen clears the selection.
+  const stageBox = await page.locator('[data-main]').boundingBox();
+  await page.mouse.click(stageBox.x + stageBox.width * 0.6, stageBox.y + stageBox.height * 0.3);
+  assert.equal(await page.locator('.d-name h2').count(), 0);
+  // A box that holds a source-only part cannot be deleted here.
+  await open({ state: 'box', viewport: 'wide', theme: 'dark' });
+  await page.locator('[data-canvas]').focus();
+  await page.keyboard.press('Delete');
+  assert.match(await status(), /Stub box contains Stops list, which is source only/);
+  assert.equal((await order('stub')).length, 5);
+
   // With the switch on the look group, the panel names the buttons that keep an own value.
   await open({ state: 'button', viewport: 'wide', theme: 'dark' });
   await page.locator('[data-do="scope:group"]').click();
-  assert.match(await page.locator('.d-look').innerText(), /Board the tram and Wait have own values and keep them/);
+  assert.match(await page.locator('.d-look').innerText(), /Board the tram keeps its own text color/);
   // An element that moves inside its row keeps its offset.
   await page.locator('[data-do="more"]').click();
   await page.locator('[data-in="off:y"]').fill('22'); await page.locator('[data-in="off:y"]').dispatchEvent('change');

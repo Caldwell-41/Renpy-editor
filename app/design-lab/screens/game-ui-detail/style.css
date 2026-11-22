@@ -123,6 +123,14 @@
 .gu-shell .gu-el-head button.gu-icon { color:var(--text-secondary); }
 .d-over i em.d-tag-side { left:calc(100% + 12px); bottom:auto; top:-3px; }
 .d-over i em.d-tag-side.d-tag-right { left:auto; right:calc(100% + 12px); }
-.d-ghost em { bottom:auto; top:calc(100% + 6px); }
+.d-over i.d-ghost em { bottom:auto; top:calc(100% + 6px); }
+.d-over i em.d-tag-under { bottom:auto; top:calc(100% + 6px); }
 .d-showing { display:inline-flex; align-items:center; gap:6px; font-size:12px; }
 .gu-shell .gu-control>button.gu-edit { flex:none; }
+/* Round two of the council review. */
+/* The look switch stays in view while the author works through the Look section. */
+.d-scope { position:sticky; top:0; z-index:3; padding:4px 0; margin:-4px 0; background:var(--surface-panel); }
+.d-look .gu-xy { gap:6px; }
+.gu-shell .d-look .gu-xy input { width:46px; }
+.d-file { font:11px/1.5 var(--font-source); color:var(--text-secondary); }
+.d-keep { color:var(--text-primary); }
