@@ -22,8 +22,8 @@ export default async function ({ page, open, capture }) {
     assert.equal(await name(), 'Load');
     assert.equal(await page.locator('[data-do="scope:group"]').getAttribute('aria-pressed'), 'true');
     // The link to the other screens that show this look group.
-    await page.locator('.d-look button', { hasText: 'on 7 screens' }).click();
-    assert.match(await status(), /shows those screens together with the unsaved change/);
+    await page.locator('.d-look button', { hasText: '6 other screens' }).click();
+    assert.match(await status(), /shows the 7 screens together with the unsaved change/);
     await el('load').hover();
     assert.equal(await page.locator('.d-over .d-sel').count(), 1);
     // One frame of corner marks goes around the six neighbors.
@@ -83,7 +83,7 @@ export default async function ({ page, open, capture }) {
 
   // A drag in a column: it lands at the line, or it shifts by pixels.
   await drag('quit', 'load', -4);
-  if (preset === 'boxes') assert.match(await status(), /Move Quit/);
+  if (preset === 'boxes') assert.match(await el('quit').getAttribute('style'), /translate:/);
   else assert.deepEqual(await order('menu'), ['start', 'quit', 'load', 'prefs', 'about', 'help']);
   await page.locator('[data-do="undo"]').click();
 
@@ -94,10 +94,22 @@ export default async function ({ page, open, capture }) {
   if (preset === 'boxes' || preset === 'place') { const b = await el('help').boundingBox(); await page.mouse.click(b.x + 10, b.y + 2); }
   assert.deepEqual((await order('menu')).slice(3, 5), ['about', 'new1']);
   assert.match(await status(), /one of the Menu buttons/);
+  // The author names a new button at once: the Text field has the focus.
+  assert.equal(await page.evaluate(() => document.activeElement?.dataset.in), 'text');
   await capture(`${preset}-added`);
   await page.locator('[data-canvas]').focus();
   await page.keyboard.press('Delete');
   assert.equal((await order('menu')).length, 6);
+
+  // A text edit ends on its own element when the author clicks a different element on the canvas.
+  if (oneClick) {
+    await el('start').click();
+    await page.locator('[data-in="text"]').fill('Begin');
+    await el('load').click();
+    assert.equal(await el('start').innerText(), 'Begin');
+    assert.equal(await el('load').innerText(), 'Load');
+    await page.locator('[data-do="undo"]').click();
+  }
 
   // The states: a button with an own Idle fill keeps it in Hover until Hover gets an own value.
   await open({ state: 'button', viewport: 'wide', theme: 'dark' });
@@ -124,6 +136,9 @@ export default async function ({ page, open, capture }) {
   assert.match(await el('detail').innerText(), /one way 6/);
   await open({ state: 'source', viewport: 'wide', theme: 'dark' });
   await capture(`${preset}-source`);
+  // A source-only part keeps its place: its row in the list has no Move buttons.
+  await page.locator('[data-do="list"]').click();
+  assert.equal(await page.locator('.d-el-row.is-on [data-do^="shift"]').count(), 0);
   await drag('stops', 'heading');
   assert.match(await status(), /does not move here/);
   await open({ state: 'bar', viewport: 'wide', theme: 'dark' });
@@ -132,13 +147,27 @@ export default async function ({ page, open, capture }) {
   await capture(`${preset}-box`);
   if (preset !== 'chosen') return;
 
+  // With the switch on the look group, the panel names the buttons that keep an own value.
+  await open({ state: 'button', viewport: 'wide', theme: 'dark' });
+  await page.locator('[data-do="scope:group"]').click();
+  assert.match(await page.locator('.d-look').innerText(), /Board the tram and Wait have own values and keep them/);
+  // An element that moves inside its row keeps its offset.
+  await page.locator('[data-do="more"]').click();
+  await page.locator('[data-in="off:y"]').fill('22'); await page.locator('[data-in="off:y"]').dispatchEvent('change');
+  const from = await el('board').boundingBox(), to = await el('later').boundingBox();
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2); await page.mouse.down();
+  await page.mouse.move(to.x + to.width - 3, to.y + to.height / 2, { steps: 6 }); await page.mouse.up();
+  assert.deepEqual(await order('row'), ['later', 'board']);
+  assert.match(await el('board').getAttribute('style'), /translate:0cqw 1\.146cqw/);
+
   // The chosen mix. The states table has a Shadow row, and Glow takes the offset away.
   const style = id => el(id).getAttribute('style');
   await open({ state: 'button', viewport: 'wide', theme: 'dark' });
   await page.locator('[data-do="cell:hover.shadow"]').click();
   await page.locator('[data-do="none:hover.shadow"]').click();
   assert.match(await style('board'), /box-shadow:0cqw 0\.208cqw/);
-  await page.locator('[data-do="glow"]').click();
+  await page.locator('[data-do="glow:hover"]').click();
+  assert.equal(await page.locator('[data-do="glow:hover"]').getAttribute('aria-pressed'), 'true');
   assert.match(await style('board'), /box-shadow:0cqw 0cqw/);
   await capture('chosen-shadow');
   // A fill fades to a second color.
@@ -158,7 +187,7 @@ export default async function ({ page, open, capture }) {
   await page.locator('[data-do="pin:mc"]').click();
   const pinned = await el('stamp').boundingBox();
   assert.ok(Math.abs(before.x - pinned.x) < 1 && Math.abs(before.y - pinned.y) < 1);
-  assert.match(await page.locator('.gu-panel').innerText(), /From the centre of the screen/);
+  assert.match(await page.locator('.gu-panel').innerText(), /From the center of the screen/);
   // A drag near the middle of the screen snaps to it and shows a guide.
   const stage = await page.locator('[data-main]').boundingBox();
   await page.mouse.move(pinned.x + pinned.width / 2, pinned.y + pinned.height / 2); await page.mouse.down();

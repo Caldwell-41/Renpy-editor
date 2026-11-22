@@ -101,6 +101,48 @@ border. He asked for these changes:
 - **The selected cell keeps its color.** The dark brown was a defect of the mock: the
   lab's style for a pressed button replaced the cell's color.
 
+### Council review of mock D
+
+Kris asked for a council review of mock D on 2026-11-22: three delegates, two rounds,
+a focus on the user experience, a target of 9.5, and his say on any major change.
+Round one scored 8 (Claude Opus 5.5), 7 (GPT-6.2 Sol) and 7 (Claude Fable 5.2). No
+delegate labelled a finding as a major change. These fixes followed round one:
+
+- **Defects.** A text edit now ends on its own element when the author clicks a
+  different element. An element that moves inside its row or column keeps its offset.
+  A new element lands inside a selected Free box, or under a selected free element. A
+  source-only part has its hatched outline again and no Move buttons. A cell of the
+  states table counts as an own value when its second fill color is set. The chain
+  commands and the rows of a cell scroll into view. The element list no longer
+  overflows the panel.
+- **What a look change reaches.** With the switch on the look group, the panel names
+  the elements that have own values and keep them. Copy look and Paste look name their
+  target, such as "Paste look to Menu buttons".
+- **The state on the canvas.** While the canvas shows a state other than Idle, the row
+  under it says so ("The marked buttons show Hover") with "Show Idle".
+- **None, Add and Glow.** A setting with no value reads "None" and has "Add". The new
+  value starts at a color that shows. Glow is also on a shadow that is None, takes the
+  fill or the text color, and shows pressed while the offset is 0. Offset X and Y
+  share one row.
+- **The states table.** A cell shows its color at full strength. The dashed edge alone
+  means that it follows.
+- **The name tag and the handles.** In a column the name tag sits beside the element,
+  so it does not cover the neighbor above. The handles sit outside the outline.
+- **A drag out of a row or column** shows "Leaves Menu" on the outline before the drop.
+  The status then says that the element left the box and its look group.
+- **Density and words.** Number fields are 24 pixels high. A stock action is one row.
+  A new selection starts at the top of the panel. A new text or button has the focus
+  in its Text field, and a double click on a text or a button goes there too. "More
+  commands" has heavier dots. "Background" replaces "Box" for Drawn or Image, "Hover
+  animation" replaces "On hover", and "6 other screens" replaces "on 7 screens".
+
+Two points from round one are questions for Kris, not fixes:
+
+- An element that the author drags out of the Menu leaves the Menu buttons look group.
+  Should a moved element keep its look group?
+- "Glow" names two things: the shadow with no offset, and one of the hover animations.
+  Each name comes from an earlier decision.
+
 Known simplifications in mock D:
 
 - The blur and the offset of a shadow have one value for all states. Only the shadow
