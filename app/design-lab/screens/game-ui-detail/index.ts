@@ -9,14 +9,16 @@ import '../game-ui/game.css';
 import '../game-ui/style.css';
 import './style.css';
 
-export type Preset = 'point' | 'boxes' | 'place';
+export type Preset = 'chosen' | 'point' | 'boxes' | 'place';
 type Opt = { click: 'deep' | 'boxes'; drag: 'reorder' | 'offset'; add: 'selection' | 'place'; states: 'switch' | 'matrix' | 'diff' };
 const presets: Record<Preset, Opt> = {
+  // What Kris chose on 2026-11-22: mock A with the states side by side.
+  chosen: { click: 'deep', drag: 'reorder', add: 'selection', states: 'matrix' },
   point: { click: 'deep', drag: 'reorder', add: 'selection', states: 'switch' },
   boxes: { click: 'boxes', drag: 'offset', add: 'place', states: 'matrix' },
   place: { click: 'deep', drag: 'reorder', add: 'place', states: 'diff' },
 };
-const presetNames: Record<Preset, string> = { point: 'A · Point and change', boxes: 'B · Boxes first', place: 'C · Place it yourself' };
+const presetNames: Record<Preset, string> = { chosen: 'D · Chosen mix', point: 'A · Point and change', boxes: 'B · Boxes first', place: 'C · Place it yourself' };
 const optNames: { [K in keyof Opt]: [label: string, options: [Opt[K], string][]] } = {
   click: ['A click selects', [['deep', 'What you point at'], ['boxes', 'The box first']]],
   drag: ['A drag in a row or column', [['reorder', 'Moves it to a new place'], ['offset', 'Shifts it by pixels']]],
@@ -36,30 +38,51 @@ type El = {
   kids?: El[]; arrange?: 'column' | 'row' | 'free'; gap?: number; pad?: number; frame?: boolean;
   /** Free placement: the top left corner, in game pixels. */
   at?: { x: number; y: number };
+  /** Free placement: the point that `at` measures from, on the box and on the element. Two letters: t, m or b, then l, c or r. */
+  pin?: string;
   /** In a row or column: how far it sits from its place. */
   off?: { x: number; y: number };
   w?: number; h?: number;
   /** Its look group. Loomlight makes each group. */
   group?: string; own?: Record<string, V>;
   actions?: Action[]; stock?: string; bind?: string; max?: number; entrance?: string; pic?: string;
+  /** A bar that the player can drag has a thumb. */
+  drag?: boolean;
+  /** A box is Drawn from its box look, or shows an image file. */
+  mode?: 'image';
   /** Why it does not move here. */
   fixed?: string;
 };
 type Doc = { screens: Record<string, El>; groups: Record<string, Record<string, V>>; game: Record<string, Record<string, V>> };
 type Sel = { g?: string; e?: string } | null;
 type Level = { label: string; own: Record<string, V> };
-type Setting = { key: string; label: string; type: 'color' | 'px' | 'pick'; perState?: boolean; none?: boolean; max?: number; options?: [string, string][] };
+type Setting = { key: string; label: string; type: 'color' | 'px' | 'num' | 'pick'; perState?: boolean; none?: boolean; max?: number; options?: [string, string][];
+  /** It sits under this setting, and shows only while `needs` has a value. */
+  under?: string; needs?: string };
 type Rect = { x: number; y: number; w: number; h: number };
 
+// The box look: fill, corners, border and shadow. Fill, border color and shadow can differ for each state.
+const boxLook: Setting[] = [
+  { key: 'fill', label: 'Fill', type: 'color', perState: true, none: true },
+  { key: 'fill2', label: 'Fades to', type: 'color', perState: true, none: true, under: 'fill', needs: 'fill' },
+  { key: 'dir', label: 'Direction', type: 'pick', options: [['v', 'Top to bottom'], ['h', 'Left to right']], under: 'fill', needs: 'fill2' },
+  { key: 'border', label: 'Border', type: 'color', perState: true, none: true },
+  { key: 'shadow', label: 'Shadow', type: 'color', perState: true, none: true },
+  { key: 'blur', label: 'Blur', type: 'px', max: 60, under: 'shadow', needs: 'shadow' },
+  { key: 'sx', label: 'Offset X', type: 'num', under: 'shadow', needs: 'shadow' }, { key: 'sy', label: 'Offset Y', type: 'num', under: 'shadow', needs: 'shadow' },
+  { key: 'bwidth', label: 'Border width', type: 'px', max: 12 }, { key: 'corners', label: 'Corners', type: 'px', max: 60 },
+];
+const boxKeys = boxLook.map(def => def.key);
 const looks: Record<string, Setting[]> = {
-  Button: [
-    { key: 'text', label: 'Text', type: 'color', perState: true }, { key: 'fill', label: 'Fill', type: 'color', perState: true, none: true },
-    { key: 'border', label: 'Border', type: 'color', perState: true, none: true }, { key: 'corners', label: 'Corners', type: 'px', max: 40 },
+  Button: [{ key: 'text', label: 'Text', type: 'color', perState: true }, ...boxLook,
     { key: 'motion', label: 'On hover', type: 'pick', options: [['none', 'No animation'], ['lift', 'Lift'], ['grow', 'Grow'], ['glow', 'Glow']] }],
   Text: [{ key: 'text', label: 'Color', type: 'color' }, { key: 'size', label: 'Size', type: 'px', max: 120 }],
-  Box: [{ key: 'fill', label: 'Fill', type: 'color', none: true }, { key: 'border', label: 'Border', type: 'color', none: true }, { key: 'corners', label: 'Corners', type: 'px', max: 60 }],
-  Bar: [{ key: 'track', label: 'Track', type: 'color' }, { key: 'filled', label: 'Filled part', type: 'color' }, { key: 'corners', label: 'Corners', type: 'px', max: 20 }],
+  Box: boxLook,
+  Bar: [{ key: 'track', label: 'Track', type: 'color' }, { key: 'filled', label: 'Filled part', type: 'color' }, { key: 'thumb', label: 'Thumb', type: 'color' }, { key: 'corners', label: 'Corners', type: 'px', max: 20 }],
 };
+const pinWords: Record<string, string> = { t: 'top', m: 'middle', b: 'bottom', l: 'left', c: 'centre', r: 'right' };
+const pinName = (pin: string) => pin === 'mc' ? 'centre' : `${pinWords[pin[0]!]} ${pinWords[pin[1]!]}`;
+const pinOf = (el: El) => { const pin = el.pin ?? 'tl'; return { py: { t: 0, m: 0.5, b: 1 }[pin[0]!] ?? 0, px: { l: 0, c: 0.5, r: 1 }[pin[1]!] ?? 0 }; };
 const plural: Record<string, string> = { Button: 'Buttons', Text: 'Text', Box: 'Boxes', Bar: 'Bars' };
 const inGame: Record<string, string> = { Button: 'buttons in the game', Text: 'text in the game', Box: 'boxes in the game', Bar: 'bars in the game' };
 const variables: [name: string, type: string, sample: string][] = [['platform', 'whole number', '4'], ['depart_time', 'text', '23:52'], ['tram_wait', 'whole number', '6'], ['boarded', 'true or false', 'False']];
@@ -75,14 +98,14 @@ const menuButton = (id: string, text: string, stock: string): El => ({ id, kind:
 function fresh(): Doc {
   return {
     game: {
-      Button: { text: '#f6efe2', 'hover.text': '#e8a54b', 'selected.text': '#e8a54b', 'disabled.text': '#8a8377', fill: '', border: '', corners: 10, motion: 'none' },
-      Text: { text: '#f6efe2', size: 36 }, Box: { fill: '#1d1410', border: '#8a6a35', corners: 10 }, Bar: { track: '#3a3028', filled: '#e8a54b', corners: 6 },
+      Button: { text: '#f6efe2', 'hover.text': '#e8a54b', 'selected.text': '#e8a54b', 'disabled.text': '#8a8377', fill: '', fill2: '', dir: 'v', border: '', bwidth: 2, shadow: '', blur: 12, sx: 0, sy: 4, corners: 10, motion: 'none' },
+      Text: { text: '#f6efe2', size: 36 }, Box: { fill: '#1d1410', fill2: '', dir: 'v', border: '#8a6a35', bwidth: 3, shadow: '', blur: 24, sx: 0, sy: 8, corners: 10 }, Bar: { track: '#3a3028', filled: '#e8a54b', thumb: '#f6efe2', corners: 6 },
     },
     groups: { menu: {} },
     screens: {
       title: { id: 'title', kind: 'Box', arrange: 'free', kids: [
         { id: 'bg', kind: 'Image', name: 'Background', pic: 'dawn', fixed: 'The background fills the screen. It does not move.' },
-        { id: 'panel', kind: 'Box', name: 'Menu panel', frame: true, group: 'Box:title', arrange: 'free', at: { x: 0, y: 0 }, w: 440, h: 1080, own: { corners: 0, fill: '#1d1410d6' }, kids: [] },
+        { id: 'panel', kind: 'Box', name: 'Menu panel', frame: true, group: 'Box:title', arrange: 'free', at: { x: 0, y: 0 }, w: 440, h: 1080, mode: 'image', kids: [] },
         { id: 'menu', kind: 'Box', name: 'Menu', arrange: 'column', gap: 14, at: { x: 62, y: 330 }, kids: [
           menuButton('start', 'Start', 'Starts the game'), menuButton('load', 'Load', 'Opens Load'), menuButton('prefs', 'Preferences', 'Opens Options'),
           menuButton('about', 'About', 'Opens About'), menuButton('help', 'Help', 'Opens Help'), menuButton('quit', 'Quit', 'Asks, then closes the game')] },
@@ -125,7 +148,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   let page: string, sel: Sel, hover: Sel = null, showState: St, cell: string, more: boolean, listOpen: boolean | null, open: string, expanded: number | null;
   let copied: { kind: string; values: Record<string, V>; from: string } | null, placing: Kind | null, nextNew: number, nextAction: number;
   // What the pointer is doing on the canvas: an outline that follows it, and the line where the element will land.
-  let ghost: Rect | null = null, line: Rect | null = null, pending: Doc | null = null, focusCanvas = false;
+  let ghost: Rect | null = null, line: Rect | null = null, guides: Rect[] = [], pending: Doc | null = null, focusCanvas = false;
 
   function reset(state: string) {
     doc = fresh(); done = []; undone = []; saved = 0; status = 'Ready'; page = 'ticket'; sel = null; hover = null; showState = 'idle'; cell = 'idle.text';
@@ -186,22 +209,29 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     const L = levels({ e: el.id });
     const v = (key: string) => resolve(L, key, forced).value;
     const css: string[] = [];
-    if (parent.arrange === 'free') css.push(`position:absolute;left:${u(el.at?.x ?? 0)};top:${u(el.at?.y ?? 0)}`);
+    const { px, py } = pinOf(el);
+    if (parent.arrange === 'free') css.push(`position:absolute;left:calc(${px * 100}% + ${u(el.at?.x ?? 0)});top:calc(${py * 100}% + ${u(el.at?.y ?? 0)})${px || py ? `;translate:${-px * 100}% ${-py * 100}%` : ''}`);
     else if (el.off) css.push(`translate:${u(el.off.x)} ${u(el.off.y)}`);
     if (el.w) css.push(`width:${u(el.w)}`);
     if (el.h) css.push(`height:${u(el.h)}`);
     let inner = '', cls = `d-${el.kind}`;
+    // An Image box shows its file as it is. The stock frame is a dark fill with square corners.
+    const box = () => {
+      if (el.mode === 'image') return 'background:#1d1410d6';
+      const fill = v('fill'), to = v('fill2'), shade = v('shadow');
+      return `background:${!fill ? 'transparent' : to ? `linear-gradient(${v('dir') === 'h' ? 'to right' : 'to bottom'}, ${fill}, ${to})` : fill};border:${u(Number(v('bwidth')))} solid ${v('border') || 'transparent'};border-radius:${u(Number(v('corners')))}${shade ? `;box-shadow:${u(Number(v('sx')))} ${u(Number(v('sy')))} ${u(Number(v('blur')))} ${shade}` : ''}`;
+    };
     if (el.kind === 'Box') {
       cls += ` d-a-${el.arrange}`;
       css.push(`gap:${u(el.gap ?? 0)};padding:${u(el.pad ?? 0)}`);
-      if (el.frame) css.push(`background:${v('fill') || 'transparent'};border:${u(3)} solid ${v('border') || 'transparent'};border-radius:${u(Number(v('corners')))}`);
+      if (el.frame) css.push(box());
       inner = el.kids!.map(kid => drawEl(kid, el)).join('');
-    } else if (el.kind === 'Button') { css.push(`color:${v('text')};background:${v('fill') || 'transparent'};border-color:${v('border') || 'transparent'};border-radius:${u(Number(v('corners')))}`); inner = shown(el.text ?? ''); }
+    } else if (el.kind === 'Button') { css.push(`color:${v('text')};${box()}`); inner = shown(el.text ?? ''); }
     else if (el.kind === 'Text') { css.push(`color:${v('text')};font-size:${u(Number(v('size')))}`); inner = shown(el.text ?? ''); }
     else if (el.kind === 'Bar') {
       const sample = Number(variables.find(([n]) => n === el.bind)?.[2] ?? 0), part = el.bind ? Math.min(1, sample / (el.max || 1)) : 0.5;
       css.push(`background:${v('track')};border-radius:${u(Number(v('corners')))}`);
-      inner = `<i style="width:${part * 100}%;background:${v('filled')}"></i>`;
+      inner = `<i style="width:${part * 100}%;background:${v('filled')}"></i>${el.drag ? `<b style="left:${part * 100}%;background:${v('thumb')}"></b>` : ''}`;
     } else if (el.kind === 'Image') { cls += el.pic ? ` d-pic-${el.pic}` : ' d-nopic'; inner = el.pic === 'stamp' ? 'NIGHT<br>FARE' : el.pic ? '' : 'Picture'; }
     else inner = ['Harrow Quay', 'Mill Lane', 'Depot'].map(stop => `<span>${stop}</span>`).join('<b>›</b>');
     return `<div class="d-el ${cls}" data-el="${el.id}" style="${css.join(';')}">${inner}</div>`;
@@ -236,8 +266,12 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     let html = hover && !same(hover, sel) ? selEls(hover).map((el, i) => outline(el, 'd-hov', i === 0 ? tagOf(hover) : '')).join('') : '';
     html += selEls(sel).map((el, i) => outline(el, 'd-sel', i === 0 ? tagOf(sel) : '')).join('');
     const one = sel?.e ? find(sel.e)?.el : null, r = one && canResize(one) && !ghost ? rectOf(one.id) : null;
-    // Text takes a width and wraps, so it has one handle. The others take a width and a height.
-    if (one && r) html += (one.kind === 'Text' ? ['e'] : ['e', 's', 'se']).map(dir => `<b class="d-h d-h-${dir}" data-handle="${dir}" style="left:${r.x + (dir === 's' ? r.w / 2 : r.w)}px;top:${r.y + (dir === 'e' ? r.h / 2 : r.h)}px"></b>`).join('');
+    // Text takes a width and wraps, so its handles are on its sides. A free element has handles on every edge.
+    // In a row or column the box sets the place, so the handles are on the right and the bottom.
+    const isFree = !!one && !arranged(find(one.id)!);
+    const dirs = one?.kind === 'Text' ? (isFree ? ['e', 'w'] : ['e']) : isFree ? ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'] : ['e', 's', 'se'];
+    if (one && r) html += dirs.map(dir => `<b class="d-h d-h-${dir}" data-handle="${dir}" style="left:${r.x + (dir.includes('w') ? 0 : dir.includes('e') ? r.w : r.w / 2)}px;top:${r.y + (dir.includes('n') ? 0 : dir.includes('s') ? r.h : r.h / 2)}px"></b>`).join('');
+    html += guides.map(g => `<i class="d-guide" style="${place(g)}"></i>`).join('');
     if (ghost) html += `<i class="d-ghost" style="${place(ghost)}"></i>`;
     if (line) html += `<i class="d-line" style="${place(line)}"></i>`;
     over.innerHTML = html;
@@ -277,7 +311,9 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     if (sel && !selEls(sel).length) sel = null;
     status = `${back ? 'Undone' : 'Redone'}: ${entry.name}`;
   }
-  const scale = () => 1920 / host.querySelector<HTMLElement>('[data-main]')!.getBoundingClientRect().width;
+  /** The drawn game, inside the stage's edge. Game pixels and cqw units measure from it. */
+  const gameBox = () => host.querySelector<HTMLElement>('[data-main] .g')!.getBoundingClientRect();
+  const scale = () => 1920 / gameBox().width;
   /** The row or column under the pointer, and the place in it. Null means free space. */
   function dropTarget(x: number, y: number, dragId: string | null): { box: El; index: number; line: Rect } | null {
     for (const node of document.elementsFromPoint(x, y)) {
@@ -295,6 +331,35 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     }
     return null;
   }
+  /** The area that a free element sits in: its box, or the screen. */
+  function areaOf(parent: El): Rect {
+    if (parent !== root()) return rectOf(parent.id)!;
+    const a = host.querySelector('.gu-view')!.getBoundingClientRect(), b = gameBox();
+    return { x: b.left - a.left, y: b.top - a.top, w: b.width, h: b.height };
+  }
+  /** Alignment guides: an edge or the middle of the outline snaps to the screen's edges and middle, and to its neighbors' edges and middles. */
+  function snap(r: Rect, skip: string, parent: El): { r: Rect; guides: Rect[] } {
+    const area = areaOf(root()), others = parent.kids!.filter(kid => kid.id !== skip && kid.id !== 'bg').map(kid => rectOf(kid.id)).filter((o): o is Rect => !!o);
+    const fit = (mine: number[], targets: number[]) => {
+      let best: [by: number, at: number] | null = null;
+      for (const t of targets) for (const m of mine) if (Math.abs(t - m) < 6 && (!best || Math.abs(t - m) < Math.abs(best[0]))) best = [t - m, t];
+      return best;
+    };
+    const x = fit([r.x, r.x + r.w / 2, r.x + r.w], [area.x, area.x + area.w / 2, area.x + area.w, ...others.flatMap(o => [o.x, o.x + o.w / 2, o.x + o.w])]);
+    const y = fit([r.y, r.y + r.h / 2, r.y + r.h], [area.y, area.y + area.h / 2, area.y + area.h, ...others.flatMap(o => [o.y, o.y + o.h / 2, o.y + o.h])]);
+    return { r: { ...r, x: r.x + (x?.[0] ?? 0), y: r.y + (y?.[0] ?? 0) }, guides: [...(x ? [{ x: x[1], y: area.y, w: 1, h: area.h }] : []), ...(y ? [{ x: area.x, y: y[1], w: area.w, h: 1 }] : [])] };
+  }
+  function duplicate() {
+    const f = sel?.e ? find(sel.e) : null;
+    if (!f) { status = 'Select one element to duplicate it.'; return; }
+    if (f.el.fixed || f.el.kind === 'Code') { status = `${nameOf(f.el)} cannot be duplicated here.`; return; }
+    const copy = structuredClone(f.el);
+    const renew = (el: El) => { el.id = `new${nextNew++}`; el.actions = el.actions?.map(a => ({ ...a, id: nextAction++ })); el.kids?.forEach(renew); };
+    renew(copy);
+    if (copy.at && !arranged(f)) copy.at = { x: copy.at.x + 24, y: copy.at.y + 24 };
+    commit(`duplicate ${nameOf(f.el)}`, () => { f.parent.kids!.splice(f.parent.kids!.indexOf(f.el) + 1, 0, copy); });
+    select({ e: copy.id });
+  }
   /** An element takes the group of its kind in the box it joins. Outside such a box it is in its screen's group. */
   function regroup(el: El, box: El) {
     if (!looks[el.kind] || (el.kind === 'Box' && !el.frame)) return;
@@ -303,13 +368,13 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   function moveInto(id: string, box: El, index: number) {
     const f = find(id)!;
     f.parent.kids!.splice(f.parent.kids!.indexOf(f.el), 1);
-    delete f.el.at; delete f.el.off;
+    delete f.el.at; delete f.el.off; delete f.el.pin;
     box.kids!.splice(index, 0, f.el); regroup(f.el, box);
   }
   function moveFree(id: string, at: { x: number; y: number }) {
     const f = find(id)!;
     if (f.parent !== root()) { f.parent.kids!.splice(f.parent.kids!.indexOf(f.el), 1); root().kids!.push(f.el); regroup(f.el, root()); }
-    delete f.el.off; f.el.at = at;
+    delete f.el.off; delete f.el.pin; f.el.at = at;
   }
   function make(kind: Kind): El {
     const id = `new${nextNew++}`, g = `${kind}:${page}`;
@@ -339,7 +404,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     if (!sel) return;
     if (sel.g) { status = 'Select one element to delete it. A group is a shared look, not a thing on the screen.'; return; }
     const f = find(sel.e!)!;
-    if (f.el.fixed || f.el.kind === 'Code') { status = f.el.kind === 'Code' ? `${nameOf(f.el)} is source only. Delete its lines in Source.` : `${nameOf(f.el)} cannot go. Its settings can hide it.`; return; }
+    if (f.el.fixed || f.el.kind === 'Code') { status = f.el.kind === 'Code' ? `${nameOf(f.el)} is source only. Delete its lines in Source.` : `The game needs ${nameOf(f.el)}. Its settings are on the settings page.`; return; }
     commit(`delete ${nameOf(f.el)}`, () => { f.parent.kids!.splice(f.parent.kids!.indexOf(f.el), 1); });
     select(f.parent === root() ? null : { e: f.parent.id });
   }
@@ -383,44 +448,57 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     const name = `${st === 'idle' ? '' : `${cap(st)} `}${def.label}`;
     const control = def.type === 'color' ? `<span class="gu-color"><input type="color" data-in="look:${key}" value="${String(value).slice(0, 7) || '#000000'}" aria-label="${esc(name)}"${value === '' ? ' class="d-none"' : ''}><code>${value === '' ? 'None' : String(value).slice(0, 7)}</code></span>${def.none ? `<button type="button" class="gu-icon gu-flat d-nonebtn" data-do="none:${key}" aria-pressed="${value === ''}" aria-label="No ${def.label.toLowerCase()}" title="No ${def.label.toLowerCase()}">${svg(glyph.none)}</button>` : ''}`
       : def.type === 'px' ? `<span class="gu-range"><input type="range" data-in="look:${key}" min="0" max="${def.max}" value="${value}" aria-label="${esc(name)}"><output>${value}px</output></span>`
+        : def.type === 'num' ? `<span class="gu-xy"><input type="number" data-in="look:${key}" value="${value}" aria-label="${esc(name)}"></span>`
         : `<select data-in="look:${key}" aria-label="${esc(name)}">${def.options!.map(([v, text]) => `<option value="${v}" ${v === value ? 'selected' : ''}>${text}</option>`).join('')}</select>`;
     return `<div class="gu-field"><span class="gu-label">${label}</span><span class="gu-control">${control}<span class="gu-spacer"></span>${chain(L, def, st)}</span></div>`;
   }
   const showButton = (st: St, label = cap(st)) => `<button type="button" class="gu-flat d-show" data-do="state:${st}" aria-pressed="${showState === st}" aria-label="Show ${st} on the canvas" title="Show ${st} on the canvas">${label}</button>`;
   function lookSection(): string {
-    const kind = selKind(sel), defs = looks[kind];
-    if (!defs) return '';
-    const one = sel?.e ? find(sel.e)!.el : null;
+    const kind = selKind(sel), one = sel?.e ? find(sel.e)!.el : null;
+    if (!looks[kind]) return '';
     if (one?.kind === 'Box' && !one.frame) return `<section class="gu-group"><h3>Look</h3><p class="gu-help gu-help-wide">This box only arranges its elements. It has no background.</p><div><button type="button" data-do="frame">Give it a background</button></div></section>`;
-    const L = levels(sel), per = defs.filter(def => def.perState), rest = defs.filter(def => !def.perState);
+    const L = levels(sel), stateful = kind === 'Button', image = one?.mode === 'image';
+    // A box is Drawn from its box look, or shows an image file. An Image box has no fill, corners, border or shadow to set.
+    const boxy = !!one && (one.kind === 'Button' || one.kind === 'Box');
+    const mode = boxy ? `<div class="gu-field"><span class="gu-label">Box</span><span class="gu-control"><div class="gu-seg" role="group" aria-label="Box">${[['drawn', 'Drawn'], ['image', 'Image']].map(([v, text]) => `<button type="button" data-do="mode:${v}" aria-pressed="${image === (v === 'image')}">${text}</button>`).join('')}</div></span></div>
+      ${image ? `<div class="gu-field"><span class="gu-label">Image</span><span class="gu-control"><code class="gu-clip">gui/frame.png</code><span class="gu-spacer"></span><button type="button" data-do="say:Change opens the project's pictures. Stretch areas and an image for each state are not part of this mock.">Change</button></span>
+        <p class="gu-help">Loomlight shows this file as it is. Select Drawn to set a fill, corners, a border and a shadow. The file stays in the project.</p></div>` : ''}` : '';
+    const defs = looks[kind]!.filter(def => (def.key !== 'thumb' || selEls(sel).some(el => el.drag)) && !(image && boxKeys.includes(def.key)));
+    const shows = (def: Setting, st: St) => !def.needs || resolve(L, def.needs, st).value !== '';
+    const glow = (st: St) => resolve(L, 'shadow', st).value !== '' ? `<div class="d-row"><span class="gu-help">A glow is a shadow with no offset.</span><button type="button" class="gu-flat gu-edit" data-do="glow">Glow</button></div>` : '';
+    /** One setting with the settings under it: Fill with its gradient, Shadow with its blur and offset. */
+    const full = (def: Setting, st: St, label?: string) => `${lookRow(L, def, st, label)}${defs.filter(d => d.under === def.key && shows(d, st)).map(d => lookRow(L, d, d.perState ? st : 'idle')).join('')}${def.key === 'shadow' ? glow(st) : ''}`;
+    const top = defs.filter(def => !def.under), per = stateful ? top.filter(def => def.perState) : [], rest = top.filter(def => !per.includes(def));
     let body: string;
-    if (!per.length) body = defs.map(def => lookRow(L, def, 'idle')).join('');
+    if (!per.length) body = top.map(def => full(def, 'idle')).join('');
     else if (opt.states === 'switch') {
       // One state at a time: the switch sets what the rows edit and what the canvas shows.
-      body = `<div class="gu-seg" role="group" aria-label="State">${states.map(st => showButton(st)).join('')}</div>${(showState === 'idle' ? defs : per).map(def => lookRow(L, def, showState)).join('')}
-        ${showState === 'idle' ? '' : `<p class="gu-help gu-help-wide">${rest.map(def => def.label).join(' and ')} are the same in every state.</p>`}`;
+      body = `<div class="gu-seg" role="group" aria-label="State">${states.map(st => showButton(st)).join('')}</div>${(showState === 'idle' ? top : per).map(def => full(def, showState)).join('')}
+        ${showState === 'idle' ? '' : '<p class="gu-help gu-help-wide">The other settings are the same in every state.</p>'}`;
     } else if (opt.states === 'matrix') {
-      // Side by side: every state of every setting in one table. A click on a cell opens its row under the table.
+      // Side by side: every state of every setting in one table. A click on a cell opens its rows under the table.
       const [cst, ckey] = cell.split('.') as [St, string], cdef = per.find(def => def.key === ckey) ?? per[0]!;
       const cellHtml = (def: Setting, st: St) => {
         const key = st === 'idle' ? def.key : `${st}.${def.key}`, r = resolve(L, def.key, st), own = key in L[0]!.own;
+        const to = def.key === 'fill' && r.value ? resolve(L, 'fill2', st).value : '';
+        const paint = to ? `linear-gradient(${resolve(L, 'dir', st).value === 'h' ? 'to right' : 'to bottom'}, ${r.value}, ${to})` : r.value || 'transparent';
         const where = own ? 'own value' : `same as ${fromName(L, r)}`;
-        return `<button type="button" class="d-cell${own ? ' is-own' : ''}${r.value === '' ? ' is-none' : ''}" data-do="cell:${st}.${def.key}" aria-pressed="${cell === `${st}.${def.key}`}" style="--c:${r.value || 'transparent'}" aria-label="${cap(st)} ${def.label.toLowerCase()}: ${r.value || 'none'}, ${esc(where)}" title="${cap(st)} ${def.label.toLowerCase()}: ${esc(where)}"></button>`;
+        return `<button type="button" class="d-cell${own ? ' is-own' : ''}${r.value === '' ? ' is-none' : ''}" data-do="cell:${st}.${def.key}" aria-pressed="${cdef === def && cst === st}" style="--c:${paint}" aria-label="${cap(st)} ${def.label.toLowerCase()}: ${r.value || 'none'}, ${esc(where)}" title="${cap(st)} ${def.label.toLowerCase()}: ${esc(where)}"></button>`;
       };
       body = `<div class="d-matrix"><span></span>${states.map(st => showButton(st)).join('')}${per.map(def => `<span class="gu-label">${def.label}</span>${states.map(st => cellHtml(def, st)).join('')}`).join('')}</div>
         <p class="gu-help gu-help-wide">A solid edge marks an own value. A state name shows that state on the canvas.</p>
-        ${lookRow(L, cdef, cst, `${cap(cst)} ${cdef.label.toLowerCase()}`)}${rest.map(def => lookRow(L, def, 'idle')).join('')}`;
+        ${full(cdef, cst, `${cap(cst)} ${cdef.label.toLowerCase()}`)}${rest.length ? `<div class="d-state-head"><h4>Every state</h4></div>${rest.map(def => full(def, 'idle')).join('')}` : ''}`;
     } else {
       // Differences from Idle: each other state lists only the settings that differ from Idle.
-      body = `<div class="d-state-head"><h4>Idle</h4><span class="gu-spacer"></span>${showButton('idle', 'Show')}</div>${defs.map(def => lookRow(L, def, 'idle')).join('')}${states.slice(1).map(st => {
+      body = `<div class="d-state-head"><h4>Idle</h4><span class="gu-spacer"></span>${showButton('idle', 'Show')}</div>${top.map(def => full(def, 'idle')).join('')}${states.slice(1).map(st => {
         const differs = per.filter(def => `${st}.${def.key}` in L[0]!.own || resolve(L, def.key, st).value !== resolve(L, def.key, 'idle').value);
         const others = per.filter(def => !differs.includes(def));
         return `<div class="d-state-head"><h4>${cap(st)}</h4>${differs.length ? '' : '<span class="gu-muted">Same as Idle</span>'}<span class="gu-spacer"></span>${showButton(st, 'Show')}
           ${others.length ? `<span class="gu-anchor"><button type="button" class="gu-flat gu-edit" data-do="menu:diff:${st}" aria-expanded="${open === `diff:${st}`}">Change</button>${open === `diff:${st}` ? `<div class="gu-pop gu-menu gu-pop-right" role="menu">${others.map(def => `<button type="button" class="gu-flat" role="menuitem" data-do="own:${st}.${def.key}">${def.label}</button>`).join('')}</div>` : ''}</span>` : ''}</div>
-          ${differs.map(def => lookRow(L, def, st)).join('')}`;
+          ${differs.map(def => full(def, st)).join('')}`;
       }).join('')}`;
     }
-    return `<section class="gu-group"><h3>Look</h3>${body}</section>`;
+    return `<section class="gu-group"><h3>Look</h3>${mode}${body}</section>`;
   }
   const actionText = (a: Action) => a.type === 'set' ? (a.op === 'add' ? `Add ${a.value} to ${a.name}` : a.op === 'sub' ? `Subtract ${a.value} from ${a.name}` : `Set ${a.name} to ${a.value}`) : `${a.type === 'show' ? 'Show' : 'Hide'} ${titles[a.screen!] ?? a.screen}`;
   function behavior(el: El): string {
@@ -433,7 +511,8 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     if (el.kind === 'Image') html += `<section class="gu-group"><div class="gu-field"><span class="gu-label">Picture</span><span class="gu-control"><button type="button" data-do="say:Choose a picture opens the project's pictures. It is not part of this mock.">${el.pic ? 'Change' : 'Choose a picture'}</button></span></div></section>`;
     if (el.kind === 'Bar') {
       html += `<section class="gu-group"><h3>Value</h3><div class="gu-field"><span class="gu-label">Shows</span><span class="gu-control"><select data-in="bind" aria-label="Variable"><option value="">Nothing yet</option>${variables.filter(([, type]) => type === 'whole number').map(([name]) => `<option value="${name}" ${el.bind === name ? 'selected' : ''}>${name}</option>`).join('')}</select></span></div>
-        <div class="gu-field"><span class="gu-label">Full at</span><span class="gu-control gu-xy"><input type="number" data-in="max" value="${el.max ?? 100}" aria-label="Full at"></span><p class="gu-help">${el.bind ? `The canvas shows the sample value ${variables.find(([n]) => n === el.bind)?.[2]}.` : 'Choose a whole-number variable.'}</p></div></section>`;
+        <div class="gu-field"><span class="gu-label">Full at</span><span class="gu-control gu-xy"><input type="number" data-in="max" value="${el.max ?? 100}" aria-label="Full at"></span><p class="gu-help">${el.bind ? `The canvas shows the sample value ${variables.find(([n]) => n === el.bind)?.[2]}.` : 'Choose a whole-number variable.'}</p></div>
+        <label class="gu-toggle"><input type="checkbox" data-in="bardrag" ${el.drag ? 'checked' : ''}>The player can drag it</label></section>`;
     }
     if (el.kind === 'Button') {
       // The approved action editor: ordered actions, one open at a time. Each change is a draft step, with no Apply.
@@ -459,7 +538,9 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     const where = arranged(f)
       ? `<div class="gu-field"><span class="gu-label">Place</span><span class="gu-control"><span>${kids.indexOf(el) + 1} of ${kids.length} in ${esc(nameOf(f.parent))}</span><span class="gu-spacer"></span><button type="button" class="gu-icon gu-flat" data-do="shift:-1" aria-label="Move earlier" title="Move earlier">${svg(glyph.up)}</button><button type="button" class="gu-icon gu-flat" data-do="shift:1" aria-label="Move later" title="Move later">${svg(glyph.down)}</button></span></div>
          <div class="gu-field"><span class="gu-label">Offset</span>${xy('off', off)}<p class="gu-help">How far it sits from its place in the ${f.parent.arrange}.</p></div>`
-      : `<div class="gu-field"><span class="gu-label">Position</span>${xy('pos', at)}<p class="gu-help">From the top left of ${f.parent === root() ? 'the screen' : esc(nameOf(f.parent))}.</p></div>`;
+      : `<div class="gu-field"><span class="gu-label">Position</span>${xy('pos', at)}<p class="gu-help">From the ${pinName(el.pin ?? 'tl')} of ${f.parent === root() ? 'the screen' : esc(nameOf(f.parent))}.</p></div>
+         <div class="gu-field"><span class="gu-label">Pin</span><span class="gu-control"><div class="d-pin" role="group" aria-label="Pin">${['t', 'm', 'b'].flatMap(v => ['l', 'c', 'r'].map(h => `<button type="button" data-do="pin:${v}${h}" aria-pressed="${(el.pin ?? 'tl') === v + h}" aria-label="${cap(pinName(v + h))}" title="${cap(pinName(v + h))}"></button>`)).join('')}</div></span>
+         <p class="gu-help">It keeps its distance from this point when its size or its words change.</p></div>`;
     const size = `<div class="gu-field"><span class="gu-label">${el.kind === 'Text' ? 'Wraps at' : 'Size'}</span><span class="gu-control gu-xy"><label>W<input type="number" data-in="size:w" value="${el.w ?? ''}" placeholder="Fit"></label>${el.kind === 'Text' ? '' : `<label>H<input type="number" data-in="size:h" value="${el.h ?? ''}" placeholder="Fit"></label>`}</span>
       <p class="gu-help">Empty means it fits its content.</p></div>`;
     const box = el.kind === 'Box' ? `<div class="gu-field"><span class="gu-label">Arrange</span><span class="gu-control"><div class="gu-seg" role="group" aria-label="Arrange">${(['column', 'row', 'free'] as const).map(a => `<button type="button" data-do="arrange:${a}" aria-pressed="${el.arrange === a}">${cap(a)}</button>`).join('')}</div></span>
@@ -492,7 +573,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     const kind = selKind(sel), canPaste = !!copied && copied.kind === kind;
     const menu = `<span class="gu-anchor"><button type="button" class="gu-icon gu-flat" data-do="menu:more" aria-expanded="${open === 'more'}" aria-label="More commands" title="More commands">${svg(glyph.more)}</button>${open === 'more' ? `<div class="gu-pop gu-menu gu-pop-right" role="menu">
       ${looks[kind] ? `<button type="button" class="gu-flat" role="menuitem" data-do="copylook">Copy look</button><button type="button" class="gu-flat" role="menuitem" data-do="pastelook" aria-disabled="${!canPaste}" title="${canPaste ? `From ${esc(copied!.from)}` : `Copy the look of ${kind === 'Text' ? 'some text' : `a ${kind.toLowerCase()}`} first`}">Paste look</button>` : ''}
-      ${sel.e ? `<button type="button" class="gu-flat" role="menuitem" data-do="delete">Delete<span class="gu-muted d-key">${mac ? '⌫' : 'Del'}</span></button>` : ''}</div>` : ''}</span>`;
+      ${sel.e ? `<button type="button" class="gu-flat" role="menuitem" data-do="duplicate">Duplicate<span class="gu-muted d-key">${mac ? '⌘D' : 'Ctrl+D'}</span></button><button type="button" class="gu-flat" role="menuitem" data-do="delete">Delete<span class="gu-muted d-key">${mac ? '⌫' : 'Del'}</span></button>` : ''}</div>` : ''}</span>`;
     const n = sel.g ? members(sel.g).length : 0;
     const counts = sel.g ? `<p class="d-counts">${n} here${sel.g === 'menu' ? ` · <button type="button" class="gu-flat gu-edit" data-do="say:&quot;on 7 screens&quot; shows those screens together with the unsaved change. That view is in the approved layout mock.">on 7 screens</button>` : ''}</p>` : '';
     const head = `<div class="gu-panel-top"><div class="gu-el-head"><div class="gu-el-back">${back}${addMenu()}</div>${trail}<div class="d-name"><h2 class="gu-clip" title="${esc(selName(sel))}">${esc(selName(sel))}</h2>${menu}</div>${counts}</div></div>`;
@@ -575,13 +656,23 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
       case 'cell': cell = arg; showState = arg.split('.')[0] as St; break;
       case 'add': if (opt.add === 'place') { placing = arg as Kind; status = `Click the canvas where the new ${arg.toLowerCase()} goes. Esc cancels.`; focusCanvas = true; } else addBySelection(arg as Kind); break;
       case 'delete': remove(); break;
+      case 'duplicate': duplicate(); break;
+      case 'glow': commit(`${selName(sel)} glow`, () => { setLook('sx', 0); setLook('sy', 0); }); break;
+      case 'mode': if ((f!.el.mode === 'image') !== (arg === 'image')) commit(arg === 'image' ? `use an image for ${nameOf(f!.el)}` : `draw ${nameOf(f!.el)} from a box look`, () => { if (arg === 'image') f!.el.mode = 'image'; else delete f!.el.mode; }); break;
+      case 'pin': if ((f!.el.pin ?? 'tl') !== arg) commit(`pin ${nameOf(f!.el)} to the ${pinName(arg)}`, () => {
+        // The element stays where it is. Only the point that its position measures from changes.
+        const r = rectOf(f!.el.id)!, area = areaOf(f!.parent), k = scale();
+        f!.el.pin = arg;
+        const { px, py } = pinOf(f!.el);
+        f!.el.at = { x: Math.round((r.x + px * r.w - area.x - px * area.w) * k), y: Math.round((r.y + py * r.h - area.y - py * area.h) * k) };
+      }); break;
       case 'shift': shift(Number(arg)); break;
       case 'frame': commit(`give ${nameOf(f!.el)} a background`, () => { f!.el.frame = true; regroup(f!.el, f!.parent); }); break;
       case 'arrange': if (f!.el.arrange !== arg) commit(`arrange ${nameOf(f!.el)} as a ${arg}`, () => {
         // Free placement keeps each element where the row or column had put it.
         const spots = arg === 'free' ? f!.el.kids!.map(kid => rectOf(kid.id)!) : [], box = rectOf(f!.el.id)!, s = scale();
         f!.el.arrange = arg as El['arrange'];
-        f!.el.kids!.forEach((kid, i) => { delete kid.off; if (arg === 'free') kid.at = { x: Math.round((spots[i]!.x - box.x) * s), y: Math.round((spots[i]!.y - box.y) * s) }; else delete kid.at; });
+        f!.el.kids!.forEach((kid, i) => { delete kid.off; delete kid.pin; if (arg === 'free') kid.at = { x: Math.round((spots[i]!.x - box.x) * s), y: Math.round((spots[i]!.y - box.y) * s) }; else delete kid.at; });
         if (arg === 'free') { f!.el.w ??= Math.round(box.w * s); f!.el.h ??= Math.round(box.h * s); }
       }); break;
       case 'none': { const L = levels(sel), def = looks[selKind(sel)]!.find(d => d.key === arg.split('.').pop())!, st = (arg.includes('.') ? arg.split('.')[0] : 'idle') as St;
@@ -617,8 +708,8 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     const f = sel?.e ? find(sel.e) : null;
     if (name === 'look') {
       pending ??= clone(doc);
-      setLook(key!, el.type === 'range' ? Number(el.value) : el.value);
-      const out = el.parentElement?.querySelector('output, code');
+      setLook(key!, el.type === 'range' || el.type === 'number' ? Number(el.value) : el.value);
+      const out = el.type === 'number' ? null : el.parentElement?.querySelector('output, code');
       if (out) out.textContent = el.type === 'range' ? `${el.value}px` : el.value;
       refreshStage();
     } else if (name === 'text' && f) { pending ??= clone(doc); f.el.text = el.value; refreshStage(); }
@@ -641,6 +732,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
       if (name === 'gap') commit(`${nameOf(f.el)} gap`, () => { f.el.gap = Math.max(0, n); });
       if (name === 'entrance') commit(`${nameOf(f.el)} entrance`, () => { f.el.entrance = el.value; });
       if (name === 'bind') commit(`${nameOf(f.el)} value`, () => { f.el.bind = el.value || undefined; });
+      if (name === 'bardrag') commit(`${nameOf(f.el)} can be dragged`, () => { f.el.drag = el.checked; });
       if (name === 'max') commit(`${nameOf(f.el)} range`, () => { f.el.max = Math.max(1, n); });
       if (name === 'act') commit(`change action of ${nameOf(f.el)}`, () => { const action = f.el.actions!.find(item => item.id === Number(a))!; (action as unknown as Record<string, unknown>)[b!] = el.value; });
     }
@@ -654,7 +746,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     if (!target.closest('[data-main]')) return;
     event.preventDefault(); focusCanvas = true;
     if (placing) {
-      const t = dropTarget(event.clientX, event.clientY, null), stage = host.querySelector('[data-main]')!.getBoundingClientRect(), s = scale();
+      const t = dropTarget(event.clientX, event.clientY, null), stage = gameBox(), s = scale();
       const kind = placing; placing = null; ghost = line = null;
       addAt(kind, t, { x: Math.round((event.clientX - stage.left) * s), y: Math.round((event.clientY - stage.top) * s) }); render(); return;
     }
@@ -680,6 +772,9 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
       // The outline follows the pointer. The canvas draws the element again when it lands, as the real frame would.
       ghost = { ...start, x: start.x + dx, y: start.y + dy };
       drop = opt.drag === 'reorder' ? dropTarget(m.clientX, m.clientY, dragId) : null;
+      guides = [];
+      // In free space the outline snaps to the screen and to its neighbors, and a guide shows the line it took.
+      if (!drop && (opt.drag === 'reorder' || !arranged(f))) { const snapped = snap(ghost, dragId, arranged(f) ? root() : f.parent); ghost = snapped.r; guides = snapped.guides; }
       line = drop?.line ?? null; drawOver();
     };
     const stop = () => { document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); };
@@ -687,28 +782,41 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
       stop();
       if (!moving) { if (advance && !same(advance, sel)) { select(advance); render(); } return; }
       const dx = Math.round((m.clientX - event.clientX) * s), dy = Math.round((m.clientY - event.clientY) * s), name = nameOf(f.el);
-      const stage = host.querySelector('.gu-view')!.getBoundingClientRect(), origin = host.querySelector('[data-main]')!.getBoundingClientRect();
+      const stage = host.querySelector('.gu-view')!.getBoundingClientRect(), origin = gameBox();
       const free = { x: Math.round((ghost!.x - (origin.left - stage.left)) * s), y: Math.round((ghost!.y - (origin.top - stage.top)) * s) };
       if (opt.drag === 'reorder' && drop) { const t = drop; commit(`move ${name} ${t.box === f.parent ? 'in' : 'into'} ${nameOf(t.box)}`, () => moveInto(dragId, t.box, t.index)); }
       else if (opt.drag === 'reorder' && arranged(f)) { commit(`take ${name} out of ${nameOf(f.parent)}`, () => moveFree(dragId, free)); status = `${name} left ${nameOf(f.parent)}. It stays where you put it.`; }
       else if (arranged(f)) commit(`move ${name}`, () => { f.el.off = { x: (f.el.off?.x ?? 0) + dx, y: (f.el.off?.y ?? 0) + dy }; });
-      else commit(`move ${name}`, () => { f.el.at = { x: (f.el.at?.x ?? 0) + dx, y: (f.el.at?.y ?? 0) + dy }; });
-      ghost = line = null; focusCanvas = true; render();
+      else { const gx = Math.round((ghost!.x - start.x) * s), gy = Math.round((ghost!.y - start.y) * s); commit(`move ${name}`, () => { f.el.at = { x: (f.el.at?.x ?? 0) + gx, y: (f.el.at?.y ?? 0) + gy }; }); }
+      ghost = line = null; guides = []; focusCanvas = true; render();
     };
     document.addEventListener('pointermove', move); document.addEventListener('pointerup', up);
   }
   function resize(event: PointerEvent, dir: string) {
     event.preventDefault();
-    const f = find(sel!.e!)!, start = rectOf(f.el.id)!, s = scale();
+    const f = find(sel!.e!)!, start = rectOf(f.el.id)!, s = scale(), { px, py } = pinOf(f.el);
     const move = (m: PointerEvent) => {
-      const w = Math.max(12, start.w + (dir.includes('e') ? m.clientX - event.clientX : 0));
-      // A picture keeps its shape from the corner handle.
-      const h = f.el.kind === 'Image' && dir === 'se' ? w * start.h / start.w : Math.max(12, start.h + (dir.includes('s') ? m.clientY - event.clientY : 0));
-      ghost = { ...start, w, h }; drawOver();
+      const dx = m.clientX - event.clientX, dy = m.clientY - event.clientY;
+      let { x, y, w, h } = start;
+      if (dir.includes('e')) w = Math.max(12, w + dx);
+      if (dir.includes('w')) { w = Math.max(12, w - dx); x = start.x + start.w - w; }
+      if (dir.includes('s')) h = Math.max(12, h + dy);
+      if (dir.includes('n')) { h = Math.max(12, h - dy); y = start.y + start.h - h; }
+      // A picture keeps its shape from a corner handle.
+      if (f.el.kind === 'Image' && dir.length === 2) { h = w * start.h / start.w; if (dir.includes('n')) y = start.y + start.h - h; }
+      ghost = { x, y, w, h }; drawOver();
     };
     const up = () => {
       document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up);
-      if (ghost) { const g = ghost; commit(`resize ${nameOf(f.el)}`, () => { if (dir.includes('e')) f.el.w = Math.round(g.w * s); if ((dir.includes('s') || f.el.kind === 'Image') && f.el.kind !== 'Text') f.el.h = Math.round(g.h * s); }); }
+      if (ghost) {
+        const g = ghost;
+        commit(`resize ${nameOf(f.el)}`, () => {
+          if (/[ew]/.test(dir)) f.el.w = Math.round(g.w * s);
+          if ((/[ns]/.test(dir) || f.el.kind === 'Image') && f.el.kind !== 'Text') f.el.h = Math.round(g.h * s);
+          // The edge that the author did not drag stays where it was, whatever the pin.
+          if (!arranged(f)) f.el.at = { x: (f.el.at?.x ?? 0) + Math.round((g.x - start.x + px * (g.w - start.w)) * s), y: (f.el.at?.y ?? 0) + Math.round((g.y - start.y + py * (g.h - start.h)) * s) };
+        });
+      }
       ghost = null; focusCanvas = true; render();
     };
     document.addEventListener('pointermove', move); document.addEventListener('pointerup', up);
@@ -739,6 +847,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     if ((event.metaKey || event.ctrlKey) && !typing) {
       const key = event.key.toLowerCase();
       if (key === 'z' || (key === 'y' && !mac)) { event.preventDefault(); step(!(key === 'y' || event.shiftKey)); render(); }
+      if (key === 'd' && sel?.e) { event.preventDefault(); duplicate(); focusCanvas = true; render(); }
       return;
     }
     if (!target.hasAttribute('data-canvas')) return;

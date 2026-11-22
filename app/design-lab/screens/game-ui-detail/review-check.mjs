@@ -59,7 +59,7 @@ export default async function ({ page, open, capture }) {
   await el('about').click(); await el('about').click();
   await page.locator('[data-do="menu:add"]').click();
   await page.locator('[data-do="add:Button"]').click();
-  if (preset !== 'point') { const b = await el('help').boundingBox(); await page.mouse.click(b.x + 10, b.y + 2); }
+  if (preset === 'boxes' || preset === 'place') { const b = await el('help').boundingBox(); await page.mouse.click(b.x + 10, b.y + 2); }
   assert.deepEqual((await order('menu')).slice(3, 5), ['about', 'new1']);
   assert.match(await status(), /one of the Menu buttons/);
   await capture(`${preset}-added`);
@@ -73,7 +73,7 @@ export default async function ({ page, open, capture }) {
   await page.locator('[data-do="state:hover"]').first().click();
   assert.match(await el('board').getAttribute('style'), /background:#e8a54b/);
   await capture(`${preset}-states`);
-  if (preset === 'boxes') await page.locator('[data-do="cell:hover.fill"]').click();
+  if (preset === 'boxes' || preset === 'chosen') await page.locator('[data-do="cell:hover.fill"]').click();
   if (preset === 'place') { await page.locator('[data-do="menu:diff:hover"]').click(); await page.locator('[data-do="own:hover.fill"]').click(); }
   const fill = page.locator('[data-in="look:hover.fill"]');
   await fill.fill('#ffffff'); await fill.dispatchEvent('change');
@@ -98,4 +98,65 @@ export default async function ({ page, open, capture }) {
   await capture(`${preset}-bar`);
   await open({ state: 'box', viewport: 'wide', theme: 'dark' });
   await capture(`${preset}-box`);
+  if (preset !== 'chosen') return;
+
+  // The chosen mix. The states table has a Shadow row, and Glow takes the offset away.
+  const style = id => el(id).getAttribute('style');
+  await open({ state: 'button', viewport: 'wide', theme: 'dark' });
+  await page.locator('[data-do="cell:hover.shadow"]').click();
+  await page.locator('[data-do="none:hover.shadow"]').click();
+  assert.match(await style('board'), /box-shadow:0cqw 0\.208cqw/);
+  await page.locator('[data-do="glow"]').click();
+  assert.match(await style('board'), /box-shadow:0cqw 0cqw/);
+  await capture('chosen-shadow');
+  // A fill fades to a second color.
+  await page.locator('[data-do="cell:idle.fill"]').click();
+  await page.locator('[data-do="none:fill2"]').click();
+  assert.match(await style('board'), /linear-gradient\(to bottom/);
+  await capture('chosen-gradient');
+  // Duplicate puts the copy after the original.
+  await page.locator('[data-do="menu:more"]').click();
+  await page.locator('[data-do="duplicate"]').click();
+  assert.equal((await order('row')).length, 3);
+
+  // The pin: the element stays where it is, and its position then measures from the new point.
+  await open({ state: 'box', viewport: 'wide', theme: 'dark' });
+  await el('stamp').click();
+  const before = await el('stamp').boundingBox();
+  await page.locator('[data-do="pin:mc"]').click();
+  const pinned = await el('stamp').boundingBox();
+  assert.ok(Math.abs(before.x - pinned.x) < 1 && Math.abs(before.y - pinned.y) < 1);
+  assert.match(await page.locator('.gu-panel').innerText(), /From the centre of the screen/);
+  // A drag near the middle of the screen snaps to it and shows a guide.
+  const stage = await page.locator('[data-main]').boundingBox();
+  await page.mouse.move(pinned.x + pinned.width / 2, pinned.y + pinned.height / 2); await page.mouse.down();
+  await page.mouse.move(stage.x + stage.width / 2 + 3, stage.y + stage.height * 0.3, { steps: 6 });
+  assert.ok(await page.locator('.d-guide').count() >= 1);
+  await capture('chosen-guide');
+  await page.mouse.up();
+  const landed = await el('stamp').boundingBox();
+  assert.ok(Math.abs(landed.x + landed.width / 2 - (stage.x + stage.width / 2)) < 1);
+  assert.equal(await page.locator('[data-in="pos:x"]').inputValue(), '0');
+  // A handle on the left edge keeps the right edge in place.
+  const handle = await page.locator('[data-handle="w"]').boundingBox();
+  await page.mouse.move(handle.x + 4, handle.y + 4); await page.mouse.down();
+  await page.mouse.move(handle.x - 16, handle.y + 4, { steps: 4 }); await page.mouse.up();
+  const wider = await el('stamp').boundingBox();
+  assert.ok(Math.abs(wider.x + wider.width - (landed.x + landed.width)) < 1.5 && wider.width > landed.width + 15);
+
+  // Drawn or Image: the stock Menu panel starts as an image, and Drawn gives it the box look.
+  await page.locator('[data-do="go:title"]').click();
+  await el('panel').click({ position: { x: 6, y: 20 } });
+  assert.equal(await page.locator('.d-name h2').innerText(), 'Menu panel');
+  assert.equal(await page.locator('[data-do="mode:image"]').getAttribute('aria-pressed'), 'true');
+  assert.equal(await page.locator('[data-in="look:fill"]').count(), 0);
+  await capture('chosen-image');
+  await page.locator('[data-do="mode:drawn"]').click();
+  assert.equal(await page.locator('[data-in="look:fill"]').count(), 1);
+  // A bar that the player can drag gets a Thumb row.
+  await open({ state: 'bar', viewport: 'wide', theme: 'dark' });
+  assert.equal(await page.locator('[data-in="look:thumb"]').count(), 0);
+  await page.locator('[data-in="bardrag"]').check();
+  assert.equal(await page.locator('[data-in="look:thumb"]').count(), 1);
+  await capture('chosen-bar');
 }

@@ -12,6 +12,7 @@ export const definition: Omit<LabScreen, 'approval'> = {
     { id: 'screen', title: 'Ticket stub, nothing selected' },
   ],
   variants: [
+    { id: 'chosen', title: 'D · Chosen mix', load: () => import('./chosen.ts') },
     { id: 'point', title: 'A · Point and change', load: () => import('./point.ts') },
     { id: 'boxes', title: 'B · Boxes first', load: () => import('./boxes.ts') },
     { id: 'place', title: 'C · Place it yourself', load: () => import('./place.ts') },

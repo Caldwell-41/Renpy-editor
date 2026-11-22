@@ -3,6 +3,7 @@
   "screenId": "game-ui-detail",
   "currentApproved": null,
   "revisions": [
+    { "id": "chosen-v1", "variantId": "chosen", "approval": null },
     { "id": "point-v1", "variantId": "point", "approval": null },
     { "id": "boxes-v1", "variantId": "boxes", "approval": null },
     { "id": "place-v1", "variantId": "place", "approval": null }
