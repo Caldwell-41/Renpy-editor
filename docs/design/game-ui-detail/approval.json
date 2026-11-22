@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "screenId": "game-ui-detail",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "point-v1", "variantId": "point", "approval": null },
+    { "id": "boxes-v1", "variantId": "boxes", "approval": null },
+    { "id": "place-v1", "variantId": "place", "approval": null }
+  ]
+}

@@ -1,0 +1,84 @@
+/* Game UI detailed level study (#205) only. The shell and its tokens come from the approved layout mock. */
+[data-variant=detail] .gu-body { grid-template-columns:46px 172px minmax(0,1fr) 296px; }
+[data-variant=detail] .gu-centre { grid-template-rows:minmax(0,1fr); }
+.d-proto { flex-wrap:wrap; gap:3px 12px; }
+.d-proto label { margin-left:0; }
+.d-proto label:first-of-type { margin-left:auto; }
+.gu-view { position:relative; }
+.gu-view:focus-visible { outline:2px solid var(--focus-ring); outline-offset:3px; }
+.d-keys { font-size:11px; color:var(--text-secondary); visibility:hidden; }
+.gu-view:focus ~ .gu-preview .d-keys { visibility:visible; }
+.d-placing .gu-stage { cursor:crosshair; }
+
+/* The sample game. Sizes are in cqw of the stage, as in the layout mock. */
+.g .d-el { position:relative; flex:none; }
+.g .d-el.g-bg { position:absolute; }
+.g .d-Box { display:flex; align-items:flex-start; }
+.g .d-a-column { flex-direction:column; }
+.g .d-a-row { flex-direction:row; align-items:center; }
+.g .d-a-free { display:block; }
+.g .d-Button { padding:.5cqw 1.5cqw; font-size:1.8cqw; border:.12cqw solid transparent; white-space:nowrap; }
+.g .d-Text { line-height:1.2; text-shadow:0 .1cqw .5cqw rgb(0 0 0 / 55%); }
+.g .d-Bar { height:1.2cqw; overflow:hidden; }
+.g .d-Bar i { display:block; height:100%; }
+.g .d-Image { display:grid; place-items:center; font-size:1.3cqw; line-height:1.15; text-align:center; }
+.g .d-nopic { background:color-mix(in srgb, var(--gp) 70%, transparent); border:.12cqw dashed var(--gt); }
+.g .d-pic-stamp { color:#e8a54b; font-weight:700; letter-spacing:.08cqw; border:.3cqw double #e8a54b; border-radius:50%; rotate:-12deg; background:rgb(29 20 16 / 55%); }
+.g .d-Code { display:flex; align-items:center; gap:.7cqw; font-size:1.25cqw; opacity:.85; }
+.g .d-Code b { color:var(--ga); font-weight:400; }
+
+/* Outlines, name tags, handles, the drag outline and the landing line. Loomlight draws these over the frame. */
+.d-over { position:absolute; inset:0; pointer-events:none; }
+.d-over i { position:absolute; box-sizing:border-box; }
+.d-out { outline:1.5px solid #fff; outline-offset:2px; box-shadow:0 0 0 4.5px rgb(10 12 14 / 70%); }
+.d-hov { outline-style:dashed; box-shadow:none; }
+.d-src { outline-style:dashed; background:repeating-linear-gradient(135deg, rgb(255 255 255 / 16%) 0 2px, transparent 2px 8px); }
+.d-out em { position:absolute; left:-4px; bottom:calc(100% + 6px); padding:0 6px; font:400 11px/1.6 var(--font-ui); color:var(--text-primary); white-space:nowrap; background:var(--surface-raised); border:1px solid var(--border-strong); }
+.d-out em.d-tag-in { bottom:auto; top:6px; left:6px; }
+.d-out em.d-tag-right { left:auto; right:-4px; }
+.d-h { position:absolute; width:9px; height:9px; margin:-5px 0 0 -5px; background:#fff; border:1.5px solid #14161a; pointer-events:auto; cursor:nwse-resize; }
+.d-h-e { cursor:ew-resize; }
+.d-h-s { cursor:ns-resize; }
+.d-ghost { outline:1.5px dashed var(--accent-primary); background:color-mix(in srgb, var(--accent-primary) 14%, transparent); }
+.d-line { background:var(--accent-primary); box-shadow:0 0 0 1px rgb(10 12 14 / 70%); }
+
+/* The panel */
+.d-crumbs { min-width:0; display:flex; flex-wrap:wrap; align-items:center; gap:0 4px; padding-bottom:2px; font-size:12px; }
+.gu-shell .d-crumbs button.gu-crumb { width:auto; min-height:18px; }
+.d-name { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.d-counts { font-size:12px; color:var(--text-secondary); }
+.d-counts button { vertical-align:baseline; }
+.d-key { margin-left:auto; padding-left:14px; }
+.d-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.gu-shell textarea, .gu-shell input[type=text], .gu-shell input[type=number] { min-width:0; min-height:24px; padding:2px 6px; font:inherit; color:var(--text-primary); background:var(--surface-app); border:1px solid var(--border-strong); border-radius:3px; }
+.gu-shell textarea { flex:1; resize:vertical; }
+.gu-control>input[type=text] { flex:1; }
+.gu-shell input.d-none { opacity:.35; }
+.gu-shell button.d-nonebtn { width:22px; min-height:22px; color:var(--text-secondary); }
+.gu-control>.gu-range + .gu-spacer, .gu-control>select + .gu-spacer { display:none; }
+.gu-shell .gu-control input[type=text], .gu-shell .gu-control input[type=number] { height:24px; }
+.d-vars { min-width:230px; }
+.gu-shell .d-vars button { justify-content:space-between; gap:14px; }
+.d-vars code, .d-code code { font:11px/1.5 var(--font-source); }
+.d-code { margin:0; white-space:pre; }
+.gu-shell button.d-show { min-height:22px; padding:0 4px; font-size:11px; }
+.d-matrix { display:grid; grid-template-columns:52px repeat(4, minmax(0,1fr)); align-items:center; gap:4px; }
+.gu-shell button.d-cell { min-height:24px; padding:0; border:1px dashed var(--border-strong); border-radius:3px; background:var(--c); opacity:.75; }
+.gu-shell button.d-cell:hover:not(:disabled) { background:var(--c); opacity:1; }
+.gu-shell button.d-cell.is-own { border:2px solid var(--text-primary); opacity:1; }
+.gu-shell button.d-cell.is-none { background:linear-gradient(to top right, transparent 47%, var(--text-muted) 47% 53%, transparent 53%); }
+.gu-shell button.d-cell[aria-pressed=true] { outline:2px solid var(--accent-primary); outline-offset:1px; background:var(--c); }
+.gu-shell button.d-cell.is-none[aria-pressed=true] { background:linear-gradient(to top right, transparent 47%, var(--text-muted) 47% 53%, transparent 53%); }
+.d-state-head { display:flex; align-items:center; gap:8px; min-height:24px; margin-top:4px; padding-top:6px; border-top:1px solid var(--border-normal); }
+.d-state-head:first-of-type { margin-top:0; padding-top:0; border-top:0; }
+.d-state-head h4 { margin:0; font-size:12px; font-weight:650; }
+.d-actions { display:grid; margin:0 -12px; padding:0; list-style:none; }
+.d-actions li { border-top:1px solid var(--border-normal); }
+.gu-shell button.d-action { width:100%; justify-content:flex-start; gap:8px; padding:3px 12px; border-radius:0; }
+.d-action .gu-clip { flex:1; text-align:left; }
+.d-action-body { display:grid; gap:6px; padding:4px 12px 8px; }
+.d-el-row { display:flex; align-items:center; }
+.d-el-row .gu-el { flex:1; min-width:0; gap:10px; }
+.d-el-row .gu-el>.gu-clip { flex:1; text-align:left; }
+.d-el-row.is-on { background:var(--surface-selected); }
+.gu-shell .d-el-row .gu-icon { width:22px; min-height:22px; }
