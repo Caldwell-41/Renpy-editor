@@ -108,3 +108,4 @@
 /* A long element name clips in the panel head. It must not widen the panel. */
 [data-variant=detail] .gu-panel, [data-variant=detail] .gu-panel-top { min-width:0; }
 [data-variant=detail] .gu-el-head { grid-template-columns:minmax(0,1fr); }
+.gu-shell button.d-inline { display:inline; min-height:0; padding:0; font-size:inherit; vertical-align:baseline; }

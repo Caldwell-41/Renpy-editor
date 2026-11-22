@@ -21,6 +21,10 @@ export default async function ({ page, open, capture }) {
   if (oneClick) {
     assert.equal(await name(), 'Load');
     assert.equal(await page.locator('[data-do="scope:group"]').getAttribute('aria-pressed'), 'true');
+    // The link to the other screens that show this look group.
+    await page.locator('.d-look button', { hasText: 'on 7 screens' }).click();
+    assert.match(await status(), /shows those screens together with the unsaved change/);
+    await el('load').hover();
     assert.equal(await page.locator('.d-over .d-sel').count(), 1);
     // One frame of corner marks goes around the six neighbors.
     assert.equal(await page.locator('.d-over .d-mark').count(), 1);
