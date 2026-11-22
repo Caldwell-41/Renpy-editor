@@ -32,22 +32,23 @@
 .d-over { position:absolute; inset:0; pointer-events:none; }
 .d-over i { position:absolute; box-sizing:border-box; }
 .d-out { outline:1.5px solid #fff; outline-offset:2px; box-shadow:0 0 0 4.5px rgb(10 12 14 / 70%); }
-.d-hov { outline-style:dashed; box-shadow:none; }
-/* Corner marks: four small corners outside the element, so a border, a shadow or a glow stays in view. */
-.d-mark { --m:8px; --w:2px; filter:drop-shadow(0 0 1px #000) drop-shadow(0 0 1px #000);
-  background:linear-gradient(#fff,#fff) left top/var(--m) var(--w), linear-gradient(#fff,#fff) left top/var(--w) var(--m), linear-gradient(#fff,#fff) right top/var(--m) var(--w), linear-gradient(#fff,#fff) right top/var(--w) var(--m),
-    linear-gradient(#fff,#fff) left bottom/var(--m) var(--w), linear-gradient(#fff,#fff) left bottom/var(--w) var(--m), linear-gradient(#fff,#fff) right bottom/var(--m) var(--w), linear-gradient(#fff,#fff) right bottom/var(--w) var(--m);
-  background-repeat:no-repeat; }
-.d-mark em { filter:none; }
-.d-src { outline-style:dashed; background:repeating-linear-gradient(135deg, rgb(255 255 255 / 16%) 0 2px, transparent 2px 8px); }
-.d-over i em { position:absolute; left:-4px; bottom:calc(100% + 6px); padding:0 6px; font:400 11px/1.6 var(--font-ui); color:var(--text-primary); white-space:nowrap; background:var(--surface-raised); border:1px solid var(--border-strong); }
+.d-hov { outline-style:dashed; box-shadow:0 0 0 3.5px rgb(10 12 14 / 38%); }
+/* Corner marks: four small corners at a distance from the elements, so a border, a shadow or a glow stays in view.
+   A light line over a wider dark line shows on a dark game and on a white one. */
+.d-mark::before, .d-mark::after { content:''; position:absolute; background-repeat:no-repeat;
+  background-image:linear-gradient(var(--c),var(--c)), linear-gradient(var(--c),var(--c)), linear-gradient(var(--c),var(--c)), linear-gradient(var(--c),var(--c)), linear-gradient(var(--c),var(--c)), linear-gradient(var(--c),var(--c)), linear-gradient(var(--c),var(--c)), linear-gradient(var(--c),var(--c));
+  background-position:left top, left top, right top, right top, left bottom, left bottom, right bottom, right bottom;
+  background-size:var(--m) var(--w), var(--w) var(--m), var(--m) var(--w), var(--w) var(--m), var(--m) var(--w), var(--w) var(--m), var(--m) var(--w), var(--w) var(--m); }
+.d-mark::before { inset:-1px; --c:rgb(10 12 14 / 50%); --m:9px; --w:3.5px; }
+.d-mark::after { inset:0; --c:rgb(255 255 255 / 85%); --m:7px; --w:1.5px; }
+.d-over i em { position:absolute; left:-4px; bottom:calc(100% + 6px); max-width:240px; overflow:hidden; text-overflow:ellipsis; padding:0 6px; font:400 11px/1.6 var(--font-ui); color:var(--text-primary); white-space:nowrap; background:var(--surface-raised); border:1px solid var(--border-strong); }
 .d-over i em.d-tag-in { bottom:auto; top:6px; left:6px; }
 .d-over i em.d-tag-right { left:auto; right:-4px; }
 .d-h { position:absolute; width:9px; height:9px; margin:-5px 0 0 -5px; background:#fff; border:1.5px solid #14161a; pointer-events:auto; cursor:nwse-resize; }
 .d-h-e, .d-h-w { cursor:ew-resize; }
 .d-h-s, .d-h-n { cursor:ns-resize; }
 .d-h-ne, .d-h-sw { cursor:nesw-resize; }
-.d-guide { background:var(--accent-primary); }
+.d-guide { background:var(--accent-primary); box-shadow:0 0 0 .5px rgb(10 12 14 / 55%); }
 .d-ghost { outline:1.5px dashed var(--accent-primary); background:color-mix(in srgb, var(--accent-primary) 14%, transparent); }
 .d-line { background:var(--accent-primary); box-shadow:0 0 0 1px rgb(10 12 14 / 70%); }
 
@@ -98,3 +99,12 @@
 .gu-shell .d-pin button[aria-pressed=true]::after { background:var(--text-primary); }
 .gu-shell .gu-panel .gu-xy input, .gu-shell .gu-panel .gu-control>input[type=text] { box-sizing:border-box; height:24px; min-height:0; padding:1px 5px; }
 .gu-shell .gu-xy input { width:64px; }
+/* The look switch: "This button" keeps its width, and the name of the look group takes the rest and clips. */
+.gu-shell .d-scope button:first-child { flex:none; padding-inline:9px; }
+.gu-shell .d-scope button:last-child { flex:1 1 0; min-width:0; gap:4px; }
+.gu-shell .d-scope button>span:last-child { flex:none; }
+.g.d-light .d-Text { text-shadow:none; }
+.gu-preview .d-keys { margin-left:8px; }
+/* A long element name clips in the panel head. It must not widen the panel. */
+[data-variant=detail] .gu-panel, [data-variant=detail] .gu-panel-top { min-width:0; }
+[data-variant=detail] .gu-el-head { grid-template-columns:minmax(0,1fr); }

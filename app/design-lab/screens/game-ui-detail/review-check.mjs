@@ -22,11 +22,12 @@ export default async function ({ page, open, capture }) {
     assert.equal(await name(), 'Load');
     assert.equal(await page.locator('[data-do="scope:group"]').getAttribute('aria-pressed'), 'true');
     assert.equal(await page.locator('.d-over .d-sel').count(), 1);
-    assert.equal(await page.locator('.d-over .d-mark').count(), 5);
+    // One frame of corner marks goes around the six neighbors.
+    assert.equal(await page.locator('.d-over .d-mark').count(), 1);
   } else {
     if (preset === 'boxes') { assert.equal(await name(), 'Menu'); await el('load').click(); }
     assert.equal(await name(), 'Menu buttons');
-    assert.equal(await page.locator('.d-over .d-mark').count(), 6);
+    assert.equal(await page.locator('.d-over .d-mark').count(), 1);
   }
   await capture(`${preset}-group`);
   if (!oneClick) await el('load').click();
@@ -181,6 +182,18 @@ export default async function ({ page, open, capture }) {
   await page.locator('[data-do="mode:drawn"]').click();
   assert.equal(await page.locator('[data-in="look:fill"]').count(), 1);
   // A bar that the player can drag gets a Thumb row.
+  // The look switch stays inside the panel with a long group name, and the light sample game shows the marks on white.
+  await open({ state: 'text', viewport: 'wide', theme: 'dark' });
+  const fits = await page.locator('.d-scope').evaluate(node => node.scrollWidth <= node.clientWidth + 1 && node.getBoundingClientRect().right <= node.closest('.gu-panel').getBoundingClientRect().right);
+  assert.ok(fits);
+  // A long element name clips. The panel keeps its width, and "Add element" stays in view.
+  assert.ok(await page.locator('.gu-panel').evaluate(node => node.scrollWidth <= node.clientWidth + 1 && node.querySelector('[data-do="menu:add"]').getBoundingClientRect().right <= node.getBoundingClientRect().right));
+  await capture('chosen-switch');
+  await page.locator('[data-do="go:title"]').click();
+  await page.locator('[data-sample]').selectOption('light');
+  await el('load').click();
+  await capture('chosen-light');
+  await page.locator('[data-sample]').selectOption('dark');
   await open({ state: 'bar', viewport: 'wide', theme: 'dark' });
   assert.equal(await page.locator('[data-in="look:thumb"]').count(), 0);
   await page.locator('[data-in="bardrag"]').check();

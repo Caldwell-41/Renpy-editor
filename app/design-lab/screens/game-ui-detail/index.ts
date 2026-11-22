@@ -95,6 +95,11 @@ const listed: [title: string, rows: [id: string, name: string][]][] = [
   ['Your screens', [['ticket', 'Ticket stub']]],
 ];
 const titles: Record<string, string> = { title: 'Title screen', ticket: 'Ticket stub' };
+/** Sample content only: a light game, to judge the outlines and marks on white. It replaces game-wide colors on the canvas and never reaches the project. */
+const lightGame: Record<string, Record<string, V>> = {
+  Button: { text: '#2b2622', 'hover.text': '#a3412d', 'selected.text': '#a3412d', 'disabled.text': '#a39c90' },
+  Text: { text: '#2b2622' }, Box: { fill: '#ffffff', border: '#2b2622' }, Bar: { track: '#d9d2c3', filled: '#a3412d', thumb: '#2b2622' },
+};
 
 const menuButton = (id: string, text: string, stock: string): El => ({ id, kind: 'Button', text, group: 'menu', stock });
 function fresh(): Doc {
@@ -154,6 +159,8 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   let lookScope: 'group' | 'one' = 'one';
   // Where the pointer is. Over the Look section the outline hides, so it does not cover a border or a glow.
   let overLook = false, overCanvas = false;
+  // Sample content: the light game.
+  let light = false;
   let ghost: Rect | null = null, line: Rect | null = null, guides: Rect[] = [], pending: Doc | null = null, focusCanvas = false;
 
   function reset(state: string) {
@@ -200,7 +207,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
 
   // ---- the three look levels ----
   function levels(s: Sel): Level[] {
-    const game = (kind: string): Level => ({ label: inGame[kind] ?? '', own: doc.game[kind] ?? {} });
+    const game = (kind: string): Level => ({ label: inGame[kind] ?? '', own: light ? { ...doc.game[kind], ...lightGame[kind] } : doc.game[kind] ?? {} });
     const group = (g: string): Level => ({ label: groupName(g), own: doc.groups[g] ??= {} });
     if (s?.g) return [group(s.g), game(kindOf(s.g))];
     const el = find(s!.e!)!.el;
@@ -221,7 +228,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   // ---- drawing: a browser drawing stands in for the frame the hidden Ren'Py process sends ----
   const shown = (text: string) => esc(text).replace(/\[(\w+)\]/g, (whole, name: string) => variables.find(([n]) => n === name)?.[2] ?? whole);
   function drawEl(el: El, parent: El): string {
-    if (el.id === 'bg') return `<div class="d-el g-bg" data-el="bg" style="background-image:url(${art[el.pic!]})"></div>`;
+    if (el.id === 'bg') return `<div class="d-el g-bg" data-el="bg" style="${light ? 'background:#fff' : `background-image:url(${art[el.pic!]})`}"></div>`;
     const forced = el.kind === 'Button' && showState !== 'idle' && selEls(lookTarget()).includes(el) ? showState : 'idle';
     const L = levels({ e: el.id });
     const v = (key: string) => resolve(L, key, forced).value;
@@ -234,7 +241,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     let inner = '', cls = `d-${el.kind}`;
     // An Image box shows its file as it is. The stock frame is a dark fill with square corners.
     const box = () => {
-      if (el.mode === 'image') return 'background:#1d1410d6';
+      if (el.mode === 'image') return `background:${light ? '#f1ece2' : '#1d1410d6'}`;
       const fill = v('fill'), to = v('fill2'), shade = v('shadow');
       return `background:${!fill ? 'transparent' : to ? `linear-gradient(${v('dir') === 'h' ? 'to right' : 'to bottom'}, ${fill}, ${to})` : fill};border:${u(Number(v('bwidth')))} solid ${v('border') || 'transparent'};border-radius:${u(Number(v('corners')))}${shade ? `;box-shadow:${u(Number(v('sx')))} ${u(Number(v('sy')))} ${u(Number(v('blur')))} ${shade}` : ''}`;
     };
@@ -254,8 +261,8 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     return `<div class="d-el ${cls}" data-el="${el.id}" style="${css.join(';')}">${inner}</div>`;
   }
   function stageHtml() {
-    const back = page === 'ticket' ? `<div class="g-bg" style="background-image:url(${art.platform})"></div><img class="g-sprite" src="${art.mara}" alt="">` : '';
-    return `<div class="g d-root" style="--gf:Georgia,'Iowan Old Style',serif;--gz:1;--gt:#f6efe2;--gp:#1d1410;--ga:#e8a54b">${back}${root().kids!.map(kid => drawEl(kid, root())).join('')}</div>`;
+    const back = page !== 'ticket' ? '' : light ? '<div class="g-bg" style="background:#fff"></div>' : `<div class="g-bg" style="background-image:url(${art.platform})"></div><img class="g-sprite" src="${art.mara}" alt="">`;
+    return `<div class="g d-root${light ? ' d-light' : ''}" style="--gf:Georgia,'Iowan Old Style',serif;--gz:1;--gt:${light ? '#2b2622' : '#f6efe2'};--gp:${light ? '#ffffff' : '#1d1410'};--ga:${light ? '#a3412d' : '#e8a54b'}">${back}${root().kids!.map(kid => drawEl(kid, root())).join('')}</div>`;
   }
   function refreshStage() { const stage = host.querySelector<HTMLElement>('[data-main]'); if (stage) stage.innerHTML = stageHtml(); drawOver(); }
 
@@ -273,24 +280,42 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     const el = find(s!.e!)!.el;
     return `${nameOf(el)}${el.kind === 'Code' ? ' · Source only' : el.fixed ? ' · does not move' : hint && hovered && sel?.g && sel.g === el.group ? ' · click for this one' : ''}`;
   }
+  /** Corner marks go around each run of marked neighbors in a row or column, so a stack of buttons has one frame and not six. */
+  function markRuns(els: El[]): Rect[] {
+    const ids = new Set(els.map(el => el.id)), runs: Rect[] = [];
+    const join = (a: Rect, b: Rect): Rect => { const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y); return { x, y, w: Math.max(a.x + a.w, b.x + b.w) - x, h: Math.max(a.y + a.h, b.y + b.h) - y }; };
+    const visit = (box: El) => {
+      let run: Rect | null = null;
+      for (const kid of box.kids ?? []) {
+        const r = ids.has(kid.id) ? rectOf(kid.id) : null;
+        if (r && box.arrange !== 'free') run = run ? join(run, r) : r;
+        else { if (run) runs.push(run); run = null; if (r) runs.push(r); }
+      }
+      if (run) runs.push(run);
+      box.kids?.forEach(visit);
+    };
+    visit(root());
+    return runs;
+  }
   const canResize = (el: El) => !el.fixed && el.kind !== 'Code';
   function drawOver() {
     const over = host.querySelector<HTMLElement>('.d-over');
     if (!over) return;
     const quiet = overLook || (!overCanvas && !!host.querySelector('.d-look')?.contains(document.activeElement));
-    // One element has a full outline. The elements of a look group have corner marks, which leave a border or a glow in view.
+    const tagHtml = (r: Rect, tag: string) => tag ? `<em class="${r.y < 24 ? 'd-tag-in' : ''}${r.x + 250 > over.clientWidth ? ' d-tag-right' : ''}">${esc(tag)}</em>` : '';
+    // One element has a full outline. A look group has corner marks, which leave a border or a glow in view.
     const outline = (el: El, cls: string, tag: string) => {
-      const at = rectOf(el.id);
-      if (!at) return '';
-      const r = cls === 'd-mark' ? { x: at.x - 5, y: at.y - 5, w: at.w + 10, h: at.h + 10 } : at;
-      return `<i class="${cls === 'd-mark' ? '' : 'd-out '}${cls}${el.kind === 'Code' ? ' d-src' : ''}" style="${place(r)}">${tag ? `<em class="${r.y < 24 ? 'd-tag-in' : ''}${r.x + 170 > over.clientWidth ? ' d-tag-right' : ''}">${esc(tag)}</em>` : ''}</i>`;
+      const r = rectOf(el.id);
+      return r ? `<i class="d-out ${cls}${el.kind === 'Code' ? ' d-src' : ''}" style="${place(r)}">${tagHtml(r, tag)}</i>` : '';
     };
+    const marks = (els: El[], tag: string) => markRuns(els).map((r, i) => `<i class="d-mark" style="${place({ x: r.x - 6, y: r.y - 6, w: r.w + 12, h: r.h + 12 })}">${i === 0 ? tagHtml(r, tag) : ''}</i>`).join('');
     const look = lookTarget();
     let html = !quiet && hover && !same(hover, sel) ? selEls(hover).map((el, i) => outline(el, 'd-hov', i === 0 ? tagOf(hover, true) : '')).join('') : '';
-    if (sel?.g) html += selEls(sel).map((el, i) => outline(el, 'd-mark', i === 0 && !quiet ? tagOf(sel) : '')).join('');
+    if (sel?.g) html += marks(selEls(sel), quiet ? '' : tagOf(sel));
     else if (sel?.e) {
-      html += selEls(sel).map(el => outline(el, quiet ? 'd-mark' : 'd-sel', quiet ? '' : tagOf(sel))).join('');
-      if (look?.g) html += selEls(look).filter(el => el.id !== sel!.e).map(el => outline(el, 'd-mark', '')).join('');
+      if (look?.g) html += marks(selEls(look), '');
+      else if (quiet) html += marks(selEls(sel), '');
+      if (!quiet) html += selEls(sel).map(el => outline(el, 'd-sel', tagOf(sel))).join('');
     }
     const one = sel?.e ? find(sel.e)?.el : null, r = one && canResize(one) && !ghost && !quiet ? rectOf(one.id) : null;
     // Text takes a width and wraps, so its handles are on its sides. A free element has handles on every edge.
@@ -487,7 +512,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     const L = levels(aim), stateful = kind === 'Button', image = one?.mode === 'image';
     // "One click, switch in the panel": the switch says what a look change applies to. The canvas marks the same elements.
     const picked = opt.scope === 'panel' && sel?.e ? find(sel.e)!.el : null, count = picked?.group ? members(picked.group).length : 0;
-    const scope = picked && shared(picked) ? `<div class="gu-seg" role="group" aria-label="Change the look of"><button type="button" data-do="scope:one" aria-pressed="${lookScope === 'one'}">This ${noun[kind]![0]}</button><button type="button" data-do="scope:group" aria-pressed="${lookScope === 'group'}">${groupName(picked.group!)} · ${count}</button></div>
+    const scope = picked && shared(picked) ? `<div class="gu-seg d-scope" role="group" aria-label="Change the look of"><button type="button" data-do="scope:one" aria-pressed="${lookScope === 'one'}">This ${noun[kind]![0]}</button><button type="button" data-do="scope:group" aria-pressed="${lookScope === 'group'}" title="${groupName(picked.group!)} · ${count}"><span class="gu-clip">${groupName(picked.group!)}</span><span>· ${count}</span></button></div>
       <p class="gu-help gu-help-wide">${lookScope === 'group' ? `A change applies to the ${count} marked ${noun[kind]![1]}${picked.group === 'menu' ? ', and to the same buttons on 7 screens' : ''}.` : `A change applies to this ${noun[kind]![0]} only.`}</p>` : '';
     // A box is Drawn from its box look, or shows an image file. An Image box has no fill, corners, border or shadow to set.
     const boxy = !!one && (one.kind === 'Button' || one.kind === 'Box');
@@ -644,7 +669,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
             ${listed.map(([title, rows]) => `<h3>${title}</h3>${rows.map(([id, name]) => `<button type="button" class="gu-row" data-do="go:${id}" ${id === page ? 'aria-current="page"' : ''}>${name}</button>`).join('')}`).join('')}
             <button type="button" class="gu-row gu-row-new" data-do="say:New screen opens the visual starters. They are not part of this mock.">${svg(glyph.plus)}New screen</button></aside>
           <main class="gu-centre"><div class="gu-canvas gu-canvas-b${placing ? ' d-placing' : ''}"><div class="gu-view" tabindex="0" data-canvas aria-label="Screen canvas: ${titles[page]}. ${sel ? `${esc(selName(sel))} selected.` : 'Nothing selected.'}"><div class="gu-stage" data-main>${stageHtml()}</div><div class="d-over"></div></div>
-            <div class="gu-preview"><div class="gu-preview-left"><span class="d-keys">${keys}</span></div><div class="gu-seg gu-zoom" role="group" aria-label="Canvas size"><button type="button" aria-pressed="true">Fit</button><button type="button" data-do="say:100% is in the approved layout mock.">100%</button></div></div></div></main>
+            <div class="gu-preview"><div class="gu-preview-left"><span class="gu-label" title="Sample content never changes your game.">Sample</span><label class="gu-sample">Game<select data-sample aria-label="Sample game"><option value="dark" ${light ? '' : 'selected'}>Dark</option><option value="light" ${light ? 'selected' : ''}>Light</option></select></label><span class="d-keys">${keys}</span></div><div class="gu-seg gu-zoom" role="group" aria-label="Canvas size"><button type="button" aria-pressed="true">Fit</button><button type="button" data-do="say:100% is in the approved layout mock.">100%</button></div></div></div></main>
           <aside class="gu-panel" aria-label="Settings">${panel()}</aside></div>
         <footer class="gu-footer"><span role="status" aria-live="polite">${esc(status)}</span><span class="gu-muted">Local project</span></footer></div></div>`;
   }
@@ -748,6 +773,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   }
   function onChange(event: Event) {
     const el = event.target as HTMLInputElement, d = el.dataset;
+    if (d.sample !== undefined) { light = el.value === 'light'; status = 'Sample content changed. Your game is unchanged.'; render(); return; }
     if (d.preset !== undefined) { if (el.value) { preset = el.value as Preset; opt = { ...presets[preset] }; placing = null; normalize(); } render(); return; }
     if (d.opt) { (opt as unknown as Record<string, string>)[d.opt] = el.value; preset = (Object.keys(presets) as Preset[]).find(p => JSON.stringify(presets[p]) === JSON.stringify(opt)) ?? ''; placing = null; normalize(); render(); return; }
     const [name, a, b] = (d.in ?? '').split(':'), f = sel?.e ? find(sel.e) : null;

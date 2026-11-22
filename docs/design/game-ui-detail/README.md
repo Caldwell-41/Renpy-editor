@@ -75,8 +75,8 @@ On 2026-11-22 Kris said that the two clicks are confusing, that the selected cel
 the states table turned dark brown, and that the white outline hides a glow or a
 border. He asked for these changes:
 
-- **A fifth choice, "A look group"**, in the dashed bar. Mock D starts on the third
-  option, which the agent recommends.
+- **A fifth choice, "A look group"**, in the dashed bar. Kris chose the third option
+  on 2026-11-22 ("one click is the way"), and mock D starts on it.
   - *Two clicks.* The first click selects the look group, the second the element.
   - *Two clicks, with a hint.* The same, and the name tag says that a second click
     selects the one element.
@@ -85,12 +85,19 @@ border. He asked for these changes:
     what a look change applies to. It starts on the look group. It starts on the
     element when that element has an own value. This option changes one point of the
     shared-look decision: the first click no longer selects the look group.
-- **Corner marks.** The elements of a look group have four small corner marks and no
-  full outline. With the switch on the look group, the selected element has the full
-  outline and the other elements of the group have marks.
+- **Corner marks.** A look group has corner marks and no full outline. One frame of
+  four marks goes around each run of neighbors in a row or column, so the six Menu
+  buttons have one frame. The marks sit 6 pixels from the elements. Each mark is a
+  light line over a wider dark line, so it shows on a dark game and on a white one.
+  With the switch on the look group, the selected element also has its full outline.
 - **The outline gives way.** While the pointer is over the Look section, or the
   keyboard is in it, the full outline, the handles and the name tag hide and corner
   marks stay. They return when the pointer is on the canvas.
+- **The look switch fits.** "This button" keeps its width, and the name of the look
+  group takes the rest and clips. A long element name clips in the panel head and on
+  the name tag.
+- **A light sample game.** The row under the canvas has "Sample: Game: Dark / Light".
+  Light draws a white game, to judge the outlines and marks. It is sample content.
 - **The selected cell keeps its color.** The dark brown was a defect of the mock: the
   lab's style for a pressed button replaced the cell's color.
 
