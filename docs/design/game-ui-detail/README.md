@@ -3,11 +3,17 @@
 This Design Lab screen, `game-ui-detail`, mocks direct work on elements on the screen
 canvas for [Design the detailed level on the screen canvas](https://github.com/Caldwell-41/Renpy-editor/issues/205).
 It sits on the approved layout B of Game UI (`game-ui` / `blend-v2`) and leaves that
-mock's source untouched. All four mocks are unapproved drafts.
+mock's source untouched.
+
+Kris approved mock D on 2026-11-23: `game-ui-detail` / `chosen`, revision `chosen-v1`,
+source commit `04c7bb1f`. The [approval record](approval.json) lists the agreed
+behaviour and the known deviations, and the approved captures are under
+[captures](captures/), named `chosen-v1-` with the state, the theme and the size.
+Mocks A, B and C stay in the lab as unapproved drafts.
 
 On 2026-11-22 Kris looked at A, B and C and chose A with the states side by side. He
-then answered ten questions with "yes to all". Mock D, `chosen`, revision `chosen-v1`,
-is that choice with those answers built in. It waits for his approval.
+then answered ten questions with "yes to all". Mock D is that choice with those answers
+built in, plus the changes after his first look and the council review below.
 
 ## Open it
 

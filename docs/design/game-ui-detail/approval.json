@@ -1,11 +1,132 @@
 {
   "schemaVersion": 1,
   "screenId": "game-ui-detail",
-  "currentApproved": null,
+  "currentApproved": "chosen-v1",
   "revisions": [
-    { "id": "chosen-v1", "variantId": "chosen", "approval": null },
-    { "id": "point-v1", "variantId": "point", "approval": null },
-    { "id": "boxes-v1", "variantId": "boxes", "approval": null },
-    { "id": "place-v1", "variantId": "place", "approval": null }
+    {
+      "id": "chosen-v1",
+      "variantId": "chosen",
+      "approval": {
+        "date": "2026-11-23",
+        "decision": "Kris approved mock D, \"Chosen mix\", for the detailed level of Game UI: screen game-ui-detail / chosen, revision chosen-v1 (\"Approved\"). He first chose mock A with the states side by side (\"A is good, with one modification - States being side by side is better\"), answered ten open points with \"yes to all\", and chose one click with a switch in the panel for the look group (\"one click is the way\"). He asked for refined corner marks, a look switch that fits the panel, and a council review of two rounds (Claude Opus 5.5, GPT-6.2 Sol and Claude Fable 5.2 scored it 8, 8 and 8.5 in round two). During the review he decided that an element that moves takes the look group of the place it lands in, and that the hover animation \"Glow\" is named \"Brighten\". The decision is recorded in issue #205.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "04c7bb1f0b745207f18048de55e5006135b3ad89",
+          "fingerprint": "fe2ec58e68111ec19ccdf7d38064dc8a41caedc5ae57716bbd7cfb791916e965"
+        },
+        "captures": [
+          {
+            "path": "docs/design/game-ui-detail/captures/chosen-v1-group-dark-wide.png",
+            "sha256": "b2f888e56c01f184ef4e90d46d3e0f0fe05499dab93e52852d911bf31ed6b80e",
+            "state": "group",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-detail/captures/chosen-v1-button-dark-wide.png",
+            "sha256": "24d458817803596c6e454af7ad5e2d806b65da900d5da388f611547a9c0c8fff",
+            "state": "button",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-detail/captures/chosen-v1-text-dark-wide.png",
+            "sha256": "4f54961f3e71109b0b6427d6fd4d6db71cc1fa3e88ec94deb35fa4348f55eae9",
+            "state": "text",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-detail/captures/chosen-v1-bar-dark-wide.png",
+            "sha256": "dad2dc94ad4986b64d4162e8286ec17569011af48b52b54ee9b149f5be28b694",
+            "state": "bar",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-detail/captures/chosen-v1-source-dark-wide.png",
+            "sha256": "f447eb41e16110f7918a5d2c3ad269a7b69a1eb298fbd4e9e8f2d11a3372ed26",
+            "state": "source",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-detail/captures/chosen-v1-box-dark-wide.png",
+            "sha256": "cd8a6ddc96cfa03355822d7714136dc4f57b74287410f6ca250ca61fd4f2e124",
+            "state": "box",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-detail/captures/chosen-v1-screen-dark-wide.png",
+            "sha256": "34cd74d43d20106f86ea7b435e1bebeac8030ff45b45017330dd10f31d5ac098",
+            "state": "screen",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "The mock builds on the approved layout B of Game UI (game-ui / blend-v2): the screen list, the screen canvas and one panel, with the way back and \"Add element\" on the first line of the panel head, then the name.",
+          "One click selects the element under the pointer. A click on empty space or on the fixed background clears the selection. Under the way back, the panel lists the boxes around the selection, and each one is a link. Esc goes one step out and Enter goes one step in. This replaces the rule that the first click selects the look group.",
+          "The Look section of an element that shares its look has a switch, such as \"This button\" / \"Menu buttons · 6\". It sets what a look change applies to and stays in view while the section scrolls. It starts on the look group, and on the element when that element has an own value. With the switch on the look group, a line by the open setting names the elements that keep an own value for it, and a stock group links to its other screens.",
+          "The selected element has a full outline, handles and a name tag. A look group has corner marks: one frame of four marks around each run of neighbors in a row or column, a light line over a wider dark line. While the pointer or the keyboard is in the Look section, the outline, the handles and the name tag hide and corner marks stay. In a column the name tag sits beside the element, and under it when the place above is taken.",
+          "The canvas is one stop in the Tab order. Tab steps through the elements in source order. An arrow key moves a free element by 1 pixel, and by 10 with Shift, and moves an element in a row or column one place. Delete removes the selected element. The row under the canvas lists the keys while the canvas has the focus.",
+          "While the pointer drags, an outline follows it and the canvas draws the element again when it lands. A drag in a row or column moves the element to a new place at a line. Dropped on a different row or column, the element joins it. Dropped outside, it leaves its box, and the outline says so before the drop. In free space the outline snaps to the edges and the middle of the screen and of its neighbors, with a guide line.",
+          "An element that moves or is new takes the look group of its kind in the box it lands in. Outside such a box it is in its screen's look group.",
+          "A free element has a Position, a Pin with nine points and handles on every edge. A change of pin does not move the element. An element in a row or column has a Place, an Offset that it keeps when it moves in that row or column, and handles on the right and the bottom. Text has a width and wraps. A picture keeps its shape from a corner handle. An empty size means that the element fits its content. A Box arranges its elements as a Column or a Row or leaves them Free, and has a Gap.",
+          "A new element lands by the selection: in the selected box, after the selected element in its row or column, or under a selected free element, and always fully inside the screen or its box. With no selection it lands in the middle of the screen. A new text or button has the focus in its Text field. A double click on a text or a button goes to that field. Enter ends the edit of a button's words, and Esc ends any text edit.",
+          "\"More commands\" has Copy look and Paste look, which name their target, Duplicate and Delete. Delete removes an element of a stock screen from the source and Undo puts it back. The fixed background, a source-only part and a box that holds a source-only part cannot be deleted or duplicated here. The element list is a tree in source order with Move earlier and Move later on the selected row.",
+          "A look group and an element show the settings of their kind, each with the chain. The open chain opens \"Same as (level above)\" and \"Use for all (level above)\". A setting with no value reads \"None\" with \"Add\", and the new value starts at a color that shows.",
+          "The four states of a button show side by side in a table with the rows Text, Fill, Border and Shadow. A cell shows its color at full strength. A dashed edge means that it follows, and a solid edge marks an own value. A click on a cell opens its rows under the table, and a state name shows that state on the canvas. The row under the canvas then names the shown state, with \"Show Idle\". \"Every state\" holds Border width, Corners and Hover animation.",
+          "The states rule: the nearest look level with an own value wins, and an own Idle value covers every state until that state gets an own value. Kris accepted it on the condition that an SDK run confirms it (issue #216).",
+          "A box look has a fill that is one color or fades to a second color with a direction, corners, a border with a width, and a shadow with a blur and an offset. Glow gives a shadow with no offset, in the first of the border, the fill and the text color that shows, and a second click gives back the offset. A box is Drawn from its box look or shows an Image file. A bar has Track, Filled part and one Corners value, and a Thumb row when the player can drag it.",
+          "The hover animations are named Lift, Grow and Brighten. \"Glow\" names only the shadow with no offset.",
+          "Text and Button have a Text field with \"Insert variable\". The field shows the variable name and the canvas shows the sample value. \"When clicked\" is the approved action editor with no Apply: ordered actions, one open at a time, each change one draft step. A stock button shows its action in words on one row with a link to Source. A Bar has \"Shows\", \"Full at\" and \"The player can drag it\".",
+          "A source-only part has a dashed, hatched outline and the tag \"Source only\". The panel shows its lines and Open in Source. It does not move, and the parts around it still move. A property that Loomlight cannot read shows as \"Custom (in source)\" with a link to Source.",
+          "The row under the canvas has a sample \"Game: Dark / Light\" that draws a white game, to judge the outlines and marks. It is sample content."
+        ],
+        "deviations": [
+          "Fictional browser-memory mock. A browser drawing stands in for the frame from the hidden Ren'Py process. It has no source transaction, revision check or save. Save, Validate, Run, \"New screen\", \"Open in Source\" and the link to the other screens of a look group only write a status message.",
+          "Only the Title screen and the Ticket stub open. Settings pages, the Game-wide look page, sample content menus other than the sample game, 100%, the source line of a setting, the list of pending edits, the collapse tabs and the narrow window are in the approved layout mock and not in this one.",
+          "The properties, the action kinds, the variables, the file names and the line numbers are sample values. Issue #218 chooses the real properties of each kind of element, and issue #217 chooses the button actions for stock screens.",
+          "Two facts have no SDK run: the states rule, and a forced Hover, Selected or Disabled look without a pointer. Issue #216 checks them. The state names of the table depend on the second fact.",
+          "The blur and the offset of a shadow have one value for all states, and only the shadow color differs between states. The box decision in issue #202 lets the full shadow differ. A color has no opacity control. Drawn or Image shows on one element, not on a look group.",
+          "Not shown: selecting two or more elements (a later version), the stretch areas of an image, an image for each state, and playing an animation.",
+          "No reviewer scored the mock after the round-two fixes. The last measured scores are 8, 8 and 8.5, under the 9.5 target.",
+          "Not checked: Loomlight's light theme and window sizes other than 1100 x 720.",
+          "The dashed bar reads \"Game UI detailed level · unapproved\" in the reviewed source and can still change each choice. The approval covers mock D with its five choices as preset. Mocks A, B and C remain in the lab as unapproved drafts."
+        ]
+      }
+    },
+    {
+      "id": "point-v1",
+      "variantId": "point",
+      "approval": null
+    },
+    {
+      "id": "boxes-v1",
+      "variantId": "boxes",
+      "approval": null
+    },
+    {
+      "id": "place-v1",
+      "variantId": "place",
+      "approval": null
+    }
   ]
 }
