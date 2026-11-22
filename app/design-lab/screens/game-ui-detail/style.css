@@ -33,10 +33,16 @@
 .d-over i { position:absolute; box-sizing:border-box; }
 .d-out { outline:1.5px solid #fff; outline-offset:2px; box-shadow:0 0 0 4.5px rgb(10 12 14 / 70%); }
 .d-hov { outline-style:dashed; box-shadow:none; }
+/* Corner marks: four small corners outside the element, so a border, a shadow or a glow stays in view. */
+.d-mark { --m:8px; --w:2px; filter:drop-shadow(0 0 1px #000) drop-shadow(0 0 1px #000);
+  background:linear-gradient(#fff,#fff) left top/var(--m) var(--w), linear-gradient(#fff,#fff) left top/var(--w) var(--m), linear-gradient(#fff,#fff) right top/var(--m) var(--w), linear-gradient(#fff,#fff) right top/var(--w) var(--m),
+    linear-gradient(#fff,#fff) left bottom/var(--m) var(--w), linear-gradient(#fff,#fff) left bottom/var(--w) var(--m), linear-gradient(#fff,#fff) right bottom/var(--m) var(--w), linear-gradient(#fff,#fff) right bottom/var(--w) var(--m);
+  background-repeat:no-repeat; }
+.d-mark em { filter:none; }
 .d-src { outline-style:dashed; background:repeating-linear-gradient(135deg, rgb(255 255 255 / 16%) 0 2px, transparent 2px 8px); }
-.d-out em { position:absolute; left:-4px; bottom:calc(100% + 6px); padding:0 6px; font:400 11px/1.6 var(--font-ui); color:var(--text-primary); white-space:nowrap; background:var(--surface-raised); border:1px solid var(--border-strong); }
-.d-out em.d-tag-in { bottom:auto; top:6px; left:6px; }
-.d-out em.d-tag-right { left:auto; right:-4px; }
+.d-over i em { position:absolute; left:-4px; bottom:calc(100% + 6px); padding:0 6px; font:400 11px/1.6 var(--font-ui); color:var(--text-primary); white-space:nowrap; background:var(--surface-raised); border:1px solid var(--border-strong); }
+.d-over i em.d-tag-in { bottom:auto; top:6px; left:6px; }
+.d-over i em.d-tag-right { left:auto; right:-4px; }
 .d-h { position:absolute; width:9px; height:9px; margin:-5px 0 0 -5px; background:#fff; border:1.5px solid #14161a; pointer-events:auto; cursor:nwse-resize; }
 .d-h-e, .d-h-w { cursor:ew-resize; }
 .d-h-s, .d-h-n { cursor:ns-resize; }
@@ -70,8 +76,9 @@
 .gu-shell button.d-cell:hover:not(:disabled) { background:var(--c); opacity:1; }
 .gu-shell button.d-cell.is-own { border:2px solid var(--text-primary); opacity:1; }
 .gu-shell button.d-cell.is-none { background:linear-gradient(to top right, transparent 47%, var(--text-muted) 47% 53%, transparent 53%); }
-.gu-shell button.d-cell[aria-pressed=true] { outline:2px solid var(--accent-primary); outline-offset:1px; background:var(--c); }
-.gu-shell button.d-cell.is-none[aria-pressed=true] { background:linear-gradient(to top right, transparent 47%, var(--text-muted) 47% 53%, transparent 53%); }
+/* The selected cell keeps its color. The lab's pressed-button background must not replace it. */
+.gu-shell button.d-cell[aria-pressed=true]:not(.gu-tile):not(.gu-row) { outline:2px solid var(--accent-primary); outline-offset:1px; background:var(--c); }
+.gu-shell button.d-cell.is-none[aria-pressed=true]:not(.gu-tile):not(.gu-row) { background:linear-gradient(to top right, transparent 47%, var(--text-muted) 47% 53%, transparent 53%); }
 .d-state-head { display:flex; align-items:center; gap:8px; min-height:24px; margin-top:4px; padding-top:6px; border-top:1px solid var(--border-normal); }
 .d-state-head:first-of-type { margin-top:0; padding-top:0; border-top:0; }
 .d-state-head h4 { margin:0; font-size:12px; font-weight:650; }

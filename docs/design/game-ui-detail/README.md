@@ -26,9 +26,10 @@ and `place` (C).
 | `box` | A box with "All properties" open |
 | `screen` | The Ticket stub with nothing selected |
 
-## The four choices
+## The choices
 
-A mock is a set of four choices. The dashed bar at the top changes one choice at a
+A mock is a set of choices. The table has the first four. The fifth, "A look group",
+came later and is described under "After Kris's first look at mock D". The dashed bar at the top changes one choice at a
 time, so any mix can be tried. "Mock" then reads "Your mix".
 
 | Choice | A · Point and change | B · Boxes first | C · Place it yourself |
@@ -67,6 +68,31 @@ four mocks share one source.
   back. An element that the game needs cannot be deleted. The sample screens have one
   such element, the Background.
 - **Later version.** Selecting two or more elements.
+
+### After Kris's first look at mock D
+
+On 2026-11-22 Kris said that the two clicks are confusing, that the selected cell of
+the states table turned dark brown, and that the white outline hides a glow or a
+border. He asked for these changes:
+
+- **A fifth choice, "A look group"**, in the dashed bar. Mock D starts on the third
+  option, which the agent recommends.
+  - *Two clicks.* The first click selects the look group, the second the element.
+  - *Two clicks, with a hint.* The same, and the name tag says that a second click
+    selects the one element.
+  - *One click, switch in the panel.* A click selects the element that the pointer is
+    on. The Look section has a switch, "This button" / "Menu buttons · 6", that sets
+    what a look change applies to. It starts on the look group. It starts on the
+    element when that element has an own value. This option changes one point of the
+    shared-look decision: the first click no longer selects the look group.
+- **Corner marks.** The elements of a look group have four small corner marks and no
+  full outline. With the switch on the look group, the selected element has the full
+  outline and the other elements of the group have marks.
+- **The outline gives way.** While the pointer is over the Look section, or the
+  keyboard is in it, the full outline, the handles and the name tag hide and corner
+  marks stay. They return when the pointer is on the canvas.
+- **The selected cell keeps its color.** The dark brown was a defect of the mock: the
+  lab's style for a pressed button replaced the cell's color.
 
 Known simplifications in mock D:
 
@@ -177,7 +203,8 @@ Kris agreed to a new ticket for each of these on 2026-11-22.
 `npm run design:check -- game-ui-detail <mock> --theme dark --interaction ./screens/game-ui-detail/review-check.mjs`
 covers the group and element clicks, a group change and the chain commands, the
 keyboard, a drag in a column, a new element, the states, actions, variable text and
-the source-only part. For `chosen` it also covers the Shadow row and Glow, a fill
+the source-only part. For `chosen` it also covers one click with the switch in the
+panel, the corner marks, the outline that gives way, the color of the selected cell, the Shadow row and Glow, a fill
 that fades, Duplicate, the pin, an alignment guide, a handle on the left edge, Drawn
 or Image, and the Thumb row. Not checked: the light theme and window sizes other than
 1100 x 720.

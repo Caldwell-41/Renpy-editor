@@ -15,19 +15,28 @@ export default async function ({ page, open, capture }) {
   // Selection: the group first, then the element. "The box first" starts one step further out.
   await open({ state: 'screen', viewport: 'wide', theme: 'dark' });
   await page.locator('[data-do="go:title"]').click();
+  // One click with the switch in the panel: the click selects the button, and the Look section starts on its look group.
+  const oneClick = await page.locator('[data-opt="scope"]').inputValue() === 'panel';
   await el('load').click();
-  if (preset === 'boxes') { assert.equal(await name(), 'Menu'); await el('load').click(); }
-  assert.equal(await name(), 'Menu buttons');
-  assert.equal(await page.locator('.d-over .d-sel').count(), 6);
+  if (oneClick) {
+    assert.equal(await name(), 'Load');
+    assert.equal(await page.locator('[data-do="scope:group"]').getAttribute('aria-pressed'), 'true');
+    assert.equal(await page.locator('.d-over .d-sel').count(), 1);
+    assert.equal(await page.locator('.d-over .d-mark').count(), 5);
+  } else {
+    if (preset === 'boxes') { assert.equal(await name(), 'Menu'); await el('load').click(); }
+    assert.equal(await name(), 'Menu buttons');
+    assert.equal(await page.locator('.d-over .d-mark').count(), 6);
+  }
   await capture(`${preset}-group`);
-  await el('load').click();
+  if (!oneClick) await el('load').click();
   assert.equal(await name(), 'Load');
   // Inside the group, a click on another member selects that member.
   await el('help').click();
   assert.equal(await name(), 'Help');
 
   // A group change reaches every member, and the open chain gives the two commands.
-  await page.locator('.d-crumbs [data-do="crumb:g:menu"]').click();
+  if (!oneClick) await page.locator('.d-crumbs [data-do="crumb:g:menu"]').click();
   const text = page.locator('[data-in="look:text"]');
   await text.fill('#ff0000'); await text.dispatchEvent('change');
   assert.match(await el('quit').getAttribute('style'), /color:#ff0000/);
@@ -35,6 +44,24 @@ export default async function ({ page, open, capture }) {
   assert.deepEqual(await page.locator('.gu-pop [role=menuitem]').allInnerTexts(), ['Same as buttons in the game', 'Use for all buttons in the game']);
   await page.locator('[data-do="same:text"]').click();
   assert.match(await el('quit').getAttribute('style'), /color:#f6efe2/);
+  if (oneClick) {
+    // "This button" changes the one button. The others keep the look of the group.
+    await page.locator('[data-do="scope:one"]').click();
+    await text.fill('#00ff00'); await text.dispatchEvent('change');
+    assert.match(await el('help').getAttribute('style'), /color:#00ff00/);
+    assert.match(await el('quit').getAttribute('style'), /color:#f6efe2/);
+    // The pointer is over the Look section, so only the one button has marks.
+    assert.equal(await page.locator('.d-over .d-mark').count(), 1);
+    await page.locator('[data-do="undo"]').click();
+    // The selected cell keeps its color.
+    await page.locator('[data-do="cell:hover.text"]').click();
+    assert.equal(await page.locator('[data-do="cell:hover.text"]').evaluate(node => getComputedStyle(node).backgroundColor), 'rgb(232, 165, 75)');
+    // With the pointer over the Look section, the outline gives way to corner marks.
+    await page.locator('.d-look h3').hover();
+    assert.equal(await page.locator('.d-over .d-sel').count(), 0);
+    assert.equal(await page.locator('.d-over .d-mark').count(), 1);
+    await capture(`${preset}-quiet`);
+  }
 
   // The keyboard: Tab steps through the elements, an arrow key moves one, Esc goes out one step.
   await page.locator('[data-canvas]').focus();
@@ -46,7 +73,7 @@ export default async function ({ page, open, capture }) {
   if (preset === 'boxes') assert.match(await el('start').getAttribute('style'), /translate:0cqw 0\.052cqw/);
   else assert.deepEqual((await order('menu')).slice(0, 2), ['load', 'start']);
   await page.keyboard.press('Escape');
-  assert.equal(await name(), 'Menu buttons');
+  assert.equal(await name(), oneClick ? 'Menu' : 'Menu buttons');
   await page.locator('[data-do="undo"]').click();
 
   // A drag in a column: it lands at the line, or it shifts by pixels.
@@ -69,7 +96,7 @@ export default async function ({ page, open, capture }) {
 
   // The states: a button with an own Idle fill keeps it in Hover until Hover gets an own value.
   await open({ state: 'button', viewport: 'wide', theme: 'dark' });
-  assert.deepEqual(await page.locator('.d-crumbs button').allInnerTexts(), ['Stub box', 'Buttons row', 'Buttons on this screen']);
+  assert.deepEqual(await page.locator('.d-crumbs button').allInnerTexts(), oneClick ? ['Stub box', 'Buttons row'] : ['Stub box', 'Buttons row', 'Buttons on this screen']);
   await page.locator('[data-do="state:hover"]').first().click();
   assert.match(await el('board').getAttribute('style'), /background:#e8a54b/);
   await capture(`${preset}-states`);

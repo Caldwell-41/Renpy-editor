@@ -10,13 +10,13 @@ import '../game-ui/style.css';
 import './style.css';
 
 export type Preset = 'chosen' | 'point' | 'boxes' | 'place';
-type Opt = { click: 'deep' | 'boxes'; drag: 'reorder' | 'offset'; add: 'selection' | 'place'; states: 'switch' | 'matrix' | 'diff' };
+type Opt = { click: 'deep' | 'boxes'; drag: 'reorder' | 'offset'; add: 'selection' | 'place'; states: 'switch' | 'matrix' | 'diff'; scope: 'click' | 'hint' | 'panel' };
 const presets: Record<Preset, Opt> = {
   // What Kris chose on 2026-11-22: mock A with the states side by side.
-  chosen: { click: 'deep', drag: 'reorder', add: 'selection', states: 'matrix' },
-  point: { click: 'deep', drag: 'reorder', add: 'selection', states: 'switch' },
-  boxes: { click: 'boxes', drag: 'offset', add: 'place', states: 'matrix' },
-  place: { click: 'deep', drag: 'reorder', add: 'place', states: 'diff' },
+  chosen: { click: 'deep', drag: 'reorder', add: 'selection', states: 'matrix', scope: 'panel' },
+  point: { click: 'deep', drag: 'reorder', add: 'selection', states: 'switch', scope: 'click' },
+  boxes: { click: 'boxes', drag: 'offset', add: 'place', states: 'matrix', scope: 'click' },
+  place: { click: 'deep', drag: 'reorder', add: 'place', states: 'diff', scope: 'click' },
 };
 const presetNames: Record<Preset, string> = { chosen: 'D · Chosen mix', point: 'A · Point and change', boxes: 'B · Boxes first', place: 'C · Place it yourself' };
 const optNames: { [K in keyof Opt]: [label: string, options: [Opt[K], string][]] } = {
@@ -24,6 +24,7 @@ const optNames: { [K in keyof Opt]: [label: string, options: [Opt[K], string][]]
   drag: ['A drag in a row or column', [['reorder', 'Moves it to a new place'], ['offset', 'Shifts it by pixels']]],
   add: ['A new element', [['selection', 'Lands by the selection'], ['place', 'Goes where you click']]],
   states: ['States', [['switch', 'One at a time'], ['matrix', 'Side by side'], ['diff', 'Differences from Idle']]],
+  scope: ['A look group', [['click', 'Two clicks'], ['hint', 'Two clicks, with a hint'], ['panel', 'One click, switch in the panel']]],
 };
 
 type V = string | number;
@@ -83,6 +84,7 @@ const looks: Record<string, Setting[]> = {
 const pinWords: Record<string, string> = { t: 'top', m: 'middle', b: 'bottom', l: 'left', c: 'centre', r: 'right' };
 const pinName = (pin: string) => pin === 'mc' ? 'centre' : `${pinWords[pin[0]!]} ${pinWords[pin[1]!]}`;
 const pinOf = (el: El) => { const pin = el.pin ?? 'tl'; return { py: { t: 0, m: 0.5, b: 1 }[pin[0]!] ?? 0, px: { l: 0, c: 0.5, r: 1 }[pin[1]!] ?? 0 }; };
+const noun: Record<string, [one: string, many: string]> = { Button: ['button', 'buttons'], Text: ['text', 'text elements'], Box: ['box', 'boxes'], Bar: ['bar', 'bars'] };
 const plural: Record<string, string> = { Button: 'Buttons', Text: 'Text', Box: 'Boxes', Bar: 'Bars' };
 const inGame: Record<string, string> = { Button: 'buttons in the game', Text: 'text in the game', Box: 'boxes in the game', Bar: 'bars in the game' };
 const variables: [name: string, type: string, sample: string][] = [['platform', 'whole number', '4'], ['depart_time', 'text', '23:52'], ['tram_wait', 'whole number', '6'], ['boarded', 'true or false', 'False']];
@@ -148,6 +150,10 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   let page: string, sel: Sel, hover: Sel = null, showState: St, cell: string, more: boolean, listOpen: boolean | null, open: string, expanded: number | null;
   let copied: { kind: string; values: Record<string, V>; from: string } | null, placing: Kind | null, nextNew: number, nextAction: number;
   // What the pointer is doing on the canvas: an outline that follows it, and the line where the element will land.
+  // "One click, switch in the panel": whether the Look section changes the look group or the one element.
+  let lookScope: 'group' | 'one' = 'one';
+  // Where the pointer is. Over the Look section the outline hides, so it does not cover a border or a glow.
+  let overLook = false, overCanvas = false;
   let ghost: Rect | null = null, line: Rect | null = null, guides: Rect[] = [], pending: Doc | null = null, focusCanvas = false;
 
   function reset(state: string) {
@@ -159,6 +165,8 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     if (state === 'bar') sel = { e: 'wait' };
     if (state === 'source') sel = { e: 'stops' };
     if (state === 'box') { sel = { e: 'stub' }; more = true; }
+    if (opt.scope === 'panel' && sel?.g) sel = { e: members(sel.g)[0]!.id };
+    lookScope = scopeFor(sel);
   }
 
   // ---- the sample screen ----
@@ -180,6 +188,15 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   const selEls = (s: Sel) => s?.g ? members(s.g) : s?.e && find(s.e) ? [find(s.e)!.el] : [];
   const selKind = (s: Sel) => s?.g ? kindOf(s.g) : s?.e ? find(s.e)?.el.kind ?? '' : '';
   const arranged = (f: Found) => f.parent.arrange !== 'free';
+  /** An element shares its look when its look group has more than one element, here or on other screens. */
+  const shared = (el: El) => !!el.group && (members(el.group).length > 1 || el.group === 'menu');
+  /** The switch starts on the look group, so a look change is shared. An element with an own value starts on itself. */
+  const scopeFor = (s: Sel): 'group' | 'one' => { const el = s?.e ? find(s.e)?.el : null; return el && shared(el) && !Object.keys(el.own ?? {}).length ? 'group' : 'one'; };
+  /** What the Look section changes: the selection, or with the switch on the look group, the group of the selected element. */
+  function lookTarget(): Sel {
+    const el = opt.scope === 'panel' && sel?.e ? find(sel.e)?.el : null;
+    return el && lookScope === 'group' && shared(el) ? { g: el.group } : sel;
+  }
 
   // ---- the three look levels ----
   function levels(s: Sel): Level[] {
@@ -205,7 +222,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   const shown = (text: string) => esc(text).replace(/\[(\w+)\]/g, (whole, name: string) => variables.find(([n]) => n === name)?.[2] ?? whole);
   function drawEl(el: El, parent: El): string {
     if (el.id === 'bg') return `<div class="d-el g-bg" data-el="bg" style="background-image:url(${art[el.pic!]})"></div>`;
-    const forced = el.kind === 'Button' && showState !== 'idle' && selEls(sel).includes(el) ? showState : 'idle';
+    const forced = el.kind === 'Button' && showState !== 'idle' && selEls(lookTarget()).includes(el) ? showState : 'idle';
     const L = levels({ e: el.id });
     const v = (key: string) => resolve(L, key, forced).value;
     const css: string[] = [];
@@ -250,22 +267,32 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     return { x: b.left - a.left + view.scrollLeft, y: b.top - a.top + view.scrollTop, w: b.width, h: b.height };
   }
   const place = (r: Rect) => `left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px`;
-  function tagOf(s: Sel) {
-    if (s?.g) return `${groupName(s.g)} · ${members(s.g).length}`;
+  function tagOf(s: Sel, hovered = false) {
+    const hint = opt.scope === 'hint';
+    if (s?.g) return `${groupName(s.g)} · ${members(s.g).length}${hint && !hovered ? ` · click one again for that ${noun[kindOf(s.g)]![0]}` : ''}`;
     const el = find(s!.e!)!.el;
-    return `${nameOf(el)}${el.kind === 'Code' ? ' · Source only' : el.fixed ? ' · does not move' : ''}`;
+    return `${nameOf(el)}${el.kind === 'Code' ? ' · Source only' : el.fixed ? ' · does not move' : hint && hovered && sel?.g && sel.g === el.group ? ' · click for this one' : ''}`;
   }
   const canResize = (el: El) => !el.fixed && el.kind !== 'Code';
   function drawOver() {
     const over = host.querySelector<HTMLElement>('.d-over');
     if (!over) return;
+    const quiet = overLook || (!overCanvas && !!host.querySelector('.d-look')?.contains(document.activeElement));
+    // One element has a full outline. The elements of a look group have corner marks, which leave a border or a glow in view.
     const outline = (el: El, cls: string, tag: string) => {
-      const r = rectOf(el.id);
-      return r ? `<i class="d-out ${cls}${el.kind === 'Code' ? ' d-src' : ''}" style="${place(r)}">${tag ? `<em class="${r.y < 24 ? 'd-tag-in' : ''}${r.x + 170 > over.clientWidth ? ' d-tag-right' : ''}">${esc(tag)}</em>` : ''}</i>` : '';
+      const at = rectOf(el.id);
+      if (!at) return '';
+      const r = cls === 'd-mark' ? { x: at.x - 5, y: at.y - 5, w: at.w + 10, h: at.h + 10 } : at;
+      return `<i class="${cls === 'd-mark' ? '' : 'd-out '}${cls}${el.kind === 'Code' ? ' d-src' : ''}" style="${place(r)}">${tag ? `<em class="${r.y < 24 ? 'd-tag-in' : ''}${r.x + 170 > over.clientWidth ? ' d-tag-right' : ''}">${esc(tag)}</em>` : ''}</i>`;
     };
-    let html = hover && !same(hover, sel) ? selEls(hover).map((el, i) => outline(el, 'd-hov', i === 0 ? tagOf(hover) : '')).join('') : '';
-    html += selEls(sel).map((el, i) => outline(el, 'd-sel', i === 0 ? tagOf(sel) : '')).join('');
-    const one = sel?.e ? find(sel.e)?.el : null, r = one && canResize(one) && !ghost ? rectOf(one.id) : null;
+    const look = lookTarget();
+    let html = !quiet && hover && !same(hover, sel) ? selEls(hover).map((el, i) => outline(el, 'd-hov', i === 0 ? tagOf(hover, true) : '')).join('') : '';
+    if (sel?.g) html += selEls(sel).map((el, i) => outline(el, 'd-mark', i === 0 && !quiet ? tagOf(sel) : '')).join('');
+    else if (sel?.e) {
+      html += selEls(sel).map(el => outline(el, quiet ? 'd-mark' : 'd-sel', quiet ? '' : tagOf(sel))).join('');
+      if (look?.g) html += selEls(look).filter(el => el.id !== sel!.e).map(el => outline(el, 'd-mark', '')).join('');
+    }
+    const one = sel?.e ? find(sel.e)?.el : null, r = one && canResize(one) && !ghost && !quiet ? rectOf(one.id) : null;
     // Text takes a width and wraps, so its handles are on its sides. A free element has handles on every edge.
     // In a row or column the box sets the place, so the handles are on the right and the bottom.
     const isFree = !!one && !arranged(find(one.id)!);
@@ -281,7 +308,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   /** What repeated clicks on one element select, in order. "What you point at": its group, then the element.
    *  "The box first": each box around it from the outside in, then its group, then the element. */
   function ladder(id: string): Sel[] {
-    const f = find(id)!, g = f.el.group && members(f.el.group).length > 1 ? [{ g: f.el.group }] : [];
+    const f = find(id)!, g = opt.scope !== 'panel' && f.el.group && members(f.el.group).length > 1 ? [{ g: f.el.group }] : [];
     return [...(opt.click === 'boxes' ? f.path.map(box => ({ e: box.id })) : []), ...g, { e: id }];
   }
   /** The path from the screen to the selection: the boxes around it, its group, then the element. Esc goes one step left. */
@@ -289,11 +316,11 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     const first = selEls(s)[0];
     if (!first) return [];
     const f = find(first.id)!;
-    return [...f.path.map(box => ({ e: box.id })), ...(first.group && members(first.group).length > 1 ? [{ g: first.group }] : []), ...(s!.e ? [{ e: s!.e }] : [])];
+    return [...f.path.map(box => ({ e: box.id })), ...(opt.scope !== 'panel' && first.group && members(first.group).length > 1 ? [{ g: first.group }] : []), ...(s!.e ? [{ e: s!.e }] : [])];
   }
   function select(next: Sel) {
     if (!same(next, sel) && selKind(next) !== selKind(sel)) { showState = 'idle'; cell = 'idle.text'; }
-    if (!same(next, sel)) expanded = null;
+    if (!same(next, sel)) { expanded = null; lookScope = scopeFor(next); }
     sel = next; open = '';
   }
   const selName = (s: Sel) => s?.g ? groupName(s.g) : nameOf(find(s!.e!)!.el);
@@ -429,8 +456,8 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
       else f.el.at = { x: (f.el.at?.x ?? 0) + dx, y: (f.el.at?.y ?? 0) + dy };
     });
   }
-  function setLook(key: string, value: V) { levels(sel)[0]!.own[key] = value; }
-  const lookEdit = (key: string) => `${selName(sel)} ${key.includes('.') ? `${key.split('.')[0]} ` : ''}${looks[selKind(sel)]?.find(def => def.key === key.split('.').pop())?.label.toLowerCase() ?? key}`;
+  function setLook(key: string, value: V) { levels(lookTarget())[0]!.own[key] = value; }
+  const lookEdit = (key: string) => `${selName(lookTarget())} ${key.includes('.') ? `${key.split('.')[0]} ` : ''}${looks[selKind(sel)]?.find(def => def.key === key.split('.').pop())?.label.toLowerCase() ?? key}`;
 
   // ---- the panel ----
   function chain(L: Level[], def: Setting, st: St) {
@@ -454,16 +481,20 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   }
   const showButton = (st: St, label = cap(st)) => `<button type="button" class="gu-flat d-show" data-do="state:${st}" aria-pressed="${showState === st}" aria-label="Show ${st} on the canvas" title="Show ${st} on the canvas">${label}</button>`;
   function lookSection(): string {
-    const kind = selKind(sel), one = sel?.e ? find(sel.e)!.el : null;
+    const kind = selKind(sel), aim = lookTarget(), one = aim?.e ? find(aim.e)!.el : null;
     if (!looks[kind]) return '';
     if (one?.kind === 'Box' && !one.frame) return `<section class="gu-group"><h3>Look</h3><p class="gu-help gu-help-wide">This box only arranges its elements. It has no background.</p><div><button type="button" data-do="frame">Give it a background</button></div></section>`;
-    const L = levels(sel), stateful = kind === 'Button', image = one?.mode === 'image';
+    const L = levels(aim), stateful = kind === 'Button', image = one?.mode === 'image';
+    // "One click, switch in the panel": the switch says what a look change applies to. The canvas marks the same elements.
+    const picked = opt.scope === 'panel' && sel?.e ? find(sel.e)!.el : null, count = picked?.group ? members(picked.group).length : 0;
+    const scope = picked && shared(picked) ? `<div class="gu-seg" role="group" aria-label="Change the look of"><button type="button" data-do="scope:one" aria-pressed="${lookScope === 'one'}">This ${noun[kind]![0]}</button><button type="button" data-do="scope:group" aria-pressed="${lookScope === 'group'}">${groupName(picked.group!)} · ${count}</button></div>
+      <p class="gu-help gu-help-wide">${lookScope === 'group' ? `A change applies to the ${count} marked ${noun[kind]![1]}${picked.group === 'menu' ? ', and to the same buttons on 7 screens' : ''}.` : `A change applies to this ${noun[kind]![0]} only.`}</p>` : '';
     // A box is Drawn from its box look, or shows an image file. An Image box has no fill, corners, border or shadow to set.
     const boxy = !!one && (one.kind === 'Button' || one.kind === 'Box');
     const mode = boxy ? `<div class="gu-field"><span class="gu-label">Box</span><span class="gu-control"><div class="gu-seg" role="group" aria-label="Box">${[['drawn', 'Drawn'], ['image', 'Image']].map(([v, text]) => `<button type="button" data-do="mode:${v}" aria-pressed="${image === (v === 'image')}">${text}</button>`).join('')}</div></span></div>
       ${image ? `<div class="gu-field"><span class="gu-label">Image</span><span class="gu-control"><code class="gu-clip">gui/frame.png</code><span class="gu-spacer"></span><button type="button" data-do="say:Change opens the project's pictures. Stretch areas and an image for each state are not part of this mock.">Change</button></span>
         <p class="gu-help">Loomlight shows this file as it is. Select Drawn to set a fill, corners, a border and a shadow. The file stays in the project.</p></div>` : ''}` : '';
-    const defs = looks[kind]!.filter(def => (def.key !== 'thumb' || selEls(sel).some(el => el.drag)) && !(image && boxKeys.includes(def.key)));
+    const defs = looks[kind]!.filter(def => (def.key !== 'thumb' || selEls(aim).some(el => el.drag)) && !(image && boxKeys.includes(def.key)));
     const shows = (def: Setting, st: St) => !def.needs || resolve(L, def.needs, st).value !== '';
     const glow = (st: St) => resolve(L, 'shadow', st).value !== '' ? `<div class="d-row"><span class="gu-help">A glow is a shadow with no offset.</span><button type="button" class="gu-flat gu-edit" data-do="glow">Glow</button></div>` : '';
     /** One setting with the settings under it: Fill with its gradient, Shadow with its blur and offset. */
@@ -498,7 +529,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
           ${differs.map(def => full(def, st)).join('')}`;
       }).join('')}`;
     }
-    return `<section class="gu-group"><h3>Look</h3>${mode}${body}</section>`;
+    return `<section class="gu-group d-look"><h3>Look</h3>${scope}${mode}${body}</section>`;
   }
   const actionText = (a: Action) => a.type === 'set' ? (a.op === 'add' ? `Add ${a.value} to ${a.name}` : a.op === 'sub' ? `Subtract ${a.value} from ${a.name}` : `Set ${a.name} to ${a.value}`) : `${a.type === 'show' ? 'Show' : 'Hide'} ${titles[a.screen!] ?? a.screen}`;
   function behavior(el: El): string {
@@ -602,7 +633,7 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     return `<div class="gu-shell" data-variant="detail">
       <section class="gu-proto d-proto" aria-label="Prototype controls"><strong>Game UI detailed level · unapproved</strong><button type="button" data-do="reset">Reset</button>
         <label>Mock <select data-preset aria-label="Mock">${(Object.keys(presets) as Preset[]).map(p => `<option value="${p}" ${p === preset ? 'selected' : ''}>${presetNames[p]}</option>`).join('')}${preset ? '' : '<option value="" selected>Your mix</option>'}</select></label>
-        ${pick('click')}${pick('drag')}${pick('add')}${pick('states')}</section>
+        ${pick('click')}${pick('scope')}${pick('drag')}${pick('add')}${pick('states')}</section>
       <div class="gu-app"><header class="gu-header"><strong class="gu-brand" data-icon="story">Loomlight</strong><span class="gu-project">The Last Tram</span><span class="gu-spacer"></span>
           <span class="gu-save-state">${count ? `${count} unsaved ${count === 1 ? 'change' : 'changes'}` : 'Saved'}</span>
           <div class="gu-history" role="group" aria-label="Project history">${command('undo')}${command('redo')}</div><button type="button" class="gu-primary" data-do="save">Save</button>
@@ -652,12 +683,13 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
       case 'pick': select({ e: arg }); break;
       case 'list': listOpen = !(listOpen ?? !sel); break;
       case 'more': more = !more; break;
+      case 'scope': lookScope = arg as 'group' | 'one'; break;
       case 'state': showState = arg as St; if (opt.states === 'matrix') cell = `${arg}.${cell.split('.')[1]}`; break;
       case 'cell': cell = arg; showState = arg.split('.')[0] as St; break;
       case 'add': if (opt.add === 'place') { placing = arg as Kind; status = `Click the canvas where the new ${arg.toLowerCase()} goes. Esc cancels.`; focusCanvas = true; } else addBySelection(arg as Kind); break;
       case 'delete': remove(); break;
       case 'duplicate': duplicate(); break;
-      case 'glow': commit(`${selName(sel)} glow`, () => { setLook('sx', 0); setLook('sy', 0); }); break;
+      case 'glow': commit(`${selName(lookTarget())} glow`, () => { setLook('sx', 0); setLook('sy', 0); }); break;
       case 'mode': if ((f!.el.mode === 'image') !== (arg === 'image')) commit(arg === 'image' ? `use an image for ${nameOf(f!.el)}` : `draw ${nameOf(f!.el)} from a box look`, () => { if (arg === 'image') f!.el.mode = 'image'; else delete f!.el.mode; }); break;
       case 'pin': if ((f!.el.pin ?? 'tl') !== arg) commit(`pin ${nameOf(f!.el)} to the ${pinName(arg)}`, () => {
         // The element stays where it is. Only the point that its position measures from changes.
@@ -675,17 +707,17 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
         f!.el.kids!.forEach((kid, i) => { delete kid.off; delete kid.pin; if (arg === 'free') kid.at = { x: Math.round((spots[i]!.x - box.x) * s), y: Math.round((spots[i]!.y - box.y) * s) }; else delete kid.at; });
         if (arg === 'free') { f!.el.w ??= Math.round(box.w * s); f!.el.h ??= Math.round(box.h * s); }
       }); break;
-      case 'none': { const L = levels(sel), def = looks[selKind(sel)]!.find(d => d.key === arg.split('.').pop())!, st = (arg.includes('.') ? arg.split('.')[0] : 'idle') as St;
+      case 'none': { const L = levels(lookTarget()), def = looks[selKind(sel)]!.find(d => d.key === arg.split('.').pop())!, st = (arg.includes('.') ? arg.split('.')[0] : 'idle') as St;
         commit(lookEdit(arg), () => setLook(arg, resolve(L, def.key, st).value === '' ? '#1d1410' : '')); break; }
-      case 'own': { const [st, key] = arg.split('.') as [St, string]; commit(lookEdit(arg), () => setLook(arg, resolve(levels(sel), key, st).value)); break; }
-      case 'same': commit(`${lookEdit(arg)} same as the level above`, () => { delete levels(sel)[0]!.own[arg]; }); break;
-      case 'forall': { const L = levels(sel); commit(`${lookEdit(arg)} for all ${L[1]!.label}`, () => { L[1]!.own[arg] = L[0]!.own[arg]!; delete L[0]!.own[arg]; }); break; }
-      case 'copylook': { const L = levels(sel), values: Record<string, V> = {};
+      case 'own': { const [st, key] = arg.split('.') as [St, string]; commit(lookEdit(arg), () => setLook(arg, resolve(levels(lookTarget()), key, st).value)); break; }
+      case 'same': commit(`${lookEdit(arg)} same as the level above`, () => { delete levels(lookTarget())[0]!.own[arg]; }); break;
+      case 'forall': { const L = levels(lookTarget()); commit(`${lookEdit(arg)} for all ${L[1]!.label}`, () => { L[1]!.own[arg] = L[0]!.own[arg]!; delete L[0]!.own[arg]; }); break; }
+      case 'copylook': { const L = levels(lookTarget()), values: Record<string, V> = {};
         for (const def of looks[selKind(sel)]!) for (const st of def.perState ? states : ['idle' as St]) values[st === 'idle' ? def.key : `${st}.${def.key}`] = resolve(L, def.key, st).value;
-        copied = { kind: selKind(sel), values, from: selName(sel) }; status = `Copied the look of ${selName(sel)}.`; break; }
-      case 'pastelook': if (copied && copied.kind === selKind(sel)) commit(`paste look on ${selName(sel)}`, () => {
+        copied = { kind: selKind(sel), values, from: selName(lookTarget()) }; status = `Copied the look of ${selName(lookTarget())}.`; break; }
+      case 'pastelook': if (copied && copied.kind === selKind(sel)) commit(`paste look on ${selName(lookTarget())}`, () => {
         // An own value only where the result differs, so a chain that already gives the same value stays joined.
-        const L = levels(sel);
+        const L = levels(lookTarget());
         for (const [key, value] of Object.entries(copied!.values)) { const [st, k] = key.includes('.') ? key.split('.') as [St, string] : ['idle' as St, key]; if (resolve(L, k, st).value !== value) L[0]!.own[key] = value; }
       }); break;
       case 'var': commit('change element text', () => { f!.el.text = `${f!.el.text ?? ''}${f!.el.text?.endsWith(' ') || !f!.el.text ? '' : ' '}[${arg}]`; }); break;
@@ -716,8 +748,8 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   }
   function onChange(event: Event) {
     const el = event.target as HTMLInputElement, d = el.dataset;
-    if (d.preset !== undefined) { if (el.value) { preset = el.value as Preset; opt = { ...presets[preset] }; placing = null; } render(); return; }
-    if (d.opt) { (opt as unknown as Record<string, string>)[d.opt] = el.value; preset = (Object.keys(presets) as Preset[]).find(p => JSON.stringify(presets[p]) === JSON.stringify(opt)) ?? ''; placing = null; render(); return; }
+    if (d.preset !== undefined) { if (el.value) { preset = el.value as Preset; opt = { ...presets[preset] }; placing = null; normalize(); } render(); return; }
+    if (d.opt) { (opt as unknown as Record<string, string>)[d.opt] = el.value; preset = (Object.keys(presets) as Preset[]).find(p => JSON.stringify(presets[p]) === JSON.stringify(opt)) ?? ''; placing = null; normalize(); render(); return; }
     const [name, a, b] = (d.in ?? '').split(':'), f = sel?.e ? find(sel.e) : null;
     if (!name) return;
     if (name === 'look' || name === 'text') {
@@ -738,6 +770,8 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
     }
     render();
   }
+  /** With one click for an element, no look group stays selected. */
+  function normalize() { if (opt.scope === 'panel' && sel?.g) { sel = { e: members(sel.g)[0]!.id }; lookScope = 'group'; } }
   function onPointerDown(event: PointerEvent) {
     const target = event.target as HTMLElement;
     if (event.button !== 0) return;
@@ -823,6 +857,8 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   }
   function onMove(event: MouseEvent) {
     const target = event.target as HTMLElement;
+    const look = !!target.closest('.d-look'), canvas = !!target.closest('.gu-view');
+    if (look !== overLook || canvas !== overCanvas) { overLook = look; overCanvas = canvas; drawOver(); }
     if (placing && target.closest('[data-main]')) {
       const view = host.querySelector('.gu-view')!.getBoundingClientRect(), t = dropTarget(event.clientX, event.clientY, null);
       ghost = { x: event.clientX - view.left - 4, y: event.clientY - view.top - 4, w: 96, h: 30 }; line = t?.line ?? null; drawOver(); return;
@@ -870,12 +906,14 @@ export function mountDetail(host: HTMLElement, context: LabContext, initial: Pre
   host.addEventListener('pointerdown', onPointerDown); host.addEventListener('mousemove', onMove); document.addEventListener('keydown', onKey);
   const onLeave = () => { if (hover) { hover = null; drawOver(); } };
   host.addEventListener('mouseleave', onLeave);
+  const onFocus = () => drawOver();
+  host.addEventListener('focusin', onFocus); host.addEventListener('focusout', onFocus);
   const onResize = () => drawOver();
   window.addEventListener('resize', onResize);
   render();
   return () => {
     host.removeEventListener('click', onClick); host.removeEventListener('input', onInput); host.removeEventListener('change', onChange);
     host.removeEventListener('pointerdown', onPointerDown); host.removeEventListener('mousemove', onMove); document.removeEventListener('keydown', onKey);
-    host.removeEventListener('mouseleave', onLeave); window.removeEventListener('resize', onResize); host.replaceChildren();
+    host.removeEventListener('mouseleave', onLeave); host.removeEventListener('focusin', onFocus); host.removeEventListener('focusout', onFocus); window.removeEventListener('resize', onResize); host.replaceChildren();
   };
 }
