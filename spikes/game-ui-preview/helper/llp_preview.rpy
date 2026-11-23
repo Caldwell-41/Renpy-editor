@@ -1,4 +1,4 @@
-# Throwaway spike for #198, extended for #216. Never merged. Loads beside the project through
+# Throwaway spike for #198, extended for #216 and #213. Never merged. Loads beside the project through
 # RENPY_SEARCHPATH, keeps one long interaction like the game menu, and answers
 # requests from the driver through numbered JSON files in LLP_IO.
 
@@ -43,7 +43,7 @@ init python:
     def _llp_write(name, data):
         tmp = _llp_os.path.join(_llp_io, name + ".tmp")
         with open(tmp, "w", encoding="utf-8") as output:
-            _llp_json.dump(data, output)
+            _llp_json.dump(data, output, default=str)
         _llp_os.replace(tmp, _llp_os.path.join(_llp_io, name))
 
     def _llp_native():
@@ -57,8 +57,13 @@ init python:
         if not getattr(iface, "_llp_hooked", False):
             original = iface.draw_screen
             def draw_screen(*args, **kwargs):
+                _llp_S["root_widget"] = args[0]
                 result = original(*args, **kwargs)
                 now = _llp_perf()
+                _llp_S["last_frame_time"] = iface.frame_time
+                rec = _llp_S.get("rec")
+                if rec is not None and not _llp_S.get("bursting"):
+                    _llp_record(rec)
                 _llp_S["draws"] += 1
                 _llp_S["last_draw"] = now
                 wait = _llp_S.get("wait")
@@ -80,6 +85,8 @@ init python:
         if not getattr(focus.before_interact, "_llp", False):
             original_before = focus.before_interact
             def before_interact(roots):
+                roots = list(roots)
+                _llp_S["roots"] = roots
                 result = original_before(roots)
                 try:
                     _llp_apply_forced(roots)
@@ -145,6 +152,419 @@ init python:
         renpy.restart_interaction()
         yield dict(settle=True, min=req.get("min", 0), timeout=req.get("timeout", 2.0))
         _llp_capture(req, geometry=req.get("geometry", False), extra=dict(forceApplied=_llp_S.get("forceApplied")))
+
+    # ---- #213: frames at a set animation time, a record of the engine's own
+    # frames, and a story mode that runs real lines of dialogue and menus. ----
+
+    def _llp_entry_time(name):
+        """The time at which the engine first drew the named screen."""
+        d = renpy.get_screen(name)
+        if d is None:
+            return None
+        for entries in renpy.game.context().scene_lists.layers.values():
+            for e in entries:
+                if e.displayable is d:
+                    return e.show_time
+        return None
+
+    def _llp_times():
+        """Seconds since each shown screen was first drawn, at the last frame."""
+        frame_time = renpy.display.interface.frame_time
+        out = {}
+        for entries in renpy.game.context().scene_lists.layers.values():
+            for e in entries:
+                if isinstance(e.tag, str) and not e.tag.startswith("_llp"):
+                    out[e.tag] = (frame_time - e.show_time) if e.show_time else None
+        return out
+
+    def _llp_states(spec):
+        """The transform values and the button states of the elements named by file and line."""
+        transform_type = renpy.display.transform.Transform
+        button_type = renpy.display.behavior.Button
+        found, seen, transforms, buttons = [], set(), [], []
+        for root in _llp_S.get("roots") or []:
+            root.visit_all(found.append)
+        def matches(d, targets):
+            locations = [getattr(d, "_location", None)]
+            if isinstance(d, button_type) and d.child is not None:
+                locations.append(getattr(d.child, "_location", None))
+            for t in targets:
+                if any(l and l[1] == t["line"] and _llp_same_file(l, t["file"]) for l in locations):
+                    return t
+            return None
+        for d in found:
+            if id(d) in seen:
+                continue
+            seen.add(id(d))
+            if isinstance(d, transform_type) and spec.get("transforms"):
+                # "at a, b" nests transforms. nest counts from the element out.
+                nest, child = 1, d.child
+                while isinstance(child, transform_type):
+                    nest += 1
+                    child = child.child
+                t = matches(child, spec["transforms"]) if child is not None else None
+                if t is not None:
+                    state = d.state
+                    transforms.append(dict(line=t["line"], nest=nest, alpha=getattr(state, "alpha", None),
+                                           xoffset=getattr(state, "xoffset", None), yoffset=getattr(state, "yoffset", None),
+                                           zoom=getattr(state, "zoom", None), st=getattr(d, "st", None),
+                                           event=getattr(d, "last_transform_event", None)))
+            elif isinstance(d, button_type) and spec.get("buttons"):
+                t = matches(d, spec["buttons"])
+                if t is not None:
+                    buttons.append(dict(line=t["line"], prefix=d.style.prefix, focused=d.is_focused()))
+        return transforms, buttons
+
+    def _llp_runs(surface, origin, row=None, col=None):
+        """Runs of one color along a row or a column of the frame, in virtual pixels."""
+        scale = renpy.display.draw.draw_per_virt
+        width, height = surface.get_size()
+        if row is not None:
+            fixed, count, limit, start_at = int(round((row - origin[1]) * scale)), width, height, origin[0]
+            get = lambda i: tuple(surface.get_at((i, fixed)))
+        else:
+            fixed, count, limit, start_at = int(round((col - origin[0]) * scale)), height, width, origin[1]
+            get = lambda i: tuple(surface.get_at((fixed, i)))
+        if not 0 <= fixed < limit:
+            return None
+        runs, start, current = [], 0, get(0)
+        for i in range(1, count + 1):
+            c = get(i) if i < count else None
+            if c != current:
+                if i - start >= 4 and current[3] != 0 and current[:3] != (0, 0, 0):
+                    runs.append([list(current), round(start / scale + start_at, 2), round(i / scale + start_at, 2)])
+                start, current = i, c
+        return runs[:60]
+
+    def _llp_sample(surface, spec, origin=(0, 0)):
+        iface = renpy.display.interface
+        out = dict(t=_llp_perf(), frameTime=iface.frame_time, screens=_llp_times(), skipping=renpy.config.skipping,
+                   step=_llp_S.get("storyStep"), line=_llp_S.get("storyLine"))
+        if spec.get("transforms") or spec.get("buttons"):
+            out["transforms"], out["buttons"] = _llp_states(spec)
+        if surface is not None:
+            scale = renpy.display.draw.draw_per_virt
+            width, height = surface.get_size()
+            def pixel(x, y):
+                px, py = int(round((x - origin[0]) * scale)), int(round((y - origin[1]) * scale))
+                if 0 <= px < width and 0 <= py < height:
+                    return list(surface.get_at((px, py)))
+                return None
+            out["points"] = [pixel(x, y) for x, y in spec.get("points", [])]
+            out["rows"] = [_llp_runs(surface, origin, row=y) for y in spec.get("rows", [])]
+            out["cols"] = [_llp_runs(surface, origin, col=x) for x in spec.get("cols", [])]
+        return out
+
+    def _llp_shot(region=None):
+        """Read back the last frame, or one region of it given in virtual pixels."""
+        tree = renpy.display.interface.surftree
+        if region and not _llp_S.get("regionError"):
+            try:
+                return renpy.display.draw.screenshot(tree.subsurface(tuple(region)))
+            except Exception:
+                # Fall back to the full frame, and report it.
+                _llp_S["regionError"] = _llp_tb.format_exc()[-600:]
+        return renpy.display.draw.screenshot(tree)
+
+    def _llp_hash(surface):
+        import io, hashlib
+        with io.BytesIO() as data:
+            renpy.display.module.save_png(surface, data, 0)
+            return hashlib.sha256(data.getvalue()).hexdigest()[:16]
+
+    def _llp_record(rec):
+        """Called after each frame that the engine draws by itself."""
+        if len(rec["samples"]) >= rec.get("limit", 300):
+            return
+        try:
+            surface = _llp_shot(rec.get("region")) if rec.get("pixels", True) else None
+            origin = rec["region"][:2] if rec.get("region") else (0, 0)
+            sample = _llp_sample(surface, rec.get("probe") or {}, origin)
+            if rec.get("hash") and surface is not None:
+                sample["sha"] = _llp_hash(surface)
+        except Exception:
+            sample = dict(error=_llp_tb.format_exc()[-600:])
+        rec["samples"].append(sample)
+
+    def _llp_deliver(surface, mode, path):
+        """Write one frame for the driver. png0 is a PNG with no compression."""
+        if mode == "png":
+            renpy.display.scale.image_save_unscaled(surface, path + ".tmp.png")
+        elif mode == "png0":
+            with open(path + ".tmp.png", "wb") as output:
+                renpy.display.module.save_png(surface, output, 0)
+        else:
+            raise ValueError(mode)
+        _llp_os.replace(path + ".tmp.png", path + ".png")
+
+    def _llp_burst(req, base, segments):
+        """Render frames at set times. base is the engine time of animation time 0.
+
+        The engine reads one clock, renpy.display.core.get_time. For each frame
+        the helper sets that clock and the frame time, drops the cached renders
+        of every displayable that asked for a redraw, and renders the screen
+        tree. It does not draw to the window: the readback draws the tree into
+        the engine's own framebuffer.
+        """
+        iface, core, render = renpy.display.interface, renpy.display.core, renpy.display.render
+        mode, region, probe = req.get("deliver", "none"), req.get("region"), req.get("probe")
+        origin = region[:2] if region else (0, 0)
+        real, clock = core.get_time, [base]
+        frames, errors = [], []
+        core.get_time = lambda: clock[0]
+        _llp_S["bursting"] = True
+        try:
+            for segment in segments:
+                if "states" in segment:
+                    _llp_S["forced"] = [e for e in segment["states"] if e.get("state")]
+                    _llp_apply_forced(_llp_S["roots"])
+                renders = 1 + segment.get("prime", 0)
+                for t in segment["times"]:
+                    started = _llp_perf()
+                    for i in range(renders):
+                        # A far-future clock makes process_redraws drop every
+                        # queued redraw, also one queued at a later engine time.
+                        clock[0] = 1e18
+                        render.process_redraws()
+                        clock[0] = base + t
+                        iface.frame_time = clock[0]
+                        iface.draw_screen(_llp_S["root_widget"], None, False)
+                    renders = 1
+                    rendered = _llp_perf()
+                    surface = _llp_shot(region)
+                    read = _llp_perf()
+                    row = dict(t=t, renderMs=(rendered - started) * 1000, readMs=(read - rendered) * 1000,
+                               size=list(surface.get_size()))
+                    if mode != "none" and not errors:
+                        try:
+                            _llp_deliver(surface, mode, _llp_os.path.join(_llp_io, "burst-%d-%d" % (req["id"], len(frames))))
+                        except Exception:
+                            errors.append(_llp_tb.format_exc()[-600:])
+                    row["encodeMs"] = (_llp_perf() - read) * 1000
+                    row["doneMs"] = (_llp_perf() - _llp_S["t_req"]) * 1000
+                    if probe:
+                        row["sample"] = _llp_sample(surface, probe, origin)
+                    if req.get("hash"):
+                        row["sha"] = _llp_hash(surface)
+                    frames.append(row)
+        finally:
+            core.get_time = real
+            _llp_S["bursting"] = False
+        return frames, errors
+
+    def _llp_draft(req):
+        """Load the screen draft that a request carries. Returns an error result or None."""
+        draft = req.get("load")
+        if not draft:
+            return None
+        text = "\n" * (draft["line"] - 1) + draft["text"]
+        if draft.get("screen"):
+            _llp_evict(draft["screen"])
+        if renpy.load_string(text, draft["file"]) is None:
+            return dict(id=req["id"], kind=req["kind"], ok=False, error="parse",
+                        messages=[str(e) for e in renpy.parser.get_parse_errors()])
+        if draft.get("screen"):
+            _llp_S["good"][draft["screen"]] = (text, draft["file"])
+        return None
+
+    def _llp_frames(req):
+        """Optionally load a draft and show a screen again, then render frames at set times."""
+        started = _llp_perf()
+        failed = _llp_draft(req)
+        if failed is not None:
+            _llp_write("result-%d.json" % req["id"], failed)
+            return
+        loaded = _llp_perf()
+        draws = _llp_S["draws"]
+        if req.get("scene"):
+            _llp_S["scene"] = req["scene"]
+            _llp_S["forced"] = []
+            _llp_show(req["scene"])
+            yield dict(timeout=req.get("timeout", 2.0))
+        shown = _llp_perf()
+        base = _llp_S["last_frame_time"]
+        if req.get("base") == "show":
+            base = _llp_entry_time(req["scene"]["screen"]) or base
+        ahead = _llp_S["last_frame_time"] - base
+        frames, errors = _llp_burst(req, base, req["segments"])
+        done = _llp_perf()
+        _llp_S["forced"] = []
+        renpy.restart_interaction()
+        _llp_write("result-%d.json" % req["id"], dict(
+            id=req["id"], kind=req["kind"], ok=not errors, errors=errors, frames=frames,
+            loadMs=(loaded - started) * 1000, showMs=(shown - loaded) * 1000, burstMs=(done - shown) * 1000,
+            helperMs=(done - _llp_S["t_req"]) * 1000, engineFramesBefore=_llp_S["draws"] - draws,
+            engineAheadMs=ahead * 1000, native=_llp_native(), drawPerVirt=renpy.display.draw.draw_per_virt,
+            renderer=renpy.get_renderer_info()["renderer"], forceApplied=_llp_S.get("forceApplied"),
+            regionError=_llp_S.get("regionError")))
+
+    def _llp_match(req):
+        """Record the frames the engine draws by itself in real time. Then render
+        the same animation times with a set clock, and report both."""
+        failed = _llp_draft(req)
+        if failed is not None:
+            _llp_write("result-%d.json" % req["id"], failed)
+            return
+        region, seconds = req.get("region"), req.get("seconds", 0.4)
+        def recorder():
+            return dict(region=region, probe=req.get("probe"), hash=True, limit=req.get("limit", 80), samples=[])
+        quiet = dict(req, deliver="none", hash=True)
+        if req.get("states"):
+            # Hover in, then hover out, each from rest.
+            _llp_S["scene"] = req["scene"]
+            _llp_S["forced"] = []
+            _llp_show(req["scene"])
+            yield dict(min=0.4, timeout=3.0)
+            parts = []
+            for states in (req["states"], req["rest"]):
+                rec = recorder()
+                _llp_S["forced"] = states
+                renpy.restart_interaction()
+                _llp_S["rec"] = rec
+                yield dict(min=seconds, timeout=seconds + 2.0)
+                _llp_S["rec"] = None
+                first = rec["samples"][0]["frameTime"] if rec["samples"] else 0
+                for s in rec["samples"]:
+                    s["at"] = s.get("frameTime", first) - first
+                parts.append(rec["samples"])
+            _llp_S["forced"] = []
+            renpy.restart_interaction()
+            yield dict(min=0.4, timeout=3.0)
+            gap = (parts[0][-1]["at"] if parts[0] else 0) + 0.05
+            segments = [dict(states=req["states"], times=[s["at"] for s in parts[0]]),
+                        dict(states=req["rest"], times=[gap + s["at"] for s in parts[1]])]
+            real = parts[0] + parts[1]
+            frames, errors = _llp_burst(quiet, _llp_S["last_frame_time"], segments)
+        else:
+            tag = req["tag"]
+            rec = recorder()
+            _llp_S["scene"] = req["scene"]
+            _llp_S["forced"] = []
+            _llp_show(req["scene"])
+            _llp_S["rec"] = rec
+            yield dict(min=seconds, timeout=seconds + 2.0)
+            _llp_S["rec"] = None
+            # The first frame of a screen has no show time yet, and the engine
+            # renders it at animation time 0.
+            real = [s for s in rec["samples"] if "screens" in s and tag in s["screens"]]
+            for s in real:
+                s["at"] = s["screens"][tag] or 0.0
+            _llp_show(req["scene"])
+            yield dict(timeout=2.0)
+            base = _llp_entry_time(req["scene"]["screen"]) or _llp_S["last_frame_time"]
+            frames, errors = _llp_burst(quiet, base, [dict(times=[s["at"] for s in real])])
+        _llp_S["forced"] = []
+        renpy.restart_interaction()
+        def brief(sample, sha, at):
+            return dict(at=at, sha=sha, transforms=sample.get("transforms"), error=sample.get("error"))
+        _llp_write("result-%d.json" % req["id"], dict(
+            id=req["id"], kind=req["kind"], ok=not errors, errors=errors,
+            real=[brief(s, s.get("sha"), s.get("at")) for s in real],
+            set=[brief(f.get("sample") or {}, f.get("sha"), f["t"]) for f in frames], native=_llp_native(),
+            regionError=_llp_S.get("regionError")))
+
+    def _llp_trace(req):
+        """Post pointer moves at a fixed interval and record every frame the engine draws."""
+        rec = dict(probe=req.get("probe"), pixels=False, limit=req.get("limit", 600), samples=[])
+        renpy.display.interface.mouse_focused = True
+        _llp_S["rec"] = rec
+        for x, y in req["moves"]:
+            _llp_mouse.move_mouse(x, y)
+            rec["samples"].append(dict(move=[x, y], t=_llp_perf()))
+            yield dict(nodraw=True, min=req.get("interval", 0.016), timeout=1.0)
+        yield dict(nodraw=True, min=req.get("after", 0.3), timeout=2.0)
+        _llp_S["rec"] = None
+        _llp_write("result-%d.json" % req["id"], dict(id=req["id"], kind=req["kind"], ok=True, samples=rec["samples"],
+                                                     native=_llp_native()))
+
+    def _llp_story(req):
+        """Run real lines of dialogue and real menus, as a game does. The main
+        loop runs the steps. This request samples frames and ends each step."""
+        S = _llp_S
+        _llp_clear()
+        S["scene"] = None
+        S["forced"] = []
+        S["story"] = req
+        S["storyStep"] = -1
+        S["storyAbort"] = False
+        S["storyLines"] = []
+        S["stepStart"] = _llp_perf()
+        probe = req.get("probe") or {}
+        samples, records, notes = [], {}, []
+        S["end"] = True
+        for i, step in enumerate(req["steps"]):
+            if S["storyAbort"]:
+                break
+            if step["do"] == "skip":
+                rec = dict(probe=probe, pixels=step.get("pixels", True), limit=step.get("limit", 300), samples=[])
+                yield dict(nodraw=True, until=lambda i=i: S["storyStep"] is None or S["storyStep"] >= i, timeout=5.0)
+                S["rec"] = rec
+                yield dict(nodraw=True, until=lambda i=i: S["storyStep"] is None or S["storyStep"] > i,
+                           timeout=step.get("timeout", 15.0))
+                S["rec"] = None
+                records[str(i)] = rec["samples"]
+                if not S["lastWait"]["ok"]:
+                    notes.append("step %d did not end by itself" % i)
+                    S["storyAbort"] = True
+            elif step["do"] in ("say", "menu"):
+                yield dict(until=lambda i=i: S["storyStep"] == i and S["last_draw"] > S["stepStart"], timeout=5.0)
+                if not S["lastWait"]["ok"]:
+                    notes.append("step %d did not start" % i)
+                    S["storyAbort"] = True
+                    break
+                for want in step.get("capture", []):
+                    yield dict(until=lambda want=want: _llp_perf() - S["stepStart"] >= want, timeout=want + 2.0)
+                    sample = _llp_sample(_llp_shot(), probe)
+                    sample["want"] = want
+                    samples.append(sample)
+                S["end"] = True
+        yield dict(nodraw=True, until=lambda: S["storyStep"] is None and S.get("story") is None, timeout=15.0)
+        if not S["lastWait"]["ok"]:
+            notes.append("the story did not end")
+        _llp_write("result-%d.json" % req["id"], dict(
+            id=req["id"], kind=req["kind"], ok=not notes, notes=notes, samples=samples, records=records,
+            lines=S["storyLines"], skipDelay=config.skip_delay, native=_llp_native()))
+
+    def _llp_run_story():
+        """Called by the main loop, outside any interaction."""
+        S = _llp_S
+        req = S["story"]
+        unseen = _preferences.skip_unseen
+        who = Character("Eileen")
+        renpy.show_screen("_llp_driver")
+        try:
+            for i, step in enumerate(req["steps"]):
+                S["stepStart"] = _llp_perf()
+                S["storyStep"] = i
+                S["storyLine"] = None
+                do = step["do"]
+                if do == "say":
+                    renpy.say(who, step["what"])
+                elif do == "menu":
+                    renpy.display_menu([(caption, n) for n, caption in enumerate(step["items"])])
+                elif do == "skip":
+                    _preferences.skip_unseen = True
+                    renpy.config.skipping = step.get("mode", "slow")
+                    for n in range(step["count"]):
+                        S["storyLine"] = n
+                        began = _llp_perf()
+                        renpy.say(who, "Line %d that the player skips." % n)
+                        S["storyLines"].append(dict(step=i, line=n, ms=(_llp_perf() - began) * 1000,
+                                                    skipping=renpy.config.skipping))
+                    renpy.config.skipping = None
+                elif do == "show":
+                    renpy.show_screen(step["screen"])
+                elif do == "hide":
+                    renpy.hide_screen(step["screen"])
+        finally:
+            renpy.config.skipping = None
+            _preferences.skip_unseen = unseen
+            S["storyStep"] = None
+            S["story"] = None
+            S["rec"] = None
+            renpy.hide_screen("_llp_driver")
+
+    _llp_KINDS = dict(frames=_llp_frames, match=_llp_match, trace=_llp_trace, story=_llp_story)
 
     def _llp_hex(color):
         if color is None:
@@ -300,6 +720,8 @@ init python:
             result["geometry"] = _llp_geometry()
         if req.get("probe"):
             result["probe"] = _llp_probe(surface, req["probe"])
+        if req.get("sample"):
+            result["sample"] = _llp_sample(surface, req["sample"])
         if extra:
             result.update(extra)
         _llp_write("result-%d.json" % n, result)
@@ -426,7 +848,7 @@ init python:
         if kind == "scene":
             _llp_S["scene"] = req["scene"]
             _llp_show(req["scene"])
-            yield dict(settle=True, timeout=req.get("timeout", 2.0))
+            yield dict(settle=True, min=req.get("min", 0), timeout=req.get("timeout", 2.0))
             _llp_capture(req, geometry=req.get("geometry", False), extra=dict(
                 tInit=_llp_S["tInit"][-1], tCommand=_llp_S["tCommand"][-1], tMain=_llp_S["tMain"]))
         elif kind == "rects":
@@ -440,6 +862,9 @@ init python:
                 yield step
         elif kind == "force":
             for step in _llp_force(req):
+                yield step
+        elif kind in _llp_KINDS:
+            for step in _llp_KINDS[kind](req):
                 yield step
         elif kind == "restart":
             _llp_S["restart"] = dict(req=req, tRequest=_llp_S["t_req"])
@@ -463,18 +888,30 @@ init python:
             _llp_S["seq"] += 1
 
     def _llp_tick():
+        _llp_tick_inner()
+        S = _llp_S
+        if S.get("storyAbort") and S.get("storyStep") is not None:
+            return True
+        if S.get("end"):
+            # A story step is over. A value from the timer action ends the
+            # interaction, as a click ends a line of dialogue.
+            S["end"] = False
+            return True
+
+    def _llp_tick_inner():
         S = _llp_S
         if S["job"] is not None:
             wait = S["wait"]
             since = wait["since"]
-            drawn = S["last_draw"] > since
+            drawn = wait.get("nodraw") or S["last_draw"] > since
             if wait.get("event"):
                 drawn = drawn and S["event_seen"] >= since and S["last_draw"] > S["event_seen"]
             ok = drawn and not (wait.get("settle") and renpy.display.interface.ongoing_transition)
             ok = ok and _llp_perf() - since >= wait.get("min", 0)
+            ok = ok and (wait.get("until") is None or wait["until"]())
             if not ok and _llp_perf() - since < wait.get("timeout", 2.0):
                 return
-            wait["ok"] = ok
+            wait["ok"] = bool(ok)
             S["lastWait"] = wait
             _llp_step()
             return
@@ -509,7 +946,10 @@ init python:
             _llp_step()
         while True:
             try:
-                renpy.call_screen("_llp_driver")
+                if S.get("story") is not None:
+                    _llp_run_story()
+                else:
+                    renpy.call_screen("_llp_driver")
             except renpy.game.CONTROL_EXCEPTIONS:
                 raise
             except Exception:

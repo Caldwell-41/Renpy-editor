@@ -1,9 +1,13 @@
-"""Throwaway measurement driver for #198, extended for #216. Never merged.
+"""Throwaway measurement driver for #198, extended for #216 and #213. Never merged.
 
-Usage: python driver.py --sdk <verified 8.5.3 SDK> --work <dir> --out <dir> [--phase all|smoke|broken|states]
+Usage: python driver.py --sdk <verified 8.5.3 SDK> --work <dir> --out <dir>
+                        [--phase all|smoke|broken|states|animation|burst]
 
-One run of this script is one attempt under the limit recorded on #198. It
-starts at most --max-processes SDK processes and stops after --max-seconds.
+The phase "animation" runs the six inference cases of #213 and then the frame
+burst. The phase "burst" runs only the frame burst.
+
+One run of this script is one attempt under the limit recorded on the ticket.
+It starts at most --max-processes SDK processes and stops after --max-seconds.
 """
 import argparse
 import hashlib
@@ -231,7 +235,7 @@ def windows_spawn(argv, cwd, desktop_env):
 
 class Helper:
     def __init__(self, sdk, project, io, budget, log):
-        self.io, self.seq, self.budget = io, 0, budget
+        self.io, self.seq, self.budget, self.history = io, 0, budget, []
         shutil.rmtree(io, ignore_errors=True)
         os.makedirs(os.path.join(io, "search"))
         os.makedirs(os.path.join(io, "saves"))
@@ -302,6 +306,7 @@ class Helper:
         n, written = self.write_request(req)
         data = self.result(n, timeout)
         data["e2eMs"] = (data["_seen"] - (started or written)) * 1000
+        self.history.append(dict(request=req, result=data))
         return data
 
     def stop(self):
@@ -665,6 +670,537 @@ def summarize_states(session):
     return "\n".join(lines)
 
 
+ANIM_FILE = "game/zz_llp_animation.rpy"
+MOTION_FILE = "game/loomlight_motion.rpy"
+SCREENS_FILE = "game/screens.rpy"
+
+
+def retry_io(action):
+    """Run a file action again while Windows refuses it with a sharing violation."""
+    deadline = time.perf_counter() + 5
+    while True:
+        try:
+            return action()
+        except PermissionError:
+            if time.perf_counter() > deadline:
+                raise
+            time.sleep(0.001)
+
+
+def read_lines(path):
+    def read():
+        with open(path, encoding="utf-8") as f:
+            return f.read().split("\n")
+    return retry_io(read)
+
+
+def prepare_animation(project, cases):
+    """#213: add the preset definitions. For the inference cases, also add the
+    test screens and put presets on the say and choice screens. Returns the
+    line of each named element."""
+    shutil.copy(os.path.join(HERE, "animation", "loomlight_motion.rpy"), os.path.join(project, MOTION_FILE))
+    marks = {}
+    if not cases:
+        return marks
+    shutil.copy(os.path.join(HERE, "animation", "zz_llp_animation.rpy"), os.path.join(project, ANIM_FILE))
+    for number, line in enumerate(read_lines(os.path.join(project, ANIM_FILE)), 1):
+        if "# @" in line:
+            marks[line.split("# @")[1].strip()] = number
+    path = os.path.join(project, SCREENS_FILE)
+    lines = read_lines(path)
+    marker = '    textbutton "%s" action NullAction() pos (%d, %d) xysize (120, 60) background "%s" at %s'
+    say = next(i for i, l in enumerate(lines) if l.startswith("screen say("))
+    lines[say + 1:say + 1] = [marker % ("S1", 900, 20, "#00ff00", "llp_on_show(0.3)"),
+                              marker % ("S2", 1040, 20, "#0000ff", "ll_fade_in(0.3)")]
+    window = next(i for i in range(say, len(lines)) if lines[i].strip() == 'id "window"')
+    lines.insert(window + 1, "        at ll_fade_in(0.3)")
+    choice = next(i for i, l in enumerate(lines) if l.startswith("screen choice("))
+    lines[choice + 1:choice + 1] = [marker % ("C1", 900, 100, "#00ff00", "llp_on_show(0.3)"),
+                                    marker % ("C2", 1040, 100, "#0000ff", "ll_fade_in(0.3)")]
+    vbox = next(i for i in range(choice, len(lines)) if lines[i].strip() == "vbox:")
+    lines.insert(vbox + 1, "        at ll_slide_up(0.3)")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+    # Index i is line i + 1. The "window:" statement is the line before its id.
+    marks.update(S1=say + 2, S2=say + 3, SW=window, C1=choice + 2, C2=choice + 3, CV=vbox + 1)
+    return marks
+
+
+def target(marks, name, **more):
+    return dict(file=SCREENS_FILE if name[0] in "SC" else ANIM_FILE, line=marks[name], **more)
+
+
+def near(value, digits=4):
+    return None if value is None else round(float(value), digits)
+
+
+def tstate(sample, line):
+    """The values of the transforms on one element. An "at" list gives several."""
+    rows = [r for r in (sample.get("transforms") or []) if r["line"] == line]
+    if not rows:
+        return None
+
+    def pick(key, choose):
+        values = [float(r[key]) for r in rows if r.get(key) is not None]
+        return near(choose(values)) if values else None
+
+    return dict(alpha=pick("alpha", min), yoffset=pick("yoffset", lambda v: max(v, key=abs)),
+                xoffset=pick("xoffset", lambda v: max(v, key=abs)), zoom=pick("zoom", lambda v: max(v, key=lambda z: abs(z - 1))),
+                transforms=len(rows))
+
+
+def prefix_of(sample, line):
+    return next((b["prefix"] for b in (sample.get("buttons") or []) if b["line"] == line), None)
+
+
+def tint(color, base):
+    """If color is base under an alpha over black, return that alpha."""
+    if color is None:
+        return None
+    seen = [c * color[3] / 255.0 for c in color[:3]]
+    k = max(range(3), key=lambda i: base[i])
+    alpha = seen[k] / base[k]
+    if alpha < 0.04 or alpha > 1.04:
+        return None
+    if all(abs(seen[i] - base[i] * alpha) <= 6 for i in range(3)):
+        return round(alpha, 3)
+    return None
+
+
+def rgb(text):
+    return [int(text[i:i + 2], 16) for i in (1, 3, 5)]
+
+
+def extent(runs, base, dimmed=False):
+    """Where a solid box of the base color lies along one scan line."""
+    hits = []
+    for color, start, end in runs or []:
+        alpha = tint(color, base)
+        if alpha is not None and (dimmed or alpha > 0.96):
+            hits.append((start, end, alpha))
+    if not hits:
+        return None
+    return [min(h[0] for h in hits), max(h[1] for h in hits)] + ([hits[0][2]] if dimmed else [])
+
+
+def frames_table(result, describe):
+    rows = []
+    for f in result.get("frames") or []:
+        row = dict(t=near(f["t"]))
+        row.update(describe(f.get("sample") or {}))
+        rows.append(row)
+    return dict(ok=result.get("ok"), error=result.get("error"), errors=result.get("errors"),
+                trace=(result.get("trace") or "")[-800:] or None, engineAheadMs=near(result.get("engineAheadMs"), 1),
+                forceApplied=result.get("forceApplied"), frames=rows)
+
+
+def case_two_transforms(helper, marks):
+    """Inference 1: two transforms in one "at" list, each with its own events."""
+    names = ["A1", "A2", "A3", "A4"]
+    tops = dict(A1=40, A2=200, A3=360, A4=520)
+    base = rgb("#c06000")
+    probe = dict(transforms=[target(marks, n) for n in names], buttons=[target(marks, n) for n in names],
+                 points=[[410, tops[n] + 8] for n in names])
+
+    def describe(sample):
+        row = {}
+        for i, n in enumerate(names):
+            state = tstate(sample, marks[n]) or {}
+            pixel = (sample.get("points") or [None] * 4)[i]
+            row[n] = dict(alpha=state.get("alpha"), yoffset=state.get("yoffset"), prefix=prefix_of(sample, marks[n]),
+                          pixelAlpha=tint(pixel, base))
+        return row
+
+    out = {}
+    hover = [target(marks, n, state="hover") for n in names]
+    idle = [target(marks, n, state="idle") for n in names]
+    for label, prime in (("primed", 2), ("unprimed", 0)):
+        r = helper.ask(dict(kind="frames", scene=dict(screen="llp_m1"), base="show", probe=probe, segments=[
+            dict(times=[0.0, 0.2]),
+            dict(states=hover, prime=prime, times=[0.2, 0.26, 0.32, 0.5]),
+            dict(states=idle, prime=prime, times=[0.5, 0.56, 0.62, 1.0, 1.2])]))
+        out[label] = frames_table(r, describe)
+    # The same with a real pointer in real time: hover during the fade.
+    real = out["pointer"] = []
+    steps = [("shown", dict(kind="scene", scene=dict(screen="llp_m1"), sample=probe)),
+             ("pointer on A1", dict(kind="pointer", actions=[["move", 230, 80]], min=0.3, timeout=2.0, sample=probe)),
+             ("pointer still on A1", dict(kind="pointer", actions=[["move", 231, 80]], min=0.9, timeout=2.5, sample=probe)),
+             ("pointer away", dict(kind="pointer", actions=[["move", 1900, 1060]], min=0.4, timeout=2.0, sample=probe))]
+    for label, req in steps:
+        r = helper.ask(req)
+        sample = r.get("sample") or {}
+        row = dict(step=label, ok=r.get("ok"), st=near((sample.get("screens") or {}).get("llp_m1"), 3))
+        row.update(describe(sample))
+        real.append(row)
+    return out
+
+
+def case_show_reach(helper, marks):
+    """Inference 6: "on show" under an "if" and through "use"."""
+    names = ["K1", "K2", "K3", "K4", "K5", "K6"]
+    lefts = dict(K1=40, K2=180, K3=320, K4=460, K5=600, K6=740)
+    colors = dict(K1="#ff0000", K2="#00ff00", K3="#0000ff", K4="#ffff00", K5="#00ffff", K6="#ff00ff")
+    probe = dict(transforms=[target(marks, n) for n in names], points=[[lefts[n] + 110, 46] for n in names])
+
+    def describe(sample):
+        row = {}
+        for i, n in enumerate(names):
+            state = tstate(sample, marks[n]) or {}
+            pixel = (sample.get("points") or [None] * 6)[i]
+            row[n] = dict(alpha=state.get("alpha"), pixelAlpha=tint(pixel, rgb(colors[n])))
+        return row
+
+    r = helper.ask(dict(kind="frames", scene=dict(screen="llp_m6"), base="show", probe=probe,
+                        segments=[dict(times=[0.0, 0.25, 0.5, 1.0])]))
+    return frames_table(r, describe)
+
+
+def case_zoom(helper, marks):
+    """Inference 3: a zoom on a button in a box."""
+    grown = ["G2", "H2", "G4", "G5"]
+    probe = dict(transforms=[target(marks, n) for n in grown + ["P2"]], cols=[410, 900, 1140, 1910], rows=[134, 46, 406, 1070])
+    colors = dict(G1="#800000", G2="#008000", G3="#000080", H1="#804000", H2="#408000", H3="#004080", G4="#808000",
+                  G5="#800080", P1="#008080", P2="#ff00ff", P3="#606060")
+
+    def describe(sample):
+        cols, rows = sample.get("cols") or [None] * 4, sample.get("rows") or [None] * 4
+        where = lambda runs, n: extent(runs, rgb(colors[n]), dimmed=n == "P2")
+        row = dict(zoom={n: (tstate(sample, marks[n]) or {}).get("zoom") for n in grown + ["P2"]})
+        row["y"] = {n: where(cols[0], n) for n in ("G1", "G2", "G3", "P1", "P2", "P3")}
+        row["y"].update(H2=where(cols[1], "H2"), G4=where(cols[2], "G4"), G5=where(cols[3], "G5"))
+        row["x"] = dict(G2=where(rows[0], "G2"), H1=where(rows[1], "H1"), H2=where(rows[1], "H2"), H3=where(rows[1], "H3"),
+                        G4=where(rows[2], "G4"), G5=where(rows[3], "G5"))
+        return row
+
+    hover = [target(marks, n, state="hover") for n in grown]
+    idle = [target(marks, n, state="idle") for n in grown]
+    r = helper.ask(dict(kind="frames", scene=dict(screen="llp_m3"), base="show", probe=probe, segments=[
+        dict(times=[0.06, 0.15, 0.3, 0.6]),
+        dict(states=hover, prime=2, times=[0.6, 0.66, 0.8]),
+        dict(states=idle, prime=2, times=[0.8, 1.0])]))
+    return frames_table(r, describe)
+
+
+def case_edge(helper, marks):
+    """Inference 4: the pointer at the edge of a button with a hover lift."""
+    probe = dict(transforms=[target(marks, "L4"), target(marks, "L12")], buttons=[target(marks, "L4"), target(marks, "L12")])
+    helper.ask(dict(kind="scene", scene=dict(screen="llp_m4")))
+    out = []
+
+    def away():
+        helper.ask(dict(kind="trace", moves=[[1900, 1060]], after=0.4, probe=probe))
+
+    def digest(label, name, samples):
+        frames = [s for s in samples if "move" not in s and "error" not in s]
+        prefixes = [prefix_of(s, marks[name]) for s in frames]
+        offsets = [(tstate(s, marks[name]) or {}).get("yoffset") for s in frames]
+        offsets = [o for o in offsets if o is not None]
+        runs = []
+        for p in prefixes:
+            if runs and runs[-1][0] == p:
+                runs[-1][1] += 1
+            else:
+                runs.append([p, 1])
+        seconds = (frames[-1]["t"] - frames[0]["t"]) if len(frames) > 1 else 0
+        return dict(case=label, button=name, moves=sum(1 for s in samples if "move" in s), frames=len(frames),
+                    seconds=near(seconds, 2), stateChanges=max(0, len(runs) - 1), stateRuns=runs[:40],
+                    yoffsetMin=min(offsets) if offsets else None, yoffsetMax=max(offsets) if offsets else None,
+                    finalState=prefixes[-1] if prefixes else None, finalYoffset=offsets[-1] if offsets else None,
+                    errors=sum(1 for s in samples if "error" in s))
+
+    def trace(label, name, moves, after=0.4):
+        away()
+        r = helper.ask(dict(kind="trace", moves=moves, interval=0.016, after=after, probe=probe), timeout=30)
+        out.append(digest(label, name, r.get("samples") or []))
+
+    line = lambda y: [[100 + i, y] for i in range(60)]
+    trace("pointer moves along the middle, y 80", "L4", line(80))
+    trace("pointer moves along the strip 2 px above the bottom edge, y 118", "L4", line(118))
+    trace("pointer moves along the last row, y 119", "L4", line(119))
+    trace("pointer moves 2 px above the top edge, y 38", "L4", line(38))
+    trace("pointer moves along the top row, y 40", "L4", line(40))
+    trace("12 px lift: pointer moves 6 px above the bottom edge, y 374", "L12", line(374))
+    trace("one move into the strip, y 118, then rest for 1 s", "L4", [[100, 118]], after=1.0)
+    # The pointer still rests in the strip. Start a new interaction a few times,
+    # as a screen update does in a game.
+    rests = []
+    for i in range(4):
+        r = helper.ask(dict(kind="force", states=[], min=0.3, sample=probe))
+        sample = r.get("sample") or {}
+        rests.append(dict(state=prefix_of(sample, marks["L4"]), yoffset=(tstate(sample, marks["L4"]) or {}).get("yoffset")))
+    away()
+    return dict(traces=out, restingPointerThenNewInteraction=rests)
+
+
+SAY_POINTS = [[1010, 26], [1150, 26], [1010, 106], [1150, 106], [1610, 26], [1750, 26]]
+GREEN, BLUE, PINK, CYAN = [0, 255, 0], [0, 0, 255], [255, 0, 255], [0, 255, 255]
+
+
+def story_row(sample, marks, names):
+    points = sample.get("points") or [None] * 6
+    pixels = dict(S1=tint(points[0], GREEN), S2=tint(points[1], BLUE), C1=tint(points[2], GREEN), C2=tint(points[3], BLUE),
+                  U1=tint(points[4], PINK), U2=tint(points[5], CYAN))
+    row = dict(step=sample.get("step"), line=sample.get("line"), skipping=sample.get("skipping"),
+               screens={k: near(v, 3) for k, v in (sample.get("screens") or {}).items()})
+    for n in names:
+        state = tstate(sample, marks[n]) or {}
+        row[n] = dict(alpha=state.get("alpha"), yoffset=state.get("yoffset"))
+        if n in pixels and sample.get("points"):
+            row[n]["pixelAlpha"] = pixels[n]
+    return row
+
+
+def case_lines(helper, marks):
+    """Inference 2: an entrance on the say and choice screens, over real lines and menus."""
+    names = ["SW", "S1", "S2", "CV", "C1", "C2"]
+    probe = dict(transforms=[target(marks, n) for n in names], points=SAY_POINTS)
+    steps = [dict(do="say", what="Line %d of the story." % i, capture=[0.1, 0.6]) for i in range(3)]
+    steps += [dict(do="menu", items=["First choice", "Second choice"], capture=[0.1, 0.6]) for i in range(2)]
+    steps += [dict(do="say", what="A line after the menus.", capture=[0.1, 0.6])]
+    r = helper.ask(dict(kind="story", steps=steps, probe=probe), timeout=90)
+    rows = []
+    for s in r.get("samples") or []:
+        row = story_row(s, marks, names)
+        row["what"] = steps[s["step"]]["do"] if s.get("step") is not None else None
+        row["wanted"] = s.get("want")
+        rows.append(row)
+    return dict(ok=r.get("ok"), notes=r.get("notes"), error=r.get("error"), trace=(r.get("trace") or "")[-800:] or None,
+                samples=rows)
+
+
+def case_skip(helper, marks):
+    """Inference 5: ATL while the player skips."""
+    names = ["SW", "S1", "S2", "U1", "U2"]
+    probe = dict(transforms=[target(marks, n) for n in names], points=SAY_POINTS)
+    steps = [dict(do="show", screen="llp_m5_hud"),
+             dict(do="say", what="A line before the skip.", capture=[0.1]),
+             dict(do="skip", count=40, pixels=False),
+             dict(do="skip", count=25, pixels=True),
+             dict(do="say", what="A line after the skip.", capture=[0.2, 0.6]),
+             dict(do="hide", screen="llp_m5_hud")]
+    r = helper.ask(dict(kind="story", steps=steps, probe=probe), timeout=90)
+    out = dict(ok=r.get("ok"), notes=r.get("notes"), error=r.get("error"), trace=(r.get("trace") or "")[-800:] or None,
+               skipDelayMs=r.get("skipDelay"), captures=[story_row(s, marks, names) for s in r.get("samples") or []], skips=[])
+    for index, samples in sorted((r.get("records") or {}).items()):
+        rows = [story_row(s, marks, names) for s in samples if "error" not in s]
+        lines = [l for l in (r.get("lines") or []) if l["step"] == int(index)]
+
+        def spread(name, key):
+            values = [row[name].get(key) for row in rows if row[name].get(key) is not None]
+            if not values:
+                return None
+            return dict(min=min(values), median=near(statistics.median(values)), max=max(values), n=len(values))
+
+        hud = [(row["screens"].get("llp_m5_hud"), row["U1"]["alpha"], row["U2"]["alpha"]) for row in rows]
+        hud = [h for h in hud if h[0] is not None]
+        out["skips"].append(dict(
+            step=int(index), frames=len(rows), linesSeen=len({row["line"] for row in rows}), lines=len(lines),
+            lineMs=stats([l["ms"] for l in lines]), stillSkippingAfterEachLine=all(l["skipping"] for l in lines),
+            skippingInFrames=sorted({str(row["skipping"]) for row in rows}),
+            sayScreenAgeMs=stats([1000 * row["screens"]["say"] for row in rows if row["screens"].get("say") is not None]),
+            S1=dict(alpha=spread("S1", "alpha"), pixelAlpha=spread("S1", "pixelAlpha")),
+            S2=dict(alpha=spread("S2", "alpha"), pixelAlpha=spread("S2", "pixelAlpha")),
+            SW=dict(alpha=spread("SW", "alpha")),
+            hudFirst=hud[0] if hud else None, hudLast=hud[-1] if hud else None,
+            hudAlphaRises=all(b[1] >= a[1] and b[2] >= a[2] for a, b in zip(hud, hud[1:]))
+            if hud and all(h[1] is not None and h[2] is not None for h in hud) else None,
+            first=rows[:3], last=rows[-2:]))
+    return out
+
+
+def run_cases(helper, marks, session):
+    """#213: the six inferences. One failed case does not stop the others."""
+    cases = session["cases"] = {}
+    plan = [("1 two transforms", case_two_transforms), ("6 show reach", case_show_reach), ("3 zoom", case_zoom),
+            ("4 edge", case_edge), ("2 lines", case_lines), ("5 skip", case_skip)]
+    for name, run in plan:
+        try:
+            # A screen with an "on hide" block stays for a moment. Let it go first.
+            helper.ask(dict(kind="scene", scene=dict(screen="llp_m4"), min=0.5))
+            helper.ask(dict(kind="force", states=[]))
+            cases[name] = run(helper, marks)
+        except Exception:
+            import traceback
+            cases[name] = dict(failed=traceback.format_exc()[-1500:])
+        if helper.process.poll() is not None:
+            break
+
+
+def remove_frames(io, request):
+    """Count and delete the frame files of one burst request."""
+    count, size = 0, 0
+    while True:
+        path = os.path.join(io, "burst-%d-%d.png" % (request, count))
+        if not os.path.exists(path):
+            break
+        size += os.path.getsize(path)
+        retry_io(lambda: os.remove(path))
+        count += 1
+    return count, size
+
+
+def measure_burst(helper, project, session, reps, fps=30):
+    """#213: the frame burst, and the check of set-time frames against the engine's own frames.
+
+    The entrance is on a box of the stock preferences screen. The hover
+    animation is on the Preferences button of the stock navigation screen. Each
+    request carries the change as an unsaved draft, as an author's choice does.
+    """
+    path = os.path.join(project, "game", "screens.rpy")
+    pref_line, pref_text = block(path, "screen preferences(")
+    nav_line, nav_text = block(path, "screen navigation(")
+    pref_lines, nav_lines = pref_text.split("\n"), nav_text.split("\n")
+    radio = next(i for i, l in enumerate(pref_lines) if l.strip() == 'style_prefix "radio"')
+    indent = pref_lines[radio][:len(pref_lines[radio]) - len(pref_lines[radio].lstrip())]
+    box_line = pref_line + radio - 1
+    button = next(i for i, l in enumerate(nav_lines) if l.strip().startswith('textbutton _("Preferences")'))
+    button_line = nav_line + button
+
+    def entrance(preset):
+        lines = list(pref_lines)
+        lines.insert(radio + 1, indent + "at " + preset)
+        return dict(file=path, line=pref_line, text="\n".join(lines), screen="preferences")
+
+    def hover(preset):
+        lines = list(nav_lines)
+        lines[button] += " at " + preset
+        return dict(file=path, line=nav_line, text="\n".join(lines), screen="navigation")
+
+    def plain(line, text, screen):
+        helper.ask(dict(kind="load", file=path, line=line, text=text, screen=screen))
+
+    scene = dict(screen="preferences")
+    shown = helper.ask(dict(kind="scene", scene=scene, geometry=True))
+    in_screens = lambda g: g["file"].replace("\\", "/").endswith(SCREENS_FILE)
+    box = next(g for g in shown["geometry"] if g["line"] == box_line and in_screens(g) and g["cls"] == "MultiBox")
+    label = next(g for g in shown["geometry"] if g["line"] == button_line and in_screens(g) and g.get("container"))
+
+    def around(rect, margin):
+        x0, y0 = max(0, int(rect["x"] - margin)), max(0, int(rect["y"] - margin))
+        x1, y1 = min(1920, int(rect["x"] + rect["w"] + margin) + 1), min(1080, int(rect["y"] + rect["h"] + margin) + 1)
+        return [x0, y0, x1 - x0, y1 - y0]
+
+    box_region, button_region = around(box, 64), around(label["container"], 24)
+    box_target = dict(file=SCREENS_FILE, line=box_line)
+    button_target = dict(file=SCREENS_FILE, line=button_line)
+    hover_on, hover_off = [dict(button_target, state="hover")], [dict(button_target, state="idle")]
+    entrance_times = [k / fps for k in range(int(round(0.3 * fps)) + 1)]
+    in_times = [k / fps for k in range(int(0.12 * fps) + 1)] + [0.12]
+    out_times = [0.12 + k / fps for k in range(1, int(0.12 * fps) + 1)] + [0.24]
+    entrances = ["ll_slide_up(0.3)", "ll_fade_in(0.3)", "ll_pop(0.3)", "ll_slide_left(0.3)", "ll_slide_right(0.3)"]
+    hovers = ["ll_hover_lift(0.12)", "ll_hover_grow(0.12)", "ll_hover_brighten(0.12)"]
+    burst = session["burst"] = dict(
+        fps=fps, frameSize=shown.get("frameSize"), drawPerVirt=shown.get("drawPerVirt"), renderer=shown.get("renderer"),
+        boxRegion=box_region, buttonRegion=button_region, entranceTimes=entrance_times, hoverTimes=in_times + out_times,
+        reps=reps, runs={})
+
+    def entrance_request(i, deliver, region, probe=None):
+        return dict(kind="frames", load=entrance(entrances[i % len(entrances)]), scene=scene, base="show", deliver=deliver,
+                    region=region, probe=probe, segments=[dict(times=entrance_times)])
+
+    def hover_request(i, deliver, region, probe=None):
+        return dict(kind="frames", load=hover(hovers[i % len(hovers)]), scene=scene, deliver=deliver, region=region,
+                    probe=probe, segments=[dict(states=hover_on, prime=2, times=in_times),
+                                           dict(states=hover_off, prime=2, times=out_times)])
+
+    def series(name, make, deliver, region):
+        rows = burst["runs"][name] = []
+        for i in range(reps):
+            r = helper.ask(make(i, deliver, region), timeout=60)
+            frames = r.get("frames") or []
+            count, size = remove_frames(helper.io, r["id"])
+            rows.append(dict(ok=r.get("ok"), error=r.get("error") or (r.get("errors") or [None])[0], e2eMs=r.get("e2eMs"),
+                             helperMs=r.get("helperMs"), loadMs=r.get("loadMs"), showMs=r.get("showMs"),
+                             burstMs=r.get("burstMs"), firstFrameMs=frames[0]["doneMs"] if frames else None,
+                             frames=len(frames), files=count, bytes=size, frameSize=frames[0]["size"] if frames else None,
+                             renderMs=[f["renderMs"] for f in frames], readMs=[f["readMs"] for f in frames],
+                             encodeMs=[f["encodeMs"] for f in frames], forceApplied=r.get("forceApplied"),
+                             engineFramesBefore=r.get("engineFramesBefore"), hidden=(r.get("native") or {}),
+                             regionError=r.get("regionError"), trace=(r.get("trace") or "")[-800:] or None))
+
+    modes = [("full frame, PNG", "png", None), ("full frame, PNG with no compression", "png0", None),
+             ("element region, PNG", "png", True), ("element region, PNG with no compression", "png0", True),
+             ("full frame, no file", "none", None)]
+    for label_text, deliver, region in modes:
+        series("entrance 0.3 s: " + label_text, entrance_request, deliver, box_region if region else None)
+    plain(pref_line, pref_text, "preferences")
+    for label_text, deliver, region in modes:
+        series("hover 0.12 s in and out: " + label_text, hover_request, deliver, button_region if region else None)
+
+    # The values of the animation at each set time, for a check against the ATL formula.
+    values = session["values"] = {}
+    r = helper.ask(entrance_request(0, "none", box_region, probe=dict(transforms=[box_target])))
+    values["ll_slide_up(0.3) on the box"] = [dict(t=near(f["t"]), **(tstate(f["sample"], box_line) or {})) for f in r.get("frames") or []]
+    plain(pref_line, pref_text, "preferences")
+    r = helper.ask(hover_request(0, "none", button_region, probe=dict(transforms=[button_target], buttons=[button_target])))
+    values["ll_hover_lift(0.12) on the button"] = [
+        dict(t=near(f["t"]), state=prefix_of(f["sample"], button_line), **(tstate(f["sample"], button_line) or {}))
+        for f in r.get("frames") or []]
+
+    # Set-time frames against the frames that the engine draws by itself.
+    match = session["match"] = {}
+
+    def compare(name, r, line):
+        real, fixed = r.get("real") or [], r.get("set") or []
+        pairs = []
+        for a, b in zip(real, fixed):
+            sa, sb = tstate(a, line) or {}, tstate(b, line) or {}
+            pairs.append(dict(at=near(a.get("at")), same=a.get("sha") is not None and a.get("sha") == b.get("sha"),
+                              real=dict(alpha=sa.get("alpha"), yoffset=sa.get("yoffset"), xoffset=sa.get("xoffset"), zoom=sa.get("zoom")),
+                              set=dict(alpha=sb.get("alpha"), yoffset=sb.get("yoffset"), xoffset=sb.get("xoffset"), zoom=sb.get("zoom"))))
+
+        def worst(key):
+            gaps = [abs(p["real"][key] - p["set"][key]) for p in pairs if p["real"].get(key) is not None and p["set"].get(key) is not None]
+            return near(max(gaps), 6) if gaps else None
+
+        match[name] = dict(ok=r.get("ok"), error=r.get("error") or (r.get("errors") or [None])[0],
+                           trace=(r.get("trace") or "")[-800:] or None, realFrames=len(real), setFrames=len(fixed),
+                           sameImage=sum(1 for p in pairs if p["same"]), distinctImages=len({a.get("sha") for a in real}),
+                           worstGap=dict(alpha=worst("alpha"), yoffset=worst("yoffset"), xoffset=worst("xoffset"), zoom=worst("zoom")),
+                           different=[p for p in pairs if not p["same"]][:6], sample=pairs[:12])
+
+    for preset in ("ll_slide_up(0.3)", "ll_pop(0.3)", "ll_fade_in(0.3)"):
+        r = helper.ask(dict(kind="match", load=entrance(preset), scene=scene, tag="menu", seconds=0.45, region=box_region,
+                            probe=dict(transforms=[box_target])), timeout=60)
+        compare("entrance " + preset, r, box_line)
+    plain(pref_line, pref_text, "preferences")
+    for preset in hovers:
+        r = helper.ask(dict(kind="match", load=hover(preset), scene=scene, states=hover_on, rest=hover_off, seconds=0.3,
+                            region=button_region, probe=dict(transforms=[button_target])), timeout=60)
+        compare("hover " + preset, r, button_line)
+    plain(nav_line, nav_text, "navigation")
+
+
+def flat(rows, key):
+    return [v for row in rows for v in (row.get(key) or [])]
+
+
+def summarize_animation(session):
+    """A digest of the #213 results that fits in a terminal."""
+    out = dict(cases=session.get("cases"), values=session.get("values"), match=session.get("match"))
+    burst = session.get("burst")
+    if burst:
+        table = {}
+        for name, rows in burst["runs"].items():
+            good = [r for r in rows if r["ok"]]
+            hidden = [r["hidden"] for r in rows]
+            table[name] = dict(
+                ok="%d of %d" % (len(good), len(rows)), error=next((r["error"] for r in rows if r["error"]), None),
+                regionError=next((r["regionError"] for r in rows if r.get("regionError")), None),
+                framesPerBurst=sorted({r["frames"] for r in rows}), filesPerBurst=sorted({r["files"] for r in rows}),
+                frameSize=next((r["frameSize"] for r in rows if r["frameSize"]), None),
+                bytesPerFrame=stats([r["bytes"] / r["files"] for r in rows if r["files"]]),
+                requestToLastFrameMs=stats([r["e2eMs"] for r in good]), requestToFirstFrameMs=stats([r["firstFrameMs"] for r in good]),
+                draftLoadMs=stats([r["loadMs"] for r in good]), showMs=stats([r["showMs"] for r in good]),
+                burstMs=stats([r["burstMs"] for r in good]), perFrameRenderMs=stats(flat(good, "renderMs")),
+                perFrameReadbackMs=stats(flat(good, "readMs")), perFrameEncodeMs=stats(flat(good, "encodeMs")),
+                forceApplied=sorted({json.dumps(r["forceApplied"]) for r in rows}),
+                notHidden=sum(1 for h in hidden if h.get("hidden") is not True),
+                nativeSample=hidden[0] if hidden else None)
+        out["burst"] = dict({k: v for k, v in burst.items() if k != "runs"}, table=table)
+    return json.dumps(out, indent=1, default=str)
+
+
 def summarize(results):
     lines = []
     for variant, data in results["variants"].items():
@@ -674,6 +1210,10 @@ def summarize(results):
                                                  for s in data["starts"] if "launchToImageMs" in s]))
         s = data.get("session")
         if not s:
+            continue
+        if "cases" in s or "burst" in s:
+            lines.append(summarize_animation(s))
+            lines.append("focus: %s" % json.dumps(data.get("focus")))
             continue
         if "frames" in s:
             lines.append(summarize_states(s))
@@ -713,7 +1253,8 @@ def main():
     ap.add_argument("--sdk", required=True)
     ap.add_argument("--work", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--phase", default="all", choices=["all", "smoke", "broken", "states"])
+    ap.add_argument("--phase", default="all", choices=["all", "smoke", "broken", "states", "animation", "burst"])
+    ap.add_argument("--reps", type=int, default=10, help="bursts for each row of the frame burst")
     ap.add_argument("--max-processes", type=int, default=15)
     ap.add_argument("--max-seconds", type=int, default=600)
     args = ap.parse_args()
@@ -722,6 +1263,8 @@ def main():
     os.makedirs(args.out, exist_ok=True)
     log = open(os.path.join(args.out, "sdk-output.log"), "ab")
     results = dict(host=dict(platform=sys.platform, python=sys.version.split()[0]), variants={})
+    if hasattr(os, "getloadavg"):
+        results["host"]["loadBefore"] = os.getloadavg()
     commit = subprocess.run(["git", "-C", REPO, "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
     results["commit"] = commit
 
@@ -732,7 +1275,8 @@ def main():
     if args.phase == "all":
         results["largeStoryLines"] = write_large(stock, large)
 
-    single = args.phase in ("smoke", "broken", "states")
+    animation = args.phase in ("animation", "burst")
+    single = args.phase in ("smoke", "broken", "states") or animation
     plan = [("stock", stock, 4)] if single else [("stock", stock, 4), ("large", large, 3)]
     reps = {"stock": 10, "large": 6}
     try:
@@ -746,13 +1290,22 @@ def main():
             if args.phase == "states":
                 # The test screens load with the project, so they go in before the helper starts.
                 shutil.copy(os.path.join(HERE, "states", "zz_llp_states.rpy"), os.path.join(copy, STATES_FILE))
-            for k in range(1 if single else starts):
+            if animation:
+                marks = prepare_animation(copy, cases=args.phase == "animation")
+            # "animation" uses one helper for the inference cases and a new one for the frame burst.
+            for k in range(2 if args.phase == "animation" else 1 if single else starts):
                 io = os.path.join(args.work, "io-%s-%d" % (variant, k))
                 helper = Helper(args.sdk, copy, io, budget, log)
                 start = dict(compiled=k == 0, launchToImageMs=helper.first["launchToImageMs"], tLaunch=helper.t_launch,
                              helperFirst={key: helper.first.get(key) for key in ("tInit", "tCommand", "tMain", "tRequest", "tPng", "native", "renderer", "physical", "drawPerVirt")})
                 try:
-                    if args.phase == "states":
+                    if animation:
+                        data.setdefault("session", {})
+                        if args.phase == "animation" and k == 0:
+                            run_cases(helper, marks, data["session"])
+                        else:
+                            measure_burst(helper, copy, data["session"], args.reps)
+                    elif args.phase == "states":
                         data["session"] = {}
                         measure_states(helper, copy, args.out, data["session"])
                     elif args.phase == "broken":
@@ -772,7 +1325,12 @@ def main():
                 finally:
                     stopped = helper.stop()
                     start["stop"] = stopped
-                    if k == 1 or single:
+                    if animation:
+                        data.setdefault("focus", []).append(stopped["focus"])
+                        # Every request and result, so that a digest can be made again without a run.
+                        with open(os.path.join(args.out, "raw-%d.json" % k), "w", encoding="utf-8") as f:
+                            json.dump(helper.history, f, default=str)
+                    elif k == 1 or single:
                         data["focus"] = stopped["focus"]
                 data["starts"].append(start)
                 shutil.copy(os.path.join(io, "frame-0.png"), os.path.join(args.out, "%s-first-%d.png" % (variant, k)))
@@ -782,6 +1340,8 @@ def main():
         print(results["error"], file=sys.stderr)
     finally:
         results["processesUsed"] = budget.processes - budget.left
+        if hasattr(os, "getloadavg"):
+            results["host"]["loadAfter"] = os.getloadavg()
         with open(os.path.join(args.out, "results.json"), "w", encoding="utf-8") as f:
             json.dump(results, f, indent=1, default=str)
         summary = summarize(results)
