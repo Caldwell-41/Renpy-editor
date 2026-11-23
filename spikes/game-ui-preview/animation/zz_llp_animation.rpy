@@ -34,6 +34,16 @@ screen llp_m1():
     textbutton "A3 HHH" action NullAction() pos (40, 360) xysize (380, 80) background "#c06000" at llp_one(1.0)  # @A3
     textbutton "A4 HHH" action NullAction() pos (40, 520) xysize (380, 80) background "#c06000" at ll_hover_lift, ll_fade(1.0)  # @A4
 
+# Inference 1, the order of the list. Each entrance lasts 0.3 s. The test
+# hovers a button after its entrance has ended.
+screen llp_m1b():
+    add Solid("#000000")
+    textbutton "B1 HHH" action NullAction() pos (40, 40) xysize (380, 80) background "#c06000" at ll_fade_in(0.3), ll_hover_lift  # @B1
+    textbutton "B2 HHH" action NullAction() pos (40, 200) xysize (380, 80) background "#c06000" at ll_hover_lift, ll_fade_in(0.3)  # @B2
+    textbutton "B3 HHH" action NullAction() pos (40, 360) xysize (380, 80) background "#c06000" at ll_fade(0.3), ll_hover_lift  # @B3
+    textbutton "B4 HHH" action NullAction() pos (40, 520) xysize (380, 80) background "#c06000" at ll_hover_lift, ll_fade(0.3)  # @B4
+    textbutton "B5 HHH" action NullAction() pos (40, 680) xysize (380, 80) background "#c06000" at ll_hover_lift  # @B5
+
 # Inference 3. A zoom on a button in a box, and on buttons with other anchors.
 screen llp_m3():
     add Solid("#000000")

@@ -837,6 +837,40 @@ def case_two_transforms(helper, marks):
     return out
 
 
+def case_order(helper, marks):
+    """Inference 1, the order of the "at" list: hover after the entrance has ended."""
+    names = ["B1", "B2", "B3", "B4", "B5"]
+    tops = dict(B1=40, B2=200, B3=360, B4=520, B5=680)
+    probe = dict(transforms=[target(marks, n) for n in names], buttons=[target(marks, n) for n in names])
+
+    def describe(sample):
+        return {n: dict(alpha=(tstate(sample, marks[n]) or {}).get("alpha"), yoffset=(tstate(sample, marks[n]) or {}).get("yoffset"),
+                        prefix=prefix_of(sample, marks[n])) for n in names}
+
+    out = dict(pointer=[])
+    for name in names:
+        y = tops[name] + 40
+        helper.ask(dict(kind="scene", scene=dict(screen="llp_m1b")))
+        steps = [("0.7 s after the screen appears", dict(kind="pointer", actions=[["move", 1900, 1060]], min=0.7, timeout=2.0, sample=probe)),
+                 ("pointer on the button", dict(kind="pointer", actions=[["move", 230, y]], min=0.4, timeout=2.0, sample=probe)),
+                 ("pointer moves on the button", dict(kind="pointer", actions=[["move", 240, y]], min=0.4, timeout=2.0, sample=probe)),
+                 ("pointer away", dict(kind="pointer", actions=[["move", 1900, 1060]], min=0.4, timeout=2.0, sample=probe)),
+                 ("a new interaction starts", dict(kind="force", states=[], min=0.4, sample=probe))]
+        for label, req in steps:
+            r = helper.ask(req)
+            state = describe(r.get("sample") or {})[name]
+            out["pointer"].append(dict(button=name, step=label, **state))
+    # The same with a forced Hover at set times: hover at 0.6 s, idle at 0.8 s.
+    hover = [target(marks, n, state="hover") for n in names]
+    idle = [target(marks, n, state="idle") for n in names]
+    r = helper.ask(dict(kind="frames", scene=dict(screen="llp_m1b"), base="show", probe=probe, segments=[
+        dict(times=[0.15, 0.6]),
+        dict(states=hover, at=0.6, prime=2, times=[0.6, 0.66, 0.72, 0.8]),
+        dict(states=idle, at=0.8, prime=2, times=[0.86, 0.92, 1.0])]))
+    out["forced"] = frames_table(r, describe)
+    return out
+
+
 def case_show_reach(helper, marks):
     """Inference 6: "on show" under an "if" and through "use"."""
     names = ["K1", "K2", "K3", "K4", "K5", "K6"]
@@ -1013,7 +1047,7 @@ def case_skip(helper, marks):
 def run_cases(helper, marks, session):
     """#213: the six inferences. One failed case does not stop the others."""
     cases = session["cases"] = {}
-    plan = [("1 two transforms", case_two_transforms), ("6 show reach", case_show_reach), ("3 zoom", case_zoom),
+    plan = [("1 two transforms", case_two_transforms), ("1 order", case_order), ("6 show reach", case_show_reach), ("3 zoom", case_zoom),
             ("4 edge", case_edge), ("2 lines", case_lines), ("5 skip", case_skip)]
     for name, run in plan:
         try:
