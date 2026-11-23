@@ -334,10 +334,12 @@ init python:
                 if "states" in segment:
                     _llp_S["forced"] = [e for e in segment["states"] if e.get("state")]
                     _llp_apply_forced(_llp_S["roots"])
-                # A transform takes an event at the first render after it, and the
-                # outer transform of an "at" list takes it one render later.
-                # "at" is the time of the event. "prime" renders the first time
-                # again, so that every transform of the list starts at that time.
+                # A transform takes an event at the first render after it. "at" is
+                # the time of the event: one render there, with no readback, starts
+                # the animation at that time. The outer transform of an "at" list
+                # takes a button's event one render later, and only if something
+                # draws it again. "prime" renders the first time again to show
+                # that. The engine does not do it, so the frame burst does not use it.
                 renders = 1 + segment.get("prime", 0)
                 if segment.get("at") is not None:
                     draw(segment["at"], renders)

@@ -814,6 +814,8 @@ def case_two_transforms(helper, marks):
     out = {}
     hover = [target(marks, n, state="hover") for n in names]
     idle = [target(marks, n, state="idle") for n in names]
+    # "unprimed" renders one frame for each time, as the engine does. "primed"
+    # renders the frame of an event three times, which the engine does not do.
     for label, prime in (("primed", 2), ("unprimed", 0)):
         r = helper.ask(dict(kind="frames", scene=dict(screen="llp_m1"), base="show", probe=probe, segments=[
             dict(times=[0.0, 0.2]),
@@ -865,8 +867,8 @@ def case_order(helper, marks):
     idle = [target(marks, n, state="idle") for n in names]
     r = helper.ask(dict(kind="frames", scene=dict(screen="llp_m1b"), base="show", probe=probe, segments=[
         dict(times=[0.15, 0.6]),
-        dict(states=hover, at=0.6, prime=2, times=[0.6, 0.66, 0.72, 0.8]),
-        dict(states=idle, at=0.8, prime=2, times=[0.86, 0.92, 1.0])]))
+        dict(states=hover, at=0.6, times=[0.6, 0.66, 0.72, 0.8]),
+        dict(states=idle, at=0.8, times=[0.86, 0.92, 1.0])]))
     out["forced"] = frames_table(r, describe)
     return out
 
@@ -912,8 +914,8 @@ def case_zoom(helper, marks):
     idle = [target(marks, n, state="idle") for n in grown]
     r = helper.ask(dict(kind="frames", scene=dict(screen="llp_m3"), base="show", probe=probe, segments=[
         dict(times=[0.06, 0.15, 0.3, 0.6]),
-        dict(states=hover, prime=2, times=[0.6, 0.66, 0.8]),
-        dict(states=idle, prime=2, times=[0.8, 1.0])]))
+        dict(states=hover, at=0.6, times=[0.6, 0.66, 0.8]),
+        dict(states=idle, at=0.8, times=[0.8, 1.0])]))
     return frames_table(r, describe)
 
 
@@ -1143,8 +1145,8 @@ def measure_burst(helper, project, session, reps, fps=30):
 
     def hover_request(i, deliver, region, probe=None):
         return dict(kind="frames", load=hover(hovers[i % len(hovers)]), scene=scene, deliver=deliver, region=region,
-                    probe=probe, segments=[dict(states=hover_on, at=0.0, prime=2, times=in_times),
-                                           dict(states=hover_off, at=0.12, prime=2, times=out_times)])
+                    probe=probe, segments=[dict(states=hover_on, at=0.0, times=in_times),
+                                           dict(states=hover_off, at=0.12, times=out_times)])
 
     def series(name, make, deliver, region):
         rows = burst["runs"][name] = []
@@ -1298,7 +1300,7 @@ def main():
     ap.add_argument("--work", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--phase", default="all", choices=["all", "smoke", "broken", "states", "animation", "burst"])
-    ap.add_argument("--reps", type=int, default=10, help="bursts for each row of the frame burst")
+    ap.add_argument("--reps", type=int, default=20, help="bursts for each row of the frame burst")
     ap.add_argument("--max-processes", type=int, default=15)
     ap.add_argument("--max-seconds", type=int, default=600)
     args = ap.parse_args()
