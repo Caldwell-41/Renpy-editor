@@ -870,6 +870,16 @@ def case_order(helper, marks):
         dict(states=hover, at=0.6, times=[0.6, 0.66, 0.72, 0.8]),
         dict(states=idle, at=0.8, times=[0.86, 0.92, 1.0])]))
     out["forced"] = frames_table(r, describe)
+    # A forced Hover in the engine's own loop, and the same times with a set clock.
+    r = helper.ask(dict(kind="match", scene=dict(screen="llp_m1b"), states=hover, rest=idle, seconds=0.3,
+                        region=[30, 30, 400, 740], probe=probe), timeout=60)
+    real, fixed = r.get("real") or [], r.get("set") or []
+    lift = lambda frames, n: min([(tstate(f, marks[n]) or {}).get("yoffset") or 0 for f in frames] or [None])
+    out["match"] = dict(ok=r.get("ok"), error=r.get("error") or (r.get("errors") or [None])[0], trace=(r.get("trace") or "")[-800:] or None,
+                        realFrames=len(real), setFrames=len(fixed),
+                        sameImage=sum(1 for a, b in zip(real, fixed) if a.get("sha") and a.get("sha") == b.get("sha")),
+                        largestLiftInEngineFrames={n: lift(real, n) for n in names},
+                        largestLiftInSetFrames={n: lift(fixed, n) for n in names})
     return out
 
 

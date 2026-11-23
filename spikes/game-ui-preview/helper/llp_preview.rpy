@@ -308,10 +308,11 @@ init python:
         """Render frames at set times. base is the engine time of animation time 0.
 
         The engine reads one clock, renpy.display.core.get_time. For each frame
-        the helper sets that clock and the frame time, drops the cached renders
-        of every displayable that asked for a redraw, and renders the screen
-        tree. It does not draw to the window: the readback draws the tree into
-        the engine's own framebuffer.
+        the helper sets that clock and the frame time, lets the engine drop the
+        cached renders of the displayables whose redraw is due, and renders the
+        screen tree. It does not draw to the window: the readback draws the
+        tree into the engine's own framebuffer. Time must not go back, so the
+        caller holds the engine at animation time 0 until the first frame.
         """
         iface, core, render = renpy.display.interface, renpy.display.core, renpy.display.render
         mode, region, probe = req.get("deliver", "none"), req.get("region"), req.get("probe")
@@ -322,11 +323,10 @@ init python:
         _llp_S["bursting"] = True
         def draw(t, count):
             for i in range(count):
-                # A far-future clock makes process_redraws drop every queued
-                # redraw, also one queued at a later engine time.
-                clock[0] = 1e18
-                render.process_redraws()
+                # As the engine's loop does: drop the cached renders of the
+                # redraws that are due at this time, then render the tree.
                 clock[0] = base + t
+                render.process_redraws()
                 iface.frame_time = clock[0]
                 iface.draw_screen(_llp_S["root_widget"], None, False)
         try:
