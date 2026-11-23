@@ -1,0 +1,20 @@
+/* PROTOTYPE for #215: the candidate fonts, loaded from the files Loomlight would ship, each beside its OFL.txt. */
+@font-face { font-family:'ll-lora'; src:url('./fonts/lora/regular.ttf'); font-style:normal; font-weight:100 900; }
+@font-face { font-family:'ll-lora'; src:url('./fonts/lora/italic.ttf'); font-style:italic; font-weight:100 900; }
+@font-face { font-family:'ll-ebgaramond'; src:url('./fonts/ebgaramond/regular.ttf'); font-style:normal; font-weight:100 900; }
+@font-face { font-family:'ll-ebgaramond'; src:url('./fonts/ebgaramond/italic.ttf'); font-style:italic; font-weight:100 900; }
+@font-face { font-family:'ll-crimsonpro'; src:url('./fonts/crimsonpro/regular.ttf'); font-style:normal; font-weight:100 900; }
+@font-face { font-family:'ll-crimsonpro'; src:url('./fonts/crimsonpro/italic.ttf'); font-style:italic; font-weight:100 900; }
+@font-face { font-family:'ll-imfell'; src:url('./fonts/imfell/regular.ttf'); font-style:normal; font-weight:400; }
+@font-face { font-family:'ll-imfell'; src:url('./fonts/imfell/italic.ttf'); font-style:italic; font-weight:400; }
+@font-face { font-family:'ll-courierprime'; src:url('./fonts/courierprime/regular.ttf'); font-style:normal; font-weight:400; }
+@font-face { font-family:'ll-courierprime'; src:url('./fonts/courierprime/italic.ttf'); font-style:italic; font-weight:400; }
+@font-face { font-family:'ll-courierprime'; src:url('./fonts/courierprime/bold.ttf'); font-style:normal; font-weight:700; }
+@font-face { font-family:'ll-nunito'; src:url('./fonts/nunito/regular.ttf'); font-style:normal; font-weight:100 900; }
+@font-face { font-family:'ll-nunito'; src:url('./fonts/nunito/italic.ttf'); font-style:italic; font-weight:100 900; }
+@font-face { font-family:'ll-fredoka'; src:url('./fonts/fredoka/regular.ttf'); font-style:normal; font-weight:100 900; }
+@font-face { font-family:'ll-spacegrotesk'; src:url('./fonts/spacegrotesk/regular.ttf'); font-style:normal; font-weight:100 900; }
+@font-face { font-family:'ll-oxanium'; src:url('./fonts/oxanium/regular.ttf'); font-style:normal; font-weight:100 900; }
+@font-face { font-family:'ll-atkinson'; src:url('./fonts/atkinson/regular.ttf'); font-style:normal; font-weight:100 900; }
+@font-face { font-family:'ll-atkinson'; src:url('./fonts/atkinson/italic.ttf'); font-style:italic; font-weight:100 900; }
+@font-face { font-family:'ll-caveat'; src:url('./fonts/caveat/regular.ttf'); font-style:normal; font-weight:100 900; }

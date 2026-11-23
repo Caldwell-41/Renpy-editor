@@ -37,6 +37,7 @@ import { definition as screenInteractions } from "./screens/screen-interactions/
 import { definition as barsImagebuttons } from "./screens/bars-imagebuttons/definition.ts";
 import { definition as screensArithmetic } from "./screens/screens-arithmetic/definition.ts";
 import { definition as gameUi } from "./screens/game-ui/definition.ts";
+import { definition as gameUiThemes } from "./screens/game-ui-themes/definition.ts";
 
 function approvalFor(screenId: string) {
   const approval = approvalRecords.find(item => item.record.screenId === screenId);
@@ -76,7 +77,7 @@ export const screens: readonly LabScreen[] = [{
     { id: "dossier", title: "Continuous dossier", load: () => import("./screens/characters-writing/dossier.ts") },
     { id: "board", title: "Writing board", load: () => import("./screens/characters-writing/board.ts") },
   ],
-}, ...[story, storyRevamp, storyDraftConflict, storySaveRefusal, headerUndo, storyCombinedStatus, storyCombinedEditor, source, branches, lorebook, assets, variables, welcome, newProject, settings, runtime, studioRequest, screenDesigner, canvasDrag, helpComposition, numericLayout, nestedLayout, uiImage, projectFont, sharedLook, componentsAndHelpPanel, helpDialogStory, screenInteractions, barsImagebuttons, screensArithmetic, gameUi].map(definition => ({ ...definition, approval: approvalFor(definition.id) }))];
+}, ...[story, storyRevamp, storyDraftConflict, storySaveRefusal, headerUndo, storyCombinedStatus, storyCombinedEditor, source, branches, lorebook, assets, variables, welcome, newProject, settings, runtime, studioRequest, screenDesigner, canvasDrag, helpComposition, numericLayout, nestedLayout, uiImage, projectFont, sharedLook, componentsAndHelpPanel, helpDialogStory, screenInteractions, barsImagebuttons, screensArithmetic, gameUi, gameUiThemes].map(definition => ({ ...definition, approval: approvalFor(definition.id) }))];
 
 for (const screen of screens) {
   for (const variant of screen.variants) revisionFor(screen.approval, variant.id);
