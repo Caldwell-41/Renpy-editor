@@ -58,6 +58,13 @@ init python:
             original = iface.draw_screen
             def draw_screen(*args, **kwargs):
                 _llp_S["root_widget"] = args[0]
+                hold = _llp_S.get("hold")
+                if hold and not _llp_S.get("bursting"):
+                    # A transform never lets its time go back. Until the set-time
+                    # frames start, the engine's own frames stay at animation time 0.
+                    zero = _llp_entry_time(hold)
+                    if zero:
+                        iface.frame_time = zero
                 result = original(*args, **kwargs)
                 now = _llp_perf()
                 _llp_S["last_frame_time"] = iface.frame_time
@@ -313,22 +320,31 @@ init python:
         frames, errors = [], []
         core.get_time = lambda: clock[0]
         _llp_S["bursting"] = True
+        def draw(t, count):
+            for i in range(count):
+                # A far-future clock makes process_redraws drop every queued
+                # redraw, also one queued at a later engine time.
+                clock[0] = 1e18
+                render.process_redraws()
+                clock[0] = base + t
+                iface.frame_time = clock[0]
+                iface.draw_screen(_llp_S["root_widget"], None, False)
         try:
             for segment in segments:
                 if "states" in segment:
                     _llp_S["forced"] = [e for e in segment["states"] if e.get("state")]
                     _llp_apply_forced(_llp_S["roots"])
+                # A transform takes an event at the first render after it, and the
+                # outer transform of an "at" list takes it one render later.
+                # "at" is the time of the event. "prime" renders the first time
+                # again, so that every transform of the list starts at that time.
                 renders = 1 + segment.get("prime", 0)
+                if segment.get("at") is not None:
+                    draw(segment["at"], renders)
+                    renders = 1
                 for t in segment["times"]:
                     started = _llp_perf()
-                    for i in range(renders):
-                        # A far-future clock makes process_redraws drop every
-                        # queued redraw, also one queued at a later engine time.
-                        clock[0] = 1e18
-                        render.process_redraws()
-                        clock[0] = base + t
-                        iface.frame_time = clock[0]
-                        iface.draw_screen(_llp_S["root_widget"], None, False)
+                    draw(t, renders)
                     renders = 1
                     rendered = _llp_perf()
                     surface = _llp_shot(region)
@@ -379,6 +395,8 @@ init python:
         if req.get("scene"):
             _llp_S["scene"] = req["scene"]
             _llp_S["forced"] = []
+            if req.get("base") == "show":
+                _llp_S["hold"] = req["scene"]["screen"]
             _llp_show(req["scene"])
             yield dict(timeout=req.get("timeout", 2.0))
         shown = _llp_perf()
@@ -386,7 +404,10 @@ init python:
         if req.get("base") == "show":
             base = _llp_entry_time(req["scene"]["screen"]) or base
         ahead = _llp_S["last_frame_time"] - base
-        frames, errors = _llp_burst(req, base, req["segments"])
+        try:
+            frames, errors = _llp_burst(req, base, req["segments"])
+        finally:
+            _llp_S["hold"] = None
         done = _llp_perf()
         _llp_S["forced"] = []
         renpy.restart_interaction()
@@ -449,10 +470,14 @@ init python:
             real = [s for s in rec["samples"] if "screens" in s and tag in s["screens"]]
             for s in real:
                 s["at"] = s["screens"][tag] or 0.0
+            _llp_S["hold"] = req["scene"]["screen"]
             _llp_show(req["scene"])
             yield dict(timeout=2.0)
             base = _llp_entry_time(req["scene"]["screen"]) or _llp_S["last_frame_time"]
-            frames, errors = _llp_burst(quiet, base, [dict(times=[s["at"] for s in real])])
+            try:
+                frames, errors = _llp_burst(quiet, base, [dict(times=[s["at"] for s in real])])
+            finally:
+                _llp_S["hold"] = None
         _llp_S["forced"] = []
         renpy.restart_interaction()
         def brief(sample, sha, at):
@@ -651,7 +676,8 @@ init python:
     def _llp_clear():
         for name in ("say", "choice", "menu", "main_menu", "preferences", "confirm", _llp_S.get("shown")):
             if name and renpy.get_screen(name):
-                renpy.hide_screen(name)
+                # No "on hide" animation: a hiding copy would stay beside the next screen.
+                renpy.hide_screen(name, immediately=True)
 
     def _llp_show(scene):
         _llp_clear()
@@ -964,6 +990,8 @@ init python:
                     _llp_os._exit(75)
                 S["job"] = None
                 S["wait"] = None
+                S["hold"] = None
+                S["rec"] = None
                 for screen, (text, filename) in list(S["good"].items()):
                     try:
                         _llp_evict(screen)

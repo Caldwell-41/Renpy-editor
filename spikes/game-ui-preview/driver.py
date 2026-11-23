@@ -822,16 +822,18 @@ def case_two_transforms(helper, marks):
         out[label] = frames_table(r, describe)
     # The same with a real pointer in real time: hover during the fade.
     real = out["pointer"] = []
-    steps = [("shown", dict(kind="scene", scene=dict(screen="llp_m1"), sample=probe)),
-             ("pointer on A1", dict(kind="pointer", actions=[["move", 230, 80]], min=0.3, timeout=2.0, sample=probe)),
-             ("pointer still on A1", dict(kind="pointer", actions=[["move", 231, 80]], min=0.9, timeout=2.5, sample=probe)),
-             ("pointer away", dict(kind="pointer", actions=[["move", 1900, 1060]], min=0.4, timeout=2.0, sample=probe))]
-    for label, req in steps:
-        r = helper.ask(req)
-        sample = r.get("sample") or {}
-        row = dict(step=label, ok=r.get("ok"), st=near((sample.get("screens") or {}).get("llp_m1"), 3))
-        row.update(describe(sample))
-        real.append(row)
+    for name in ("A1", "A2", "A3"):
+        y = tops[name] + 40
+        steps = [("shown", dict(kind="scene", scene=dict(screen="llp_m1"), sample=probe)),
+                 ("pointer on " + name, dict(kind="pointer", actions=[["move", 230, y]], min=0.3, timeout=2.0, sample=probe)),
+                 ("pointer still on " + name, dict(kind="pointer", actions=[["move", 231, y]], min=0.9, timeout=2.5, sample=probe)),
+                 ("pointer away", dict(kind="pointer", actions=[["move", 1900, 1060]], min=0.4, timeout=2.0, sample=probe))]
+        for label, req in steps:
+            r = helper.ask(req)
+            sample = r.get("sample") or {}
+            row = dict(step=label, ok=r.get("ok"), st=near((sample.get("screens") or {}).get("llp_m1"), 3))
+            row.update(describe(sample))
+            real.append(row)
     return out
 
 
@@ -1074,6 +1076,13 @@ def measure_burst(helper, project, session, reps, fps=30):
     in_screens = lambda g: g["file"].replace("\\", "/").endswith(SCREENS_FILE)
     box = next(g for g in shown["geometry"] if g["line"] == box_line and in_screens(g) and g["cls"] == "MultiBox")
     label = next(g for g in shown["geometry"] if g["line"] == button_line and in_screens(g) and g.get("container"))
+    # A box reports the space it was offered. Its content is the text of the lines in its block.
+    last = radio + 1
+    while last < len(pref_lines) and (not pref_lines[last].strip() or pref_lines[last].startswith(indent)):
+        last += 1
+    inside = [g for g in shown["geometry"] if in_screens(g) and g["cls"] == "Text" and pref_line + radio < g["line"] < pref_line + last]
+    box = dict(x=box["x"], y=box["y"], w=max(g["x"] + g["w"] for g in inside) - box["x"],
+               h=max(g["y"] + g["h"] for g in inside) - box["y"])
 
     def around(rect, margin):
         x0, y0 = max(0, int(rect["x"] - margin)), max(0, int(rect["y"] - margin))
@@ -1100,8 +1109,8 @@ def measure_burst(helper, project, session, reps, fps=30):
 
     def hover_request(i, deliver, region, probe=None):
         return dict(kind="frames", load=hover(hovers[i % len(hovers)]), scene=scene, deliver=deliver, region=region,
-                    probe=probe, segments=[dict(states=hover_on, prime=2, times=in_times),
-                                           dict(states=hover_off, prime=2, times=out_times)])
+                    probe=probe, segments=[dict(states=hover_on, at=0.0, prime=2, times=in_times),
+                                           dict(states=hover_off, at=0.12, prime=2, times=out_times)])
 
     def series(name, make, deliver, region):
         rows = burst["runs"][name] = []
@@ -1164,7 +1173,8 @@ def measure_burst(helper, project, session, reps, fps=30):
                             probe=dict(transforms=[box_target])), timeout=60)
         compare("entrance " + preset, r, box_line)
     plain(pref_line, pref_text, "preferences")
-    for preset in hovers:
+    # The last one is the form of #203 for an entrance and a hover animation on one button.
+    for preset in hovers + ["ll_fade_in(0.3), ll_hover_lift(0.12)"]:
         r = helper.ask(dict(kind="match", load=hover(preset), scene=scene, states=hover_on, rest=hover_off, seconds=0.3,
                             region=button_region, probe=dict(transforms=[button_target])), timeout=60)
         compare("hover " + preset, r, button_line)
