@@ -37,5 +37,11 @@ export default async function ({ page, open, capture }) {
       assert.equal(await page.locator('input[value=signal]').isChecked(), true);
     }
     await capture('chosen');
+    if (/config/.test(variant)) {
+      await page.locator('.wizard-panel').evaluate(el => { el.scrollTop = el.scrollHeight; });
+      await page.locator('input[value=hollow]').check({ force: true });
+      assert.ok(await page.locator('.wizard-panel').evaluate(el => el.scrollTop > 0), 'the panel keeps its scroll position');
+      await capture('bottom');
+    }
   }
 }

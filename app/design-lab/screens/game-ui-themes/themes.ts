@@ -6,7 +6,8 @@
 export type Paint = { c: string; a: number };
 export type Fill = 'stock' | 'none' | Paint | { from: Paint; to: Paint; dir: 'down' | 'right' };
 export type Shadow = { c: Paint; blur: number; x: number; y: number };
-export type Box = { fill: Fill; corners: number; border: { w: number; c: Paint } | null; pad: [l: number, t: number, r: number, b: number]; shadow: Shadow | null };
+export type Box = { fill: Fill; corners: number; border: { w: number; c: Paint } | null; /** Left, Top, Right, Bottom, or 'stock' where the theme keeps the stock padding. */
+  pad: [l: number, t: number, r: number, b: number] | 'stock'; shadow: Shadow | null };
 export type TextType = { font: string; size: number; color: string };
 export type States = { idle: string; hover: string; selected: string; disabled: string };
 export type Motion = 'None' | 'Dissolve';
@@ -14,7 +15,7 @@ export type Motion = 'None' | 'Dissolve';
 export type Theme = {
   id: string; name: string; suits: string;
   accent: string; panel: string; menu: string;
-  text: { dialogue: TextType; interface: TextType; name: { font: string; size: number }; heading: TextType; title: TextType };
+  text: { dialogue: TextType; interface: TextType; name: { font: string; size: number }; heading: TextType; title: TextType; version: string };
   button: { text: States; box: Box | 'none'; hoverBox?: Partial<Box>; hover: 'None' | 'Grow' | 'Brighten' };
   box: Box;
   bar: { track: string; filled: string; thumb: string; corners: number };
@@ -33,7 +34,7 @@ export type Theme = {
 const p = (c: string, a = 100): Paint => ({ c, a });
 const pad = (x: number, y: number): [number, number, number, number] => [x, y, x, y];
 /** The menu panel and the screen frame keep the stock look: Panel at 80 %, no corners. */
-const panel80 = (border: Box['border'] = null, shadow: Shadow | null = null): Box => ({ fill: p('=panel', 80), corners: 0, border, pad: pad(0, 0), shadow });
+const panel80 = (border: Box['border'] = null, shadow: Shadow | null = null): Box => ({ fill: p('=panel', 80), corners: 0, border, pad: 'stock', shadow });
 
 export const themes: readonly Theme[] = [
   {
@@ -45,6 +46,7 @@ export const themes: readonly Theme[] = [
       name: { font: 'dejavu', size: 30 },
       heading: { font: '=interface', size: 24, color: '=accent' },
       title: { font: '=interface', size: 50, color: '=accent' },
+      version: '=accent',
     },
     button: { text: { idle: '#888888', hover: '=accent', selected: '#ffffff', disabled: '#88888880' }, box: 'none', hover: 'None' },
     box: { fill: 'stock', corners: 0, border: null, pad: pad(4, 4), shadow: null },
@@ -66,13 +68,14 @@ export const themes: readonly Theme[] = [
       name: { font: 'ebgaramond', size: 32 },
       heading: { font: 'ebgaramond', size: 30, color: '=accent' },
       title: { font: 'ebgaramond', size: 68, color: '#f6dfb0' },
+      version: '=accent',
     },
     button: { text: { idle: '#a89478', hover: '=accent', selected: '#fff4de', disabled: '#5e5244' }, box: 'none', hover: 'Brighten' },
     box: { fill: p('=panel', 92), corners: 10, border: { w: 1, c: p('=accent', 50) }, pad: pad(28, 18), shadow: { c: p('#000000', 55), blur: 20, x: 0, y: 6 } },
     bar: { track: '#3b2a1b', filled: '=accent', thumb: '#f6dfb0', corners: 3 },
     motion: { gameMenu: 'Dissolve', betweenMenus: 'Dissolve', dialogueBox: 'Dissolve', confirm: 'Dissolve' },
     groups: {
-      say: { fill: { from: p('=panel', 78), to: p('=panel', 96), dir: 'down' }, corners: 0, border: { w: 1, c: p('=accent', 45) }, pad: pad(28, 18), shadow: null },
+      say: { fill: { from: p('=panel', 78), to: p('=panel', 96), dir: 'down' }, corners: 0, border: { w: 1, c: p('=accent', 45) }, pad: 'stock', shadow: null },
       namebox: 'none',
       choice: { text: { idle: '#e6d8c2', hover: '#fff4de' }, box: { fill: p('=panel', 88), corners: 10, border: { w: 1, c: p('=accent', 40) }, pad: pad(24, 8), shadow: { c: p('#000000', 45), blur: 14, x: 0, y: 4 } }, hoverBox: { fill: p('#5a3c1c', 92), border: { w: 1, c: p('=accent', 95) } } },
       quick: { idle: '#a89478', hover: '=accent' },
@@ -88,13 +91,14 @@ export const themes: readonly Theme[] = [
       name: { font: 'nunito', size: 30 },
       heading: { font: '=interface', size: 26, color: '=accent' },
       title: { font: '=interface', size: 64, color: '#ffffff' },
+      version: '=accent',
     },
     button: { text: { idle: '#93afbd', hover: '#ffffff', selected: '#ffffff', disabled: '#4b6573' }, box: { fill: p('#ffffff', 6), corners: 99, border: null, pad: pad(18, 6), shadow: null }, hoverBox: { fill: p('=accent', 34) }, hover: 'Grow' },
     box: { fill: p('=panel', 90), corners: 18, border: null, pad: pad(30, 20), shadow: { c: p('#000000', 35), blur: 28, x: 0, y: 10 } },
     bar: { track: '#24485a', filled: '=accent', thumb: '#ffffff', corners: 99 },
     motion: { gameMenu: 'Dissolve', betweenMenus: 'Dissolve', dialogueBox: 'Dissolve', confirm: 'Dissolve' },
     groups: {
-      say: { fill: { from: p('=panel', 0), to: p('=panel', 94), dir: 'down' }, corners: 0, border: null, pad: pad(30, 20), shadow: null },
+      say: { fill: { from: p('=panel', 0), to: p('=panel', 94), dir: 'down' }, corners: 0, border: null, pad: 'stock', shadow: null },
       namebox: 'none',
       choice: { text: { idle: '#eef7fa', hover: '#ffffff' }, box: { fill: p('=panel', 80), corners: 99, border: null, pad: pad(24, 8), shadow: { c: p('#000000', 30), blur: 18, x: 0, y: 6 } }, hoverBox: { fill: p('#2f7f96', 95) } },
       quick: { idle: '#93afbd', hover: '#ffffff' },
@@ -110,13 +114,14 @@ export const themes: readonly Theme[] = [
       name: { font: 'ebgaramond', size: 31 },
       heading: { font: 'ebgaramond', size: 30, color: '=accent' },
       title: { font: 'ebgaramond', size: 66, color: '#2a2420' },
+      version: '#9a3c2a',
     },
     button: { text: { idle: '#6a5e52', hover: '#a8432f', selected: '#2a2420', disabled: '#b9ad9d' }, box: 'none', hover: 'None' },
     box: { fill: p('=panel', 98), corners: 2, border: { w: 2, c: p('#2a2420') }, pad: pad(30, 18), shadow: { c: p('#2a2420', 22), blur: 0, x: 5, y: 5 } },
     bar: { track: '#d6c9b2', filled: '#2a2420', thumb: '=accent', corners: 0 },
     motion: { gameMenu: 'Dissolve', betweenMenus: 'None', dialogueBox: 'Dissolve', confirm: 'None' },
     groups: {
-      say: { fill: p('=panel', 97), corners: 0, border: { w: 2, c: p('#2a2420') }, pad: pad(30, 18), shadow: null },
+      say: { fill: p('=panel', 97), corners: 0, border: { w: 2, c: p('#2a2420') }, pad: 'stock', shadow: null },
       namebox: { fill: p('#2a2420', 100), corners: 2, border: null, pad: pad(12, 2), shadow: null },
       choice: { text: { idle: '#2a2420', hover: '#f3ebdb' }, box: { fill: p('=panel', 98), corners: 2, border: { w: 2, c: p('#2a2420') }, pad: pad(24, 8), shadow: { c: p('#2a2420', 22), blur: 0, x: 4, y: 4 } }, hoverBox: { fill: p('=accent', 100), border: { w: 2, c: p('#2a2420') } } },
       quick: { idle: '#6a5e52', hover: '#a8432f' },
@@ -132,13 +137,14 @@ export const themes: readonly Theme[] = [
       name: { font: 'oxanium', size: 28 },
       heading: { font: '=interface', size: 26, color: '=accent' },
       title: { font: '=interface', size: 72, color: '#ffffff' },
+      version: '=accent',
     },
     button: { text: { idle: '#8790b6', hover: '#ffffff', selected: '#ffffff', disabled: '#3b4163' }, box: { fill: p('=panel', 0), corners: 0, border: { w: 1, c: p('#8790b6', 30) }, pad: pad(16, 6), shadow: null }, hoverBox: { border: { w: 1, c: p('=accent') }, shadow: { c: p('=accent', 70), blur: 14, x: 0, y: 0 } }, hover: 'Brighten' },
     box: { fill: p('=panel', 88), corners: 0, border: { w: 1, c: p('=accent', 55) }, pad: pad(28, 16), shadow: { c: p('=accent', 30), blur: 24, x: 0, y: 0 } },
     bar: { track: '#1b2040', filled: '=accent', thumb: '#ffffff', corners: 0 },
     motion: { gameMenu: 'Dissolve', betweenMenus: 'None', dialogueBox: 'Dissolve', confirm: 'None' },
     groups: {
-      say: { fill: { from: p('=panel', 80), to: p('#1a0d2a', 94), dir: 'down' }, corners: 0, border: { w: 1, c: p('=accent', 60) }, pad: pad(28, 16), shadow: { c: p('=accent', 35), blur: 24, x: 0, y: 0 } },
+      say: { fill: { from: p('=panel', 80), to: p('#1a0d2a', 94), dir: 'down' }, corners: 0, border: { w: 1, c: p('=accent', 60) }, pad: 'stock', shadow: { c: p('=accent', 35), blur: 24, x: 0, y: 0 } },
       namebox: 'none',
       choice: { text: { idle: '#b8c1e8', hover: '#ffffff' }, box: { fill: p('=panel', 85), corners: 0, border: { w: 1, c: p('=accent', 40) }, pad: pad(24, 8), shadow: null }, hoverBox: { fill: p('#3a1030', 92), border: { w: 1, c: p('=accent') }, shadow: { c: p('=accent', 70), blur: 16, x: 0, y: 0 } } },
       quick: { idle: '#8790b6', hover: '#ff4f9a' },
@@ -154,15 +160,16 @@ export const themes: readonly Theme[] = [
       name: { font: 'imfell', size: 32 },
       heading: { font: '=interface', size: 30, color: '=accent' },
       title: { font: '=interface', size: 80, color: '#e6ddd0' },
+      version: '#e0483c',
     },
     button: { text: { idle: '#7b7166', hover: '#e0483c', selected: '#e6ddd0', disabled: '#3a342e' }, box: 'none', hover: 'None' },
     box: { fill: p('=panel', 94), corners: 0, border: { w: 1, c: p('#3a2a26') }, pad: pad(28, 18), shadow: null },
     bar: { track: '#2a1a17', filled: '=accent', thumb: '#dcd4c7', corners: 0 },
     motion: { gameMenu: 'Dissolve', betweenMenus: 'Dissolve', dialogueBox: 'Dissolve', confirm: 'Dissolve' },
     groups: {
-      say: { fill: { from: p('=panel', 0), to: p('=panel', 96), dir: 'down' }, corners: 0, border: null, pad: pad(40, 26), shadow: null },
+      say: { fill: { from: p('=panel', 0), to: p('=panel', 96), dir: 'down' }, corners: 0, border: null, pad: 'stock', shadow: null },
       namebox: 'none',
-      choice: { text: { idle: '#b3a897', hover: '#e0483c' }, box: { fill: p('=panel', 72), corners: 0, border: null, pad: pad(24, 6), shadow: null } },
+      choice: { text: { idle: '#b3a897', hover: '#e0483c' }, box: { fill: p('=panel', 72), corners: 0, border: null, pad: pad(24, 6), shadow: null }, hoverBox: { fill: p('=panel', 92) } },
       quick: { idle: '#857b6f', hover: '#e0483c' },
       slot: { fill: p('=panel', 60), corners: 0, border: { w: 1, c: p('#3a2a26') }, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: false, slotText: '#857b6f', menuPanel: panel80({ w: 1, c: p('#3a2a26') }), screenFrame: panel80(),
     },
@@ -176,13 +183,14 @@ export const themes: readonly Theme[] = [
       name: { font: 'fredoka', size: 30 },
       heading: { font: '=interface', size: 28, color: '=accent' },
       title: { font: '=interface', size: 76, color: '=accent' },
+      version: '=accent',
     },
     button: { text: { idle: '#7d6383', hover: '#ffffff', selected: '#4b3450', disabled: '#cdbcd0' }, box: { fill: p('#ffffff', 92), corners: 99, border: { w: 2, c: p('#ffd1e1') }, pad: pad(20, 6), shadow: { c: p('=accent', 35), blur: 0, x: 0, y: 4 } }, hoverBox: { fill: p('=accent') }, hover: 'Grow' },
     box: { fill: p('=panel', 96), corners: 26, border: { w: 3, c: p('#ffd1e1') }, pad: pad(32, 18), shadow: { c: p('=accent', 30), blur: 0, x: 0, y: 6 } },
     bar: { track: '#ffd1e1', filled: '=accent', thumb: '#241528', corners: 99 },
     motion: { gameMenu: 'Dissolve', betweenMenus: 'Dissolve', dialogueBox: 'Dissolve', confirm: 'Dissolve' },
     groups: {
-      say: { fill: p('=panel', 95), corners: 0, border: null, pad: pad(32, 18), shadow: { c: p('=accent', 45), blur: 0, x: 0, y: -5 } },
+      say: { fill: p('=panel', 95), corners: 0, border: null, pad: 'stock', shadow: { c: p('=accent', 45), blur: 0, x: 0, y: -5 } },
       namebox: { fill: p('#4b3450', 100), corners: 99, border: null, pad: pad(16, 2), shadow: null },
       choice: { text: { idle: '#5d4263', hover: '#ffffff' }, box: { fill: p('#ffffff', 94), corners: 99, border: { w: 2, c: p('#ffd1e1') }, pad: pad(24, 8), shadow: { c: p('=accent', 35), blur: 0, x: 0, y: 5 } }, hoverBox: { fill: p('=accent') } },
       quick: { idle: '#7d6383', hover: '#c2255c' },
@@ -207,7 +215,7 @@ export const fontFacts: readonly FontFact[] = [
   { id: 'caveat', name: 'Caveat', css: "'ll-caveat'", kind: 'Handwriting', files: ['Caveat[wght].ttf'], kb: 394, scripts: 'Latin, Cyrillic', copyright: 'Copyright 2014 The Caveat Project Authors', italic: false },
 ];
 /** Ren'Py's own font. It is in every project already, so Loomlight copies nothing. The mock loads the SDK's copy (renpy/common). */
-export const dejavu: FontFact = { id: 'dejavu', name: 'DejaVu Sans', css: "'ll-dejavu'", kind: "Ren'Py's own font", files: [], kb: 0, scripts: 'Latin, Cyrillic, Greek and more', copyright: "Ships with Ren'Py", italic: true };
+export const dejavu: FontFact = { id: 'dejavu', name: 'DejaVu Sans', css: "'ll-dejavu'", kind: "Ren'Py's own font", files: [], kb: 0, scripts: 'Latin, Cyrillic, Greek and more', copyright: "Ships with Ren'Py", italic: false };
 export const fontById: Record<string, FontFact> = Object.fromEntries([dejavu, ...fontFacts].map(f => [f.id, f]));
 
 // ---- following ----

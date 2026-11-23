@@ -31,7 +31,7 @@ function boxCss(t: Theme, b: Box, over?: Partial<Box>, opts: { pad?: boolean } =
   const parts = [`background:${fill(t, x.fill)}`, `border-radius:${x.corners >= 99 ? '999px' : u(x.corners)}`];
   parts.push(x.border ? `box-shadow:inset 0 0 0 ${u(x.border.w)} ${paint(t, x.border.c)}${x.shadow ? `, ${u(x.shadow.x)} ${u(x.shadow.y)} ${u(x.shadow.blur)} ${paint(t, x.shadow.c)}` : ''}` : x.shadow ? `box-shadow:${u(x.shadow.x)} ${u(x.shadow.y)} ${u(x.shadow.blur)} ${paint(t, x.shadow.c)}` : 'box-shadow:none');
   // Padding is Left, Top, Right, Bottom in source order; CSS wants Top, Right, Bottom, Left.
-  if (opts.pad !== false) { const [l, top, r, b] = x.pad; parts.push(`padding:${u(top)} ${u(r)} ${u(b)} ${u(l)}`); }
+  if (opts.pad !== false && x.pad !== 'stock') { const [l, top, r, b] = x.pad; parts.push(`padding:${u(top)} ${u(r)} ${u(b)} ${u(l)}`); }
   return parts.join(';');
 }
 const textCss = (t: Theme, f: string, size: number, c: string) => `font-family:${font(t, f).css};font-size:${u(size)};color:${color(t, c)}`;
@@ -56,7 +56,7 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
       ? `background:linear-gradient(to right, transparent, ${rgba(t.panel, 80)} ${u(268)}, ${rgba(t.panel, 80)} calc(100% - ${u(268)}), transparent);-webkit-mask:linear-gradient(transparent, #000 ${u(5)})`
       : boxCss(t, g, undefined, { pad: false });
     const nb = t.groups.namebox;
-    const name = speaker ? `<div class="gt-name" style="font-family:${font(t, T.name.font).css};font-size:${u(T.name.size)};color:#f0b35b;${nb === 'none' ? '' : boxCss(t, nb)}">${speaker}</div>` : '';
+    const name = speaker ? `<div class="gt-name" style="font-family:${font(t, T.name.font).css};font-size:${u(T.name.size)};color:#f0b35b;${nb === 'none' ? `padding:${u(5)}` : boxCss(t, nb)}">${speaker}</div>` : '';
     // Quick buttons: idle gui.idle_small_color; hover follows the Button hover (gui.rpy L194-195).
     const quick = ['Back', 'History', 'Skip', 'Auto', 'Save', 'Q.Save', 'Q.Load', 'Prefs'].map((label, i) => `<span style="color:${i === 1 && s.state === 'hover' ? hoverColor(t, t.groups.quick.hover) : color(t, t.groups.quick.idle)}">${label}</span>`).join('');
     return `<div class="gt-say" style="${boxStyle}"></div>${name}<div class="gt-dialogue" style="${textCss(t, T.dialogue.font, T.dialogue.size, T.dialogue.color)}">${text}</div><div class="gt-quick" style="${iface(14)}">${quick}</div>`;
@@ -68,9 +68,8 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
     // The Screen frame: game_menu_outer_frame, the full-screen overlay picture at Panel 80 % (gui7/images.py L301-304).
     const frame = t.groups.screenFrame === 'stock' ? `background:${rgba(t.panel, 80)}` : boxCss(t, t.groups.screenFrame, undefined, { pad: false });
     return `<div class="gt-bg" style="background:${menuColor(t)}"></div><div class="gt-frame" style="${frame}"></div>${line}
-      <div class="gt-nav gt-nav-game">${nav.map((label, i) => button(label, label === current ? 'selected' : i === 0 ? s.state : 'idle')).join('')}</div>
+      <div class="gt-navcol"><div class="gt-nav">${nav.map((label, i) => button(label, label === current ? 'selected' : i === 0 ? s.state : 'idle')).join('')}</div><div class="gt-return">${button('Return')}</div></div>
       <div class="gt-menu-title" style="${textCss(t, T.heading.font, 50, T.heading.color)}">${title}</div>
-      <div class="gt-return">${button('Return')}</div>
       <div class="gt-menu-body">${body}</div>`;
   }
   const screens: Record<ScreenId, () => string> = {
@@ -81,8 +80,8 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
       const line = t.groups.accentLine ? `<i class="gt-accent-line" style="background:${t.accent};top:0;height:100%"></i>` : '';
       const nav = ['Start', 'Load', 'Preferences', 'About', 'Help', 'Quit'];
       return `<div class="gt-bg" style="${bg}"></div><div class="gt-mmframe" style="${box}"></div>${line}
-        <div class="gt-nav gt-nav-main">${nav.map((label, i) => button(label, i === 0 ? s.state : 'idle')).join('')}</div>
-        <div class="gt-mmtitle"><b style="${textCss(t, T.title.font, T.title.size, T.title.color)}">${esc(s.gameTitle)}</b><small style="${iface()};color:${t.accent}">Version 1.0</small></div>`;
+        <div class="gt-navcol"><div class="gt-nav">${nav.map((label, i) => button(label, i === 0 ? s.state : 'idle')).join('')}</div></div>
+        <div class="gt-mmtitle"><b style="${textCss(t, T.title.font, T.title.size, T.title.color)}">${esc(s.gameTitle)}</b><small style="${iface()};color:${color(t, T.version)}">1.0</small></div>`;
     },
     say: () => `${sceneBg}${say(lines[s.line], 'Mara')}`,
     choice: () => {
@@ -100,7 +99,8 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
       return `${sceneBg}<div class="gt-choices" style="gap:${u(22)}">${items.map(one).join('')}</div>${say('What should I do?', null)}`;
     },
     save: () => {
-      // Stock file_slots (screens.rpy L602-690): the page name, a 3 x 2 grid of 276 x 206 slots, pages < A Q 1-9 > at the bottom.
+      // Stock file_slots (screens.rpy L602-690): the page name at the top, a 3 x 2 grid of 276 x 206 slots centered in the whole
+      // content area with 10 px spacing, and pages < A Q 1-9 > at the bottom. Page buttons keep their stock padding, 10 4 10 4.
       const g = t.groups.slot;
       const slot = (i: number) => {
         const used = i < 2;
@@ -115,7 +115,8 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
       // Stock preferences (screens.rpy L725-800): Display and Skip, then the sliders, Voice Volume and Mute All.
       const label = (text: string) => `<div class="gt-pref-label" style="${textCss(t, T.heading.font, T.heading.size, T.heading.color)}">${text}</div>`;
       // The mark: radio_selected_foreground, a 5 px bar; an unselected option's foreground is empty (00gui.rpy L575-592).
-      const opt = (text: string, on: boolean) => `<span class="gt-opt"><i class="gt-mark" style="background:${on ? color(t, t.groups.mark) : 'transparent'}"></i>${button(text, on ? 'selected' : 'idle')}</span>`;
+      // Option buttons keep their stock padding, gui.radio_button_borders and check_button_borders = 18 4 4 4; the mark sits inside it.
+      const opt = (text: string, on: boolean) => button(`${on ? `<i class="gt-mark" style="background:${color(t, t.groups.mark)}"></i>` : ''}${text}`, on ? 'selected' : 'idle', `;position:relative;padding:${u(4)} ${u(4)} ${u(4)} ${u(18)}`);
       const r = t.bar.corners >= 99 ? '999px' : u(t.bar.corners);
       const stock = t.id === 'renpy';
       const bar = (text: string, v: number) => `${label(text)}<div class="gt-bar" style="background:${stock ? shade(t.accent, 0.4) : color(t, t.bar.track)};border-radius:${r}">${stock ? '' : `<i class="gt-bar-fill" style="width:${v}%;background:${color(t, t.bar.filled)};border-radius:${r}"></i>`}<i class="gt-thumb-mark" style="left:calc(${v}% - ${u(5)});background:${stock ? t.accent : color(t, t.bar.thumb)};border-radius:${r}"></i></div>`;

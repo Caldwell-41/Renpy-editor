@@ -50,11 +50,11 @@ export function mountThemes(host: HTMLElement, context: LabContext, variant: Var
   const corners = (n: number) => n >= 99 ? 'Pill' : String(n);
   const border = (t: Theme, b: Box['border']) => b ? `${b.w} · ${paintCell(t, b.c)}` : muted('None');
   const shadow = (t: Theme, s: Box['shadow']) => !s ? muted('None') : `${s.x || s.y ? '' : 'Glow · '}${paintCell(t, s.c)} · blur ${s.blur}${s.x || s.y ? ` · ${s.x}, ${s.y}` : ''}`;
-  /** `padText` replaces the padding numbers where the theme keeps the stock padding. */
-  const boxSummary = (t: Theme, b: Box | 'stock' | 'none', padText?: string) => {
+  const padCell = (pad: Box['pad']) => pad === 'stock' ? muted('Stock') : pad.join(' ');
+  const boxSummary = (t: Theme, b: Box | 'stock' | 'none') => {
     if (b === 'stock') return muted('Stock picture');
     if (b === 'none') return muted('No box');
-    return `Fill ${fillCell(t, b.fill)}<br>Corners ${corners(b.corners)} · Border ${border(t, b.border)}<br>Padding ${padText ? muted(padText) : b.pad.join(' ')} · Shadow ${shadow(t, b.shadow)}`;
+    return `Fill ${fillCell(t, b.fill)}<br>Corners ${corners(b.corners)} · Border ${border(t, b.border)}<br>Padding ${padCell(b.pad)} · Shadow ${shadow(t, b.shadow)}`;
   };
   const hoverSummary = (t: Theme, b: Box | 'stock' | 'none', over?: Partial<Box>) => !over || b === 'stock' || b === 'none' ? muted(b === 'stock' ? 'Stock picture' : 'Follows Idle') : Object.entries(over).map(([k, v]) => k === 'fill' ? `Fill ${fillCell(t, v as Fill)}` : k === 'border' ? `Border ${border(t, v as Box['border'])}` : k === 'shadow' ? `Shadow ${shadow(t, v as Box['shadow'])}` : `${k} ${String(v)}`).join('<br>');
   function fontCell(t: Theme, v: string) {
@@ -66,17 +66,17 @@ export function mountThemes(host: HTMLElement, context: LabContext, variant: Var
   type Row = [label: string, cell: (t: Theme) => string];
   const table: [group: string, rows: Row[]][] = [
     ['Colors', [['Accent', t => colorCell(t, t.accent)], ['Panel', t => colorCell(t, t.panel)], ['Menu background', t => t.menu === '=accent' ? `${swatch(menuColor(t))}${muted('Accent, saturation 25 %, value 25 %')}` : colorCell(t, t.menu)]]],
-    ['Text types', [['Dialogue', t => textType(t, t.text.dialogue)], ['Interface', t => textType(t, t.text.interface)], ['Speaker name', t => `${textType(t, t.text.name)} ${muted('· color per character')}`], ['Heading', t => textType(t, t.text.heading)], ['Game title', t => textType(t, t.text.title)]]],
-    ['Button look', [['Text · Idle', t => colorCell(t, t.button.text.idle)], ['Text · Hover', t => colorCell(t, t.button.text.hover, true)], ['Text · Selected', t => colorCell(t, t.button.text.selected)], ['Text · Disabled', t => colorCell(t, t.button.text.disabled)], ['Box · Idle', t => boxSummary(t, t.button.box)], ['Box · Hover', t => hoverSummary(t, t.button.box, t.button.hoverBox)], ['Padding', t => t.button.box === 'none' ? `4 4 4 4 ${muted('stock, gui.button_borders')}` : t.button.box.pad.join(' ')], ['Hover animation', t => t.button.hover === 'None' ? muted('None') : t.button.hover]]],
-    ['Box look', [['Fill', t => fillCell(t, t.box.fill)], ['Corners', t => t.box.fill === 'stock' ? muted('Stock picture') : corners(t.box.corners)], ['Border', t => t.box.fill === 'stock' ? muted('Stock picture') : border(t, t.box.border)], ['Padding', t => t.box.pad.join(' ')], ['Shadow', t => t.box.fill === 'stock' ? muted('Stock picture') : shadow(t, t.box.shadow)]]],
+    ['Text types', [['Dialogue', t => textType(t, t.text.dialogue)], ['Interface', t => textType(t, t.text.interface)], ['Speaker name', t => `${textType(t, t.text.name)} ${muted('· color per character')}`], ['Heading', t => textType(t, t.text.heading)], ['Game title', t => textType(t, t.text.title)], ['Version', t => colorCell(t, t.text.version)]]],
+    ['Button look', [['Text · Idle', t => colorCell(t, t.button.text.idle)], ['Text · Hover', t => colorCell(t, t.button.text.hover, true)], ['Text · Selected', t => colorCell(t, t.button.text.selected)], ['Text · Disabled', t => colorCell(t, t.button.text.disabled)], ['Box · Idle', t => boxSummary(t, t.button.box)], ['Box · Hover', t => hoverSummary(t, t.button.box, t.button.hoverBox)], ['Padding', t => t.button.box === 'none' ? `4 4 4 4 ${muted('stock, gui.button_borders')}` : padCell(t.button.box.pad)], ['Hover animation', t => t.button.hover === 'None' ? muted('None') : t.button.hover]]],
+    ['Box look', [['Fill', t => fillCell(t, t.box.fill)], ['Corners', t => t.box.fill === 'stock' ? muted('Stock picture') : corners(t.box.corners)], ['Border', t => t.box.fill === 'stock' ? muted('Stock picture') : border(t, t.box.border)], ['Padding', t => padCell(t.box.pad)], ['Shadow', t => t.box.fill === 'stock' ? muted('Stock picture') : shadow(t, t.box.shadow)]]],
     ['Bar look', [['Track', t => t.id === 'renpy' ? muted('Stock picture') : colorCell(t, t.bar.track)], ['Filled part', t => t.id === 'renpy' ? muted('None. The stock bar has no filled part.') : colorCell(t, t.bar.filled)], ['Thumb', t => t.id === 'renpy' ? muted('Stock picture') : colorCell(t, t.bar.thumb)], ['Corners', t => t.id === 'renpy' ? muted('Stock picture') : corners(t.bar.corners)]]],
     ['Motion', [['Game menu', t => t.motion.gameMenu], ['Between menu screens', t => t.motion.betweenMenus], ['Dialogue box', t => t.motion.dialogueBox], ['Confirm prompt', t => t.motion.confirm]]],
     ['Stock look groups with own values', [
-      ['Dialogue box', t => boxSummary(t, t.groups.say, 'Stock, so the text does not move')], ['Name box', t => boxSummary(t, t.groups.namebox)],
+      ['Dialogue box', t => boxSummary(t, t.groups.say)], ['Name box', t => boxSummary(t, t.groups.namebox)],
       ['Choice buttons · Text', t => `${colorCell(t, t.groups.choice.text.idle)} / ${colorCell(t, t.groups.choice.text.hover)}`],
       ['Choice buttons · Box', t => boxSummary(t, t.groups.choice.box)], ['Choice buttons · Box · Hover', t => hoverSummary(t, t.groups.choice.box, t.groups.choice.hoverBox)],
       ['Quick buttons · Text', t => `${colorCell(t, t.groups.quick.idle)} / ${colorCell(t, t.groups.quick.hover, true)}`],
-      ['Save slots · Box', t => boxSummary(t, t.groups.slot)], ['Save slots · Text', t => colorCell(t, t.groups.slotText)], ['Option buttons · Mark', t => colorCell(t, t.groups.mark)],
+      ['Save slots · Box', t => boxSummary(t, t.groups.slot)], ['Save slots · Text', t => colorCell(t, t.groups.slotText)], ['Option buttons · Mark', t => colorCell(t, t.groups.mark)], ['Option buttons · Padding', () => `18 4 4 4 ${muted('stock')}`], ['Page buttons · Padding', () => `10 4 10 4 ${muted('stock')}`],
       ['Menu panel', t => boxSummary(t, t.groups.menuPanel)], ['Menu panel · Show the accent line', t => t.groups.accentLine ? 'On' : 'Off'],
       ['Screen frame', t => boxSummary(t, t.groups.screenFrame)], ['Confirm prompt · Padding', t => t.box.fill === 'stock' ? muted('Stock picture, 40 40 40 40') : `40 40 40 40 ${muted('stock')}`],
       ['Notices, Skip indicator', t => t.box.fill === 'stock' ? muted('Stock picture') : muted('Follow the Box look')]]],
@@ -151,7 +151,10 @@ export function mountThemes(host: HTMLElement, context: LabContext, variant: Var
 
   function render() {
     const body = variant === 'board' ? board() : variant === 'create-step' ? createStep() : variant === 'create-config' ? createConfig() : createReview();
+    // Keep the scroll position of the wizard panel and the board, so a new selection does not move the view.
+    const keep = [...host.querySelectorAll<HTMLElement>('.wizard-panel, .tm-scroll')].map(el => el.scrollTop);
     host.innerHTML = `<div class="tm-shell" data-variant="${variant}" data-step="${step}">${body}</div>`;
+    host.querySelectorAll<HTMLElement>('.wizard-panel, .tm-scroll').forEach((el, i) => { el.scrollTop = keep[i] ?? 0; });
   }
   function onClick(event: Event) {
     const target = (event.target as HTMLElement).closest<HTMLElement>('button, input');
@@ -163,7 +166,7 @@ export function mountThemes(host: HTMLElement, context: LabContext, variant: Var
     if (d.stepTheme && large) { const i = themes.findIndex(t => t.id === large!.theme); large = { ...large, theme: themes[(i + Number(d.stepTheme) + themes.length) % themes.length]!.id }; render(); return; }
     if (d.sheet) { sheet = d.sheet === 'open'; render(); return; }
     if (d.choose) { chosen = d.choose; sheet = false; render(); return; }
-    if (target instanceof HTMLInputElement && target.name === 'theme') { chosen = target.value; render(); host.querySelector<HTMLInputElement>(`input[value="${chosen}"]`)?.focus(); }
+    if (target instanceof HTMLInputElement && target.name === 'theme') { chosen = target.value; render(); host.querySelector<HTMLInputElement>(`input[value="${chosen}"]`)?.focus({ preventScroll: true }); }
   }
   function onChange(event: Event) {
     const target = event.target as HTMLElement;

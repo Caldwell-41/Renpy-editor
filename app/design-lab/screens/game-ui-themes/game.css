@@ -17,9 +17,12 @@
 .gt-choice { width:calc(790cqw / 12.8); text-align:center; transform-origin:center; }
 
 .gt-btn { display:block; width:fit-content; line-height:1.25; white-space:nowrap; transform-origin:left center; }
-.gt-nav { position:absolute; left:calc(40cqw / 12.8); top:50%; translate:0 -50%; display:flex; flex-direction:column; align-items:stretch; gap:calc(4cqw / 12.8); }
-/* size_group "navigation": every navigation button is as wide as the widest (screens.rpy L338-340). */
-.gt-nav .gt-btn { width:auto; }
+/* size_group "navigation": every navigation button, Return included, is as wide as the widest (screens.rpy L338-340, L535-538). */
+.gt-navcol { position:absolute; left:calc(40cqw / 12.8); top:0; bottom:0; display:grid; }
+.gt-nav, .gt-return { grid-area:1 / 1; display:flex; flex-direction:column; gap:calc(4cqw / 12.8); }
+.gt-nav { align-self:center; }
+.gt-return { align-self:end; margin-bottom:calc(30cqw / 12.8); }
+.gt-navcol .gt-btn { width:auto; }
 .gt-mmframe { position:absolute; left:0; top:0; bottom:0; width:calc(280cqw / 12.8); }
 .gt-accent-line { position:absolute; left:calc(277cqw / 12.8); width:calc(3cqw / 12.8); }
 .gt-mmtitle { position:absolute; right:calc(20cqw / 12.8); bottom:calc(20cqw / 12.8); display:flex; flex-direction:column; align-items:flex-end; max-width:calc(800cqw / 12.8); text-align:right; }
@@ -27,22 +30,23 @@
 
 .gt-frame { position:absolute; inset:0; }
 .gt-menu-title { position:absolute; left:calc(50cqw / 12.8); top:0; height:calc(120cqw / 12.8); display:flex; align-items:center; line-height:1; }
-.gt-return { position:absolute; left:calc(40cqw / 12.8); bottom:calc(45cqw / 12.8); }
-.gt-menu-body { position:absolute; left:calc(330cqw / 12.8); right:calc(30cqw / 12.8); top:calc(120cqw / 12.8); bottom:calc(30cqw / 12.8); }
+/* game_menu_content_frame: x 280 + 40, y 120 + 10, 20 from the right, 30 from the bottom (screens.rpy L512-527). */
+.gt-menu-body { position:absolute; left:calc(320cqw / 12.8); right:calc(20cqw / 12.8); top:calc(130cqw / 12.8); bottom:calc(30cqw / 12.8); }
 
-.gt-save { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; }
-.gt-page-name { padding:calc(3cqw / 12.8) calc(50cqw / 12.8); line-height:1.2; }
-.gt-slots { flex:1; display:grid; grid-template-columns:repeat(3, calc(276cqw / 12.8)); grid-auto-rows:calc(206cqw / 12.8); align-content:center; gap:0; }
+.gt-save { position:absolute; inset:0; }
+.gt-page-name { position:absolute; left:50%; top:0; translate:-50% 0; padding:calc(3cqw / 12.8) calc(50cqw / 12.8); line-height:1.2; white-space:nowrap; }
+.gt-slots { position:absolute; left:50%; top:50%; translate:-50% -50%; display:grid; grid-template-columns:repeat(3, calc(276cqw / 12.8)); grid-auto-rows:calc(206cqw / 12.8); gap:calc(10cqw / 12.8); }
 .gt-slot { display:flex; flex-direction:column; align-items:center; gap:calc(4cqw / 12.8); }
 .gt-slot span { text-align:center; line-height:1.2; }
 .gt-thumb { width:calc(256cqw / 12.8); height:calc(144cqw / 12.8); flex:none; background-position:center; background-size:cover; }
-.gt-pages { display:flex; justify-content:center; gap:0; }
+.gt-pages { position:absolute; left:0; right:0; bottom:0; display:flex; justify-content:center; gap:0; }
 
-.gt-prefs { display:flex; gap:calc(60cqw / 12.8); }
+/* pref_vbox: each section is 225 px wide (screens.rpy L812-813). */
+.gt-prefs { display:flex; }
+.gt-prefs>div { width:calc(225cqw / 12.8); }
 .gt-prefs>div { display:flex; flex-direction:column; gap:calc(2cqw / 12.8); }
 .gt-pref-label { margin-bottom:calc(6cqw / 12.8); line-height:1.2; }
-.gt-opt { display:flex; align-items:stretch; }
-.gt-mark { width:calc(5cqw / 12.8); margin:calc(4cqw / 12.8) calc(10cqw / 12.8) calc(4cqw / 12.8) calc(3cqw / 12.8); flex:none; }
+.gt-mark { position:absolute; left:calc(3cqw / 12.8); top:calc(4cqw / 12.8); bottom:calc(4cqw / 12.8); width:calc(5cqw / 12.8); }
 .gt-bars { display:grid; grid-template-columns:repeat(2, calc(350cqw / 12.8)); gap:0 calc(100cqw / 12.8); margin-top:calc(40cqw / 12.8); align-items:start; }
 .gt-bars>div { display:flex; flex-direction:column; gap:calc(4cqw / 12.8); }
 .gt-mute { margin-top:calc(10cqw / 12.8); }

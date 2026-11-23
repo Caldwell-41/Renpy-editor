@@ -29,8 +29,8 @@
 .tm-who p { color:var(--text-secondary); }
 .tm-who .tm-fonts { color:var(--text-primary); font-size:13px; }
 .tm-swatches { font-size:11px; }
-.tm-shell .tm-thumb { display:block; padding:0; border:1px solid var(--border-normal); border-radius:0; background:#000; min-height:0; }
-.tm-shell .tm-thumb:hover { border-color:var(--accent-primary); background:#000; }
+.tm-shell button.tm-thumb { display:block; padding:0; border:1px solid var(--border-normal); border-radius:0; background:#000; min-height:0; }
+.tm-shell button.tm-thumb:hover { border-color:var(--accent-primary); background:#000; }
 .tm-large { position:sticky; top:0; z-index:3; padding:8px 0; background:var(--surface-app); border-bottom:1px solid var(--border-strong); }
 .tm-large-bar { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
 .tm-large-bar h3 { min-width:110px; text-align:center; }
@@ -66,6 +66,8 @@
 .tm-field select { width:280px; }
 /* Creation B inside the production wizard: production styles.css and ui-refresh.css style everything but the Look row. */
 .tm-prod { flex:1; min-height:0; display:grid; font-size:14px; }
+/* Creation B makes step 3 taller than the wizard; the panel must scroll. Production uses this rule only below 760 px today. */
+.tm-prod .wizard-panel { align-self:stretch; min-height:0; }
 .tm-tiles { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px; }
 .tm-tile { position:relative; display:flex; flex-direction:column; gap:4px; color:var(--text-primary); font-size:12px; cursor:pointer; }
 .tm-tile input { position:absolute; opacity:0; pointer-events:none; }
