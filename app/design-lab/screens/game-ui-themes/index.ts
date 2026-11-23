@@ -15,9 +15,9 @@ const byId = (id: string) => themes.find(t => t.id === id)!;
 
 export function mountThemes(host: HTMLElement, context: LabContext, variant: Variant) {
   document.documentElement.dataset.theme = context.theme;
-  const sample: Sample = { state: context.state === 'hover' ? 'hover' : 'idle', line: 'short', titleBg: 'menu', gameTitle: 'The Last Tram' };
+  const sample: Sample = { state: context.state === 'hover' ? 'hover' : 'idle', line: 'short', titleBg: 'menu', scene: 'night', gameTitle: 'The Last Tram' };
   let large: { theme: string; screen: ScreenId } | null = null;
-  let chosen = 'renpy', sheet = false, step = variant === 'create-config' ? 3 : 4, resolution = '1920x1080';
+  let chosen = 'renpy', sheet = false, step = variant === 'create-config' ? 3 : 4, resolution = '1920x1080', custom = false;
 
   // ---- shared pieces ----
   const stage = (t: Theme, id: ScreenId, attrs = '') => `<div class="gt-stage" ${attrs}>${draw(t, id, sample)}</div>`;
@@ -25,6 +25,7 @@ export function mountThemes(host: HTMLElement, context: LabContext, variant: Var
   const controls = () => `<div class="tm-proto"><strong>Prototype · #215</strong><span>Sample game, stock layout at 1280 × 720. A browser drawing stands in for Ren'Py. Nothing is saved.</span>
     ${seg('state', 'First button', [['idle', 'Idle'], ['hover', 'Hover'], ['selected', 'Selected'], ['disabled', 'Disabled']])}
     ${seg('line', 'Line', [['short', 'Short'], ['long', 'Long']])}
+    ${seg('scene', 'Scene', [['night', 'Night'], ['dawn', 'Dawn']])}
     ${seg('titleBg', 'Title background', [['menu', 'Menu background'], ['picture', "Author's picture"]])}</div>`;
   const fontsOf = (t: Theme) => [...new Set([t.text.dialogue.font, t.text.interface.font, t.text.name.font, font(t, t.text.heading.font).id, font(t, t.text.title.font).id])].map(id => fontById[id]!);
   const fontNames = (t: Theme) => fontsOf(t).map(f => `<span style="font-family:${f.css}">${f.name}</span>`).join(' · ');
@@ -49,11 +50,11 @@ export function mountThemes(host: HTMLElement, context: LabContext, variant: Var
   const corners = (n: number) => n >= 99 ? 'Pill' : String(n);
   const border = (t: Theme, b: Box['border']) => b ? `${b.w} · ${paintCell(t, b.c)}` : muted('None');
   const shadow = (t: Theme, s: Box['shadow']) => !s ? muted('None') : `${s.x || s.y ? '' : 'Glow · '}${paintCell(t, s.c)} · blur ${s.blur}${s.x || s.y ? ` · ${s.x}, ${s.y}` : ''}`;
-  const boxSummary = (t: Theme, b: Box | 'stock' | 'none', over?: Partial<Box>) => {
+  /** `padText` replaces the padding numbers where the theme keeps the stock padding. */
+  const boxSummary = (t: Theme, b: Box | 'stock' | 'none', padText?: string) => {
     if (b === 'stock') return muted('Stock picture');
     if (b === 'none') return muted('No box');
-    const x = { ...b, ...over };
-    return `Fill ${fillCell(t, x.fill)}<br>Corners ${corners(x.corners)} · Border ${border(t, x.border)}<br>Padding ${x.pad.join(' ')} · Shadow ${shadow(t, x.shadow)}`;
+    return `Fill ${fillCell(t, b.fill)}<br>Corners ${corners(b.corners)} · Border ${border(t, b.border)}<br>Padding ${padText ? muted(padText) : b.pad.join(' ')} · Shadow ${shadow(t, b.shadow)}`;
   };
   const hoverSummary = (t: Theme, b: Box | 'stock' | 'none', over?: Partial<Box>) => !over || b === 'stock' || b === 'none' ? muted(b === 'stock' ? 'Stock picture' : 'Follows Idle') : Object.entries(over).map(([k, v]) => k === 'fill' ? `Fill ${fillCell(t, v as Fill)}` : k === 'border' ? `Border ${border(t, v as Box['border'])}` : k === 'shadow' ? `Shadow ${shadow(t, v as Box['shadow'])}` : `${k} ${String(v)}`).join('<br>');
   function fontCell(t: Theme, v: string) {
@@ -64,19 +65,20 @@ export function mountThemes(host: HTMLElement, context: LabContext, variant: Var
   const textType = (t: Theme, tt: { font: string; size: number; color?: string }) => `${fontCell(t, tt.font)} · ${tt.size}${tt.color ? ` · ${colorCell(t, tt.color)}` : ''}`;
   type Row = [label: string, cell: (t: Theme) => string];
   const table: [group: string, rows: Row[]][] = [
-    ['Colors', [['Accent', t => colorCell(t, t.accent)], ['Panel', t => colorCell(t, t.panel)], ['Menu background', t => t.menu === '=accent' ? `${swatch(menuColor(t))}${muted('Accent, value 25 %')}` : colorCell(t, t.menu)]]],
+    ['Colors', [['Accent', t => colorCell(t, t.accent)], ['Panel', t => colorCell(t, t.panel)], ['Menu background', t => t.menu === '=accent' ? `${swatch(menuColor(t))}${muted('Accent, saturation 25 %, value 25 %')}` : colorCell(t, t.menu)]]],
     ['Text types', [['Dialogue', t => textType(t, t.text.dialogue)], ['Interface', t => textType(t, t.text.interface)], ['Speaker name', t => `${textType(t, t.text.name)} ${muted('· color per character')}`], ['Heading', t => textType(t, t.text.heading)], ['Game title', t => textType(t, t.text.title)]]],
-    ['Button look', [['Text · Idle', t => colorCell(t, t.button.text.idle)], ['Text · Hover', t => colorCell(t, t.button.text.hover, true)], ['Text · Selected', t => colorCell(t, t.button.text.selected)], ['Text · Disabled', t => colorCell(t, t.button.text.disabled)], ['Box · Idle', t => boxSummary(t, t.button.box)], ['Box · Hover', t => hoverSummary(t, t.button.box, t.button.hoverBox)], ['Hover animation', t => t.button.hover === 'None' ? muted('None') : t.button.hover]]],
+    ['Button look', [['Text · Idle', t => colorCell(t, t.button.text.idle)], ['Text · Hover', t => colorCell(t, t.button.text.hover, true)], ['Text · Selected', t => colorCell(t, t.button.text.selected)], ['Text · Disabled', t => colorCell(t, t.button.text.disabled)], ['Box · Idle', t => boxSummary(t, t.button.box)], ['Box · Hover', t => hoverSummary(t, t.button.box, t.button.hoverBox)], ['Padding', t => t.button.box === 'none' ? `4 4 4 4 ${muted('stock, gui.button_borders')}` : t.button.box.pad.join(' ')], ['Hover animation', t => t.button.hover === 'None' ? muted('None') : t.button.hover]]],
     ['Box look', [['Fill', t => fillCell(t, t.box.fill)], ['Corners', t => t.box.fill === 'stock' ? muted('Stock picture') : corners(t.box.corners)], ['Border', t => t.box.fill === 'stock' ? muted('Stock picture') : border(t, t.box.border)], ['Padding', t => t.box.pad.join(' ')], ['Shadow', t => t.box.fill === 'stock' ? muted('Stock picture') : shadow(t, t.box.shadow)]]],
-    ['Bar look', [['Track', t => t.id === 'renpy' ? muted('Stock picture') : colorCell(t, t.bar.track)], ['Filled part', t => t.id === 'renpy' ? muted('Stock picture') : colorCell(t, t.bar.filled)], ['Thumb', t => t.id === 'renpy' ? muted('Stock picture') : colorCell(t, t.bar.thumb)], ['Corners', t => t.id === 'renpy' ? muted('Stock picture') : corners(t.bar.corners)]]],
+    ['Bar look', [['Track', t => t.id === 'renpy' ? muted('Stock picture') : colorCell(t, t.bar.track)], ['Filled part', t => t.id === 'renpy' ? muted('None. The stock bar has no filled part.') : colorCell(t, t.bar.filled)], ['Thumb', t => t.id === 'renpy' ? muted('Stock picture') : colorCell(t, t.bar.thumb)], ['Corners', t => t.id === 'renpy' ? muted('Stock picture') : corners(t.bar.corners)]]],
     ['Motion', [['Game menu', t => t.motion.gameMenu], ['Between menu screens', t => t.motion.betweenMenus], ['Dialogue box', t => t.motion.dialogueBox], ['Confirm prompt', t => t.motion.confirm]]],
     ['Stock look groups with own values', [
-      ['Dialogue box', t => boxSummary(t, t.groups.say)], ['Name box', t => boxSummary(t, t.groups.namebox)],
+      ['Dialogue box', t => boxSummary(t, t.groups.say, 'Stock, so the text does not move')], ['Name box', t => boxSummary(t, t.groups.namebox)],
       ['Choice buttons · Text', t => `${colorCell(t, t.groups.choice.text.idle)} / ${colorCell(t, t.groups.choice.text.hover)}`],
       ['Choice buttons · Box', t => boxSummary(t, t.groups.choice.box)], ['Choice buttons · Box · Hover', t => hoverSummary(t, t.groups.choice.box, t.groups.choice.hoverBox)],
-      ['Quick buttons · Text', t => `${colorCell(t, t.groups.quick.idle)} / ${colorCell(t, t.groups.quick.hover)}`],
-      ['Save slots', t => boxSummary(t, t.groups.slot)], ['Option buttons · Mark', t => colorCell(t, t.groups.mark)],
-      ['Menu panel · Show the accent line', t => t.groups.accentLine ? 'On' : 'Off'],
+      ['Quick buttons · Text', t => `${colorCell(t, t.groups.quick.idle)} / ${colorCell(t, t.groups.quick.hover, true)}`],
+      ['Save slots · Box', t => boxSummary(t, t.groups.slot)], ['Save slots · Text', t => colorCell(t, t.groups.slotText)], ['Option buttons · Mark', t => colorCell(t, t.groups.mark)],
+      ['Menu panel', t => boxSummary(t, t.groups.menuPanel)], ['Menu panel · Show the accent line', t => t.groups.accentLine ? 'On' : 'Off'],
+      ['Screen frame', t => boxSummary(t, t.groups.screenFrame)], ['Confirm prompt · Padding', t => t.box.fill === 'stock' ? muted('Stock picture, 40 40 40 40') : `40 40 40 40 ${muted('stock')}`],
       ['Notices, Skip indicator', t => t.box.fill === 'stock' ? muted('Stock picture') : muted('Follow the Box look')]]],
     ['Fonts copied into game/fonts/', [['Files', t => copied(t).length ? copied(t).map(f => `${f.name} (${f.files.length})`).join('<br>') : muted("None. DejaVu Sans is part of Ren'Py.")], ['Size', t => { const kb = copied(t).reduce((n, f) => n + f.kb, 0); return kb ? `${(kb / 1024).toFixed(1)} MB` : '0'; }]]],
   ];
@@ -92,7 +94,7 @@ export function mountThemes(host: HTMLElement, context: LabContext, variant: Var
     const values = `<table class="tm-values"><thead><tr><th>Setting</th>${themes.map(t => `<th>${t.name}</th>`).join('')}</tr></thead><tbody>${table.map(([group, rows]) => `<tr class="tm-group"><th colspan="${themes.length + 1}">${group}</th></tr>${rows.map(([label, cell]) => `<tr><th>${label}</th>${themes.map(t => `<td>${cell(t)}</td>`).join('')}</tr>`).join('')}`).join('')}</tbody></table>`;
     const total = fontFacts.reduce((n, f) => n + f.kb, 0);
     const fonts = `<table class="tm-fontlist"><thead><tr><th>Family</th><th>Kind</th><th>Sample</th><th>Files Loomlight ships</th><th>Size</th><th>Scripts</th><th>Copyright notice</th><th>Reserved name</th><th>Themes</th></tr></thead><tbody>
-      ${[dejavu, ...fontFacts].map(f => `<tr><th style="font-family:${f.css}">${f.name}</th><td>${f.kind}</td><td style="font-family:${f.css};font-size:16px">The last tram doesn't stop here. <i>Not tonight.</i></td><td>${f.files.length ? f.files.map(n => `<code>${n}</code>`).join('<br>') + '<br><code>OFL.txt</code>' : muted('None, part of Ren\'Py')}</td><td>${f.kb ? `${f.kb} KB` : '–'}</td><td>${f.scripts}</td><td>${f.copyright}</td><td>${f.rfn ?? muted('None')}</td><td>${themes.filter(t => fontsOf(t).includes(f)).map(t => t.name).join(', ') || muted('Font menu only')}</td></tr>`).join('')}
+      ${[dejavu, ...fontFacts].map(f => `<tr><th style="font-family:${f.css}">${f.name}</th><td>${f.kind}</td><td style="font-family:${f.css};font-size:16px">The last tram doesn't stop here. ${f.italic ? '<i>Not tonight.</i>' : muted('No italic file')}</td><td>${f.files.length ? f.files.map(n => `<code>${n}</code>`).join('<br>') + '<br><code>OFL.txt</code>' : muted('None, part of Ren\'Py')}</td><td>${f.kb ? `${f.kb} KB` : '–'}</td><td>${f.scripts}</td><td>${f.copyright}</td><td>${f.rfn ?? muted('None')}</td><td>${themes.filter(t => fontsOf(t).includes(f)).map(t => t.name).join(', ') || muted('Font menu only')}</td></tr>`).join('')}
       <tr class="tm-total"><th colspan="4">11 families · each file unchanged · SIL Open Font License 1.1</th><td>${(total / 1024).toFixed(1)} MB</td><td colspan="4"></td></tr></tbody></table>`;
     const big = large ? (() => {
       const t = byId(large.theme), i = themes.indexOf(t);
@@ -118,13 +120,24 @@ export function mountThemes(host: HTMLElement, context: LabContext, variant: Var
       <div class="tm-step-body"><div class="tm-pick-list" role="radiogroup" aria-label="Theme">${list}</div>
         <div class="tm-step-preview">${stage(t, 'title')}${stage(t, 'say')}<p class="tm-quiet">${fontLine(t)}</p></div></div>${actions('Continue')}</div>`;
   }
+  /** Creation B, drawn with the production wizard's markup and classes (src/main.ts L372-470), so production CSS styles it. */
   function createConfig() {
     const t = byId(chosen);
+    const [w, h] = resolution.split('x').map(Number) as [number, number];
+    let a = w, b = h; while (b) { const r = a % b; a = b; b = r; }
+    const scale = Math.min(100 / w, 64 / h);
+    const rail = ['Project details', "Ren'Py SDK", 'Game configuration', 'Review & Create'].map((label, i) => `<span${i === 2 ? ' aria-current="step"' : ''}>${i + 1}. ${label}</span>`).join('');
+    const presets = [['1920x1080', 'Full HD — 1920 × 1080'], ['1280x720', 'HD — 1280 × 720'], ['2560x1440', 'QHD — 2560 × 1440'], ['0x0', 'Custom']];
     const tiles = themes.map(x => `<label class="tm-tile${x.id === chosen ? ' is-on' : ''}"><input type="radio" name="theme" value="${x.id}" ${x.id === chosen ? 'checked' : ''}>${stage(x, 'title')}<span>${x.name}</span></label>`).join('');
-    return `${controls()}<div class="tm-wizard tm-wizard-wide">${wizardHead(3, 4, 'Game configuration', 'Choose the size of the game window and the look of its menus.')}
-      <label class="tm-field"><span>Resolution preset</span><select data-resolution>${[['1920x1080', 'Full HD — 1920 × 1080'], ['1280x720', 'HD — 1280 × 720'], ['2560x1440', 'QHD — 2560 × 1440']].map(([v, l]) => `<option value="${v}" ${v === resolution ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-      <div class="tm-field"><span>Look</span><div class="tm-tiles" role="radiogroup" aria-label="Look">${tiles}</div></div>
-      <div class="tm-config-preview">${stage(t, 'say')}<div><b>${t.name}</b><p>${t.suits}</p><p class="tm-quiet">${fontLine(t)}</p><p class="tm-quiet">Sizes scale to ${resolution.replace('x', ' × ')}.</p></div></div>${actions('Continue')}</div>`;
+    return `${controls()}<div class="tm-prod"><section class="wizard-layout"><nav class="step-rail" aria-label="New Project steps">${rail}</nav><div class="wizard-panel">
+      <p class="eyebrow">New Project · 3 of 4</p><h1>Game configuration</h1><p class="panel-copy">Choose the size of your game window and the look of its menus. You can use a preset or enter custom dimensions.</p>
+      <label class="field"><span>Resolution preset</span><select class="resolution-picker" data-resolution>${presets.map(([v, l]) => `<option value="${v}" ${(custom ? v === '0x0' : v === resolution) ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      ${custom ? `<div class="dimension-row"><label class="field"><span>Width</span><input type="number" value="${w}"></label><label class="field"><span>Height</span><input type="number" value="${h}"></label></div>` : ''}
+      <div class="resolution-preview"><div class="resolution-screen" aria-hidden="true" style="width:${w * scale}px;height:${h * scale}px"></div><div><div aria-live="polite">${w} × ${h} · ${w / a}:${h / a}</div><div>Game resolution, not editor size.</div></div></div>
+      <div class="field"><span>Look</span><div class="tm-tiles" role="radiogroup" aria-label="Look">${tiles}</div></div>
+      <div class="tm-config-preview">${stage(t, 'say')}<div><b>${t.name}</b><p>${t.suits}</p><p>${fontLine(t)}</p><p>You can change the look later on the Game-wide look page.</p></div></div>
+      <div class="wizard-actions"><button type="button" class="button">Back</button><button type="button" class="button primary">Continue</button></div>
+    </div></section></div>`;
   }
   function createReview() {
     const t = byId(chosen);
@@ -154,7 +167,7 @@ export function mountThemes(host: HTMLElement, context: LabContext, variant: Var
   }
   function onChange(event: Event) {
     const target = event.target as HTMLElement;
-    if (target instanceof HTMLSelectElement && 'resolution' in target.dataset) { resolution = target.value; render(); }
+    if (target instanceof HTMLSelectElement && 'resolution' in target.dataset) { custom = target.value === '0x0'; if (!custom) resolution = target.value; render(); }
   }
   function onKey(event: KeyboardEvent) {
     if (variant !== 'board' || !large || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return;

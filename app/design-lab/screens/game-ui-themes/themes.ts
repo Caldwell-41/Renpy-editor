@@ -24,12 +24,16 @@ export type Theme = {
     say: Box | 'stock'; namebox: Box | 'none';
     choice: { text: { idle: string; hover: string }; box: Box | 'stock' | 'none'; hoverBox?: Partial<Box> };
     quick: { idle: string; hover: string };
-    slot: Box | 'none'; mark: string; accentLine: boolean;
+    slot: Box | 'stock'; slotText: string; mark: string; accentLine: boolean;
+    /** The title screen's 280 px panel and the menu screens' full-screen frame. */
+    menuPanel: Box | 'stock'; screenFrame: Box | 'stock';
   };
 };
 
 const p = (c: string, a = 100): Paint => ({ c, a });
 const pad = (x: number, y: number): [number, number, number, number] => [x, y, x, y];
+/** The menu panel and the screen frame keep the stock look: Panel at 80 %, no corners. */
+const panel80 = (border: Box['border'] = null, shadow: Shadow | null = null): Box => ({ fill: p('=panel', 80), corners: 0, border, pad: pad(0, 0), shadow });
 
 export const themes: readonly Theme[] = [
   {
@@ -43,14 +47,14 @@ export const themes: readonly Theme[] = [
       title: { font: '=interface', size: 50, color: '=accent' },
     },
     button: { text: { idle: '#888888', hover: '=accent', selected: '#ffffff', disabled: '#88888880' }, box: 'none', hover: 'None' },
-    box: { fill: 'stock', corners: 0, border: null, pad: pad(6, 6), shadow: null },
+    box: { fill: 'stock', corners: 0, border: null, pad: pad(4, 4), shadow: null },
     bar: { track: '=accent', filled: '=accent', thumb: '=accent', corners: 0 },
     motion: { gameMenu: 'Dissolve', betweenMenus: 'Dissolve', dialogueBox: 'Dissolve', confirm: 'None' },
     groups: {
       say: 'stock', namebox: 'none',
       choice: { text: { idle: '#888888', hover: '#ffffff' }, box: 'stock' },
       quick: { idle: '#aaaaaa', hover: '=accent' },
-      slot: 'none', mark: '=accent', accentLine: true,
+      slot: 'stock', slotText: '#aaaaaa', mark: '=accent', accentLine: true, menuPanel: 'stock', screenFrame: 'stock',
     },
   },
   {
@@ -72,7 +76,7 @@ export const themes: readonly Theme[] = [
       namebox: 'none',
       choice: { text: { idle: '#e6d8c2', hover: '#fff4de' }, box: { fill: p('=panel', 88), corners: 10, border: { w: 1, c: p('=accent', 40) }, pad: pad(24, 8), shadow: { c: p('#000000', 45), blur: 14, x: 0, y: 4 } }, hoverBox: { fill: p('#5a3c1c', 92), border: { w: 1, c: p('=accent', 95) } } },
       quick: { idle: '#a89478', hover: '=accent' },
-      slot: { fill: p('=panel', 70), corners: 6, border: { w: 1, c: p('=accent', 30) }, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: true,
+      slot: { fill: p('=panel', 70), corners: 6, border: { w: 1, c: p('=accent', 30) }, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: true, slotText: '#a89478', menuPanel: panel80({ w: 1, c: p('=accent', 50) }, { c: p('#000000', 55), blur: 20, x: 0, y: 6 }), screenFrame: panel80(),
     },
   },
   {
@@ -94,7 +98,7 @@ export const themes: readonly Theme[] = [
       namebox: 'none',
       choice: { text: { idle: '#eef7fa', hover: '#ffffff' }, box: { fill: p('=panel', 80), corners: 99, border: null, pad: pad(24, 8), shadow: { c: p('#000000', 30), blur: 18, x: 0, y: 6 } }, hoverBox: { fill: p('#2f7f96', 95) } },
       quick: { idle: '#93afbd', hover: '#ffffff' },
-      slot: { fill: p('#ffffff', 5), corners: 12, border: null, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: false,
+      slot: { fill: p('#ffffff', 5), corners: 12, border: null, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: false, slotText: '#93afbd', menuPanel: panel80(null, { c: p('#000000', 35), blur: 28, x: 0, y: 10 }), screenFrame: panel80(),
     },
   },
   {
@@ -107,7 +111,7 @@ export const themes: readonly Theme[] = [
       heading: { font: 'ebgaramond', size: 30, color: '=accent' },
       title: { font: 'ebgaramond', size: 66, color: '#2a2420' },
     },
-    button: { text: { idle: '#7a6d60', hover: '#a8432f', selected: '#2a2420', disabled: '#b9ad9d' }, box: 'none', hover: 'None' },
+    button: { text: { idle: '#6a5e52', hover: '#a8432f', selected: '#2a2420', disabled: '#b9ad9d' }, box: 'none', hover: 'None' },
     box: { fill: p('=panel', 98), corners: 2, border: { w: 2, c: p('#2a2420') }, pad: pad(30, 18), shadow: { c: p('#2a2420', 22), blur: 0, x: 5, y: 5 } },
     bar: { track: '#d6c9b2', filled: '#2a2420', thumb: '=accent', corners: 0 },
     motion: { gameMenu: 'Dissolve', betweenMenus: 'None', dialogueBox: 'Dissolve', confirm: 'None' },
@@ -115,8 +119,8 @@ export const themes: readonly Theme[] = [
       say: { fill: p('=panel', 97), corners: 0, border: { w: 2, c: p('#2a2420') }, pad: pad(30, 18), shadow: null },
       namebox: { fill: p('#2a2420', 100), corners: 2, border: null, pad: pad(12, 2), shadow: null },
       choice: { text: { idle: '#2a2420', hover: '#f3ebdb' }, box: { fill: p('=panel', 98), corners: 2, border: { w: 2, c: p('#2a2420') }, pad: pad(24, 8), shadow: { c: p('#2a2420', 22), blur: 0, x: 4, y: 4 } }, hoverBox: { fill: p('=accent', 100), border: { w: 2, c: p('#2a2420') } } },
-      quick: { idle: '#7a6d60', hover: '#a8432f' },
-      slot: { fill: p('#ffffff', 55), corners: 2, border: { w: 1, c: p('#2a2420', 40) }, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: true,
+      quick: { idle: '#6a5e52', hover: '#a8432f' },
+      slot: { fill: p('#ffffff', 55), corners: 2, border: { w: 1, c: p('#2a2420', 40) }, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: true, slotText: '#6a5e52', menuPanel: panel80({ w: 2, c: p('#2a2420') }, { c: p('#2a2420', 22), blur: 0, x: 5, y: 5 }), screenFrame: panel80(),
     },
   },
   {
@@ -138,7 +142,7 @@ export const themes: readonly Theme[] = [
       namebox: 'none',
       choice: { text: { idle: '#b8c1e8', hover: '#ffffff' }, box: { fill: p('=panel', 85), corners: 0, border: { w: 1, c: p('=accent', 40) }, pad: pad(24, 8), shadow: null }, hoverBox: { fill: p('#3a1030', 92), border: { w: 1, c: p('=accent') }, shadow: { c: p('=accent', 70), blur: 16, x: 0, y: 0 } } },
       quick: { idle: '#8790b6', hover: '#ff4f9a' },
-      slot: { fill: p('=panel', 70), corners: 0, border: { w: 1, c: p('=accent', 30) }, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: true,
+      slot: { fill: p('=panel', 70), corners: 0, border: { w: 1, c: p('=accent', 30) }, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: true, slotText: '#8790b6', menuPanel: panel80({ w: 1, c: p('=accent', 55) }, { c: p('=accent', 30), blur: 24, x: 0, y: 0 }), screenFrame: panel80(),
     },
   },
   {
@@ -151,21 +155,21 @@ export const themes: readonly Theme[] = [
       heading: { font: '=interface', size: 30, color: '=accent' },
       title: { font: '=interface', size: 80, color: '#e6ddd0' },
     },
-    button: { text: { idle: '#7b7166', hover: '#d0362b', selected: '#e6ddd0', disabled: '#3a342e' }, box: 'none', hover: 'None' },
+    button: { text: { idle: '#7b7166', hover: '#e0483c', selected: '#e6ddd0', disabled: '#3a342e' }, box: 'none', hover: 'None' },
     box: { fill: p('=panel', 94), corners: 0, border: { w: 1, c: p('#3a2a26') }, pad: pad(28, 18), shadow: null },
     bar: { track: '#2a1a17', filled: '=accent', thumb: '#dcd4c7', corners: 0 },
     motion: { gameMenu: 'Dissolve', betweenMenus: 'Dissolve', dialogueBox: 'Dissolve', confirm: 'Dissolve' },
     groups: {
       say: { fill: { from: p('=panel', 0), to: p('=panel', 96), dir: 'down' }, corners: 0, border: null, pad: pad(40, 26), shadow: null },
       namebox: 'none',
-      choice: { text: { idle: '#b3a897', hover: '#d0362b' }, box: { fill: p('=panel', 72), corners: 0, border: null, pad: pad(24, 6), shadow: null } },
-      quick: { idle: '#5e564d', hover: '#d0362b' },
-      slot: { fill: p('=panel', 60), corners: 0, border: { w: 1, c: p('#3a2a26') }, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: false,
+      choice: { text: { idle: '#b3a897', hover: '#e0483c' }, box: { fill: p('=panel', 72), corners: 0, border: null, pad: pad(24, 6), shadow: null } },
+      quick: { idle: '#857b6f', hover: '#e0483c' },
+      slot: { fill: p('=panel', 60), corners: 0, border: { w: 1, c: p('#3a2a26') }, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: false, slotText: '#857b6f', menuPanel: panel80({ w: 1, c: p('#3a2a26') }), screenFrame: panel80(),
     },
   },
   {
     id: 'sweet', name: 'Sweet', suits: 'Round bubbly type and sticker shadows. Comedy, romance, dating stories.',
-    accent: '#ff6f9f', panel: '#ffffff', menu: '#ffe6ef',
+    accent: '#c2255c', panel: '#ffffff', menu: '#ffe6ef',
     text: {
       dialogue: { font: 'nunito', size: 23, color: '#4b3450' },
       interface: { font: 'fredoka', size: 22, color: '#5d4263' },
@@ -173,16 +177,16 @@ export const themes: readonly Theme[] = [
       heading: { font: '=interface', size: 28, color: '=accent' },
       title: { font: '=interface', size: 76, color: '=accent' },
     },
-    button: { text: { idle: '#8c6f92', hover: '#ffffff', selected: '#4b3450', disabled: '#cdbcd0' }, box: { fill: p('#ffffff', 92), corners: 99, border: { w: 2, c: p('#ffd1e1') }, pad: pad(20, 6), shadow: { c: p('=accent', 35), blur: 0, x: 0, y: 4 } }, hoverBox: { fill: p('=accent') }, hover: 'Grow' },
+    button: { text: { idle: '#7d6383', hover: '#ffffff', selected: '#4b3450', disabled: '#cdbcd0' }, box: { fill: p('#ffffff', 92), corners: 99, border: { w: 2, c: p('#ffd1e1') }, pad: pad(20, 6), shadow: { c: p('=accent', 35), blur: 0, x: 0, y: 4 } }, hoverBox: { fill: p('=accent') }, hover: 'Grow' },
     box: { fill: p('=panel', 96), corners: 26, border: { w: 3, c: p('#ffd1e1') }, pad: pad(32, 18), shadow: { c: p('=accent', 30), blur: 0, x: 0, y: 6 } },
-    bar: { track: '#ffd1e1', filled: '=accent', thumb: '#ffffff', corners: 99 },
+    bar: { track: '#ffd1e1', filled: '=accent', thumb: '#241528', corners: 99 },
     motion: { gameMenu: 'Dissolve', betweenMenus: 'Dissolve', dialogueBox: 'Dissolve', confirm: 'Dissolve' },
     groups: {
       say: { fill: p('=panel', 95), corners: 0, border: null, pad: pad(32, 18), shadow: { c: p('=accent', 45), blur: 0, x: 0, y: -5 } },
       namebox: { fill: p('#4b3450', 100), corners: 99, border: null, pad: pad(16, 2), shadow: null },
       choice: { text: { idle: '#5d4263', hover: '#ffffff' }, box: { fill: p('#ffffff', 94), corners: 99, border: { w: 2, c: p('#ffd1e1') }, pad: pad(24, 8), shadow: { c: p('=accent', 35), blur: 0, x: 0, y: 5 } }, hoverBox: { fill: p('=accent') } },
-      quick: { idle: '#a58aab', hover: '#ff6f9f' },
-      slot: { fill: p('#ffffff', 80), corners: 16, border: { w: 2, c: p('#ffd1e1') }, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: false,
+      quick: { idle: '#7d6383', hover: '#c2255c' },
+      slot: { fill: p('#ffffff', 80), corners: 16, border: { w: 2, c: p('#ffd1e1') }, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: false, slotText: '#7d6383', menuPanel: panel80({ w: 3, c: p('#ffd1e1') }, { c: p('=accent', 30), blur: 0, x: 0, y: 6 }), screenFrame: panel80(),
     },
   },
 ];
@@ -202,8 +206,8 @@ export const fontFacts: readonly FontFact[] = [
   { id: 'atkinson', name: 'Atkinson Hyperlegible Next', css: "'ll-atkinson'", kind: 'Sans for low vision', files: ['AtkinsonHyperlegibleNext[wght].ttf', 'AtkinsonHyperlegibleNext-Italic[wght].ttf'], kb: 233, scripts: 'Latin', copyright: 'Copyright 2020-2024 The Atkinson Hyperlegible Next Project Authors', italic: true },
   { id: 'caveat', name: 'Caveat', css: "'ll-caveat'", kind: 'Handwriting', files: ['Caveat[wght].ttf'], kb: 394, scripts: 'Latin, Cyrillic', copyright: 'Copyright 2014 The Caveat Project Authors', italic: false },
 ];
-/** Ren'Py's own font. It is in every project already, so Loomlight copies nothing. Verdana stands in for it in the browser. */
-export const dejavu: FontFact = { id: 'dejavu', name: 'DejaVu Sans', css: "'DejaVu Sans', Verdana, system-ui, sans-serif", kind: "Ren'Py's own font", files: [], kb: 0, scripts: 'Latin, Cyrillic, Greek and more', copyright: "Ships with Ren'Py", italic: true };
+/** Ren'Py's own font. It is in every project already, so Loomlight copies nothing. The mock loads the SDK's copy (renpy/common). */
+export const dejavu: FontFact = { id: 'dejavu', name: 'DejaVu Sans', css: "'ll-dejavu'", kind: "Ren'Py's own font", files: [], kb: 0, scripts: 'Latin, Cyrillic, Greek and more', copyright: "Ships with Ren'Py", italic: true };
 export const fontById: Record<string, FontFact> = Object.fromEntries([dejavu, ...fontFacts].map(f => [f.id, f]));
 
 // ---- following ----

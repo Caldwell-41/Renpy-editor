@@ -18,3 +18,5 @@
 @font-face { font-family:'ll-atkinson'; src:url('./fonts/atkinson/regular.ttf'); font-style:normal; font-weight:100 900; }
 @font-face { font-family:'ll-atkinson'; src:url('./fonts/atkinson/italic.ttf'); font-style:italic; font-weight:100 900; }
 @font-face { font-family:'ll-caveat'; src:url('./fonts/caveat/regular.ttf'); font-style:normal; font-weight:100 900; }
+@font-face { font-family:'ll-dejavu'; src:url('./fonts/dejavu/regular.ttf'); font-style:normal; font-weight:400; }
+@font-face { font-family:'ll-dejavu'; src:url('./fonts/dejavu/bold.ttf'); font-style:normal; font-weight:700; }

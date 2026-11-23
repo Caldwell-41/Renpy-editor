@@ -5,9 +5,9 @@
 import platform from '../story-revamp/art/bg-rainy-platform.webp';
 import dawn from '../story-revamp/art/bg-station-dawn.webp';
 import mara from '../story-revamp/art/mara-neutral.webp';
-import { color, font, hoverColor, menuColor, shade, tint, type Box, type Fill, type Paint, type Theme } from './themes.ts';
+import { color, font, hoverColor, menuColor, shade, type Box, type Fill, type Paint, type Theme } from './themes.ts';
 
-export type Sample = { state: 'idle' | 'hover' | 'selected' | 'disabled'; line: 'short' | 'long'; titleBg: 'menu' | 'picture'; gameTitle: string };
+export type Sample = { state: 'idle' | 'hover' | 'selected' | 'disabled'; line: 'short' | 'long'; titleBg: 'menu' | 'picture'; scene: 'night' | 'dawn'; gameTitle: string };
 export const screenIds = ['title', 'say', 'choice', 'save', 'prefs', 'confirm'] as const;
 export type ScreenId = typeof screenIds[number];
 export const screenNames: Record<ScreenId, string> = { title: 'Title screen', say: 'Dialogue box', choice: 'Choices', save: 'Save and load', prefs: 'Options', confirm: 'Confirm prompt' };
@@ -46,7 +46,7 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
     const box = t.button.box === 'none' ? '' : boxCss(t, t.button.box, state === 'hover' ? t.button.hoverBox : undefined);
     return `<span class="gt-btn" style="${iface()};color:${btnColor(state)};${box};${motion(state)}${extra}">${label}</span>`;
   };
-  const sceneBg = `<div class="gt-bg" style="background-image:url(${platform})"></div><img class="gt-sprite" src="${mara}" alt="">`;
+  const sceneBg = `<div class="gt-bg" style="background-image:url(${s.scene === 'dawn' ? dawn : platform})"></div><img class="gt-sprite" src="${mara}" alt="">`;
   const lines = { short: "The last tram doesn't stop here.", long: "The last tram doesn't stop here. It slows at the signal, and if the driver knows your face he opens the rear door. You step on while it is still moving, and nobody on board looks up." };
 
   function say(text: string, speaker: string | null) {
@@ -57,14 +57,17 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
       : boxCss(t, g, undefined, { pad: false });
     const nb = t.groups.namebox;
     const name = speaker ? `<div class="gt-name" style="font-family:${font(t, T.name.font).css};font-size:${u(T.name.size)};color:#f0b35b;${nb === 'none' ? '' : boxCss(t, nb)}">${speaker}</div>` : '';
-    const quick = ['Back', 'History', 'Skip', 'Auto', 'Save', 'Q.Save', 'Q.Load', 'Prefs'].map((label, i) => `<span style="color:${i === 1 && s.state === 'hover' ? color(t, t.groups.quick.hover === '=accent' ? tint(t.accent) : t.groups.quick.hover) : color(t, t.groups.quick.idle)}">${label}</span>`).join('');
+    // Quick buttons: idle gui.idle_small_color; hover follows the Button hover (gui.rpy L194-195).
+    const quick = ['Back', 'History', 'Skip', 'Auto', 'Save', 'Q.Save', 'Q.Load', 'Prefs'].map((label, i) => `<span style="color:${i === 1 && s.state === 'hover' ? hoverColor(t, t.groups.quick.hover) : color(t, t.groups.quick.idle)}">${label}</span>`).join('');
     return `<div class="gt-say" style="${boxStyle}"></div>${name}<div class="gt-dialogue" style="${textCss(t, T.dialogue.font, T.dialogue.size, T.dialogue.color)}">${text}</div><div class="gt-quick" style="${iface(14)}">${quick}</div>`;
   }
   /** The stock game menu: the Menu background, the screen frame, the navigation, the title and Return. */
   function gameMenu(title: string, current: string, body: string) {
     const nav = ['History', 'Save', 'Load', 'Preferences', 'Main Menu', 'About', 'Help', 'Quit'];
     const line = t.groups.accentLine ? `<i class="gt-accent-line" style="background:${t.accent};top:${u(120)};height:${u(570)}"></i>` : '';
-    return `<div class="gt-bg" style="background:${menuColor(t)}"></div><div class="gt-frame" style="background:${rgba(t.panel, 80)}"></div>${line}
+    // The Screen frame: game_menu_outer_frame, the full-screen overlay picture at Panel 80 % (gui7/images.py L301-304).
+    const frame = t.groups.screenFrame === 'stock' ? `background:${rgba(t.panel, 80)}` : boxCss(t, t.groups.screenFrame, undefined, { pad: false });
+    return `<div class="gt-bg" style="background:${menuColor(t)}"></div><div class="gt-frame" style="${frame}"></div>${line}
       <div class="gt-nav gt-nav-game">${nav.map((label, i) => button(label, label === current ? 'selected' : i === 0 ? s.state : 'idle')).join('')}</div>
       <div class="gt-menu-title" style="${textCss(t, T.heading.font, 50, T.heading.color)}">${title}</div>
       <div class="gt-return">${button('Return')}</div>
@@ -74,7 +77,7 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
     title: () => {
       const bg = s.titleBg === 'picture' ? `background-image:url(${dawn})` : `background:${menuColor(t)}`;
       // The Menu panel: main_menu_frame, 280 px wide, panel color at 80 % with a 3 px accent line (gui7/images.py L282-293).
-      const box = t.box.fill === 'stock' ? `background:${rgba(t.panel, 80)}` : boxCss(t, { ...t.box, fill: { c: t.panel, a: 80 }, corners: 0 }, undefined, { pad: false });
+      const box = t.groups.menuPanel === 'stock' ? `background:${rgba(t.panel, 80)}` : boxCss(t, t.groups.menuPanel, undefined, { pad: false });
       const line = t.groups.accentLine ? `<i class="gt-accent-line" style="background:${t.accent};top:0;height:100%"></i>` : '';
       const nav = ['Start', 'Load', 'Preferences', 'About', 'Help', 'Quit'];
       return `<div class="gt-bg" style="${bg}"></div><div class="gt-mmframe" style="${box}"></div>${line}
@@ -87,7 +90,7 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
       const items = ['Ask about the last tram', 'Wait for the next service', 'Leave'];
       const one = (text: string, i: number) => {
         const hover = i === 0 && s.state === 'hover';
-        const c = color(t, hover ? (g.text.hover === '=accent' ? tint(t.accent) : g.text.hover) : g.text.idle);
+        const c = hover ? hoverColor(t, g.text.hover) : color(t, g.text.idle);
         // Stock choice_idle_background: black at 80 %; hover: accent at 95 %; both fade over 100 px at each side (L215-237).
         const box = g.box === 'stock'
           ? `background:linear-gradient(to right, transparent, ${hover ? rgba(t.accent, 95) : rgba(t.panel, 80)} ${u(100)}, ${hover ? rgba(t.accent, 95) : rgba(t.panel, 80)} calc(100% - ${u(100)}), transparent);padding:${u(5)} ${u(100)}`
@@ -97,33 +100,36 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
       return `${sceneBg}<div class="gt-choices" style="gap:${u(22)}">${items.map(one).join('')}</div>${say('What should I do?', null)}`;
     },
     save: () => {
+      // Stock file_slots (screens.rpy L602-690): the page name, a 3 x 2 grid of 276 x 206 slots, pages < A Q 1-9 > at the bottom.
+      const g = t.groups.slot;
       const slot = (i: number) => {
         const used = i < 2;
-        const g = t.groups.slot;
-        const box = g === 'none' ? '' : boxCss(t, g);
-        return `<div class="gt-slot" style="${box}"><div class="gt-thumb"${used ? ` style="background-image:url(${i ? dawn : platform})"` : ''}></div><span style="${iface(14)};color:${color(t, t.button.text.idle)}">${used ? `14 Nov, 23:4${i}` : 'empty slot'}</span></div>`;
+        // Stock slot_idle_background: the muted accent behind the thumbnail (00gui.rpy L631-637). A drawn slot box replaces that picture.
+        const thumb = used ? `background-image:url(${i ? dawn : platform})` : g === 'stock' ? `background:${shade(t.accent, 0.4)}` : '';
+        return `<div class="gt-slot" style="${g === 'stock' ? `padding:${u(10)}` : boxCss(t, g)}"><div class="gt-thumb" style="${thumb}"></div><span style="${iface(14)};color:${color(t, t.groups.slotText)}">${used ? `Saturday, November 14 2026, 23:4${i}` : 'empty slot'}</span></div>`;
       };
-      const pages = ['&lt;', 'A', 'Q', '1', '2', '3', '4', '5', '6', '&gt;'].map(label => button(label, label === '1' ? 'selected' : 'idle', `;padding-inline:${u(8)}`)).join('');
-      return gameMenu('Save', 'Save', `<div class="gt-slots">${Array.from({ length: 6 }, (_, i) => slot(i)).join('')}</div><div class="gt-pages">${pages}</div>`);
+      const pages = ['&lt;', 'A', 'Q', ...Array.from({ length: 9 }, (_, i) => String(i + 1)), '&gt;'].map(label => button(label, label === '1' ? 'selected' : 'idle', `;padding:${u(4)} ${u(10)}`)).join('');
+      return gameMenu('Save', 'Save', `<div class="gt-save"><div class="gt-page-name" style="${textCss(t, T.heading.font, T.heading.size, T.heading.color)}">Page 1</div><div class="gt-slots">${Array.from({ length: 6 }, (_, i) => slot(i)).join('')}</div><div class="gt-pages">${pages}</div></div>`);
     },
     prefs: () => {
+      // Stock preferences (screens.rpy L725-800): Display and Skip, then the sliders, Voice Volume and Mute All.
       const label = (text: string) => `<div class="gt-pref-label" style="${textCss(t, T.heading.font, T.heading.size, T.heading.color)}">${text}</div>`;
-      const mark = (on: boolean) => `<i class="gt-mark" style="background:${on ? color(t, t.groups.mark) : shade(t.accent, 0.4)}"></i>`;
-      const opt = (text: string, on: boolean) => `<span class="gt-opt">${mark(on)}${button(text, on ? 'selected' : 'idle')}</span>`;
+      // The mark: radio_selected_foreground, a 5 px bar; an unselected option's foreground is empty (00gui.rpy L575-592).
+      const opt = (text: string, on: boolean) => `<span class="gt-opt"><i class="gt-mark" style="background:${on ? color(t, t.groups.mark) : 'transparent'}"></i>${button(text, on ? 'selected' : 'idle')}</span>`;
       const r = t.bar.corners >= 99 ? '999px' : u(t.bar.corners);
       const stock = t.id === 'renpy';
-      const bar = (text: string, v: number) => `<div class="gt-bar-row">${label(text)}<div class="gt-bar" style="background:${stock ? shade(t.accent, 0.4) : color(t, t.bar.track)};border-radius:${r}">${stock ? '' : `<i class="gt-bar-fill" style="width:${v}%;background:${color(t, t.bar.filled)};border-radius:${r}"></i>`}<i class="gt-thumb-mark" style="left:calc(${v}% - ${u(5)});background:${stock ? t.accent : color(t, t.bar.thumb)};border-radius:${r}"></i></div></div>`;
+      const bar = (text: string, v: number) => `${label(text)}<div class="gt-bar" style="background:${stock ? shade(t.accent, 0.4) : color(t, t.bar.track)};border-radius:${r}">${stock ? '' : `<i class="gt-bar-fill" style="width:${v}%;background:${color(t, t.bar.filled)};border-radius:${r}"></i>`}<i class="gt-thumb-mark" style="left:calc(${v}% - ${u(5)});background:${stock ? t.accent : color(t, t.bar.thumb)};border-radius:${r}"></i></div>`;
       return gameMenu('Preferences', 'Preferences', `<div class="gt-prefs">
         <div>${label('Display')}${opt('Window', true)}${opt('Fullscreen', false)}</div>
-        <div>${label('Rollback Side')}${opt('Disable', false)}${opt('Left', true)}${opt('Right', false)}</div>
         <div>${label('Skip')}${opt('Unseen Text', false)}${opt('After Choices', true)}${opt('Transitions', false)}</div>
-      </div><div class="gt-bars">${bar('Text Speed', 62)}${bar('Music Volume', 80)}${bar('Auto-Forward Time', 35)}${bar('Sound Volume', 70)}</div>`);
+      </div><div class="gt-bars"><div>${bar('Text Speed', 62)}${bar('Auto-Forward Time', 35)}</div><div>${bar('Music Volume', 80)}${bar('Sound Volume', 70)}${bar('Voice Volume', 70)}<div class="gt-mute">${opt('Mute All', false)}</div></div></div>`);
     },
     confirm: () => {
       // The dim is the picture gui/overlay/confirm.png (screens.rpy L1158), black at 60 %, drawn once by the generator.
       // It is not a box, so no theme changes it.
       // Stock frame.png: a 3 px accent border around an opaque panel fill (gui7/images.py L317-326).
-      const frame = t.box.fill === 'stock' ? `background:${t.panel};box-shadow:inset 0 0 0 ${u(3)} ${t.accent};padding:${u(40)}` : boxCss(t, t.box);
+      // The Confirm prompt group keeps its stock padding, gui.confirm_frame_borders = 40 (gui.rpy L291).
+      const frame = t.box.fill === 'stock' ? `background:${t.panel};box-shadow:inset 0 0 0 ${u(3)} ${t.accent};padding:${u(40)}` : boxCss(t, { ...t.box, pad: [40, 40, 40, 40] });
       return `${sceneBg}${say(lines.short, 'Mara')}<div class="gt-dim" style="background:${rgba('#000000', 60)}"></div>
         <div class="gt-confirm" style="${frame}"><p style="${iface()};color:${color(t, I.color)}">Are you sure you want to quit?</p><div>${button('Yes', s.state)}${button('No')}</div></div>`;
     },

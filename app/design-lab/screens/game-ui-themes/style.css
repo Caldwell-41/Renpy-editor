@@ -1,12 +1,12 @@
 /* PROTOTYPE for #215: Loomlight's own chrome around the sample game. Production colour tokens. */
 .tm-shell { height:100%; display:flex; flex-direction:column; overflow:hidden; font:13px/1.4 var(--font-ui); color:var(--text-primary); background:var(--surface-app); }
-.tm-shell h1 { margin:0 0 4px; font-size:20px; font-weight:650; }
-.tm-shell h2 { margin:0; font-size:14px; font-weight:650; }
-.tm-shell h3 { margin:0; font-size:13px; font-weight:650; }
-.tm-shell p { margin:0; }
+.tm-shell :is(.tm-scroll, .tm-wizard, .tm-sheet) h1 { margin:0 0 4px; font-size:20px; font-weight:650; }
+.tm-shell :is(.tm-scroll, .tm-wizard, .tm-sheet) h2 { margin:0; font-size:14px; font-weight:650; }
+.tm-shell :is(.tm-scroll, .tm-wizard, .tm-sheet) h3 { margin:0; font-size:13px; font-weight:650; }
+.tm-shell :is(.tm-scroll, .tm-wizard, .tm-sheet) p { margin:0; }
 .tm-shell code { font:11px var(--font-source, ui-monospace, monospace); color:var(--text-secondary); }
-.tm-shell button, .tm-shell select { font:inherit; color:var(--text-primary); background:var(--surface-raised); border:1px solid var(--border-strong); border-radius:3px; padding:2px 8px; min-height:24px; cursor:pointer; }
-.tm-shell button:hover { background:var(--surface-hover); }
+.tm-shell :is(.tm-proto, .tm-scroll, .tm-wizard, .tm-sheet) :is(button, select) { font:inherit; color:var(--text-primary); background:var(--surface-raised); border:1px solid var(--border-strong); border-radius:3px; padding:2px 8px; min-height:24px; cursor:pointer; }
+.tm-shell :is(.tm-proto, .tm-scroll, .tm-wizard, .tm-sheet) button:hover { background:var(--surface-hover); }
 .tm-shell button[aria-pressed=true] { background:var(--accent-subtle); border-color:var(--accent-primary); }
 .tm-shell button:focus-visible, .tm-shell select:focus-visible, .tm-shell input:focus-visible { outline:2px solid var(--focus-ring); outline-offset:2px; }
 .tm-quiet, .tm-follows { color:var(--text-secondary); }
@@ -64,14 +64,16 @@
 .tm-field { display:flex; flex-direction:column; gap:4px; margin-bottom:12px; }
 .tm-field>span { font-size:12px; font-weight:600; }
 .tm-field select { width:280px; }
-.tm-tiles { display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:6px; }
-.tm-tile { display:flex; flex-direction:column; gap:3px; font-size:11px; cursor:pointer; }
+/* Creation B inside the production wizard: production styles.css and ui-refresh.css style everything but the Look row. */
+.tm-prod { flex:1; min-height:0; display:grid; font-size:14px; }
+.tm-tiles { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px; }
+.tm-tile { position:relative; display:flex; flex-direction:column; gap:4px; color:var(--text-primary); font-size:12px; cursor:pointer; }
 .tm-tile input { position:absolute; opacity:0; pointer-events:none; }
 .tm-tile .gt-stage { outline:1px solid var(--border-normal); }
 .tm-tile.is-on .gt-stage { outline:2px solid var(--accent-primary); }
 .tm-tile:has(input:focus-visible) .gt-stage { outline:2px solid var(--focus-ring); outline-offset:2px; }
-.tm-config-preview { display:grid; grid-template-columns:minmax(0, 1.4fr) minmax(0, 1fr); gap:12px; align-items:start; }
-.tm-config-preview p { color:var(--text-secondary); margin-top:4px !important; }
+.tm-config-preview { display:grid; grid-template-columns:minmax(0, 1.4fr) minmax(0, 1fr); gap:14px; align-items:start; margin-top:6px; }
+.tm-config-preview p { color:var(--text-secondary); font-size:12px; margin-top:4px !important; }
 .tm-review { display:grid; grid-template-columns:minmax(0, 1fr) 260px; gap:16px; }
 .tm-review dl { margin:0; }
 .tm-review dl>div { display:grid; grid-template-columns:110px 1fr; gap:8px; padding:6px 0; border-bottom:1px solid var(--border-normal); }
