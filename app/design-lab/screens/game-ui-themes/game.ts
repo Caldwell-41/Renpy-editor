@@ -120,9 +120,11 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
       </div><div class="gt-bars">${bar('Text Speed', 62)}${bar('Music Volume', 80)}${bar('Auto-Forward Time', 35)}${bar('Sound Volume', 70)}</div>`);
     },
     confirm: () => {
+      // The dim is the picture gui/overlay/confirm.png (screens.rpy L1158), black at 60 %, drawn once by the generator.
+      // It is not a box, so no theme changes it.
       // Stock frame.png: a 3 px accent border around an opaque panel fill (gui7/images.py L317-326).
       const frame = t.box.fill === 'stock' ? `background:${t.panel};box-shadow:inset 0 0 0 ${u(3)} ${t.accent};padding:${u(40)}` : boxCss(t, t.box);
-      return `${sceneBg}${say(lines.short, 'Mara')}<div class="gt-dim" style="background:${rgba(t.panel, 60)}"></div>
+      return `${sceneBg}${say(lines.short, 'Mara')}<div class="gt-dim" style="background:${rgba('#000000', 60)}"></div>
         <div class="gt-confirm" style="${frame}"><p style="${iface()};color:${color(t, I.color)}">Are you sure you want to quit?</p><div>${button('Yes', s.state)}${button('No')}</div></div>`;
     },
   };

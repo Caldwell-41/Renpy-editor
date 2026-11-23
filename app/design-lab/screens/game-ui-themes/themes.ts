@@ -178,7 +178,7 @@ export const themes: readonly Theme[] = [
     bar: { track: '#ffd1e1', filled: '=accent', thumb: '#ffffff', corners: 99 },
     motion: { gameMenu: 'Dissolve', betweenMenus: 'Dissolve', dialogueBox: 'Dissolve', confirm: 'Dissolve' },
     groups: {
-      say: { fill: p('=panel', 95), corners: 26, border: { w: 3, c: p('#ffd1e1') }, pad: pad(32, 18), shadow: { c: p('=accent', 30), blur: 0, x: 0, y: -4 } },
+      say: { fill: p('=panel', 95), corners: 0, border: null, pad: pad(32, 18), shadow: { c: p('=accent', 45), blur: 0, x: 0, y: -5 } },
       namebox: { fill: p('#4b3450', 100), corners: 99, border: null, pad: pad(16, 2), shadow: null },
       choice: { text: { idle: '#5d4263', hover: '#ffffff' }, box: { fill: p('#ffffff', 94), corners: 99, border: { w: 2, c: p('#ffd1e1') }, pad: pad(24, 8), shadow: { c: p('=accent', 35), blur: 0, x: 0, y: 5 } }, hoverBox: { fill: p('=accent') } },
       quick: { idle: '#a58aab', hover: '#ff6f9f' },
