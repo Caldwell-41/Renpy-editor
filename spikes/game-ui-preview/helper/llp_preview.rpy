@@ -1,4 +1,4 @@
-# Throwaway spike for #198. Never merged. Loads beside the project through
+# Throwaway spike for #198, extended for #216. Never merged. Loads beside the project through
 # RENPY_SEARCHPATH, keeps one long interaction like the game menu, and answers
 # requests from the driver through numbered JSON files in LLP_IO.
 
@@ -77,6 +77,138 @@ init python:
                 return original_handler(ev, x, y, default=default)
             mouse_handler._llp = True
             focus.mouse_handler = mouse_handler
+        if not getattr(focus.before_interact, "_llp", False):
+            original_before = focus.before_interact
+            def before_interact(roots):
+                result = original_before(roots)
+                try:
+                    _llp_apply_forced(roots)
+                except Exception:
+                    # Drop the request, so one bad entry cannot fail every interaction.
+                    _llp_S["forced"] = None
+                    _llp_S["forceApplied"] = dict(error=_llp_tb.format_exc()[-600:])
+                return result
+            before_interact._llp = True
+            focus.before_interact = before_interact
+
+    # The "force" request (#216). Each entry names an element by source file and
+    # line and gives the state to show. The helper applies the entries at every
+    # interaction start, after per_interact and the engine's focus pass have set
+    # the real states, so a forced state survives a screen update or a draft.
+    # It changes only the look: the button keeps its real action and focus.
+    _llp_FORCED = {
+        "idle": ("", "idle"), "hover": (None, "hover"), "disabled": (None, "insensitive"),
+        "selected": ("selected_", "idle"), "selected_hover": ("selected_", "hover"),
+        "selected_disabled": ("selected_", "insensitive"),
+    }
+
+    def _llp_same_file(location, wanted):
+        return location[0].replace("\\", "/").endswith(wanted)
+
+    def _llp_apply_forced(roots):
+        entries = _llp_S.get("forced") or []
+        applied = [0] * len(entries)
+        _llp_S["forceApplied"] = applied
+        if not entries:
+            return
+        button_type = renpy.display.behavior.Button
+        found = []
+        for root in roots:
+            root.visit_all(found.append)
+        # A textbutton keeps its source line on the inner Text. Force the Button.
+        inner = {id(d.child) for d in found if isinstance(d, button_type) and d.child is not None}
+        for d in found:
+            if id(d) in inner:
+                continue
+            locations = [getattr(d, "_location", None)]
+            if isinstance(d, button_type) and d.child is not None:
+                locations.append(getattr(d.child, "_location", None))
+            for i, entry in enumerate(entries):
+                if not any(l and l[1] == entry["line"] and _llp_same_file(l, entry["file"]) for l in locations):
+                    continue
+                role, state = _llp_FORCED[entry["state"]]
+                if role is None:
+                    role = getattr(d, "role", "")
+                d.set_style_prefix(role + state + "_", True)
+                if entry.get("events", True):
+                    # With "hover" this is what focus(default=True) does: the
+                    # transform event starts a hover animation, with no sound
+                    # and no hovered action.
+                    d.set_transform_event(role + state)
+                    child = getattr(d, "child", None)
+                    if child is not None:
+                        child.set_transform_event(role + state)
+                applied[i] += 1
+
+    def _llp_force(req):
+        _llp_S["forced"] = [e for e in req.get("states", []) if e.get("state")]
+        renpy.restart_interaction()
+        yield dict(settle=True, min=req.get("min", 0), timeout=req.get("timeout", 2.0))
+        _llp_capture(req, geometry=req.get("geometry", False), extra=dict(forceApplied=_llp_S.get("forceApplied")))
+
+    def _llp_hex(color):
+        if color is None:
+            return None
+        return "#%02x%02x%02x" % (color[0], color[1], color[2]) + ("" if len(color) < 4 or color[3] == 255 else "%02x" % color[3])
+
+    def _llp_describe(d):
+        if d is None:
+            return None
+        color = getattr(d, "color", None)
+        return _llp_hex(color) if color is not None else type(d).__name__
+
+    def _llp_probe(surface, targets):
+        """For each button named by file and line: its style prefix, the values its
+        style gives now, and the colors of its pixels in the captured frame."""
+        render_type = renpy.display.render.Render
+        button_type = renpy.display.behavior.Button
+        scale = renpy.display.draw.draw_per_virt
+        width, height = surface.get_size()
+        rows, seen = [], set()
+        def pixel(x, y):
+            px, py = int(round(x * scale)), int(round(y * scale))
+            if 0 <= px < width and 0 <= py < height:
+                return tuple(surface.get_at((px, py)))[:3]
+            return None
+        def text_pixel(x, y, w, h, behind):
+            counts = {}
+            for py in range(int(y * scale), min(height, int((y + h) * scale)), 2):
+                for px in range(int(x * scale), min(width, int((x + w) * scale)), 2):
+                    c = tuple(surface.get_at((px, py)))[:3]
+                    if behind is None or abs(c[0] - behind[0]) + abs(c[1] - behind[1]) + abs(c[2] - behind[2]) > 8:
+                        counts[c] = counts.get(c, 0) + 1
+            if not counts:
+                return None, 0
+            best = max(counts, key=counts.get)
+            return best, counts[best]
+        def walk(r, x, y, button):
+            for d in (getattr(r, "render_of", None) or []):
+                if isinstance(d, button_type):
+                    button = (d, x, y, r.width, r.height)
+            for d in (getattr(r, "render_of", None) or []):
+                location = getattr(d, "_location", None)
+                if not location or id(d) in seen:
+                    continue
+                for t in targets:
+                    if location[1] == t["line"] and _llp_same_file(location, t["file"]):
+                        seen.add(id(d))
+                        row = dict(line=location[1], cls=type(d).__name__, x=x, y=y, w=r.width, h=r.height)
+                        if button is not None:
+                            b, bx, by, bw, bh = button
+                            behind = pixel(bx + bw - 5, by + bh - 5)
+                            found, count = text_pixel(x, y, r.width, r.height, behind)
+                            row.update(button=dict(x=bx, y=by, w=bw, h=bh), prefix=b.style.prefix, role=b.role,
+                                       focusable=b.focusable, focused=b.is_focused(), textPrefix=d.style.prefix,
+                                       styleBackground=_llp_describe(b.style.background),
+                                       styleColor=_llp_hex(getattr(d.style, "color", None)),
+                                       pixelBackground=_llp_hex(behind), pixelText=_llp_hex(found), pixelTextCount=count)
+                        rows.append(row)
+            for child in (getattr(r, "children", None) or []):
+                c = child[0]
+                if isinstance(c, render_type):
+                    walk(c, x + child[1], y + child[2], button)
+        walk(renpy.display.interface.surftree, 0, 0, None)
+        return rows
 
     @_llp_contextlib.contextmanager
     def _llp_keep_screens():
@@ -97,8 +229,8 @@ init python:
             exports.show_screen = original
 
     def _llp_clear():
-        for name in ("say", "choice", "menu", "main_menu", "preferences", "confirm"):
-            if renpy.get_screen(name):
+        for name in ("say", "choice", "menu", "main_menu", "preferences", "confirm", _llp_S.get("shown")):
+            if name and renpy.get_screen(name):
                 renpy.hide_screen(name)
 
     def _llp_show(scene):
@@ -111,7 +243,8 @@ init python:
             elif kind == "choice":
                 renpy.display_menu([(caption, i) for i, caption in enumerate(scene["items"])], interact=False)
             else:
-                renpy.show_screen(kind)
+                renpy.show_screen(kind, **scene.get("args", {}))
+        _llp_S["shown"] = kind
         renpy.restart_interaction()
 
     def _llp_geometry(keep=False):
@@ -165,6 +298,8 @@ init python:
                       renderer=renpy.get_renderer_info()["renderer"], starts=_llp_S["starts"])
         if geometry:
             result["geometry"] = _llp_geometry()
+        if req.get("probe"):
+            result["probe"] = _llp_probe(surface, req["probe"])
         if extra:
             result.update(extra)
         _llp_write("result-%d.json" % n, result)
@@ -272,7 +407,7 @@ init python:
                 _llp_mouse.move_mouse(action[1], action[2])
             elif action[0] == "click":
                 _llp_mouse.click_mouse(1, action[1], action[2])
-        yield dict(event=True, settle=req.get("settle", False), timeout=req.get("timeout", 1.0))
+        yield dict(event=True, settle=req.get("settle", False), min=req.get("min", 0), timeout=req.get("timeout", 1.0))
         _llp_capture(req, geometry=req.get("geometry", False), extra=dict(
             mouseFocusedBefore=focused, eventXY=_llp_S.get("event_xy"),
             eventMs=(_llp_S["event_seen"] - _llp_S["t_req"]) * 1000 if _llp_S["event_seen"] > _llp_S["t_req"] else None))
@@ -302,6 +437,9 @@ init python:
                 yield step
         elif kind == "pointer":
             for step in _llp_pointer(req):
+                yield step
+        elif kind == "force":
+            for step in _llp_force(req):
                 yield step
         elif kind == "restart":
             _llp_S["restart"] = dict(req=req, tRequest=_llp_S["t_req"])
@@ -333,6 +471,7 @@ init python:
             if wait.get("event"):
                 drawn = drawn and S["event_seen"] >= since and S["last_draw"] > S["event_seen"]
             ok = drawn and not (wait.get("settle") and renpy.display.interface.ongoing_transition)
+            ok = ok and _llp_perf() - since >= wait.get("min", 0)
             if not ok and _llp_perf() - since < wait.get("timeout", 2.0):
                 return
             wait["ok"] = ok

@@ -1,6 +1,6 @@
-"""Throwaway measurement driver for #198. Never merged.
+"""Throwaway measurement driver for #198, extended for #216. Never merged.
 
-Usage: python driver.py --sdk <verified 8.5.3 SDK> --work <dir> --out <dir> [--phase all|smoke]
+Usage: python driver.py --sdk <verified 8.5.3 SDK> --work <dir> --out <dir> [--phase all|smoke|broken|states]
 
 One run of this script is one attempt under the limit recorded on #198. It
 starts at most --max-processes SDK processes and stops after --max-seconds.
@@ -519,6 +519,152 @@ def measure_session(helper, project, variant, reps, out, session):
     session["pointer"] = pointer
 
 
+STATES_FILE = "game/zz_llp_states.rpy"
+SHOWN = ("pixelText", "pixelBackground", "prefix", "styleColor", "styleBackground", "focused", "focusable")
+
+
+def measure_states(helper, project, out, session):
+    """#216: the states rule (cases 1 to 4) and forced states (case 5)."""
+    lines = {}
+    with open(os.path.join(project, STATES_FILE), encoding="utf-8") as f:
+        for number, line in enumerate(f, 1):
+            if line.strip().startswith("textbutton \""):
+                lines[line.split("\"")[1].split(" ")[0]] = number
+    grid = [n for n in lines if n[0] in "TB"]
+    look = ["F1", "F2", "F3"]
+    frames = session["frames"] = {}
+    centers = {}
+
+    def target(name, state=None, events=True):
+        return dict(file=STATES_FILE, line=lines[name], state=state, events=events)
+
+    def note(label, result, names):
+        rows = {}
+        for row in result.get("probe") or []:
+            name = next(n for n in names if lines[n] == row["line"])
+            rows[name] = {k: row.get(k) for k in SHOWN}
+            rows[name]["buttonY"] = (row.get("button") or {}).get("y")
+            if row.get("button"):
+                b = row["button"]
+                centers[name] = (int(b["x"] + b["w"] / 2), int(b["y"] + b["h"] / 2))
+        frames[label] = dict(ok=result.get("ok"), sha=result.get("_sha"), waitOk=result.get("waitOk"),
+                             e2eMs=result.get("e2eMs"), forceApplied=result.get("forceApplied"), error=result.get("error"),
+                             trace=(result.get("trace") or "")[-800:] or None, native=result.get("native"), rows=rows)
+        png = os.path.join(helper.io, "frame-%d.png" % result["id"])
+        if os.path.exists(png):
+            shutil.copy(png, os.path.join(out, "states-%s.png" % label))
+        return result
+
+    def scene(label, screen, names, **args):
+        return note(label, helper.ask(dict(kind="scene", scene=dict(screen=screen, args=args),
+                                           probe=[target(n) for n in names])), names)
+
+    def force(label, entries, names, wait=0):
+        return note(label, helper.ask(dict(kind="force", states=entries, min=wait,
+                                           probe=[target(n) for n in names])), names)
+
+    def point(label, xy, names, wait=0):
+        return note(label, helper.ask(dict(kind="pointer", actions=[["move", xy[0], xy[1]]], min=wait, timeout=1.5,
+                                           probe=[target(n) for n in names])), names)
+
+    away = (1900, 1060)
+    everything = look + ["F4"]
+
+    # Case 5, forced frames. No pointer event has reached the helper yet.
+    scene("force-idle", "llp_force", everything)
+    for state in ("hover", "selected", "disabled", "selected_hover", "selected_disabled"):
+        force("force-F1-%s" % state, [target("F1", state)], everything)
+    force("force-F1-hover-noevents", [target("F1", "hover", events=False)], everything)
+    force("force-F2-hover", [target("F2", "hover")], everything)
+    for state in ("hover", "selected", "disabled"):
+        force("force-group-%s" % state, [target(n, state) for n in look], everything)
+    force("force-mixed", [target("F1", "hover"), target("F2", "selected"), target("F3", "disabled")], everything)
+    force("force-F4-hover", [target("F4", "hover")], everything, wait=0.5)
+    force("force-F4-hover-noevents", [target("F4", "hover", events=False)], everything, wait=0.5)
+    force("force-cleared", [], everything, wait=0.5)
+
+    # Does a forced state survive a redraw of the screen with new arguments?
+    force("force-F2-hover-again", [target("F2", "hover")], everything)
+    scene("force-F2-hover-reshown", "llp_force", everything)
+    force("force-cleared-2", [], everything)
+
+    # Case 5, real frames.
+    scene("real-F1-selected", "llp_force", everything, sel=1)
+    scene("real-F1-disabled", "llp_force", everything, sens=1)
+    scene("real-idle", "llp_force", everything)
+    point("real-F1-hover", centers["F1"], everything)
+    point("real-F2-hover", centers["F2"], everything)
+    point("real-F4-hover", centers["F4"], everything, wait=0.5)
+    point("real-away", away, everything, wait=0.5)
+    scene("real-F1-selected-2", "llp_force", everything, sel=1)
+    point("real-F1-selected-hover", centers["F1"], everything)
+    point("real-away-2", away, everything)
+    # A forced state after the pointer has been used and rests on empty space.
+    scene("real-idle-2", "llp_force", everything)
+    force("force-F2-hover-after-pointer", [target("F2", "hover")], everything)
+    force("force-cleared-3", [], everything)
+
+    # Cases 1 to 4. Real states first, then the same states forced on all sixteen
+    # buttons at once.
+    scene("grid-idle", "llp_states", grid)
+    scene("grid-selected", "llp_states", grid, sel=True)
+    scene("grid-disabled", "llp_states", grid, sens=False)
+    scene("grid-idle-2", "llp_states", grid)
+    grid_centers = {n: centers[n] for n in grid}
+    for name in grid:
+        point("grid-hover-%s" % name, grid_centers[name], [name])
+    point("grid-away", away, grid)
+    scene("grid-selected-2", "llp_states", grid, sel=True)
+    for name in grid:
+        point("grid-selected-hover-%s" % name, grid_centers[name], [name])
+    point("grid-away-2", away, grid)
+    scene("grid-idle-3", "llp_states", grid)
+    for state in ("hover", "selected", "disabled", "selected_hover"):
+        force("grid-force-%s" % state, [target(n, state) for n in grid], grid)
+    force("grid-force-cleared", [], grid)
+
+    # The digest: one row for each grid button, real and forced values for each state.
+    def value(label, name):
+        row = frames[label]["rows"].get(name) or {}
+        return "%s on %s" % (row.get("pixelText"), row.get("pixelBackground"))
+
+    table = session["table"] = {}
+    for name in grid:
+        table[name] = dict(
+            idle=value("grid-idle", name), hover=value("grid-hover-%s" % name, name),
+            selected=value("grid-selected", name), selectedHover=value("grid-selected-hover-%s" % name, name),
+            disabled=value("grid-disabled", name), forcedHover=value("grid-force-hover", name),
+            forcedSelected=value("grid-force-selected", name), forcedDisabled=value("grid-force-disabled", name),
+            forcedSelectedHover=value("grid-force-selected_hover", name))
+    pairs = [("force-F1-hover", "real-F1-hover"), ("force-F1-hover-noevents", "real-F1-hover"),
+             ("force-F2-hover", "real-F2-hover"), ("force-F1-selected", "real-F1-selected"),
+             ("force-F1-disabled", "real-F1-disabled"), ("force-F1-selected_hover", "real-F1-selected-hover"),
+             ("force-F4-hover", "real-F4-hover"), ("force-F4-hover-noevents", "real-F4-hover"),
+             ("force-cleared", "force-idle"), ("real-away", "force-idle"), ("force-F2-hover-reshown", "force-F2-hover"),
+             ("force-F2-hover-after-pointer", "force-F2-hover"), ("force-cleared-3", "force-idle"),
+             ("grid-force-cleared", "grid-idle")]
+    session["same"] = {"%s = %s" % pair: frames[pair[0]]["sha"] == frames[pair[1]]["sha"] and frames[pair[0]]["sha"] is not None
+                       for pair in pairs}
+
+
+def summarize_states(session):
+    lines = ["## states"]
+    for name, row in (session.get("table") or {}).items():
+        lines.append("%-4s %s" % (name, json.dumps(row)))
+    for pair, same in (session.get("same") or {}).items():
+        lines.append("same frame %s: %s" % (pair, same))
+    for label, frame in (session.get("frames") or {}).items():
+        if label.startswith("grid-") and not frame.get("error"):
+            if not (label.startswith("grid-force") and frame.get("forceApplied")):
+                continue
+        lines.append("%s ok=%s wait=%s applied=%s %s" % (label, frame["ok"], frame["waitOk"], frame["forceApplied"],
+                     frame.get("error") or ""))
+        for name, row in frame["rows"].items():
+            if not label.startswith("grid-"):
+                lines.append("    %s %s" % (name, json.dumps(row)))
+    return "\n".join(lines)
+
+
 def summarize(results):
     lines = []
     for variant, data in results["variants"].items():
@@ -528,6 +674,10 @@ def summarize(results):
                                                  for s in data["starts"] if "launchToImageMs" in s]))
         s = data.get("session")
         if not s:
+            continue
+        if "frames" in s:
+            lines.append(summarize_states(s))
+            lines.append("focus: %s" % json.dumps(data.get("focus")))
             continue
         for name, path in s.get("paths", {}).items():
             lines.append("path %s: e2e %s helper %s changed %s" % (name, stats([r.get("e2eMs") for r in path]),
@@ -563,7 +713,7 @@ def main():
     ap.add_argument("--sdk", required=True)
     ap.add_argument("--work", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--phase", default="all", choices=["all", "smoke", "broken"])
+    ap.add_argument("--phase", default="all", choices=["all", "smoke", "broken", "states"])
     ap.add_argument("--max-processes", type=int, default=15)
     ap.add_argument("--max-seconds", type=int, default=600)
     args = ap.parse_args()
@@ -582,7 +732,8 @@ def main():
     if args.phase == "all":
         results["largeStoryLines"] = write_large(stock, large)
 
-    plan = [("stock", stock, 4)] if args.phase in ("smoke", "broken") else [("stock", stock, 4), ("large", large, 3)]
+    single = args.phase in ("smoke", "broken", "states")
+    plan = [("stock", stock, 4)] if single else [("stock", stock, 4), ("large", large, 3)]
     reps = {"stock": 10, "large": 6}
     try:
         for variant, source, starts in plan:
@@ -592,13 +743,19 @@ def main():
             began = time.perf_counter()
             shutil.copytree(source, copy)
             data["copyMs"] = (time.perf_counter() - began) * 1000
-            for k in range(1 if args.phase in ("smoke", "broken") else starts):
+            if args.phase == "states":
+                # The test screens load with the project, so they go in before the helper starts.
+                shutil.copy(os.path.join(HERE, "states", "zz_llp_states.rpy"), os.path.join(copy, STATES_FILE))
+            for k in range(1 if single else starts):
                 io = os.path.join(args.work, "io-%s-%d" % (variant, k))
                 helper = Helper(args.sdk, copy, io, budget, log)
                 start = dict(compiled=k == 0, launchToImageMs=helper.first["launchToImageMs"], tLaunch=helper.t_launch,
                              helperFirst={key: helper.first.get(key) for key in ("tInit", "tCommand", "tMain", "tRequest", "tPng", "native", "renderer", "physical", "drawPerVirt")})
                 try:
-                    if args.phase == "broken":
+                    if args.phase == "states":
+                        data["session"] = {}
+                        measure_states(helper, copy, args.out, data["session"])
+                    elif args.phase == "broken":
                         data["session"] = {}
                         helper.ask(dict(kind="scene", scene=dict(screen="say", who="Eileen", what="A sample line.")))
                         measure_broken(helper, os.path.join(copy, "game", "screens.rpy"), data["session"])
@@ -615,7 +772,7 @@ def main():
                 finally:
                     stopped = helper.stop()
                     start["stop"] = stopped
-                    if k == 1 or args.phase in ("smoke", "broken"):
+                    if k == 1 or single:
                         data["focus"] = stopped["focus"]
                 data["starts"].append(start)
                 shutil.copy(os.path.join(io, "frame-0.png"), os.path.join(args.out, "%s-first-%d.png" % (variant, k)))
