@@ -26,6 +26,8 @@ export type Theme = {
     choice: { text: { idle: string; hover: string }; box: Box | 'stock' | 'none'; hoverBox?: Partial<Box> };
     quick: { idle: string; hover: string };
     slot: Box | 'stock'; slotText: string; mark: string; accentLine: boolean;
+    /** Option buttons follow the Button look; a theme can give them own Corners. */
+    optionCorners?: number;
     /** The title screen's 280 px panel and the menu screens' full-screen frame. */
     menuPanel: Box | 'stock'; screenFrame: Box | 'stock';
   };
@@ -102,7 +104,7 @@ export const themes: readonly Theme[] = [
       namebox: 'none',
       choice: { text: { idle: '#eef7fa', hover: '#ffffff' }, box: { fill: p('=panel', 80), corners: 99, border: null, pad: pad(24, 8), shadow: { c: p('#000000', 30), blur: 18, x: 0, y: 6 } }, hoverBox: { fill: p('#2f7f96', 95) } },
       quick: { idle: '#93afbd', hover: '#ffffff' },
-      slot: { fill: p('#ffffff', 5), corners: 12, border: null, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: false, slotText: '#93afbd', menuPanel: panel80(null, { c: p('#000000', 35), blur: 28, x: 0, y: 10 }), screenFrame: panel80(),
+      slot: { fill: p('#ffffff', 5), corners: 12, border: null, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: false, slotText: '#93afbd', optionCorners: 8, menuPanel: panel80(null, { c: p('#000000', 35), blur: 28, x: 0, y: 10 }), screenFrame: panel80(),
     },
   },
   {
@@ -162,7 +164,7 @@ export const themes: readonly Theme[] = [
       title: { font: '=interface', size: 80, color: '#e6ddd0' },
       version: '#e0483c',
     },
-    button: { text: { idle: '#7b7166', hover: '#e0483c', selected: '#e6ddd0', disabled: '#3a342e' }, box: 'none', hover: 'None' },
+    button: { text: { idle: '#857b6f', hover: '#e0483c', selected: '#e6ddd0', disabled: '#3a342e' }, box: 'none', hover: 'None' },
     box: { fill: p('=panel', 94), corners: 0, border: { w: 1, c: p('#3a2a26') }, pad: pad(28, 18), shadow: null },
     bar: { track: '#2a1a17', filled: '=accent', thumb: '#dcd4c7', corners: 0 },
     motion: { gameMenu: 'Dissolve', betweenMenus: 'Dissolve', dialogueBox: 'Dissolve', confirm: 'Dissolve' },
@@ -194,7 +196,7 @@ export const themes: readonly Theme[] = [
       namebox: { fill: p('#4b3450', 100), corners: 99, border: null, pad: pad(16, 2), shadow: null },
       choice: { text: { idle: '#5d4263', hover: '#ffffff' }, box: { fill: p('#ffffff', 94), corners: 99, border: { w: 2, c: p('#ffd1e1') }, pad: pad(24, 8), shadow: { c: p('=accent', 35), blur: 0, x: 0, y: 5 } }, hoverBox: { fill: p('=accent') } },
       quick: { idle: '#7d6383', hover: '#c2255c' },
-      slot: { fill: p('#ffffff', 80), corners: 16, border: { w: 2, c: p('#ffd1e1') }, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: false, slotText: '#7d6383', menuPanel: panel80({ w: 3, c: p('#ffd1e1') }, { c: p('=accent', 30), blur: 0, x: 0, y: 6 }), screenFrame: panel80(),
+      slot: { fill: p('#ffffff', 80), corners: 16, border: { w: 2, c: p('#ffd1e1') }, pad: pad(10, 10), shadow: null }, mark: '=accent', accentLine: false, slotText: '#7d6383', optionCorners: 8, menuPanel: panel80({ w: 3, c: p('#ffd1e1') }, { c: p('=accent', 30), blur: 0, x: 0, y: 6 }), screenFrame: panel80(),
     },
   },
 ];

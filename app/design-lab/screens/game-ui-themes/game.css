@@ -39,13 +39,15 @@
 .gt-slot { display:flex; flex-direction:column; align-items:center; gap:calc(4cqw / 12.8); }
 .gt-slot span { text-align:center; line-height:1.2; }
 .gt-thumb { width:calc(256cqw / 12.8); height:calc(144cqw / 12.8); flex:none; background-position:center; background-size:cover; }
-.gt-pages { position:absolute; left:0; right:0; bottom:0; display:flex; justify-content:center; gap:0; }
+.gt-pages { position:absolute; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; }
+.gt-pages>div { display:flex; }
 
 /* pref_vbox: each section is 225 px wide (screens.rpy L812-813). */
 .gt-prefs { display:flex; }
 .gt-prefs>div { width:calc(225cqw / 12.8); }
-.gt-prefs>div { display:flex; flex-direction:column; gap:calc(2cqw / 12.8); }
-.gt-pref-label { margin-bottom:calc(6cqw / 12.8); line-height:1.2; }
+.gt-prefs>div { display:flex; flex-direction:column; gap:0; }
+/* pref_label: 10 px above, 2 px below (screens.rpy L839-841). */
+.gt-pref-label { margin:calc(10cqw / 12.8) 0 calc(2cqw / 12.8); line-height:1.2; }
 .gt-mark { position:absolute; left:calc(3cqw / 12.8); top:calc(4cqw / 12.8); bottom:calc(4cqw / 12.8); width:calc(5cqw / 12.8); }
 .gt-bars { display:grid; grid-template-columns:repeat(2, calc(350cqw / 12.8)); gap:0 calc(100cqw / 12.8); margin-top:calc(40cqw / 12.8); align-items:start; }
 .gt-bars>div { display:flex; flex-direction:column; gap:calc(4cqw / 12.8); }

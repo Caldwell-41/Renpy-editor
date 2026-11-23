@@ -42,8 +42,9 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
   const btnColor = (state: Sample['state']) => state === 'hover' ? hoverColor(t, t.button.text.hover) : state === 'selected' ? color(t, t.button.text.selected) : state === 'disabled' ? color(t, t.button.text.disabled) : color(t, t.button.text.idle);
   const motion = (state: Sample['state']) => state !== 'hover' ? '' : t.button.hover === 'Grow' ? 'scale:1.06;' : t.button.hover === 'Brighten' ? 'filter:brightness(1.25);' : '';
   /** A text button with the game-wide Button look. */
+  // A button with no drawn box keeps the stock padding, gui.button_borders = 4 4 4 4 (gui.rpy L155).
   const button = (label: string, state: Sample['state'] = 'idle', extra = '') => {
-    const box = t.button.box === 'none' ? '' : boxCss(t, t.button.box, state === 'hover' ? t.button.hoverBox : undefined);
+    const box = t.button.box === 'none' ? `padding:${u(4)}` : boxCss(t, t.button.box, state === 'hover' ? t.button.hoverBox : undefined);
     return `<span class="gt-btn" style="${iface()};color:${btnColor(state)};${box};${motion(state)}${extra}">${label}</span>`;
   };
   const sceneBg = `<div class="gt-bg" style="background-image:url(${s.scene === 'dawn' ? dawn : platform})"></div><img class="gt-sprite" src="${mara}" alt="">`;
@@ -89,10 +90,11 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
       const items = ['Ask about the last tram', 'Wait for the next service', 'Leave'];
       const one = (text: string, i: number) => {
         const hover = i === 0 && s.state === 'hover';
-        const c = hover ? hoverColor(t, g.text.hover) : color(t, g.text.idle);
+        const disabled = i === 0 && s.state === 'disabled';
+        const c = hover ? hoverColor(t, g.text.hover) : disabled ? color(t, t.button.text.disabled) : color(t, g.text.idle);
         // Stock choice_idle_background: black at 80 %; hover: accent at 95 %; both fade over 100 px at each side (L215-237).
         const box = g.box === 'stock'
-          ? `background:linear-gradient(to right, transparent, ${hover ? rgba(t.accent, 95) : rgba(t.panel, 80)} ${u(100)}, ${hover ? rgba(t.accent, 95) : rgba(t.panel, 80)} calc(100% - ${u(100)}), transparent);padding:${u(5)} ${u(100)}`
+          ? `background:linear-gradient(to right, transparent, ${hover ? rgba(t.accent, 95) : rgba(t.panel, 80)} ${u(100)}, ${hover ? rgba(t.accent, 95) : rgba(t.panel, 80)} calc(100% - ${u(100)}), transparent);-webkit-mask:linear-gradient(transparent, #000 ${u(3)}, #000 calc(100% - ${u(3)}), transparent);padding:${u(5)} ${u(100)}`
           : g.box === 'none' ? `padding:${u(5)} ${u(100)}` : boxCss(t, g.box, hover ? g.hoverBox : undefined);
         return `<div class="gt-choice" style="${textCss(t, T.dialogue.font, T.dialogue.size, T.dialogue.color)};color:${c};${box};${motion(hover ? 'hover' : 'idle')}">${text}</div>`;
       };
@@ -100,7 +102,8 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
     },
     save: () => {
       // Stock file_slots (screens.rpy L602-690): the page name at the top, a 3 x 2 grid of 276 x 206 slots centered in the whole
-      // content area with 10 px spacing, and pages < A Q 1-9 > at the bottom. Page buttons keep their stock padding, 10 4 10 4.
+      // content area with 10 px spacing, and pages < A Q 1-9 > at the bottom with Upload Sync under them (config.has_sync is
+      // True in a stock project, 00sync.rpy L41). Page buttons keep their stock padding, 10 4 10 4.
       const g = t.groups.slot;
       const slot = (i: number) => {
         const used = i < 2;
@@ -109,14 +112,15 @@ export function draw(t: Theme, id: ScreenId, s: Sample): string {
         return `<div class="gt-slot" style="${g === 'stock' ? `padding:${u(10)}` : boxCss(t, g)}"><div class="gt-thumb" style="${thumb}"></div><span style="${iface(14)};color:${color(t, t.groups.slotText)}">${used ? `Saturday, November 14 2026, 23:4${i}` : 'empty slot'}</span></div>`;
       };
       const pages = ['&lt;', 'A', 'Q', ...Array.from({ length: 9 }, (_, i) => String(i + 1)), '&gt;'].map(label => button(label, label === '1' ? 'selected' : 'idle', `;padding:${u(4)} ${u(10)}`)).join('');
-      return gameMenu('Save', 'Save', `<div class="gt-save"><div class="gt-page-name" style="${textCss(t, T.heading.font, T.heading.size, T.heading.color)}">Page 1</div><div class="gt-slots">${Array.from({ length: 6 }, (_, i) => slot(i)).join('')}</div><div class="gt-pages">${pages}</div></div>`);
+      return gameMenu('Save', 'Save', `<div class="gt-save"><div class="gt-page-name" style="${textCss(t, T.heading.font, T.heading.size, T.heading.color)}">Page 1</div><div class="gt-slots">${Array.from({ length: 6 }, (_, i) => slot(i)).join('')}</div><div class="gt-pages"><div>${pages}</div>${button('Upload Sync', 'idle', `;padding:${u(4)} ${u(10)}`)}</div></div>`);
     },
     prefs: () => {
       // Stock preferences (screens.rpy L725-800): Display and Skip, then the sliders, Voice Volume and Mute All.
       const label = (text: string) => `<div class="gt-pref-label" style="${textCss(t, T.heading.font, T.heading.size, T.heading.color)}">${text}</div>`;
       // The mark: radio_selected_foreground, a 5 px bar; an unselected option's foreground is empty (00gui.rpy L575-592).
       // Option buttons keep their stock padding, gui.radio_button_borders and check_button_borders = 18 4 4 4; the mark sits inside it.
-      const opt = (text: string, on: boolean) => button(`${on ? `<i class="gt-mark" style="background:${color(t, t.groups.mark)}"></i>` : ''}${text}`, on ? 'selected' : 'idle', `;position:relative;padding:${u(4)} ${u(4)} ${u(4)} ${u(18)}`);
+      const corners = t.groups.optionCorners === undefined ? '' : `;border-radius:${u(t.groups.optionCorners)}`;
+      const opt = (text: string, on: boolean) => button(`${on ? `<i class="gt-mark" style="background:${color(t, t.groups.mark)}"></i>` : ''}${text}`, on ? 'selected' : 'idle', `;position:relative;padding:${u(4)} ${u(4)} ${u(4)} ${u(18)}${corners}`);
       const r = t.bar.corners >= 99 ? '999px' : u(t.bar.corners);
       const stock = t.id === 'renpy';
       const bar = (text: string, v: number) => `${label(text)}<div class="gt-bar" style="background:${stock ? shade(t.accent, 0.4) : color(t, t.bar.track)};border-radius:${r}">${stock ? '' : `<i class="gt-bar-fill" style="width:${v}%;background:${color(t, t.bar.filled)};border-radius:${r}"></i>`}<i class="gt-thumb-mark" style="left:calc(${v}% - ${u(5)});background:${stock ? t.accent : color(t, t.bar.thumb)};border-radius:${r}"></i></div>`;

@@ -76,10 +76,10 @@ export function mountThemes(host: HTMLElement, context: LabContext, variant: Var
       ['Choice buttons · Text', t => `${colorCell(t, t.groups.choice.text.idle)} / ${colorCell(t, t.groups.choice.text.hover)}`],
       ['Choice buttons · Box', t => boxSummary(t, t.groups.choice.box)], ['Choice buttons · Box · Hover', t => hoverSummary(t, t.groups.choice.box, t.groups.choice.hoverBox)],
       ['Quick buttons · Text', t => `${colorCell(t, t.groups.quick.idle)} / ${colorCell(t, t.groups.quick.hover, true)}`],
-      ['Save slots · Box', t => boxSummary(t, t.groups.slot)], ['Save slots · Text', t => colorCell(t, t.groups.slotText)], ['Option buttons · Mark', t => colorCell(t, t.groups.mark)], ['Option buttons · Padding', () => `18 4 4 4 ${muted('stock')}`], ['Page buttons · Padding', () => `10 4 10 4 ${muted('stock')}`],
+      ['Save slots · Box', t => boxSummary(t, t.groups.slot)], ['Save slots · Text', t => colorCell(t, t.groups.slotText)], ['Option buttons · Mark', t => colorCell(t, t.groups.mark)], ['Option buttons · Padding', () => `18 4 4 4 ${muted('stock')}`], ['Option buttons · Corners', t => t.groups.optionCorners === undefined ? muted('Follows the Button look') : String(t.groups.optionCorners)], ['Page buttons · Padding', () => `10 4 10 4 ${muted('stock')}`],
       ['Menu panel', t => boxSummary(t, t.groups.menuPanel)], ['Menu panel · Show the accent line', t => t.groups.accentLine ? 'On' : 'Off'],
       ['Screen frame', t => boxSummary(t, t.groups.screenFrame)], ['Confirm prompt · Padding', t => t.box.fill === 'stock' ? muted('Stock picture, 40 40 40 40') : `40 40 40 40 ${muted('stock')}`],
-      ['Notices, Skip indicator', t => t.box.fill === 'stock' ? muted('Stock picture') : muted('Follow the Box look')]]],
+      ['Notices, Skip indicator', t => t.box.fill === 'stock' ? muted('Stock picture') : `Fill ${paintCell(t, { c: '=panel', a: 80 })} ${muted('stock opacity; the rest follows the Box look')}`]]],
     ['Fonts copied into game/fonts/', [['Files', t => copied(t).length ? copied(t).map(f => `${f.name} (${f.files.length})`).join('<br>') : muted("None. DejaVu Sans is part of Ren'Py.")], ['Size', t => { const kb = copied(t).reduce((n, f) => n + f.kb, 0); return kb ? `${(kb / 1024).toFixed(1)} MB` : '0'; }]]],
   ];
 
