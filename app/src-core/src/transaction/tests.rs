@@ -2732,3 +2732,16 @@ fn readiness_reads_an_unresolved_journal_on_every_check() {
         );
     }
 }
+
+#[test]
+fn readiness_forgets_a_terminal_journal_whose_folder_was_removed() {
+    let fixture = Fixture::new();
+    create_terminal_journals(&fixture.root, 2);
+    let anchor = DirectoryAnchor::open_root(&fixture.root).unwrap();
+    let terminal = super::journal::TerminalJournals::default();
+    assert_eq!(JournalStore::blocking_code(&anchor, &terminal), Ok(None));
+    assert_eq!(terminal.len(), 2);
+    fs::remove_dir_all(fixture.root.join(".renpy-editor/recovery/tx-terminal-0")).unwrap();
+    assert_eq!(JournalStore::blocking_code(&anchor, &terminal), Ok(None));
+    assert_eq!(terminal.len(), 1, "a removed entry is not remembered");
+}

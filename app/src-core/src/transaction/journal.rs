@@ -330,8 +330,9 @@ impl JournalStore {
         Ok(RecoveryReport { items })
     }
 
-    /// Completely enumerates retained history using constant working memory and
-    /// reports whether any record blocks a write. Terminal journals are checksum and
+    /// Completely enumerates retained history and reports whether any record
+    /// blocks a write. Working memory is one small entry per retained terminal
+    /// journal; a completed scan forgets entries that are gone. Terminal journals are checksum and
     /// schema validated, but their historical payloads are never rehashed here. A
     /// journal `terminal` already validated as terminal is skipped while both of its
     /// slots keep their size and modification time.
@@ -352,6 +353,7 @@ impl JournalStore {
             Err(code) => return Err(code),
         };
         let mut blocker = None;
+        terminal.begin_scan();
         for_each_recovery_entry(&recovery, |entry_name| {
             // Stamped before the read, so a change during the read is checked next time.
             let stamp = entry_stamp(&recovery, &entry_name);
@@ -376,6 +378,7 @@ impl JournalStore {
             }
             Ok(())
         })?;
+        terminal.end_scan();
         Ok(blocker)
     }
 
@@ -536,26 +539,57 @@ fn entry_stamp(recovery: &DirectoryAnchor, entry: &OsStr) -> Option<EntryStamp> 
 }
 
 /// Recovery entries whose journal this session validated as terminal, with the
-/// stamps they had then. Write readiness skips them until a stamp changes. It only
-/// remembers; it never deletes a record.
+/// stamps they had then. Write readiness skips them until a stamp changes, and a
+/// complete scan forgets entries it no longer finds. It only remembers; it never
+/// deletes a record.
 #[derive(Default)]
-pub(crate) struct TerminalJournals(
-    std::sync::Mutex<std::collections::HashMap<OsString, EntryStamp>>,
-);
+pub(crate) struct TerminalJournals(std::sync::Mutex<TerminalScan>);
+
+/// Each entry keeps the number of the last scan that found it.
+#[derive(Default)]
+struct TerminalScan {
+    scan: u64,
+    entries: std::collections::HashMap<OsString, (EntryStamp, u64)>,
+}
 
 impl TerminalJournals {
+    fn begin_scan(&self) {
+        if let Ok(mut known) = self.0.lock() {
+            known.scan += 1;
+        }
+    }
+
+    /// The remembered stamp, marking the entry as found by this scan.
     fn known(&self, entry: &OsStr) -> Option<EntryStamp> {
-        self.0.lock().ok()?.get(entry).copied()
+        let mut known = self.0.lock().ok()?;
+        let scan = known.scan;
+        let (stamp, seen) = known.entries.get_mut(entry)?;
+        *seen = scan;
+        Some(*stamp)
     }
 
     /// Remembers a terminal journal's stamp, or forgets the entry.
     fn record(&self, entry: OsString, stamp: Option<EntryStamp>) {
         if let Ok(mut known) = self.0.lock() {
+            let scan = known.scan;
             match stamp {
-                Some(stamp) => known.insert(entry, stamp),
-                None => known.remove(&entry),
+                Some(stamp) => known.entries.insert(entry, (stamp, scan)),
+                None => known.entries.remove(&entry),
             };
         }
+    }
+
+    /// Forgets entries the completed scan did not find.
+    fn end_scan(&self) {
+        if let Ok(mut known) = self.0.lock() {
+            let scan = known.scan;
+            known.entries.retain(|_, (_, seen)| *seen == scan);
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn len(&self) -> usize {
+        self.0.lock().unwrap().entries.len()
     }
 }
 

@@ -380,16 +380,18 @@ receive detailed bounded inspection and fail closed.
 Revision verification and recovery hashing read incrementally with a 1 MiB buffer.
 Small mutation snapshots remain capped at 16 MiB, journals at 1 MiB, and recovery
 mutation count per journal at 4096. There is no 4096-journal lifetime cap: write
-readiness completely enumerates retained history with constant working memory, validates
-each terminal journal's schema/checksum without rehashing historical media, and still
-finds later corrupt or unresolved entries. While a project is registered, readiness
+readiness completely enumerates retained history, validates each terminal journal's
+schema/checksum without rehashing historical media, and still finds later corrupt or
+unresolved entries. Its working memory is one small entry per retained terminal
+journal. While a project is registered, readiness
 remembers each recovery entry it validated as terminal, with the entry folder's
 modification time and the size and modification time of both journal slots, read before
 the journal. It skips that entry until any of these changes or a slot appears or
 disappears, and then validates it again with the full anchored read. An entry that is
 not a plain folder of regular slot files is never skipped. Entries that block
 (unresolved, conflict, unreadable or invalid) are never remembered and are read on
-every check. Remembering deletes nothing. An explicit
+every check. A completed check forgets entries whose folders are gone. Remembering
+deletes nothing. An explicit
 recovery report remains output-proportional so it can describe every retained record.
 The 512 MiB media and revision-read maximum is enforced incrementally, including
 growing-input detection.
