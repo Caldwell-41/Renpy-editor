@@ -383,11 +383,13 @@ mutation count per journal at 4096. There is no 4096-journal lifetime cap: write
 readiness completely enumerates retained history with constant working memory, validates
 each terminal journal's schema/checksum without rehashing historical media, and still
 finds later corrupt or unresolved entries. While a project is registered, readiness
-remembers each recovery entry it validated as terminal, with the size and modification
-time of both journal slots taken before the read. It skips that entry until either
-slot's size or modification time changes, appears or disappears, and then validates it
-again. Entries that block (unresolved, conflict, unreadable or invalid) are never
-remembered and are read on every check. Remembering deletes nothing. An explicit
+remembers each recovery entry it validated as terminal, with the entry folder's
+modification time and the size and modification time of both journal slots, read before
+the journal. It skips that entry until any of these changes or a slot appears or
+disappears, and then validates it again with the full anchored read. An entry that is
+not a plain folder of regular slot files is never skipped. Entries that block
+(unresolved, conflict, unreadable or invalid) are never remembered and are read on
+every check. Remembering deletes nothing. An explicit
 recovery report remains output-proportional so it can describe every retained record.
 The 512 MiB media and revision-read maximum is enforced incrementally, including
 growing-input detection.

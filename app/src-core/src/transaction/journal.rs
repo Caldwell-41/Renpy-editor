@@ -353,15 +353,14 @@ impl JournalStore {
         };
         let mut blocker = None;
         for_each_recovery_entry(&recovery, |entry_name| {
-            let directory = recovery.open_child(&entry_name, false).ok();
             // Stamped before the read, so a change during the read is checked next time.
-            let stamp = directory
-                .as_ref()
-                .and_then(|directory| slot_stamp(directory).ok());
+            let stamp = entry_stamp(&recovery, &entry_name);
             if stamp.is_some() && terminal.known(&entry_name) == stamp {
                 return Ok(());
             }
-            let code = directory
+            let code = recovery
+                .open_child(&entry_name, false)
+                .ok()
                 .and_then(|directory| Self { directory }.load().ok())
                 .map(|journal| match journal.state {
                     ref state if state.is_terminal() => None,
@@ -503,44 +502,54 @@ fn file_name(path: &Path) -> Result<&OsStr, ErrorCode> {
     path.file_name().ok_or(ErrorCode::UnsafePath)
 }
 
-/// Each journal slot's size and modification time, or `None` when it is absent.
-type SlotStamp = [Option<(u64, std::time::SystemTime)>; 2];
+/// A recovery entry's folder modification time, and each journal slot's size and
+/// modification time (`None` when the slot is absent).
+#[derive(Clone, Copy, PartialEq)]
+struct EntryStamp {
+    directory: std::time::SystemTime,
+    slots: [Option<(u64, std::time::SystemTime)>; 2],
+}
 
-fn slot_stamp(directory: &DirectoryAnchor) -> Result<SlotStamp, ErrorCode> {
-    let mut stamp = [None, None];
-    for (slot, name) in stamp.iter_mut().zip(["journal.0.json", "journal.1.json"]) {
-        if directory.entry_absent(OsStr::new(name))? {
-            continue;
-        }
-        let metadata = directory
-            .open_file(OsStr::new(name))?
-            .metadata()
-            .map_err(|_| ErrorCode::RecoveryRequired)?;
-        *slot = Some((
-            metadata.len(),
-            metadata
-                .modified()
-                .map_err(|_| ErrorCode::RecoveryRequired)?,
-        ));
+/// Stamps an entry with plain metadata reads, which cost far less than anchored
+/// opens. Anything but a real folder of regular slot files gives no stamp, so the
+/// entry takes the full anchored read, which refuses links.
+fn entry_stamp(recovery: &DirectoryAnchor, entry: &OsStr) -> Option<EntryStamp> {
+    let directory = recovery.path().join(entry);
+    let metadata = fs::symlink_metadata(&directory).ok()?;
+    if !metadata.is_dir() || path::is_link_or_reparse(&metadata) {
+        return None;
     }
-    Ok(stamp)
+    let mut slots = [None, None];
+    for (slot, name) in slots.iter_mut().zip(["journal.0.json", "journal.1.json"]) {
+        match fs::symlink_metadata(directory.join(name)) {
+            Ok(file) if file.is_file() && !path::is_link_or_reparse(&file) => {
+                *slot = Some((file.len(), file.modified().ok()?));
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            _ => return None,
+        }
+    }
+    Some(EntryStamp {
+        directory: metadata.modified().ok()?,
+        slots,
+    })
 }
 
 /// Recovery entries whose journal this session validated as terminal, with the
-/// slot stamps it had then. Write readiness skips them until a slot changes. It
-/// only remembers; it never deletes a record.
+/// stamps they had then. Write readiness skips them until a stamp changes. It only
+/// remembers; it never deletes a record.
 #[derive(Default)]
 pub(crate) struct TerminalJournals(
-    std::sync::Mutex<std::collections::HashMap<OsString, SlotStamp>>,
+    std::sync::Mutex<std::collections::HashMap<OsString, EntryStamp>>,
 );
 
 impl TerminalJournals {
-    fn known(&self, entry: &OsStr) -> Option<SlotStamp> {
+    fn known(&self, entry: &OsStr) -> Option<EntryStamp> {
         self.0.lock().ok()?.get(entry).copied()
     }
 
     /// Remembers a terminal journal's stamp, or forgets the entry.
-    fn record(&self, entry: OsString, stamp: Option<SlotStamp>) {
+    fn record(&self, entry: OsString, stamp: Option<EntryStamp>) {
         if let Ok(mut known) = self.0.lock() {
             match stamp {
                 Some(stamp) => known.insert(entry, stamp),
