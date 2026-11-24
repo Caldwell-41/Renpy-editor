@@ -271,8 +271,9 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
   const unknownBeatIds: string[] = [];
   let lastVisitedBeatId: string | undefined;
   const passClosed = throughBeatId !== undefined && stop >= 0;
+  const markUnknown = (beat: SceneBeat): void => { if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id); };
   const forget = (beat: SceneBeat): void => {
-    if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id);
+    markUnknown(beat);
     background = undefined; backgroundUnknown = true; characters = []; charactersUnknown = true;
     music = undefined; musicUnknown = true; variables = {}; variablesUnknown = true; overlay = undefined;
   };
@@ -334,11 +335,11 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
       case "return": overlay = { kind: "return", text: "Return to caller or main menu", beatId: beat.id }; break;
       case "playSfx": case "transition": break;
       case "callScreen": break;
-      case "showScreen": variables = {}; variablesUnknown = true; if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id); break;
+      case "showScreen": variables = {}; variablesUnknown = true; markUnknown(beat); break;
       case "hideScreen": break;
     }
     if (payload.type === "choice") {
-      if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id);
+      markUnknown(beat);
       const firstOption = scene.beats.find(b => b.id === payload.options[0]?.id);
       const selected = firstOption?.conditionalBranch && manualBranches?.get(firstOption.conditionalBranch.groupId);
       if (!selected || !payload.options.some(option => option.id === selected)) { if (!passClosed || beat.id === throughBeatId) break; forget(beat); }
