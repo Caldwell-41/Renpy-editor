@@ -784,8 +784,12 @@ async function deleteScene(tree: ParentNode, name: string): Promise<HTMLElement>
   const row = [...tree.querySelectorAll<HTMLElement>(".tree-scene-row")].find(item => item.querySelector(".tree-scene-open")!.textContent === name)!;
   row.querySelector<HTMLElement>(".tree-menu > summary")!.click();
   press(row.querySelector(".tree-menu")!, "Delete");
-  assert.equal(row.querySelector(".confirm-row > span")!.textContent, `Delete scene "${name}"? Undo restores it.`);
-  press(row, "Delete scene"); await tick();
+  // The confirmation sits under the row, as in a-v2, and the menu closes.
+  const confirm = row.nextElementSibling as HTMLElement;
+  assert.ok(confirm.classList.contains("story-scene-confirm")); assert.equal(confirm.getAttribute("aria-label"), `Delete ${name}`);
+  assert.equal(confirm.querySelector("p")!.textContent, `Delete scene "${name}"? Undo restores it.`);
+  assert.deepEqual(texts(confirm, "button"), ["Cancel", "Delete scene"]); assert.equal(row.querySelector<HTMLDetailsElement>(".tree-menu")!.open, false);
+  press(confirm, "Delete scene"); await tick();
   return row;
 }
 const refused = (references: { beats: object[]; protectedCode: object[] }) => async (): Promise<never> => { throw Object.assign(Error("The Scene has incoming or unknown references and cannot be deleted safely."), { code: "INCOMING_REFERENCE", references }); };
@@ -801,7 +805,7 @@ test("a refused scene delete names each beat that goes to it in the scene list, 
   const s = mountStory(chapters(), { apply: refused({ beats: [reference("leave", "jump"), reference("depot-line", "call", "platform", "Platform 4")], protectedCode: [] }) }), tree = document.querySelector("aside")!;
   const row = await deleteScene(tree, "Depot");
   const refusal = refusalOf(row);
-  assert.equal(row.querySelector(".confirm-row"), null);
+  assert.equal(document.querySelector(".story-scene-confirm"), null);
   assert.equal(refusal.head, "Can't delete \"Depot\". 2 beats go to it:");
   assert.deepEqual(refusal.rows, [["The last service", "05.2.2 Jump"], ["Platform 4", "02 Call scene"]]);
   assert.equal(refusal.tail, "Change or remove them, then delete again. Nothing was deleted.");

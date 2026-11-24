@@ -1275,7 +1275,7 @@ export const storyCases={
   await c.wait(()=>applied(from,'moveScene'));await c.settle();
   c.assert.equal(byName(c,'Spare').chapterId,firstChapter.id);after=await c.snapshot();
   c.assert(!after[spareInNight]&&after[byName(c,'Spare').sourcePath],'Move writes the scene file in the first chapter');
-  from=c.requests().length;menuNode=menuOf(sceneRow('Spare'));c.assert.equal([...menuNode.querySelectorAll('button')].find(b=>b.textContent==='Delete').ariaLabel,'Delete scene Spare');await c.click('Delete',menuNode);await c.click('Delete scene',sceneRow('Spare'));
+  from=c.requests().length;menuNode=menuOf(sceneRow('Spare'));c.assert.equal([...menuNode.querySelectorAll('button')].find(b=>b.textContent==='Delete').ariaLabel,'Delete scene Spare');await c.click('Delete',menuNode);await c.click('Delete scene',sceneRow('Spare').nextElementSibling);
   await c.wait(()=>applied(from,'deleteScene'));await c.settle();c.assert.equal(byName(c,'Spare'),undefined);
   from=c.requests().length;menuNode=menuOf(chapterGroup('Night').querySelector('.tree-chapter-row'));c.assert.equal([...menuNode.querySelectorAll('button')].find(b=>b.textContent==='Delete').ariaLabel,'Delete empty chapter Night');await c.click('Delete',menuNode);await c.click('Confirm delete',chapterGroup('Night'));
   await c.wait(()=>applied(from,'deleteChapter'));await c.settle();

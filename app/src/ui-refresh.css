@@ -359,8 +359,8 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
   margin-left:10px;
   padding-left:6px;
   border-left:1px solid var(--border-strong)}
-/* The refusal of a scene delete, under the scene's row. */
-.story-scene-refusal {
+/* The refusal of a scene delete, and its confirmation, under the scene's row. */
+.story-scene-refusal,.story-scene-confirm {
   display:flex;
   flex-direction:column;
   gap:4px;
@@ -370,6 +370,14 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="
   font-size:12px;
   line-height:1.5;
   color:var(--text-primary)}
+.story-scene-confirm {
+  gap:6px;
+  padding:6px 0 6px 10px}
+.story-scene-confirm>p {
+  margin:0}
+.story-scene-confirm>.row-actions {
+  margin:0;
+  justify-content:flex-end}
 .story-scene-refusal:focus {
   outline:0}
 .story-scene-refusal:focus-visible {

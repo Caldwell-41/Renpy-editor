@@ -1182,12 +1182,23 @@ export function renderStoryView(
       return mutate(command(displayName), undefined, expected, panel);
     });
   };
+  // Delete scene asks under the scene's row, inside the scene list (story-release-fixes / a-v2).
+  const confirmSceneDelete = (row: HTMLElement, scene: SceneDocument): void => {
+    row.querySelector("details.tree-menu")?.removeAttribute("open");
+    if (row.nextElementSibling?.matches(".story-scene-refusal, .story-scene-confirm")) row.nextElementSibling.remove();
+    const block = document.createElement("div"); block.className = "story-scene-confirm"; block.role = "group"; block.setAttribute("aria-label", `Delete ${scene.displayName}`);
+    const copy = document.createElement("p"); copy.textContent = `Delete scene "${scene.displayName}"? Undo restores it.${pendingDrafts(scene.id).length ? " Its unsaved beat drafts are discarded." : ""}`;
+    const tools = document.createElement("div"); tools.className = "row-actions";
+    const cancel = button("Cancel", "text-button"); cancel.addEventListener("click", () => block.remove());
+    const confirm = button("Delete scene", "button danger"); confirm.addEventListener("click", () => void mutate({ type: "deleteScene", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision }));
+    tools.append(cancel, confirm); block.append(copy, tools); row.after(block);
+  };
   // A refused scene delete takes the confirmation's place under the scene's row and names
   // what refuses it (story-release-fixes / a-v2). Each row opens its beat.
   const refuseSceneDelete = (sceneId: string, references: IncomingReferences): void => {
     const row = [...treeHost.querySelectorAll<HTMLElement>(".tree-scene-row")].find(item => item.dataset.sceneId === sceneId), name = model.scenes.find(item => item.id === sceneId)?.displayName ?? "this scene";
     if (!row) return;
-    row.querySelector(":scope > .confirm-row")?.remove(); row.querySelector("details.tree-menu")?.removeAttribute("open");
+    if (row.nextElementSibling?.matches(".story-scene-confirm")) row.nextElementSibling.remove(); row.querySelector("details.tree-menu")?.removeAttribute("open");
     const { intro, tail } = refusalCopy(sceneId, references), lead = document.createElement("b"); lead.textContent = `Can't delete "${name}".`;
     const block = document.createElement("div"); block.className = "story-scene-refusal"; block.role = "alert"; block.tabIndex = -1;
     const head = document.createElement("div"); head.className = "story-refusal-head";
@@ -1257,7 +1268,7 @@ export function renderStoryView(
         moveDown.addEventListener("click", () => void mutate({ type: "moveScene", sceneId: scene.id, chapterId: chapter.id, direction: "down", expectedSourceRevision: scene.sourceRevision }));
         const removeScene = button("Delete", "icon-button"); removeScene.ariaLabel = `Delete scene ${scene.displayName}`;
         removeScene.disabled = scene.id === model.entrySceneId || model.scenes.length === 1;
-        removeScene.addEventListener("click", () => { if (sceneRow.nextElementSibling?.matches(".story-scene-refusal")) sceneRow.nextElementSibling.remove(); confirmAction(sceneRow, `Delete scene "${scene.displayName}"? Undo restores it.${pendingDrafts(scene.id).length ? " Its unsaved beat drafts are discarded." : ""}`, () => mutate({ type: "deleteScene", sceneId: scene.id, expectedSourceRevision: scene.sourceRevision }), "Delete scene"); });
+        removeScene.addEventListener("click", () => confirmSceneDelete(sceneRow, scene));
         controls.append(renameScene, moveUp, moveDown, removeScene);
         if (model.chapters.length > 1) {
           const target = entitySelect(model.chapters.filter((item) => item.id !== chapter.id).map((item) => ({ id: item.id, label: item.displayName })));

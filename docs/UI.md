@@ -505,8 +505,9 @@ covers moving, unwrapping and deleting branches.
   shows or hides its scenes. The scenes sit under a thin guide line. Collapsing a
   chapter is view state: it sends nothing to core and lasts until Story closes. The
   chapter's own actions stay in its ⋯ menu (`story-release-fixes` / `a-v2`).
-- Delete in a scene's menu asks "Delete scene "Depot"? Undo restores it." beside a
-  Delete scene button. When core
+- Delete in a scene's menu closes the menu and asks "Delete scene "Depot"? Undo
+  restores it." under the scene's row, inside the scene list, with Cancel and Delete
+  scene. When core
   refuses the delete with the beats and Custom Code that need the scene, the refusal
   takes the confirmation's place under the scene's row. A header line with × reads
   "Can't delete "Platform 4". 2 beats go to it:". One row per beat gives its scene,

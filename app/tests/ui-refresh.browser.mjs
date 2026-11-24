@@ -161,6 +161,13 @@ try {
  const opened=await storyLayout();
  assert.equal(Math.round(opened.nav),180);assert.equal(opened.listOpen,true,'the scene title opens the scene list');assert.equal(opened.title,'true');
  assert.equal(new Set(opened.tools.map(tool=>tool.top)).size,1,`scene toolbar wraps at 1100 px with both panels open: ${JSON.stringify(opened.tools)}`);
+ // story-release-fixes / a-v2: Delete scene asks under the scene's row, inside the scene list, with the menu closed.
+ const deletable=page.locator('.tree-scene-row').nth(2);await deletable.hover();await deletable.locator('.tree-menu > summary').click();
+ await deletable.locator('.tree-menu').getByRole('button',{name:/^Delete scene /}).click();
+ const confirmation=await page.evaluate(()=>{const list=document.querySelector('.project-tree-panel'),panel=list.getBoundingClientRect(),box=document.querySelector('.tree-scene-row + .story-scene-confirm').getBoundingClientRect(),row=document.querySelector('.tree-scene-row:has(+ .story-scene-confirm)').getBoundingClientRect();
+  return {inside:box.left>=panel.left&&box.right<=panel.right,below:box.top>=row.bottom-1,openMenus:document.querySelectorAll('.tree-menu[open]').length,scrolls:list.scrollWidth>list.clientWidth};});
+ assert.deepEqual(confirmation,{inside:true,below:true,openMenus:0,scrolls:false},'the Delete scene confirmation sits under its row inside the scene list');
+ await page.locator('.story-scene-confirm').getByRole('button',{name:'Cancel',exact:true}).click();
  await page.locator('.story-scene-toggle').click();assert.equal((await storyLayout()).listOpen,false,'the scene title closes the scene list');
  await page.locator('.navigation-toggle').click();
  const compact=await storyAt(560,640);
