@@ -513,6 +513,9 @@ export interface StoryView {
   applyStep(step: DraftStep, direction: HistoryDirection): boolean;
   /** Whether a field belongs to a beat draft, where Cmd/Ctrl+Z runs project Undo. */
   ownsDraftField(target: EventTarget | null): boolean;
+  /** Notes the focused Story field and its caret. The result puts them back after a redraw,
+   *  on the same field of a redrawn editor, unless focus has moved on since. */
+  keepFocus(): () => void;
   dispose(): void;
 }
 
@@ -687,6 +690,24 @@ export function renderStoryView(
     if (!draft || !isPending(draft)) return;
     closeText(); startStep(draft, kind, captureDraft(draft)); draft.state = undefined;
   };
+  // Notes the focused Story field and its caret; the result puts them back after a redraw,
+  // on the same field of a redrawn editor, unless focus has moved on since.
+  const keepFocus = (): (() => void) => {
+    const element = document.activeElement;
+    if (!(element instanceof HTMLElement) || !(host.contains(element) || treeHost.contains(element))) return () => undefined;
+    const fields = (root: ParentNode): HTMLElement[] => [...root.querySelectorAll<HTMLElement>("input, select, textarea")];
+    const editorFor = element.closest<HTMLElement>("[data-editor-for]")?.dataset.editorFor, index = editorFor === undefined ? -1 : fields(element.closest("[data-editor-for]")!).indexOf(element);
+    const text = element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement ? element : undefined;
+    const selection = text && text.selectionStart !== null ? [text.selectionStart, text.selectionEnd ?? text.selectionStart, text.selectionDirection ?? "none"] as const : undefined;
+    return () => {
+      if (disposed || !host.isConnected || (document.activeElement && document.activeElement !== document.body)) return;
+      const editor = [...host.querySelectorAll<HTMLElement>("[data-editor-for]")].find(item => item.dataset.editorFor === editorFor);
+      const redrawn = editor && index >= 0 ? fields(editor)[index] : undefined;
+      const target = element.isConnected ? element : redrawn?.tagName === element.tagName ? redrawn : undefined;
+      target?.focus({ preventScroll: true });
+      if (selection && (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) target.setSelectionRange(...selection);
+    };
+  };
   // Undo or Redo of a step sets its draft to that step's state; no state ends the draft.
   const applyStep = (step: DraftStep, direction: HistoryDirection): boolean => {
     const record = steps.get(step.stepId); if (!record || disposed) return false;
@@ -709,8 +730,9 @@ export function renderStoryView(
     const scene = model.scenes.find(item => item.id === draft.sceneId);
     if (state && !draft.panel.isConnected && scene && draft.sceneId === selectedSceneId) {
       openOperation = undefined;
+      const refocus = keepFocus();
       if (draft.beatId) selectBeat(scene, draft.beatId); else { selectedBeatId = undefined; selectedNewDraft = key; const place = draft.place?.().body; if (place) openTo(scene, place); }
-      draw();
+      draw(); refocus();
     } else { refreshPreview(); if (!draft.beatId) redrawBottom(); }
     return true;
   };
@@ -2686,6 +2708,7 @@ export function renderStoryView(
     },
     applyStep,
     ownsDraftField: target => target instanceof HTMLElement && [...beatDrafts.values()].some(draft => draft.panel.contains(target)),
+    keepFocus,
     dispose: () => {
       disposed = true; closeText(); beatDrafts.clear(); steps.clear(); stopLaneWatch?.(); historyWrite?.release();
       mediaGeneration += 1;

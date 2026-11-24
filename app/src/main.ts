@@ -625,10 +625,11 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   if(hasTree){let width=layoutFor(layoutKey).treeWidth??230;layout.style.setProperty("--tree-width",`${width}px`);const resize=document.createElement("div");resize.className="tree-divider";resize.role="separator";resize.tabIndex=0;resize.ariaLabel="Resize scene or file list";resize.setAttribute("aria-orientation","vertical");treePanel.append(resize);const setWidth=(next:number,save=false):void=>{width=Math.max(160,Math.min(400,Math.round(next)));layout.style.setProperty("--tree-width",`${width}px`);resize.setAttribute("aria-valuenow",String(width));if(save)saveLayout(layoutKey,{treeWidth:width});};resize.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();setWidth(width+(e.key==="ArrowLeft"?-10:10),true);}});let start:number|undefined;resize.addEventListener("pointerdown",e=>{start=e.clientX-width;resize.setPointerCapture(e.pointerId);});resize.addEventListener("pointermove",e=>{if(start!==undefined)setWidth(e.clientX-start);});resize.addEventListener("pointerup",()=>{start=undefined;setWidth(width,true);});resize.addEventListener("pointercancel",()=>{start=undefined;});}
   const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!await allowSceneNavigation() || hasBlockingModal()) return; await requestProjectClose(project); }); sidebar.append(close);
   const workspace = document.createElement("div"); workspace.className = surface === "story" ? "scene-workspace" : surface === "source" ? "source-workspace" : surface === "branches" ? "branches-workspace" : surface === "screens" ? "screens-workspace" : "supporting-workspace";
+  const kept = keepStory && surface === "story" && storyView ? { view: storyView, refocus: storyView.keepFocus() } : undefined;
   layout.append(sidebar);if(hasTree)layout.append(treePanel);layout.append(workspace); shell(layout);
   // Undo and Redo keep the Story view on screen while the scene list reloads, held so
   // nothing is typed into the old workspace. It updates and is released when the list arrives.
-  if (keepStory && surface === "story" && storyView) { workspace.replaceWith(storyView.host); tree.replaceWith(storyView.treeHost); holdStory(true); }
+  if (kept) { workspace.replaceWith(kept.view.host); tree.replaceWith(kept.view.treeHost); holdStory(true, kept.refocus); }
   runtimeWorkspace ??= new RuntimeWorkspace({ sessionId: project.sessionId, sdkVersion: project.sdkVersion,
     request: (operation, payload) => value(operation, operation.startsWith("sdk.") ? payload : { ...payload, sessionId: project.sessionId }),
     current: () => currentProject?.sessionId === project.sessionId,
@@ -754,11 +755,17 @@ function rememberStoryScene(project: OpenProject, sceneId: string): void {
   saveLayout(storyLayoutKey(project), { sceneSelection: sceneId });
 }
 
+let heldRefocus: (() => void) | undefined;
+
 // A kept Story view shows while its scene list reloads, but takes no input until it arrives.
-function holdStory(held: boolean): void {
+// Holding it drops focus, so its release puts focus and caret back (StoryView.keepFocus),
+// as they were when the first of several queued Undo or Redo steps held it.
+function holdStory(held: boolean, refocus?: () => void): void {
   for (const host of storyView ? [storyView.host, storyView.treeHost] : []) {
     if (held) { host.setAttribute("inert", ""); host.setAttribute("aria-busy", "true"); } else { host.removeAttribute("inert"); host.removeAttribute("aria-busy"); }
   }
+  if (held) { heldRefocus ??= refocus; return; }
+  const kept = heldRefocus; heldRefocus = undefined; kept?.();
 }
 
 async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, project: OpenProject, generation: number, target?: SceneTarget, sceneList?: SceneList): Promise<void> {
