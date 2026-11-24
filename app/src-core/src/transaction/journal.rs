@@ -332,8 +332,13 @@ impl JournalStore {
 
     /// Completely enumerates retained history using constant working memory and
     /// reports whether any record blocks a write. Terminal journals are checksum and
-    /// schema validated, but their historical payloads are never rehashed here.
-    pub fn blocking_code(root: &DirectoryAnchor) -> Result<Option<ErrorCode>, ErrorCode> {
+    /// schema validated, but their historical payloads are never rehashed here. A
+    /// journal `terminal` already validated as terminal is skipped while both of its
+    /// slots keep their size and modification time.
+    pub(crate) fn blocking_code(
+        root: &DirectoryAnchor,
+        terminal: &TerminalJournals,
+    ) -> Result<Option<ErrorCode>, ErrorCode> {
         let metadata = match root.open_child(OsStr::new(".renpy-editor"), false) {
             Ok(value) => value,
             Err(_) if root.entry_absent(OsStr::new(".renpy-editor")) == Ok(true) => {
@@ -348,9 +353,15 @@ impl JournalStore {
         };
         let mut blocker = None;
         for_each_recovery_entry(&recovery, |entry_name| {
-            let code = recovery
-                .open_child(&entry_name, false)
-                .ok()
+            let directory = recovery.open_child(&entry_name, false).ok();
+            // Stamped before the read, so a change during the read is checked next time.
+            let stamp = directory
+                .as_ref()
+                .and_then(|directory| slot_stamp(directory).ok());
+            if stamp.is_some() && terminal.known(&entry_name) == stamp {
+                return Ok(());
+            }
+            let code = directory
                 .and_then(|directory| Self { directory }.load().ok())
                 .map(|journal| match journal.state {
                     ref state if state.is_terminal() => None,
@@ -358,6 +369,7 @@ impl JournalStore {
                     _ => Some(ErrorCode::RecoveryRequired),
                 })
                 .unwrap_or(Some(ErrorCode::RecoveryRequired));
+            terminal.record(entry_name, stamp.filter(|_| code.is_none()));
             if let Some(code) = code {
                 if code == ErrorCode::RecoveryRequired || blocker.is_none() {
                     blocker = Some(code);
@@ -491,7 +503,67 @@ fn file_name(path: &Path) -> Result<&OsStr, ErrorCode> {
     path.file_name().ok_or(ErrorCode::UnsafePath)
 }
 
+/// Each journal slot's size and modification time, or `None` when it is absent.
+type SlotStamp = [Option<(u64, std::time::SystemTime)>; 2];
+
+fn slot_stamp(directory: &DirectoryAnchor) -> Result<SlotStamp, ErrorCode> {
+    let mut stamp = [None, None];
+    for (slot, name) in stamp.iter_mut().zip(["journal.0.json", "journal.1.json"]) {
+        if directory.entry_absent(OsStr::new(name))? {
+            continue;
+        }
+        let metadata = directory
+            .open_file(OsStr::new(name))?
+            .metadata()
+            .map_err(|_| ErrorCode::RecoveryRequired)?;
+        *slot = Some((
+            metadata.len(),
+            metadata
+                .modified()
+                .map_err(|_| ErrorCode::RecoveryRequired)?,
+        ));
+    }
+    Ok(stamp)
+}
+
+/// Recovery entries whose journal this session validated as terminal, with the
+/// slot stamps it had then. Write readiness skips them until a slot changes. It
+/// only remembers; it never deletes a record.
+#[derive(Default)]
+pub(crate) struct TerminalJournals(
+    std::sync::Mutex<std::collections::HashMap<OsString, SlotStamp>>,
+);
+
+impl TerminalJournals {
+    fn known(&self, entry: &OsStr) -> Option<SlotStamp> {
+        self.0.lock().ok()?.get(entry).copied()
+    }
+
+    /// Remembers a terminal journal's stamp, or forgets the entry.
+    fn record(&self, entry: OsString, stamp: Option<SlotStamp>) {
+        if let Ok(mut known) = self.0.lock() {
+            match stamp {
+                Some(stamp) => known.insert(entry, stamp),
+                None => known.remove(&entry),
+            };
+        }
+    }
+}
+
+#[cfg(test)]
+thread_local! {
+    static JOURNAL_READS: std::cell::Cell<u64> = const { std::cell::Cell::new(0) };
+}
+
+/// Journal slot reads on this thread since the last call.
+#[cfg(test)]
+pub(crate) fn take_journal_reads() -> u64 {
+    JOURNAL_READS.replace(0)
+}
+
 fn read_valid(directory: &DirectoryAnchor, name: &OsStr) -> Result<Journal, ErrorCode> {
+    #[cfg(test)]
+    JOURNAL_READS.set(JOURNAL_READS.get() + 1);
     let mut bytes = Vec::new();
     directory
         .open_file(name)?

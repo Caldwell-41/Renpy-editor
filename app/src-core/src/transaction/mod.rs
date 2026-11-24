@@ -267,6 +267,8 @@ struct ApprovedProject {
     root: PathBuf,
     identity: FileIdentity,
     anchor: Arc<platform::DirectoryAnchor>,
+    /// Journals validated as terminal while this project is registered.
+    terminal_journals: Arc<journal::TerminalJournals>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -390,6 +392,7 @@ impl TransactionService {
                     root,
                     identity,
                     anchor: Arc::new(anchor),
+                    terminal_journals: Arc::default(),
                 },
             );
         Ok(id)
@@ -1867,7 +1870,8 @@ fn scan_recovery(approved: &ApprovedProject) -> RecoveryReport {
 }
 
 fn blocking_recovery_code(approved: &ApprovedProject) -> Option<ErrorCode> {
-    JournalStore::blocking_code(&approved.anchor).unwrap_or(Some(ErrorCode::RecoveryRequired))
+    JournalStore::blocking_code(&approved.anchor, &approved.terminal_journals)
+        .unwrap_or(Some(ErrorCode::RecoveryRequired))
 }
 
 fn recovery_scan_failure(code: ErrorCode) -> RecoveryReport {

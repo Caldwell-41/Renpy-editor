@@ -2614,3 +2614,121 @@ fn history_continuity_refuses_external_replacements_after_undo_without_cursor_ch
         assert_eq!(fs::read(f.root.join("game/one.rpy")).unwrap(), external);
     }
 }
+
+/// The newest journal slot files in the only recovery entry.
+fn journal_slots(root: &Path) -> Vec<PathBuf> {
+    let directory = transaction_directory(root);
+    ["journal.0.json", "journal.1.json"]
+        .into_iter()
+        .map(|name| directory.join(name))
+        .filter(|path| path.exists())
+        .collect()
+}
+
+#[test]
+fn readiness_reads_a_terminal_journal_again_only_when_a_slot_changes() {
+    use super::journal::take_journal_reads;
+    let fixture = Fixture::new();
+    let outcome = fixture.service.commit(
+        &fixture.project,
+        fixture.proposal(vec![fixture.mutation("game/one.rpy", b"changed\n")]),
+    );
+    assert!(
+        matches!(outcome, CommitOutcome::Committed { .. }),
+        "{outcome:?}"
+    );
+    let blocks = || {
+        fixture
+            .service
+            .has_blocking_recovery(&fixture.project)
+            .unwrap()
+    };
+    let _ = take_journal_reads();
+    assert!(!blocks());
+    assert!(
+        take_journal_reads() > 0,
+        "the first check validates the terminal journal"
+    );
+    assert!(!blocks());
+    assert_eq!(
+        take_journal_reads(),
+        0,
+        "an unchanged terminal journal is not read again"
+    );
+    // A new modification time alone is checked again.
+    let slots = journal_slots(&fixture.root);
+    assert!(!slots.is_empty());
+    for slot in &slots {
+        fs::File::options()
+            .write(true)
+            .open(slot)
+            .unwrap()
+            .set_modified(std::time::SystemTime::now() + std::time::Duration::from_secs(60))
+            .unwrap();
+    }
+    assert!(!blocks());
+    assert!(
+        take_journal_reads() > 0,
+        "a slot with a new modification time is validated again"
+    );
+    assert!(!blocks());
+    assert_eq!(take_journal_reads(), 0);
+    // So is a new size; trailing whitespace keeps the journal valid.
+    for slot in &slots {
+        fs::OpenOptions::new()
+            .append(true)
+            .open(slot)
+            .unwrap()
+            .write_all(b" ")
+            .unwrap();
+    }
+    assert!(!blocks());
+    assert!(
+        take_journal_reads() > 0,
+        "a slot with a new size is validated again"
+    );
+    // A changed journal that no longer validates blocks, every time.
+    for slot in &slots {
+        fs::write(slot, b"{}").unwrap();
+    }
+    for _ in 0..2 {
+        assert!(blocks());
+        assert!(
+            take_journal_reads() > 0,
+            "a journal that blocks is never cached"
+        );
+    }
+}
+
+#[test]
+fn readiness_reads_an_unresolved_journal_on_every_check() {
+    use super::journal::take_journal_reads;
+    let fixture = Fixture::new();
+    let mut hook = Hook(|point, _root: &Path| {
+        if point == FaultPoint::AfterExchange(0) {
+            Err(ErrorCode::RecoveryRequired)
+        } else {
+            Ok(())
+        }
+    });
+    let outcome = fixture.service.commit_with_injector(
+        &fixture.project,
+        fixture.proposal(vec![fixture.mutation("game/one.rpy", b"interrupted\n")]),
+        &mut hook,
+    );
+    assert!(
+        matches!(outcome, CommitOutcome::RecoveryRequired { .. }),
+        "{outcome:?}"
+    );
+    for _ in 0..2 {
+        let _ = take_journal_reads();
+        assert!(fixture
+            .service
+            .has_blocking_recovery(&fixture.project)
+            .unwrap());
+        assert!(
+            take_journal_reads() > 0,
+            "a non-terminal journal is read on every check"
+        );
+    }
+}

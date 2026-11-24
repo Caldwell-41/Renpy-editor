@@ -382,9 +382,15 @@ Small mutation snapshots remain capped at 16 MiB, journals at 1 MiB, and recover
 mutation count per journal at 4096. There is no 4096-journal lifetime cap: write
 readiness completely enumerates retained history with constant working memory, validates
 each terminal journal's schema/checksum without rehashing historical media, and still
-finds later corrupt or unresolved entries. An explicit recovery report remains
-output-proportional so it can describe every retained record. The 512 MiB media and
-revision-read maximum is enforced incrementally, including growing-input detection.
+finds later corrupt or unresolved entries. While a project is registered, readiness
+remembers each recovery entry it validated as terminal, with the size and modification
+time of both journal slots taken before the read. It skips that entry until either
+slot's size or modification time changes, appears or disappears, and then validates it
+again. Entries that block (unresolved, conflict, unreadable or invalid) are never
+remembered and are read on every check. Remembering deletes nothing. An explicit
+recovery report remains output-proportional so it can describe every retained record.
+The 512 MiB media and revision-read maximum is enforced incrementally, including
+growing-input detection.
 
 Native selections retain an anchored parent directory and open the regular file
 descriptor-relative with no-follow/reparse-safe semantics before deriving size,
