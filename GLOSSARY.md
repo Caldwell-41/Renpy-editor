@@ -70,3 +70,45 @@ _Avoid_: Game preview as a synonym
 The deliberate preview of an accepted screen in the actual Ren'Py project, where
 game scripts and actions can execute.
 _Avoid_: Screen canvas as a synonym
+
+**Game UI**:
+The workspace where the author changes the look of the game's screens.
+_Avoid_: Screens as the workspace name
+
+**Stock screen**:
+A screen that Ren'Py puts in each new project, such as the title screen, the
+dialogue box and the pause menu.
+
+**Settings page**:
+The panel of plain settings for one stock screen.
+
+**Game-wide look**:
+The colors, fonts and looks for each kind of element that every screen uses unless
+a look group or an element has an own value. It is the top look level.
+
+**Theme**:
+A ready-made game-wide look.
+_Avoid_: Template as a synonym
+
+**Template**:
+A ready-made look for one screen.
+_Avoid_: Theme as a synonym
+
+**Look level**:
+One of the three places that hold a look: the game-wide look, a look group and an
+element. Position, size and words belong to the element only.
+_Avoid_: Style, which is a Ren'Py word
+
+**Look group**:
+The elements of one kind on a screen that share a look, such as the menu buttons.
+Loomlight makes each look group, and an element is in one look group at all times.
+_Avoid_: Named style, component
+
+**Own value**:
+A value that a look group or an element sets for itself in place of the value from
+the look level above.
+
+**Follows**:
+A look setting follows the look level above when it has no own value. A change at
+the level above then changes it too.
+_Avoid_: Inherits, linked

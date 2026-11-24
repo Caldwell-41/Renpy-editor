@@ -1,0 +1,324 @@
+/* Game UI layout study only: Loomlight's own chrome around the sample game. Production colour tokens. */
+.gu-shell { height:100%; display:grid; grid-template-rows:auto minmax(0,1fr); overflow:hidden; font:13px/1.4 var(--font-ui); color:var(--text-primary); background:var(--surface-app); }
+.gu-shell h2 { margin:0; font-size:14px; font-weight:650; white-space:nowrap; }
+.gu-shell h3 { margin:0; font-size:12px; font-weight:650; }
+.gu-shell p { margin:0; }
+.gu-shell button, .gu-shell select { font:inherit; color:var(--text-primary); background:var(--surface-raised); border:1px solid var(--border-strong); border-radius:3px; padding:3px 9px; min-height:26px; cursor:pointer; }
+.gu-shell button { display:inline-flex; align-items:center; justify-content:center; gap:5px; white-space:nowrap; }
+.gu-shell button:hover:not(:disabled):not([aria-disabled=true]) { background:var(--surface-hover); }
+.gu-shell button:disabled, .gu-shell button[aria-disabled=true] { color:var(--text-muted); border-color:var(--border-normal); background:transparent; cursor:default; }
+.gu-shell button:focus-visible, .gu-shell select:focus-visible, .gu-shell input:focus-visible { outline:2px solid var(--focus-ring); outline-offset:2px; }
+.gu-shell button.gu-primary { color:var(--on-accent); background:var(--accent-primary); border-color:var(--accent-primary); font-weight:600; }
+.gu-shell button.gu-primary:hover { background:var(--accent-hover); }
+.gu-shell button.gu-flat { background:transparent; border-color:transparent; }
+.gu-shell button.gu-icon { width:28px; padding:0; }
+.gu-shell button[aria-pressed=true]:not(.gu-tile):not(.gu-row) { background:var(--accent-subtle); border-color:var(--accent-primary); }
+.gu-shell svg { width:15px; height:15px; flex:none; }
+.gu-muted { color:var(--text-secondary); }
+.gu-spacer { flex:1; min-width:0; }
+.gu-anchor { position:relative; display:inline-flex; }
+
+.gu-proto { display:flex; align-items:center; gap:12px; padding:3px 12px; border-bottom:1px dashed var(--border-strong); font-size:11px; color:var(--text-secondary); }
+.gu-proto strong { font-weight:600; }
+.gu-proto label { margin-left:auto; display:flex; align-items:center; gap:6px; }
+.gu-shell .gu-proto button, .gu-shell .gu-proto select { min-height:22px; padding:1px 7px; font-size:11px; }
+
+/* Shell: header, workspace rail and status bar, after the approved header-undo / icons-v1. */
+.gu-app { min-height:0; display:grid; grid-template-rows:auto minmax(0,1fr) 24px; }
+.gu-header { position:relative; z-index:6; min-height:40px; display:flex; align-items:center; gap:8px 12px; padding:5px 12px; font-size:12px; background:var(--surface-panel); border-bottom:1px solid var(--border-normal); }
+.gu-brand { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:650; }
+.gu-shell .gu-brand svg { width:17px; height:17px; color:var(--accent-primary); }
+.gu-project { padding-left:12px; color:var(--text-secondary); border-left:1px solid var(--border-strong); white-space:nowrap; }
+.gu-save-state { font-size:11px; color:var(--text-secondary); white-space:nowrap; }
+.gu-history, .gu-runtime { display:flex; gap:4px; }
+.gu-runtime { gap:6px; padding-left:12px; border-left:1px solid var(--border-strong); }
+.gu-body { min-height:0; display:grid; grid-template-columns:46px 184px minmax(0,1fr) 284px; }
+[data-variant=click] .gu-body { grid-template-columns:46px minmax(0,1fr) 284px; }
+[data-variant=board] .gu-body { grid-template-columns:46px minmax(0,1fr) 284px; }
+[data-variant=board][data-home=true] .gu-body { grid-template-columns:46px 264px minmax(0,1fr); }
+.gu-rail { display:flex; flex-direction:column; align-items:center; gap:6px; padding-top:10px; background:var(--surface-panel); border-right:1px solid var(--border-normal); }
+.gu-rail>span, .gu-shell .gu-rail>button { width:36px; height:36px; display:flex; align-items:center; justify-content:center; padding:0; color:var(--text-muted); border-radius:4px; }
+.gu-shell .gu-rail>button[aria-pressed=true] { color:var(--text-primary); background:var(--accent-subtle); border-color:transparent; box-shadow:inset 3px 0 var(--accent-primary); }
+.gu-shell .gu-rail svg { width:18px; height:18px; }
+.gu-footer { display:flex; align-items:center; justify-content:space-between; padding:0 12px; font-size:11px; background:var(--surface-panel); border-top:1px solid var(--border-normal); }
+
+/* Screen list (layout 1) and flat rows */
+.gu-list { min-height:0; overflow:auto; padding:4px 0 0; background:var(--surface-panel); border-right:1px solid var(--border-normal); }
+.gu-list>h3 { padding:10px 12px 3px; }
+.gu-shell button.gu-row { width:100%; min-height:25px; justify-content:space-between; padding:2px 12px; text-align:left; background:transparent; border:0; border-left:2px solid transparent; border-radius:0; }
+.gu-shell button.gu-row[aria-current], .gu-shell button.gu-row[aria-pressed=true] { background:var(--surface-selected); border-left-color:var(--accent-primary); }
+.gu-only { display:inline-flex; color:var(--text-muted); }
+.gu-shell .gu-only svg { width:12px; height:12px; }
+.gu-list-foot { padding:10px 12px 12px; }
+
+/* Centre: toolbar, canvas, note */
+.gu-centre { min-width:0; min-height:0; display:grid; grid-template-rows:38px minmax(0,1fr) auto; }
+[data-variant=click] .gu-centre { grid-template-rows:38px minmax(0,1fr) auto auto; }
+.gu-bar { position:relative; z-index:5; min-width:0; display:flex; align-items:center; gap:10px; padding:0 12px; border-bottom:1px solid var(--border-normal); }
+.gu-bar-editing { background:var(--accent-subtle); }
+.gu-canvas { min-width:0; min-height:0; display:grid; place-items:center; padding:14px; container-type:size; }
+.gu-canvas>.gu-stage { width:min(100cqw, calc(100cqh * 16 / 9)); border:1px solid var(--stage-edge); }
+.gu-sheet { width:min(100cqw, calc((100cqh - 46px) * 16 / 9)); display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; }
+.gu-foot { padding:0 14px 10px; font-size:11px; color:var(--text-secondary); text-align:center; }
+.gu-sample { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--text-secondary); white-space:nowrap; }
+.gu-shell .gu-sample select { min-height:24px; padding:1px 4px; }
+.gu-shell .gu-sample .gu-seg button { flex:none; padding:1px 9px; }
+.gu-group>.gu-sample>.gu-label { display:none; }
+.gu-group>.gu-sample>.gu-seg { flex:1; }
+.gu-shell .gu-group>.gu-sample .gu-seg button { flex:1; padding:1px 4px; }
+.gu-showing { min-height:36px; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px 16px; padding:4px 12px; font-size:12px; }
+
+/* Panel: flat groups of label and control rows */
+.gu-panel { min-height:0; display:grid; grid-template-rows:auto minmax(0,1fr); background:var(--surface-panel); border-left:1px solid var(--border-normal); }
+.gu-look { display:grid; grid-template-rows:auto minmax(0,1fr); padding:0; overflow:hidden; }
+.gu-panel-head { min-height:38px; display:flex; flex-wrap:wrap; align-items:center; gap:2px 8px; padding:5px 12px; border-bottom:1px solid var(--border-normal); }
+.gu-scroll { min-height:0; overflow:auto; }
+.gu-level { flex:1; }
+.gu-shell button.gu-crumb { width:100%; justify-content:flex-start; min-height:20px; padding:0; font-size:12px; color:var(--text-secondary); }
+.gu-part-head { display:flex; align-items:baseline; gap:8px; padding:10px 12px 0; }
+.gu-group { display:grid; gap:7px; padding:10px 12px 12px; border-bottom:1px solid var(--border-normal); }
+.gu-group.is-hit { background:var(--accent-subtle); }
+.gu-group-head { display:flex; align-items:center; justify-content:space-between; }
+.gu-field { display:grid; grid-template-columns:78px minmax(0,1fr); align-items:center; gap:3px 8px; }
+.gu-label { font-size:12px; color:var(--text-secondary); }
+.gu-control { min-width:0; display:flex; align-items:center; gap:4px; }
+.gu-control>select, .gu-control>.gu-seg, .gu-control>.gu-range, .gu-control>.gu-follow { flex:1; min-width:0; }
+.gu-help { grid-column:2; font-size:11px; color:var(--text-secondary); }
+.gu-help-wide { grid-column:1 / -1; }
+.gu-note { padding:10px 12px; font-size:12px; color:var(--text-secondary); }
+.gu-toggle { display:flex; align-items:center; gap:7px; font-size:12px; }
+.gu-seg { display:flex; }
+.gu-shell .gu-seg button { flex:1; min-width:0; min-height:24px; padding:1px 6px; font-size:12px; border-radius:0; }
+.gu-shell .gu-seg button+button { margin-left:-1px; }
+.gu-shell .gu-seg button:first-child { border-radius:3px 0 0 3px; }
+.gu-shell .gu-seg button:last-child { border-radius:0 3px 3px 0; }
+.gu-shell .gu-seg button[aria-pressed=true] { position:relative; z-index:1; }
+.gu-color { display:flex; align-items:center; gap:7px; }
+.gu-color input { width:30px; height:24px; padding:0; background:none; border:1px solid var(--border-strong); border-radius:3px; cursor:pointer; }
+.gu-color code { font:12px var(--font-source); color:var(--text-secondary); }
+.gu-range { display:flex; align-items:center; gap:8px; }
+.gu-range input { flex:1; min-width:0; accent-color:var(--accent-primary); }
+.gu-range output { width:38px; font-size:12px; color:var(--text-secondary); text-align:right; }
+.gu-shell button.gu-follow { justify-content:flex-start; gap:6px; min-height:24px; padding:1px 0; font-size:12px; color:var(--text-secondary); text-align:left; white-space:normal; }
+.gu-shell button.gu-follow:hover { color:var(--text-primary); }
+.gu-swatch { width:14px; height:14px; flex:none; border:1px solid var(--border-strong); border-radius:2px; }
+.gu-shell button.gu-same { width:24px; min-height:24px; padding:0; color:var(--text-secondary); }
+.gu-pics { display:flex; gap:5px; }
+.gu-shell .gu-pics button { flex:1; min-width:0; max-width:48px; height:26px; min-height:0; padding:0; font-size:11px; background-size:cover; background-position:center; border-radius:2px; }
+.gu-shell .gu-pics button[aria-pressed=true] { border-color:var(--accent-primary); box-shadow:0 2px 0 var(--accent-primary); }
+.gu-checks { display:grid; grid-template-columns:1fr 1fr; gap:3px 8px; font-size:12px; }
+.gu-checks label { display:flex; align-items:center; gap:6px; }
+.gu-shell input[type=checkbox] { accent-color:var(--accent-primary); margin:0; }
+.gu-xy { gap:10px; }
+.gu-xy label { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--text-secondary); }
+.gu-xy input { width:64px; min-height:24px; padding:1px 5px; }
+.gu-els { display:grid; margin:0 -12px; }
+.gu-shell button.gu-disclose { width:100%; justify-content:flex-start; padding:8px 12px; font-weight:650; font-size:12px; border-radius:0; border-bottom:1px solid var(--border-normal); }
+
+/* Picture tiles: templates, themes, the screen strip and the board. The selected tile gets an accent bar and accent text. */
+.gu-tiles { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.gu-tiles-4 { grid-template-columns:repeat(4, 150px); }
+.gu-tiles-row { grid-template-columns:repeat(4, 132px); }
+.gu-shell button.gu-tile { min-width:0; min-height:0; display:grid; justify-content:stretch; gap:3px; padding:0; font-size:12px; text-align:left; white-space:normal; background:transparent; border:0; border-radius:0; }
+.gu-shell button.gu-tile:hover:not(:disabled):not([aria-disabled=true]) { background:transparent; }
+.gu-tile .gu-stage { border:1px solid var(--stage-edge); border-bottom:2px solid transparent; pointer-events:none; }
+.gu-tile:hover .gu-stage { border-bottom-color:var(--border-strong); }
+.gu-tile[aria-pressed=true] .gu-stage, .gu-tile[aria-current] .gu-stage { border-bottom-color:var(--accent-primary); }
+.gu-tile[aria-pressed=true]>span, .gu-tile[aria-current]>span { color:var(--accent-hover); font-weight:600; }
+.gu-tile>span { display:flex; align-items:center; gap:5px; }
+.gu-tile small { font-size:11px; color:var(--text-secondary); }
+.gu-shell button.gu-new { align-self:start; aspect-ratio:16/9; min-height:0; flex-direction:column; color:var(--text-secondary); background:transparent; border:1px dashed var(--border-strong); border-radius:0; }
+
+/* Layout 2: screens as a strip of live pictures under the canvas */
+.gu-strip { display:flex; gap:18px; overflow-x:auto; padding:6px 12px 8px; background:var(--surface-panel); border-top:1px solid var(--border-normal); }
+.gu-strip-group { display:grid; gap:4px; }
+.gu-strip-row { display:flex; gap:8px; }
+.gu-strip-row>button { flex:none; width:104px; }
+.gu-shell .gu-strip .gu-tile { font-size:11px; }
+
+/* Layout 3: the board and the template strip */
+.gu-board { min-height:0; overflow:auto; display:grid; align-content:start; gap:16px; padding:12px 16px 18px; }
+.gu-board section { display:grid; gap:6px; }
+.gu-board-row { display:grid; grid-template-columns:repeat(auto-fill, minmax(168px, 1fr)); gap:12px; }
+.gu-tstrip { display:flex; align-items:flex-start; justify-content:center; gap:12px; padding:0 14px 10px; }
+.gu-tstrip h3 { padding-top:2px; }
+
+/* Floating layers: menus and sheets. Only these carry a shadow. */
+.gu-pop { position:absolute; z-index:10; top:calc(100% + 4px); left:0; display:grid; gap:8px; padding:10px; background:var(--surface-raised); border:1px solid var(--border-strong); border-radius:4px; box-shadow:var(--shadow-preview); }
+.gu-pop-right { left:auto; right:0; }
+.gu-menu { gap:0; padding:4px; min-width:130px; }
+.gu-shell .gu-menu button { justify-content:flex-start; }
+.gu-sample-pop { min-width:300px; }
+.gu-sample-pop .gu-sample { display:grid; grid-template-columns:70px 1fr; }
+.gu-dots { display:inline-flex; }
+.gu-dots i { width:11px; height:11px; margin-right:-3px; border:1px solid var(--border-strong); border-radius:50%; }
+.gu-dots i:last-child { margin-right:3px; }
+
+/* Layouts A and B: no toolbar above the canvas, one preview row under it, and a template row that opens a sheet. */
+[data-variant=refined] .gu-body, [data-variant=blend] .gu-body { grid-template-columns:46px 172px minmax(0,1fr) 280px; }
+[data-variant=refined] .gu-centre, [data-variant=blend] .gu-centre { grid-template-rows:minmax(0,1fr) auto; }
+.gu-list-a { padding-top:8px; }
+.gu-shell button.gu-row-new { justify-content:flex-start; gap:6px; color:var(--text-secondary); }
+.gu-shell button.gu-other { margin-top:10px; gap:6px; border-top:1px solid var(--border-normal); border-bottom:0; }
+.gu-disclose .gu-muted { margin-left:auto; font-weight:400; }
+.gu-preview { min-height:38px; display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px; padding:0 14px 8px; font-size:12px; }
+.gu-preview-note { margin-left:auto; }
+.gu-panel { position:relative; z-index:4; }
+.gu-panel-top { min-width:0; }
+.gu-panel-head .gu-level { flex:none; margin-left:auto; }
+.gu-shell .gu-panel-head .gu-level button { padding:1px 10px; }
+.gu-template { padding:8px 12px; border-bottom:1px solid var(--border-normal); }
+.gu-template .gu-anchor { display:flex; }
+.gu-shell button.gu-template-button { flex:1; min-width:0; justify-content:flex-start; gap:10px; padding:0; text-align:left; }
+.gu-template-thumb { width:84px; flex:none; }
+.gu-template-thumb .gu-stage { border:1px solid var(--stage-edge); pointer-events:none; }
+.gu-template-text { flex:1; min-width:0; display:grid; }
+.gu-template-pop { width:max-content; }
+.gu-shell button.gu-edit { min-height:20px; padding:0 4px; font-size:12px; color:var(--accent-hover); }
+.gu-shell button.gu-quiet { padding:0; color:var(--text-secondary); }
+.g .is-hit { outline:1px solid var(--accent-primary); outline-offset:2px; }
+
+/* Layout C (council blend): layout 1's list, toolbar and panel, a template strip under the canvas, and the element list as a menu. */
+[data-variant=council] .gu-body { grid-template-columns:46px 168px minmax(0,1fr) 284px; }
+[data-variant=council] .gu-centre { grid-template-rows:38px minmax(0,1fr) auto auto; }
+[data-variant=council] .gu-panel-head .gu-level { flex:1; margin-left:0; }
+.gu-sample-name { font-weight:650; color:var(--text-primary); }
+/* The strip keeps one height with or without templates, and its four tiles span the canvas in an 1100 px window. */
+.gu-cstrip { box-sizing:border-box; width:100%; max-width:658px; height:136px; justify-self:center; display:grid; align-content:start; gap:5px; padding:0 14px 8px; }
+.gu-cstrip .gu-tiles { grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; }
+/* The app's global input rule sets a 40 px minimum height, so this needs its specificity. */
+.gu-shell .gu-xy input[data-offset]:not([type=checkbox]):not([type=radio]) { height:24px; min-height:24px; padding:1px 5px; }
+.gu-el-head { display:flex; align-items:center; gap:6px; padding:6px 12px; border-bottom:1px solid var(--border-normal); }
+.gu-el-anchor { flex:1; min-width:0; }
+.gu-shell button.gu-el-pick { flex:1; min-width:0; justify-content:flex-start; gap:8px; padding:3px 6px 3px 9px; }
+.gu-el-name { min-width:0; overflow:hidden; text-overflow:ellipsis; font-weight:650; }
+.gu-shell .gu-el-pick svg { margin-left:auto; }
+.gu-pop.gu-el-pop { gap:0; min-width:100%; padding:4px 0; }
+.gu-el-pop .gu-els { margin:0; }
+.gu-control>.gu-pics { flex:1; min-width:0; }
+
+/* Layout B: zoom, collapsing side panels, the narrow window, and the source lines. */
+[data-variant=blend] .gu-body { --list:172px; --panel:280px; grid-template-columns:46px var(--list) minmax(0,1fr) var(--panel); }
+[data-variant=blend][data-list=gone] .gu-body { --list:0px; }
+[data-variant=blend][data-panel=gone] .gu-body { --panel:0px; }
+[data-variant=blend] .gu-list { grid-column:2; }
+[data-variant=blend] .gu-centre { grid-column:3; position:relative; }
+[data-variant=blend] .gu-panel { grid-column:4; }
+/* Collapse control 1: a chevron tab on the panel's edge. It needs no icon box and no bar when the panel is closed. */
+.gu-shell button.gu-tab { position:absolute; top:50%; z-index:3; width:13px; height:44px; min-height:0; margin-top:-22px; padding:0; color:var(--text-secondary); background:var(--surface-panel); border:1px solid var(--border-normal); }
+.gu-shell button.gu-tab:hover { color:var(--text-primary); }
+.gu-shell button.gu-tab-list { left:0; border-left:0; border-radius:0 4px 4px 0; }
+.gu-shell button.gu-tab-panel { right:0; border-right:0; border-radius:4px 0 0 4px; }
+.gu-shell .gu-tab svg { width:11px; height:11px; }
+/* The canvas and the row of sample content and zoom are one block, centred together. */
+.gu-canvas-b { place-content:center; grid-template-columns:auto; padding:12px 14px 6px; }
+.gu-canvas-b>.gu-view, .gu-canvas-b>.gu-preview { width:min(100cqw, calc((100cqh - 40px) * 16 / 9)); }
+.gu-canvas-b>.gu-view>.gu-stage { width:100%; border:1px solid var(--stage-edge); }
+.gu-canvas-b>.gu-preview { min-height:40px; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start; gap:10px; padding:7px 0 0; }
+.gu-preview-left { min-width:0; display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; }
+.gu-preview-left strong { font-size:13px; font-weight:650; }
+.gu-zoom { flex:none; }
+.gu-shell .gu-zoom button { flex:none; padding:1px 9px; }
+.gu-canvas-b.gu-zoom-100>.gu-view { width:100cqw; height:calc(100cqh - 40px); overflow:auto; border:1px solid var(--stage-edge); }
+.gu-canvas-b.gu-zoom-100>.gu-view>.gu-stage { width:1920px; border:0; }
+.gu-canvas-b.gu-zoom-100>.gu-preview { width:100cqw; }
+/* A group heading that selects its element. The arrow shows on the pointer and on focus. */
+.gu-shell button.gu-group-pick { width:100%; justify-content:space-between; min-height:0; padding:0; font-size:12px; font-weight:650; }
+.gu-shell button.gu-group-pick:hover:not(:disabled):not([aria-disabled=true]) { background:transparent; }
+.gu-group-pick svg { color:var(--text-secondary); opacity:0; }
+.gu-group-pick:hover svg, .gu-group-pick:focus-visible svg { opacity:1; }
+.gu-el-hidden>span:first-child { color:var(--text-muted); }
+.gu-proto { flex-wrap:wrap; }
+/* What a setting writes: the label opens its source line under the row. */
+.gu-shell button.gu-what { justify-content:flex-start; min-height:0; padding:0; border:0; font-size:12px; text-align:left; white-space:normal; cursor:help; }
+.gu-shell button.gu-what:hover:not(:disabled):not([aria-disabled=true]), .gu-shell button.gu-what[aria-expanded=true] { color:var(--text-primary); background:transparent; text-decoration:underline dotted; text-underline-offset:3px; }
+.gu-writes, .gu-change { display:grid; gap:2px; }
+.gu-writes { margin:0 -12px; padding:6px 12px 8px; background:var(--surface-app); border-block:1px solid var(--border-normal); }
+.gu-writes code, .gu-change code { font:11px/1.5 var(--font-source); color:var(--text-secondary); overflow-wrap:anywhere; }
+.gu-shell code.gu-del { color:var(--status-error); }
+.gu-shell code.gu-add { color:var(--status-success); }
+.gu-file { font-size:11px; font-weight:650; color:var(--text-secondary); }
+/* The changes list behind the unsaved count. */
+.gu-shell button.gu-save-state { min-height:24px; padding:1px 4px; font-size:11px; color:var(--text-secondary); }
+.gu-shell button.gu-save-state:hover { color:var(--text-primary); }
+.gu-shell .gu-save-state svg { width:12px; height:12px; }
+.gu-changes { width:400px; max-width:calc(100vw - 24px); font-size:12px; }
+.gu-changes-list { max-height:60vh; overflow:auto; display:grid; gap:10px; }
+.gu-changes section { display:grid; gap:8px; }
+.gu-change-head { display:flex; align-items:center; gap:8px; }
+.gu-shell button.gu-change-name { flex:1; min-width:0; justify-content:flex-start; min-height:0; padding:0; font-size:12px; text-align:left; white-space:normal; }
+.gu-shell .gu-change-head button[data-revert] { min-height:22px; padding:0 7px; font-size:11px; }
+@media (max-width:700px) {
+  [data-variant=blend] .gu-body { grid-template-columns:46px var(--list) minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); }
+  [data-variant=blend][data-look=true] .gu-body { grid-template-rows:minmax(0,45%) minmax(0,1fr); }
+  [data-variant=blend] .gu-rail, [data-variant=blend] .gu-list { grid-row:1 / 3; }
+  [data-variant=blend] .gu-centre { grid-column:3; grid-row:1; grid-template-rows:auto auto; }
+  [data-variant=blend][data-look=true] .gu-centre { grid-template-rows:minmax(0,1fr) auto; }
+  [data-variant=blend] .gu-canvas-b { display:block; container-type:inline-size; padding:8px 8px 4px 16px; }
+  [data-variant=blend] .gu-canvas-b>.gu-view, [data-variant=blend] .gu-canvas-b>.gu-preview { width:100%; }
+  [data-variant=blend] .gu-canvas-b.gu-zoom-100>.gu-view { width:100%; height:56cqw; }
+  [data-variant=blend] .gu-template-thumb { display:none; }
+  [data-variant=blend] .gu-preview-left { flex-wrap:nowrap; overflow-x:auto; }
+  [data-variant=blend] .gu-panel { grid-column:3; grid-row:2; border-left:0; border-top:1px solid var(--border-normal); }
+  [data-variant=blend] .gu-header { gap:6px; padding-inline:8px; }
+  [data-variant=blend] .gu-project, [data-variant=blend] .gu-long { display:none; }
+  .gu-shell[data-variant=blend] .gu-header button { padding:3px 6px; font-size:11px; }
+  [data-variant=blend] .gu-runtime { gap:4px; padding-left:6px; }
+  [data-variant=blend] .gu-template-pop .gu-tiles-4 { grid-template-columns:repeat(4, minmax(0,1fr)); }
+}
+
+/* Layout B, revision 2: an inherited setting keeps its control, and a checkbox row gets a source button on the pointer and on focus. */
+.gu-linked { position:relative; width:22px; height:24px; flex:none; display:inline-flex; align-items:center; justify-content:center; color:var(--text-muted); }
+/* The open chain acts, and it marks what this screen changed, so it takes the accent. */
+.gu-shell[data-variant=blend] button.gu-same { width:22px; color:var(--accent-hover); }
+/* Its meaning shows on the pointer, and while the keyboard is on the setting's control. */
+.gu-linked:hover::after, .gu-control:has(:focus-visible)>.gu-linked::after { content:attr(data-tip); position:absolute; z-index:6; right:0; top:calc(100% + 4px); width:190px; padding:4px 8px; font-size:11px; line-height:1.4; color:var(--surface-app); background:var(--text-primary); border-radius:3px; white-space:normal; text-align:left; }
+/* A switch beside a chain sizes its options by their words, so no word is cut. */
+.gu-shell[data-variant=blend] .gu-control>.gu-seg button { flex:1 1 auto; padding-inline:4px; }
+.gu-clip { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+[data-variant=blend] .gu-els { grid-template-columns:minmax(0,1fr); }
+[data-variant=blend] .gu-el { gap:10px; }
+[data-variant=blend] .gu-el>.gu-clip { flex:1; text-align:left; }
+.gu-panel-head>h2.gu-clip { flex:0 1 auto; }
+/* The selected element's header: the way back with "Add element", then the name. It has the same height at every name. */
+.gu-el-head { display:grid; gap:1px; padding:5px 12px 7px; border-bottom:1px solid var(--border-normal); }
+.gu-el-back { min-height:28px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.gu-shell .gu-el-back button.gu-crumb { width:auto; min-width:0; }
+.gu-shell .gu-control>textarea { flex:1; min-width:0; min-height:24px; max-height:62px; padding:2px 6px; font:inherit; line-height:1.45; resize:none; field-sizing:content; }
+/* The pending lines of one edit sit under its name. */
+.gu-change-row { display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px; }
+.gu-change-row>div { display:grid; gap:2px; min-width:0; }
+.gu-shell code.gu-line { color:var(--text-muted); }
+/* At 100% the scroll bars always show, so the author can see that the canvas goes on. */
+.gu-zoom-100>.gu-view::-webkit-scrollbar { width:9px; height:9px; }
+.gu-zoom-100>.gu-view::-webkit-scrollbar-thumb { background:var(--border-strong); border-radius:5px; }
+.gu-zoom-100>.gu-view::-webkit-scrollbar-track, .gu-zoom-100>.gu-view::-webkit-scrollbar-corner { background:var(--surface-panel); }
+.gu-pop.gu-pop-panel { left:8px; right:8px; top:4px; width:auto; max-height:calc(100% - 8px); overflow:auto; }
+.gu-toggle-row { display:flex; align-items:center; gap:6px; min-height:22px; }
+.gu-toggle-row .gu-toggle { flex:1; min-width:0; }
+.gu-shell button.gu-what-button { width:22px; min-height:22px; padding:0; color:var(--text-secondary); opacity:0; }
+.gu-toggle-row:hover .gu-what-button, .gu-toggle-row:focus-within .gu-what-button, .gu-shell button.gu-what-button[aria-expanded=true] { opacity:1; }
+.gu-shell .gu-control>input[type=text]:not([type=checkbox]):not([type=radio]) { flex:1; min-width:0; height:24px; min-height:24px; padding:1px 6px; }
+
+/* Layout B, Game-wide look: the large view of one screen. The peek floats over the board, so it has a shadow. */
+.gu-peek { position:absolute; z-index:8; display:grid; gap:5px; padding:6px; background:var(--surface-raised); border:1px solid var(--border-strong); border-radius:4px; box-shadow:var(--shadow-preview); pointer-events:none; }
+.gu-peek .gu-stage { border:1px solid var(--stage-edge); }
+.gu-peek p { display:flex; justify-content:space-between; gap:12px; font-size:12px; }
+.gu-peek p span { color:var(--text-secondary); }
+.gu-shell .gu-board .gu-tile { cursor:zoom-in; }
+.gu-canvas-b>.gu-preview.gu-pinned { align-items:center; }
+.gu-pinned .gu-preview-left { flex-wrap:nowrap; gap:6px; }
+.gu-pinned-name { min-width:0; display:flex; align-items:baseline; gap:6px; margin-left:8px; white-space:nowrap; }
+.gu-pinned-name strong { overflow:hidden; text-overflow:ellipsis; }
+/* The strip of every screen under the pinned preview. The large view gives up height for it. */
+.gu-look-pinned>.gu-view, .gu-look-pinned>.gu-preview, .gu-look-pinned>.gu-pin-strip { width:min(100cqw, calc((100cqh - 40px - 104px) * 16 / 9)); }
+.gu-pin-strip { height:104px; display:flex; align-items:flex-start; gap:8px; overflow-x:auto; padding-top:10px; border-top:1px solid var(--border-normal); margin-top:8px; }
+.gu-shell .gu-pin-strip .gu-tile { flex:none; width:100px; font-size:11px; }
+@media (max-width:700px) { [data-variant=blend] .gu-look-pinned>.gu-view, [data-variant=blend] .gu-look-pinned>.gu-preview { width:100%; } }
+
+/* Layout B: the font menu. The button and each option show the font's own letters. */
+.gu-shell button.gu-font-button { flex:1; min-width:0; justify-content:space-between; min-height:28px; padding:2px 8px; font-size:14px; }
+.gu-shell .gu-font-button svg { width:13px; height:13px; color:var(--text-secondary); }
+.gu-pop.gu-font-pop { min-width:0; padding:4px; }
+.gu-shell .gu-font-pop button { min-height:32px; padding:3px 8px; font-size:16px; }
+.gu-shell .gu-font-pop button[aria-selected=true] { background:var(--surface-selected); box-shadow:inset 2px 0 var(--accent-primary); }
