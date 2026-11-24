@@ -154,7 +154,7 @@ try {
   if(listOpen)await page.locator('.story-scene-toggle').click();
   await page.getByRole('button',{name:'Writing focus',exact:true}).click();
   assert.deepEqual(await focusWidth(),{columns:1,workspace:1100},`Writing focus at 1100 x 720 with the scene list ${listOpen?'open':'closed'}`);
-  await page.getByRole('button',{name:'Show game window',exact:true}).click();
+  await page.getByRole('button',{name:'Show stage',exact:true}).click();
   if(listOpen)await page.locator('.story-scene-toggle').click();
  }
  await page.locator('.navigation-toggle').click();await page.locator('.story-scene-toggle').click();
@@ -289,7 +289,7 @@ try {
  await page.getByRole('button',{name:'Writing focus',exact:true}).click();
  assert.equal(await page.locator('.story-sidebar').isVisible(),false);
  assert.equal(await page.locator('.project-tree-panel').isVisible(),false);
- await page.getByRole('button',{name:'Show game window',exact:true}).click();
+ await page.getByRole('button',{name:'Show stage',exact:true}).click();
  assert.equal(await page.locator('.story-sidebar').evaluate(el=>Math.round(el.getBoundingClientRect().width)),64);
  await page.getByRole('button',{name:'Toggle navigation size'}).click();
  await page.locator('.story-track-beat').nth(3).click();
@@ -521,7 +521,7 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
  await restore.click();assert.equal(await hide.evaluate(e=>document.activeElement===e&&e.checkVisibility()),true);
  await audit.locator('.story-track-beat').nth(3).click();
  await hide.click();await audit.getByRole('button',{name:'Writing focus',exact:true}).click();await audit.locator('.expanded-beat').scrollIntoViewIfNeeded();await audit.screenshot({path:output+'audit-fixed-choice-compact.png'});
- await audit.getByRole('button',{name:'Show game window',exact:true}).click();await audit.setViewportSize({width:1440,height:900});
+ await audit.getByRole('button',{name:'Show stage',exact:true}).click();await audit.setViewportSize({width:1440,height:900});
  // Alt+Arrow on a Tracks column moves the beat to the next core-listed place; Undo puts it back.
  await audit.locator('.story-track-column[data-beat-id="background"] > .story-track-beat').focus();await audit.keyboard.press('Alt+ArrowRight');
  await audit.waitForFunction(()=>document.querySelectorAll('.story-track-column')[1]?.dataset.beatId==='background'&&document.activeElement?.closest('.story-track-column')?.dataset.beatId==='background');

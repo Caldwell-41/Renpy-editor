@@ -58,7 +58,7 @@ test("Commit on a missing Background marks its row and focuses Change", async ()
 test("guarded Choice validates exact integer at blur/submission; IME and failed writes retain every field", async () => {
   const writes: SceneCommand[] = []; const s = setup([choice, ending], async command => { writes.push(command); throw Error("Map changed. Input retained."); });
   selectBeat(s.host, "choice");
-  const value = openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('input[aria-label="Option 1 rule 1 value"]')!;
+  const value = openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('input[aria-label="Option 1 value"]')!;
   assert.equal(value.value, "5");
   type(value, "9223372036854775808"); assert.equal(value.hasAttribute("aria-invalid"), false);
   value.dispatchEvent(new Event("blur")); assert.equal(value.getAttribute("aria-invalid"), "true"); click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 0); assert.equal(value.value, "9223372036854775808"); assert.equal(document.activeElement, value);
@@ -74,14 +74,17 @@ test("an option's rules are named for screen readers by its option number, which
   selectBeat(s.host, "choice");
   const rules = openGuard(optionBlocks(s.host)[1]!);
   const comparisons = (): (string | null)[] => [...rules.querySelectorAll("select")].map(item => item.getAttribute("aria-label")).filter(label => label?.endsWith(" comparison") ?? false);
+  // Each rule's variable list, value field and remove button, in order.
+  const named = (): (string | null)[] => [...rules.querySelectorAll(".story-rule")].flatMap(row => [row.querySelector("select")!.getAttribute("aria-label"), row.querySelector("input")?.getAttribute("aria-label") ?? null, row.querySelector('button[aria-label^="Remove"]')!.getAttribute("aria-label")]);
   // One rule has no number; several rules are numbered, and the labels follow adds and removes.
-  assert.deepEqual(comparisons(), ["Option 2 comparison"]); assert.ok(rules.querySelector('input[aria-label="Option 2 rule 1 value"]'));
+  assert.deepEqual(comparisons(), ["Option 2 comparison"]); assert.deepEqual(named(), ["Option 2 variable", "Option 2 value", "Remove rule"]);
   click(rules, "+ Add rule");
   assert.deepEqual(comparisons(), ["Option 2 rule 1 comparison", "Option 2 rule 2 comparison"]);
+  assert.deepEqual(named().slice(0, 3), ["Option 2 rule 1 variable", "Option 2 rule 1 value", "Remove rule 1"]);
   press(optionBlocks(s.host)[1]!, "Move option 2 up");
   assert.deepEqual(comparisons(), ["Option 1 rule 1 comparison", "Option 1 rule 2 comparison"]); assert.equal(rules.querySelector('[aria-label^="Option 2"]'), null);
   press(rules, "Remove rule 2");
-  assert.deepEqual(comparisons(), ["Option 1 comparison"]);
+  assert.deepEqual(comparisons(), ["Option 1 comparison"]); assert.deepEqual(named(), ["Option 1 variable", "Option 1 value", "Remove rule"]);
   await s.close();
 });
 
@@ -110,7 +113,7 @@ test("guard-only Choice edit preserves raw captions and permits explicit option 
   const s = setup([raw, ending], async command => { saved = command; throw Error("Hold input"); });
   selectBeat(s.host, "choice");
   assert.equal([...s.host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "+ Add option")!.disabled, false);
-  const value = openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('input[aria-label="Option 1 rule 1 value"]')!; type(value, "6"); click(s.host, "Commit Beat"); await tick();
+  const value = openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('input[aria-label="Option 1 value"]')!; type(value, "6"); click(s.host, "Commit Beat"); await tick();
   assert.deepEqual((saved!.beat as {options:{text:string}[]}).options.map(option => option.text), ["  Ready café 雪  ", " Neighbor "]); await s.close();
 });
 
@@ -126,7 +129,7 @@ test("unchanged pending commit blocks another draft and late disposed refusal ca
  const writes:SceneCommand[]=[];
  const decimalChoice:SceneBeat={...choice,payload:{type:"choice",options:[{text:"Ready",condition:{status:"supported",expression:{type:"compare",operator:"greaterEqual",left:{type:"variable",variableId:"money",variableType:"decimal"},right:{type:"decimal",value:"1.25"}}}}]}};
  const s=setup([decimalChoice,ending],async command=>{writes.push(command);throw Error("Keep draft");});
- try{selectBeat(s.host, "choice");const value=openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('[aria-label="Option 1 rule 1 value"]')!;assert.equal(value.value,"1.25");type(value,"2.75");click(s.host,"Commit Beat");await tick();assert.equal(writes.length,1);assert.equal(value.value,"2.75");
+ try{selectBeat(s.host, "choice");const value=openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('[aria-label="Option 1 value"]')!;assert.equal(value.value,"1.25");type(value,"2.75");click(s.host,"Commit Beat");await tick();assert.equal(writes.length,1);assert.equal(value.value,"2.75");
   const condition=(writes[0]!.beat as {options:{condition:{expression:{right:unknown}}}[]}).options[0]!.condition;assert.deepEqual(condition.expression.right,{type:"decimal",value:"2.75"});}finally{await s.close();}
  });
 

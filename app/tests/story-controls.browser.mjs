@@ -161,7 +161,7 @@ try{
  const reel=await page.evaluate(()=>[...document.querySelectorAll('.story-reel .story-track-column')].slice(0,2).map(node=>node.getBoundingClientRect().top));assert(reel[1]>reel[0],'Reel cards are rows');
  await page.screenshot({path:`${output}/focus-1100x720-reel.png`});await view('tracks');
  await text.focus();await text.evaluate(field=>field.setSelectionRange(2,5));
- await page.getByRole('button',{name:'Show game window',exact:true}).click();assert(await page.locator('.story-stage').isVisible());await keeps('leaving');
+ await page.getByRole('button',{name:'Show stage',exact:true}).click();assert(await page.locator('.story-stage').isVisible());await keeps('leaving');
  // A new Choice's Prompt takes what the author types while option 1 is still empty:
  // leaving an empty field and previewing the draft mark it, but never pull focus back to it.
  await mount({width:1280,height:720});

@@ -262,9 +262,9 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
   };
   const ruleRow = (rule: Rule, index: number): HTMLElement => {
     const row = element("div", "story-rule"); row.dataset.rule = String(index);
-    const variable = variables.find(item => item.id === rule.variableId), title = `${label} rule ${index + 1}`;
-    // A lone rule's comparison has no number: "If comparison". Several are numbered.
-    const comparison = state.rules.length === 1 ? `${label} comparison` : `${title} comparison`;
+    // A lone rule's controls have no number: "If comparison", "Remove rule". Several are numbered.
+    const lone = state.rules.length === 1, variable = variables.find(item => item.id === rule.variableId), title = lone ? label : `${label} rule ${index + 1}`;
+    const comparison = `${title} comparison`;
     const update = (next: Partial<Rule>, redraw = false, notify = false): void => set({ rules: state.rules.map((item, at) => at === index ? { ...item, ...next, original: undefined } : item) }, redraw, notify);
     // The variable list: name and type, as in Story Combined v1, ending with "+ New variable…".
     const pick = backingSelect(`${title} variable`, variableItems(), rule.variableId);
@@ -279,7 +279,7 @@ export function buildRuleBuilder(projectVariables: Variables, initial: Condition
     summary.dataset.ruleFocus = `variable-${index}`;
     // A new variable starts a fresh rule of its type.
     pick.addEventListener("change", () => { const chosen = variables.find(item => item.id === pick.value); if (chosen) { update(defaultRule(chosen), true); refocus(`variable-${index}`); } });
-    const remove = iconButton("close", `Remove rule ${index + 1}`, () => { set({ rules: state.rules.filter((_item, at) => at !== index) }, true, true); refocus(state.rules.length ? `variable-${Math.max(0, index - 1)}` : "add"); });
+    const remove = iconButton("close", lone ? "Remove rule" : `Remove rule ${index + 1}`, () => { set({ rules: state.rules.filter((_item, at) => at !== index) }, true, true); refocus(state.rules.length ? `variable-${Math.max(0, index - 1)}` : "add"); });
     const top = element("div", "story-rule-top"); top.append(menu, pick, remove);
     const how = element("div", "story-rule-how");
     if (variable?.variableType === "bool") {

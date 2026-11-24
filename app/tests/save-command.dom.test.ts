@@ -465,7 +465,7 @@ test("A refused Story Save counts failing drafts, links each scene and marks fai
   assert.equal(status(), "Nothing saved. 1 of 4 drafts need changes:Arrival 1");
   assert.deepEqual(failing(), ["g2"]);
   await pickSpeaker("g2");
-  assert.equal(status(), "4 unsaved beat drafts. Ready to save.");assert.equal(header().dataset.short, "4 unsaved");assert.equal(mirror(), "");assert.equal(legendFails(), false);
+  assert.equal(status(), "4 unsaved beat drafts.");assert.equal(header().dataset.short, "4 unsaved");assert.equal(mirror(), "");assert.equal(legendFails(), false);
   assert.deepEqual(failing(), []); assert.equal(sceneRow("Arrival").dataset.saveRefused, undefined);
 
   // A new beat whose place is gone from core's candidate is a beat draft conflict, marked like the others.

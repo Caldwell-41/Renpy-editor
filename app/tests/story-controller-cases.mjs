@@ -59,7 +59,7 @@ const unchangedOtherSources=(c,before,after,path)=>{
 const guard=async(c,choice,index,value)=>{
  await select(c,choice.id);const editor=card(c,choice.id);const option=editor.querySelectorAll('.story-option')[index];c.assert(option);
  option.querySelector('.story-guard > button').click();
- c.enter(option.querySelector(`[aria-label="Option ${index+1} rule 1 value"]`),value);
+ c.enter(option.querySelector(`[aria-label="Option ${index+1} value"]`),value);
  await c.click('Commit Beat',editor);await c.wait(accepted(c,choice.id));
 };
 // Add a beat: pick a kind in the open dialog; its new beat opens in the editor.
@@ -81,7 +81,7 @@ const group=async(c,id)=>{const node=nodeOf(c,id);c.assert(node,`Missing actual 
 // A branch's section of its condition's editor: the branch opens in the Branch path first.
 const branchBody=async(c,id)=>{const header=shownBeats(c).find(b=>b.id===id);c.assert(header);reveal(c,id);openBranch(c,id);const editor=await pick(c,nodeOf(c,header.conditionalBranch.groupId).id);const section=editor.querySelector(`.story-branch-editor[data-branch-id="${id}"]`);c.assert(section,`Missing branch editor ${id}`);return section;};
 const panel=(c,title)=>{const node=c.document.querySelector(`.story-operation[aria-label="${title}"]`);c.assert(node,`Missing actual operation ${title}`);return node;};
-// A branch's test is a retained draft panel with Commit test and Cancel.
+// A branch's test is a retained draft panel with Commit condition and Cancel.
 const openHeader=async(c,id)=>{const section=await branchBody(c,id);await c.wait(()=>section.querySelector('.story-branch-test'));return section.querySelector('.story-branch-test');};
 const conditionDraft=(c,label)=>{const node=c.document.querySelector(`.story-condition-draft[aria-label="${label}"]`);c.assert(node,`Missing condition draft ${label}`);return node;};
 const applyOperation=async(c,scope,label,type)=>{
@@ -238,7 +238,7 @@ export const storyCases={
   c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);c.assert(current.beats.some(b=>b.structuralPlaceholder&&b.owner?.branchId===header.id));
   // Editing the If test in place: remove the first rule and commit the test.
   before=c.workspace();form=await openHeader(c,header.id);c.assert.equal(ruleOf(form,0).querySelector('.story-variable-name').textContent,'precision');
-  await c.click('Remove rule 1',form);await applyOperation(c,form,'Commit test','updateConditionBranch');const update=envelope(c,before,'updateConditionBranch');c.assert.equal(update.branchId,header.id);c.assert.deepEqual(update.expectedBody,{type:'root'});
+  await c.click('Remove rule 1',form);await applyOperation(c,form,'Commit condition','updateConditionBranch');const update=envelope(c,before,'updateConditionBranch');c.assert.equal(update.branchId,header.id);c.assert.deepEqual(update.expectedBody,{type:'root'});
   expected=replaceOnce(c,expected,'    if ((precision >= 9007199254740993) and (trust < 5)):\n','    if (trust < 5):\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
   before=c.workspace();await c.click('+ Add Else if',await group(c,authored.groupId));form=conditionDraft(c,'New Else if');
   pickVariable(c,form,0,'mood');ruleValue(c,form,0,'ready');c.enter(form.querySelector('[aria-label="Branch position"]'),'end','change');
@@ -249,11 +249,11 @@ export const storyCases={
   expected=replaceOnce(c,expected,'    elif (mood == "ready"):\n        pass\n','    elif (mood == "ready"):\n        pass\n    else:\n        pass\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
   c.assert.equal(newHeaders(c).length,3);c.assert([...c.document.querySelectorAll('.story-branch-group')].some(item=>item.dataset.branchOwner===authored.headerId&&[...item.querySelectorAll('.story-branch-segment')].some(segment=>segment.textContent==='Otherwise')));
   const elseif=newHeaders(c).find(b=>b.conditionalBranch.ordinal===1);before=c.workspace();form=await openHeader(c,elseif.id);ruleValue(c,form,0,'blocked');
-  await applyOperation(c,form,'Commit test','updateConditionBranch');c.assert.equal(envelope(c,before,'updateConditionBranch').branchId,elseif.id);
+  await applyOperation(c,form,'Commit condition','updateConditionBranch');c.assert.equal(envelope(c,before,'updateConditionBranch').branchId,elseif.id);
   expected=replaceOnce(c,expected,'elif (mood == "ready")','elif (mood == "blocked")');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
-  // A half-typed number stays in its field, marked, and Commit test sends nothing.
+  // A half-typed number stays in its field, marked, and Commit condition sends nothing.
   form=await openHeader(c,header.id);const at=c.requests().length;ruleValue(c,form,0,'-');ruleOf(form,0).querySelector('.story-rule-how > input').dispatchEvent(new c.document.defaultView.Event('blur'));
-  c.assert.equal(ruleOf(form,0).querySelector('.story-rule-how > input').getAttribute('aria-invalid'),'true');await c.click('Commit test',form);await c.settle();
+  c.assert.equal(ruleOf(form,0).querySelector('.story-rule-how > input').getAttribute('aria-invalid'),'true');await c.click('Commit condition',form);await c.settle();
   c.assert.equal(c.requests().slice(at).filter(r=>r.request.operation==='scene.apply').length,0);c.assert.equal(ruleOf(form,0).querySelector('.story-rule-how > input').value,'-');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
   await c.click('Cancel',form);
   // "Remove this Else if" marks the Else if; Remove branch removes it.
@@ -273,7 +273,7 @@ export const storyCases={
   const priorIds=scene(c).beats.map(b=>b.id);await applyOperation(c,form,'Add Condition','insertCondition');c.assert.deepEqual(envelope(c,before,'insertCondition').body,bodyRef(focusBranch));
   const nestedHeader=scene(c).beats.find(b=>b.conditionalBranch&&!priorIds.includes(b.id));c.assert(nestedHeader);c.assert.deepEqual(nestedHeader.owner,{groupId:authored.groupId,branchId:focusBranch.id});
   const nestedBytes=replaceOnce(c,expected,'    if (trust < 5):\n        pass\n    else:\n        pass\n','    if (trust < 5):\n        pass\n    else:\n        if (flag == True):\n            pass\n');c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),nestedBytes);
-  before=c.workspace();await c.click('Delete condition',await group(c,nestedHeader.conditionalBranch.groupId));form=panel(c,'Delete entire condition');await applyOperation(c,form,'Delete entire condition','removeStoryNode');c.assert.deepEqual(envelope(c,before,'removeStoryNode').expectedBody,bodyRef(focusBranch));
+  before=c.workspace();await c.click('Delete condition',await group(c,nestedHeader.conditionalBranch.groupId));form=panel(c,'Delete entire condition');await applyOperation(c,form,'Delete condition','removeStoryNode');c.assert.deepEqual(envelope(c,before,'removeStoryNode').expectedBody,bodyRef(focusBranch));
   c.assert.equal(c.sourceText(await c.snapshot(),current.sourcePath),expected);
   // Story Save writes a test edit and a new Else if as condition drafts, one Undo each.
   const header2=c.document.querySelector('.app-header'),statusLine=c.document.querySelector('#app-status'),saveAt=c.requests().length;
@@ -331,13 +331,13 @@ export const storyCases={
   for(const beat of opaque){c.assert(beat.protected);c.assert.deepEqual(beat.owner,members[0].owner);}
   const acceptedBytes=Buffer.from(withOpaque,'utf8');
   c.assert.deepEqual(opaque.map(b=>acceptedBytes.subarray(b.byteStart,b.byteEnd).toString('utf8')),['        python:\n            opaque_deleted = "kept"\n']);
-  c.assert.match((await group(c,authored.groupId)).querySelector('.story-condition-summary').textContent,/2 branches \/ 3 Beats/);
+  c.assert.match((await group(c,authored.groupId)).querySelector('.story-condition-summary').textContent,/2 branches \/ 3 beats/);
   await c.click('Delete condition',await group(c,authored.groupId));let form=panel(c,'Delete entire condition');
-  c.assert.match(form.textContent,/all 3 contained Beats/);c.assert(form.textContent.includes(`all ${members.length} contained Beats`));await applyOperation(c,form,'Delete entire condition','removeStoryNode');
+  c.assert.match(form.textContent,/their 3 beats\?/);c.assert(form.textContent.includes(`their ${members.length} beats?`));await applyOperation(c,form,'Delete condition','removeStoryNode');
   c.assert.deepEqual(envelope(c,before,'removeStoryNode').node,{type:'condition',groupId:authored.groupId});c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),replaceOnce(c,withOpaque,opaqueBlock,''));c.assert.equal(newHeaders(c).length,0);
   await c.history('undo');await c.settle();c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),withOpaque);
   await editSource(c,original);
-  before=c.workspace();const leaf=scene(c).beats.find(b=>b.id===authored.leafId);c.assert(leaf);await c.click('Delete',await pick(c,leaf.id));form=panel(c,'Delete Beat');await applyOperation(c,form,'Delete this Beat','removeStoryNode');
+  before=c.workspace();const leaf=scene(c).beats.find(b=>b.id===authored.leafId);c.assert(leaf);await c.click('Delete',await pick(c,leaf.id));form=panel(c,'Delete Beat');await applyOperation(c,form,'Delete beat','removeStoryNode');
   c.assert.deepEqual(envelope(c,before,'removeStoryNode').expectedBody,{type:'branch',...leaf.owner});c.assert(scene(c).beats.some(b=>b.structuralPlaceholder&&b.owner?.branchId===leaf.owner.branchId));
   c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),replaceOnce(c,original,'        "Movable subtree leaf"\n','        pass\n'));
   await c.history('undo');await c.settle();c.assert.equal(c.sourceText(await c.snapshot(),s.sourcePath),original);
@@ -524,7 +524,7 @@ export const storyCases={
   // Fixing the last failing draft clears every mark.
   await c.click(`${entry.displayName}, 1 to fix`,statusLine);await c.wait(()=>shownScene(c)===entry.id&&optionText());
   c.enter(optionText(),choice.payload.options[0].text);await c.settle();
-  c.assert.equal(status(),'3 unsaved beat drafts. Ready to save.');c.assert.equal(row(c,choice.id).dataset.saveRefused,undefined);c.assert.equal(sceneMark(entry.displayName),undefined);
+  c.assert.equal(status(),'3 unsaved beat drafts.');c.assert.equal(row(c,choice.id).dataset.saveRefused,undefined);c.assert.equal(sceneMark(entry.displayName),undefined);
   // An ordinary external edit makes the request stale: core refuses with no writes and Story refreshes.
   const external=await c.raw({driver:'externalAppend',path:entry.sourcePath});const externalSnapshot=await c.snapshot();
   c.assert.deepEqual(externalSnapshot[entry.sourcePath],external.externalBytes);
@@ -544,7 +544,7 @@ export const storyCases={
   c.assert.equal(status(),`Story changed in source and was refreshed. Nothing saved. 1 of 4 drafts need changes:${entry.displayName} 1`);
   c.assert.equal(newBeat().dataset.saveRefused,'true');
   c.assert.equal(newBeat().querySelector('.story-save-reason')?.textContent,"This beat's place changed in source after the draft began. Draft retained.");
-  await c.click('Cancel',newBeat());await c.settle();c.assert.equal(status(),'3 unsaved beat drafts. Ready to save.');
+  await c.click('Cancel',newBeat());await c.settle();c.assert.equal(status(),'3 unsaved beat drafts.');
   // The next Save accepts the three drafts in one request and clears the refusal.
   const saved=await save(),request=saved.find(r=>r.request.operation==='scene.saveDrafts');
   c.assert(request?.responseOk);c.assert.equal(request.request.payload.commands.length,3);c.assert.equal(request.request.payload.drafts.length,3);c.assert.equal(status(),'Saved');
@@ -765,7 +765,7 @@ export const storyCases={
   const same=()=>{c.assert.equal(c.document.activeElement,field);c.assert.deepEqual([field.selectionStart,field.selectionEnd,field.value],[3,6,'Nested in focus']);
    c.assert.equal(card(c,nested.id)?.querySelector('textarea'),field);c.assert.equal(row(c,nested.id).querySelector('.story-track-beat').dataset.selected,'true');
    c.assert.equal(workspace().querySelector(`.story-branch-segment[data-branch-id="${ifHeader.id}"]`).ariaPressed,'true');c.assert.equal(row(c,choice.id).dataset.beatDraft,'true');};
-  toggle().click();c.assert.equal(workspace().dataset.writingFocus,'true');c.assert.equal(toggle().textContent,'Show game window');same();
+  toggle().click();c.assert.equal(workspace().dataset.writingFocus,'true');c.assert.equal(toggle().textContent,'Show stage');same();
   c.assert.equal(workspace().querySelector('.story-stage-status').textContent,stage,'Hiding the stage changes no preview state');
   c.assert.equal(workspace().querySelectorAll('.story-track-label > .story-grip').length,5,'Every lane but Words has a grip');
   c.assert.equal(workspace().querySelector('.story-track-key'),null,'Writing focus has no Key');
@@ -899,10 +899,10 @@ export const storyCases={
    return {test:caption.textContent,warn:caption.classList.contains('story-branch-warn'),summary:card(c,ifId).querySelector('.story-condition-summary').textContent,section};
   };
   const mismatch=await shown('trust == True','If','trust = True','wrong type',"trust is a whole number, and True is yes/no. Compare it with a whole number in Source. Until then, the builder can't edit this branch.");
-  c.assert.deepEqual({test:mismatch.test,warn:mismatch.warn,summary:mismatch.summary},{test:'trust = True · wrong type',warn:true,summary:'Condition · trust = True · 1 branches / 1 Beats'});
+  c.assert.deepEqual({test:mismatch.test,warn:mismatch.warn,summary:mismatch.summary},{test:'trust = True · wrong type',warn:true,summary:'Condition · trust = True · 1 branch / 1 beat'});
   // The Branch path caption follows the open Else if and names its problem; the summary keeps the If test.
   const missing=await shown('missing_flag == 4','Else if','missing_flag = 4','not a variable',"missing_flag is not a project variable. Create it, or change this line in Source. Until then, the builder can't edit this branch.");
-  c.assert.equal(missing.test,'missing_flag = 4 · not a variable');c.assert.equal(missing.warn,true);c.assert.match(missing.summary,/^Condition · flag · 3 branches \/ \d+ Beats$/);
+  c.assert.equal(missing.test,'missing_flag = 4 · not a variable');c.assert.equal(missing.warn,true);c.assert.match(missing.summary,/^Condition · flag · 3 branches \/ \d+ beats$/);
   c.assert.deepEqual([...missing.section.querySelectorAll('.story-rule-actions > button')].map(b=>b.textContent),['Create missing_flag…','Edit in Source']);
   // An unrelated draft still saves.
   const root=scene(c).beats.find(b=>b.payload.text==='Override A'&&!b.owner);c.assert(root);
@@ -1209,7 +1209,7 @@ export const storyCases={
   const dialog=()=>c.document.querySelector('.scene-workspace .story-new-variable');c.assert(dialog());
   c.enter(dialog().querySelector('input[aria-label="Variable name"]'),'late_tram');await c.click('Create variable',dialog());
   await c.wait(()=>!dialog()&&c.requests().slice(from).some(r=>r.request.operation==='variable.create'&&r.responseOk));await c.settle();
-  c.assert.equal(picker().getAttribute('aria-label'),'If rule 1 variable: late_tram');
+  c.assert.equal(picker().getAttribute('aria-label'),'If variable: late_tram');
   c.assert(c.workspace().authoring.variables.some(v=>v.technicalName==='late_tram'));
   await c.click('Cancel',condition);await c.settle();c.assert(!applied(from,'insertCondition'),'Cancel adds no condition');
   after=await c.snapshot();c.assert.match(c.sourceText(after,'game/definitions/variables.rpy'),/^default late_tram = False$/m);

@@ -311,8 +311,10 @@ Each shows its line and that hint in the neutral hint style. It is information, 
 problem: it gets no `!` and no count. Screen readers name each rule's test a
 comparison. A branch or option with one rule says "If comparison", "Else if comparison"
 or "Option 2 comparison". With several rules each has its number: "If rule 1
-comparison", "Option 2 rule 2 comparison". The names follow added and removed rules and
-an option's number after a move.
+comparison", "Option 2 rule 2 comparison". The rule's variable list, value field and
+remove button follow the same rule: "If variable", "If value" and "Remove rule" for one
+rule, "If rule 2 value" and "Remove rule 2" for several. The names follow added and
+removed rules and an option's number after a move.
 
 A test core could not read (`story-release-fixes` / `a-v2`) keeps its line in a
 red-bordered box, with why and what to do in red under it, then Create and Edit in
@@ -474,7 +476,7 @@ covers moving, unwrapping and deleting branches.
   1600 px wide and 400 px from 900 to 1200 px. Below 900 px the editor sits above
   Tracks, which shows Beat and Beat content. Writing focus has no Key, and the arrow
   keys move up and down between rows. The scene toolbar button reads "Writing focus",
-  then "Show game window".
+  then "Show stage".
 - In Writing focus from 900 px, grips on the sidebar edge and on each lane edge resize
   them by drag or by the arrow keys (Shift for larger steps). Escape cancels a drag or
   the keyboard changes, and double-click or Enter resets the default. Words fills the
@@ -630,11 +632,15 @@ a beat follow `story-combined-editor` / `replace-v2`
   [rule builder](#condition-rule-builder). A number field keeps what the author typed,
   including a half-entered number such as `-` or `1.`, until it is complete.
 - A condition's editor lists its branches. Each If or Else if test is a retained draft
-  with Commit test and Cancel. "+ Add Else if" and Add Otherwise add a new branch as a
+  with Commit condition and Cancel. "+ Add Else if" and Add Otherwise add a new branch as a
   draft until Add Else If or Add Otherwise. "Remove this Else if" (or Otherwise) marks
   the branch as a draft until Remove branch or Story Save; it cancels the branch's own
   unsaved test. A new condition from Add a beat is a draft
-  like a new beat, with its test and Include Otherwise.
+  like a new beat, with its test and Include Otherwise. The condition's caption counts
+  its branches and beats: "2 branches / 1 beat", "1 branch / 3 beats".
+- Delete asks first. A beat: "Delete beat 05, <its Tracks summary>? Undo restores it."
+  with Delete beat. A condition: "Delete this condition, its branches and their 3 beats?
+  Undo restores them. To keep one branch, use Unwrap." with Delete condition.
 - Add a beat is a [pick-one dialog](#pick-one-dialogs). Its details list Goes at, In
   and After for the highlighted kind, or "Replaces …" when the kind replaces an
   ending. A new beat's editor repeats those lines.
@@ -770,8 +776,8 @@ also shows the reason under the beat's text, in red, and "Conflict with source" 
 accent colour for a conflict. The legend adds "Needs changes". The editor heading reads
 "! Needs changes" and the reason sits under the fields. Marks appear only after a refused Save. A new beat whose body or insertion anchor is gone from source is a beat
 draft conflict. The marks and counts update as the author fixes or cancels each
-failing draft. When none fail, the status reads "5 unsaved beat drafts. Ready to
-save." The marks clear when a later Save succeeds.
+failing draft. When none fail, the status reads "5 unsaved beat drafts." The marks
+clear when a later Save succeeds.
 
 Story Save does not accept unfinished Source text. The shell coordinates acceptance
 through the existing transaction layer, with current-source validation and ordinary

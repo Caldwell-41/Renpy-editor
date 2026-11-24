@@ -79,7 +79,7 @@ test("+ New variable creates a project variable in place and the rule uses it", 
   assert.match(dialog()!.querySelector(".field-error")!.textContent!, /^Variable name must begin with a letter/); assert.equal(name.value, "9 late"); assert.deepEqual(requests, []);
   type(name, "late_tram"); press(dialog()!, "Create variable"); await tick();
   assert.deepEqual(requests, [{ technicalName: "late_tram", variableType: "bool", defaultValue: false }]);
-  assert.equal(dialog(), null); assert.equal(summary().getAttribute("aria-label"), "If rule 1 variable: late_tram");
+  assert.equal(dialog(), null); assert.equal(summary().getAttribute("aria-label"), "If variable: late_tram");
   assert.equal(panel.querySelector(".story-rule-code")!.textContent, "if late_tram == True:");
   // The condition commits against the workspace the new variable came from.
   button(panel, "Add Condition").click(); await tick();
@@ -154,8 +154,8 @@ test("a new Else if is a draft that exposes first-match order and captures the c
 test("nested Otherwise creation and condition editing use group-parent qualification, not selected branch ownership", async () => {
   const s = setup(); button(selectBeat(s.host, "nested-if-0", "if"), "Add Otherwise").click(); button(s.host.querySelector('.story-branch-new[aria-label="New Otherwise"]')!, "Add Otherwise").click(); await tick();
   assert.deepEqual(s.calls[0]!.command.expectedBody, { type: "branch", groupId: "group", branchId: "if" }); assert.equal(s.calls[0]!.command.condition, null); assert.equal(s.calls[0]!.command.beforeBranchId, null);
-  // The nested condition's editor edits its If test as a draft with Commit test.
-  const test = storyEditor(s.host).querySelector<HTMLElement>('.story-branch-test[aria-label="If comparison"]')!; button(test, "Commit test").click(); await tick();
+  // The nested condition's editor edits its If test as a draft with Commit condition.
+  const test = storyEditor(s.host).querySelector<HTMLElement>('.story-branch-test[aria-label="If comparison"]')!; button(test, "Commit condition").click(); await tick();
   assert.equal(s.calls[1]!.command.type, "updateConditionBranch"); assert.deepEqual(s.calls[1]!.command.expectedBody, { type: "branch", groupId: "group", branchId: "if" }); await s.close();
 });
 
@@ -220,7 +220,27 @@ test("delete whole group and selected unwrap remain distinct; initial If cannot 
   assert.deepEqual([...branches].map(section => [section.dataset.branchId, [...section.querySelectorAll("button")].some(button => button.getAttribute("aria-label")?.startsWith("Remove this "))]), [["if", false], ["elif", true], ["otherwise", true]]);
   button(storyEditor(s.host), "Unwrap…").click(); let panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Unwrap one branch"]')!; choose(panel, "Branch to keep", "elif"); button(panel, "Unwrap selected branch").click(); await tick();
   assert.equal(s.calls[0]!.command.type, "unwrapCondition"); assert.equal(s.calls[0]!.command.branchId, "elif"); assert.deepEqual(s.calls[0]!.command.expectedBody, { type: "root" });
-  button(storyEditor(s.host), "Delete condition").click(); panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Delete entire condition"]')!; button(panel, "Delete entire condition").click(); await tick(); assert.equal(s.calls[1]!.command.type, "removeStoryNode"); assert.deepEqual(s.calls[1]!.command.node, { type: "condition", groupId: "group" }); await s.close();
+  button(storyEditor(s.host), "Delete condition").click(); panel = s.host.querySelector<HTMLElement>('.story-operation[aria-label="Delete entire condition"]')!; button(panel, "Delete condition").click(); await tick(); assert.equal(s.calls[1]!.command.type, "removeStoryNode"); assert.deepEqual(s.calls[1]!.command.node, { type: "condition", groupId: "group" }); await s.close();
+});
+
+test("delete confirmations name the beat, or count the condition's branches and beats, and say Undo restores them", async () => {
+  const s = setup();
+  const panel = (title: string): HTMLElement => s.host.querySelector<HTMLElement>(`.story-operation[aria-label="${title}"]`)!;
+  const copy = (title: string): string => panel(title).querySelector("p:not(.story-breadcrumb)")!.textContent!;
+  assert.match(selectBeat(s.host, "if").querySelector(".story-condition-summary")!.textContent!, / · 3 branches \/ 4 beats$/);
+  button(storyEditor(s.host), "Delete condition").click();
+  assert.equal(copy("Delete entire condition"), "Delete this condition, its branches and their 4 beats? Undo restores them. To keep one branch, use Unwrap.");
+  button(panel("Delete entire condition"), "Cancel").click();
+  // One branch with one beat is singular in the caption and the confirmation.
+  assert.match(selectBeat(s.host, "nested-if-0", "if").querySelector(".story-condition-summary")!.textContent!, / · 1 branch \/ 1 beat$/);
+  button(storyEditor(s.host), "Delete condition").click();
+  assert.equal(copy("Delete entire condition"), "Delete this condition, its branches and their 1 beat? Undo restores them. To keep one branch, use Unwrap.");
+  button(panel("Delete entire condition"), "Cancel").click();
+  const editor = selectBeat(s.host, "after-call"), number = editor.querySelector(".story-editor-title")!.textContent!.split(" · ")[0];
+  button(editor.querySelector<HTMLElement>(".story-beat-menu")!, "Delete").click();
+  assert.equal(copy("Delete Beat"), `Delete beat ${number}, The conversation has ended.? Undo restores it.`);
+  button(panel("Delete Beat"), "Delete beat").click(); await tick();
+  assert.deepEqual(s.calls.map(call => call.command.type), ["removeStoryNode"]); await s.close();
 });
 
 test("Unwrap with no branch to keep marks the field, writes nothing, and Apply focuses it", async () => {
@@ -290,8 +310,8 @@ test("whole-group confirmation and collapse summary count protected Custom Code 
   const fixture = storyFixture(); const scene = fixture.scenes[0]!;
   const opaque = { id: "opaque", byteStart: 65, byteEnd: 70, protected: true, owner: { groupId: "group", branchId: "if" }, payload: { type: "customCode" as const, source: "        custom_code()", reason: "Unsupported source" } };
   const s = setup(undefined, { ...fixture, scenes: [{ ...scene, beats: [...scene.beats.slice(0, 3), opaque, ...scene.beats.slice(3)] }, fixture.scenes[1]!] });
-  assert.match(selectBeat(s.host, "if").querySelector(".story-condition-summary")!.textContent!, /3 branches \/ 5 Beats/);
-  button(storyEditor(s.host), "Delete condition").click(); assert.match(s.host.querySelector('.story-operation[aria-label="Delete entire condition"]')!.textContent!, /all 5 contained Beats/); await s.close();
+  assert.match(selectBeat(s.host, "if").querySelector(".story-condition-summary")!.textContent!, /3 branches \/ 5 beats/);
+  button(storyEditor(s.host), "Delete condition").click(); assert.match(s.host.querySelector('.story-operation[aria-label="Delete entire condition"]')!.textContent!, /their 5 beats\?/); await s.close();
 });
 
 test("a condition draft waits while tree New works; dirty tree input blocks adding a condition", async () => {
@@ -305,7 +325,7 @@ test("a condition draft waits while tree New works; dirty tree input blocks addi
 
 test("unchanged pending condition commit locks tree authoring and cannot admit another tree draft", async () => {
   let finish!: (value: SceneWorkspace) => void; const pending = new Promise<SceneWorkspace>(resolve => { finish = resolve; }); const s = setup(async () => pending);
-  button(selectBeat(s.host, "if").querySelector<HTMLElement>('.story-branch-test[aria-label="If comparison"]')!, "Commit test").click(); const tree = document.querySelector<HTMLElement>("aside")!; assert.equal(button(tree, "New Chapter").disabled, true); button(tree, "New Chapter").click(); assert.equal(tree.querySelector(".tree-inline"), null); assert.equal(s.calls.length, 1); finish(s.model); await tick(); assert.equal(button(tree, "New Chapter").disabled, false); await s.close();
+  button(selectBeat(s.host, "if").querySelector<HTMLElement>('.story-branch-test[aria-label="If comparison"]')!, "Commit condition").click(); const tree = document.querySelector<HTMLElement>("aside")!; assert.equal(button(tree, "New Chapter").disabled, true); button(tree, "New Chapter").click(); assert.equal(tree.querySelector(".tree-inline"), null); assert.equal(s.calls.length, 1); finish(s.model); await tick(); assert.equal(button(tree, "New Chapter").disabled, false); await s.close();
 });
 
 test("unresolved manual conditions stop a whole-scene preview at the header, and pass it with unknown state toward a selected beat", async () => {
@@ -653,9 +673,9 @@ test("Add a beat says Condition branches on a variable, and a branch with no rul
   const s = mountStory(brokenCondition());
   const editor = selectBeat(s.host, "if");
   assert.ok(editor.querySelector('.story-branch-test[aria-label="If comparison"]'));
-  press(editor.querySelector<HTMLElement>('.story-branch-editor[data-branch-id="if"]')!, "Remove rule 1");
+  press(editor.querySelector<HTMLElement>('.story-branch-editor[data-branch-id="if"]')!, "Remove rule");
   assert.equal(editor.querySelector('.story-branch-editor[data-branch-id="if"] .story-rule-code')!.textContent, "Add a rule to this branch.");
-  press(editor.querySelector<HTMLElement>('.story-branch-editor[data-branch-id="if"]')!, "Commit test"); await tick();
+  press(editor.querySelector<HTMLElement>('.story-branch-editor[data-branch-id="if"]')!, "Commit condition"); await tick();
   assert.equal(s.status.at(-1), "Add a rule to this branch."); assert.deepEqual(s.calls, []);
   press(s.host, "+ Add beat"); const dialog = s.host.querySelector<HTMLElement>(".story-add-beat")!;
   [...dialog.querySelectorAll<HTMLButtonElement>(".story-result")].find(item => item.textContent === "Condition")!.dispatchEvent(new Event("pointerenter"));

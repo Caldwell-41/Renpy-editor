@@ -916,7 +916,7 @@ export function renderStoryView(
   const saveStatus = (): StoryStatus | undefined => {
     if (!refusal || !host.isConnected) return undefined;
     const total = pendingDrafts().length, failing = [...refusal.failing.keys()], drafts = total === 1 ? "draft" : "drafts";
-    if (!failing.length) return { text: `${total} unsaved beat ${drafts}. Ready to save.`, kind: "normal", links: [], short: `${total} unsaved` };
+    if (!failing.length) return { text: `${total} unsaved beat ${drafts}.`, kind: "normal", links: [], short: `${total} unsaved` };
     // Each link reveals the scene's first failing draft at the time of the click.
     const open = (sceneId: string): void => { const draft = inProjectOrder([...refusal?.failing.keys() ?? []].filter(item => item.sceneId === sceneId), item => item)[0]; if (draft) reveal(draft); };
     const links = model.scenes.flatMap(scene => {
@@ -1702,7 +1702,7 @@ export function renderStoryView(
       } };
     };
     const panel = conditionPanel("story-branch-test", `${word} comparison`);
-    panel.append(builder.host, draftActions(beat.id, "Commit test", () => void commitCondition(draft, beat.id, beat.id), `${branchSelector(beat.id)} .story-branch-test summary`));
+    panel.append(builder.host, draftActions(beat.id, "Commit condition", () => void commitCondition(draft, beat.id, beat.id), `${branchSelector(beat.id)} .story-branch-test summary`));
     dirtyDraft(panel, []); card.append(panel);
     const draft = keepDraft(beat.id, { panel, sceneId: scene.id, beatId: beat.id, command, kind: () => "condition", conflict, editors: () => [builderEditor(panel, builder)], primary: () => builder.host });
   };
@@ -1835,9 +1835,9 @@ export function renderStoryView(
   };
   const removeNodeForm = (scene: SceneDocument, beat: SceneBeat): void => {
     const target = prepareOperation(scene, beat); if (!target) return;
-    const copy = document.createElement("p"); copy.textContent = beat.conditionalBranch ? `Delete ${branchCaption(beat.conditionalBranch, model)} and all ${groupCount(scene, beat)} contained Beats. Use Unwrap to keep one selected branch instead.` : `Delete this ${beatLabels[beat.payload.type]} Beat. If its branch becomes empty, Source keeps pass.`;
+    const copy = document.createElement("p"); copy.textContent = beat.conditionalBranch ? `Delete this condition, its branches and their ${countOf(groupCount(scene, beat), "beat")}? Undo restores them. To keep one branch, use Unwrap.` : `Delete beat ${numbers.get(beat.id) ?? ""}, ${beatSummary(beat.payload, model)}? Undo restores it.`;
     discardNote(copy, scene, beat.conditionalBranch?.groupId ?? beat.id);
-    operation(scene, target, beat.conditionalBranch ? "Delete entire condition" : "Delete Beat", [copy], () => ({ type: "removeStoryNode", node: nodeRef(beat), expectedBody: beatBody(beat) }), beat.conditionalBranch ? "Delete entire condition" : "Delete this Beat");
+    operation(scene, target, beat.conditionalBranch ? "Delete entire condition" : "Delete Beat", [copy], () => ({ type: "removeStoryNode", node: nodeRef(beat), expectedBody: beatBody(beat) }), beat.conditionalBranch ? "Delete condition" : "Delete beat");
   };
   const unwrapForm = (scene: SceneDocument, header: SceneBeat): void => {
     const target = prepareOperation(scene, header); if (!target) return;
@@ -1917,7 +1917,7 @@ export function renderStoryView(
 
   // Entering or leaving Writing focus moves no content: the editor, its drafts, focus and
   // caret stay, and only the bottom panel redraws for its rows. Nothing reaches core.
-  const focusToggleName = (on: boolean): string => on ? "Show game window" : "Writing focus";
+  const focusToggleName = (on: boolean): string => on ? "Show stage" : "Writing focus";
   const setWritingFocus = (scene: SceneDocument, on: boolean, toggle: HTMLButtonElement): void => {
     writingFocus = on; host.dataset.writingFocus = String(on);
     host.closest<HTMLElement>(".project-shell")?.setAttribute("data-writing-focus", String(on));
@@ -2212,7 +2212,7 @@ export function renderStoryView(
     const groupId = selected.conditionalBranch!.groupId, node = groupHeader(scene, groupId);
     editor.append(beatHeading(scene, node));
     const caption = document.createElement("p"); caption.className = "story-condition-summary";
-    caption.textContent = `Condition · ${forkCaption(node)} · ${scene.beats.filter(item => item.conditionalBranch?.groupId === groupId).length} branches / ${groupCount(scene, node)} Beats`;
+    caption.textContent = `Condition · ${forkCaption(node)} · ${countOf(scene.beats.filter(item => item.conditionalBranch?.groupId === groupId).length, "branch", "branches")} / ${countOf(groupCount(scene, node), "beat")}`;
     // Each branch the builder can't edit, and why.
     const problems = groupProblems(scene, groupId), list = document.createElement("ul"); list.className = "story-condition-problems"; list.setAttribute("aria-label", "Branches that need changes");
     for (const [header, problem] of problems) { const item = document.createElement("li"), mark = document.createElement("b"); mark.textContent = "!"; mark.ariaHidden = "true"; item.append(mark, Object.assign(document.createElement("span"), { textContent: `${branchName(scene, header)}: ${problem.reason}` })); list.append(item); }
@@ -2711,6 +2711,9 @@ function stageSubject(payload: BeatPayload, model: SceneWorkspace): string {
   if (payload.type === "background") return model.authoring.assets.find(item => item.id === payload.assetId)?.displayName ?? "Unknown Asset";
   return "characterId" in payload ? model.authoring.characters.find(item => item.id === payload.characterId)?.displayName ?? "Unknown Character" : beatLabels[payload.type];
 }
+/** "1 beat", "3 beats". */
+function countOf(count: number, one: string, many = `${one}s`): string { return `${count} ${count === 1 ? one : many}`; }
+
 function beatSummary(payload: BeatPayload, model: SceneWorkspace): string {
   const character = (id: string): string => model.authoring.characters.find((item) => item.id === id)?.displayName ?? "Unknown Character";
   const asset = (id: string): string => model.authoring.assets.find((item) => item.id === id)?.displayName ?? "Unknown Asset";

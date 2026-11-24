@@ -390,7 +390,7 @@ try {
  assert.equal([...pick(endingMenu.id).querySelectorAll('.story-beat-menu button')].find(item=>item.textContent==='Move down').disabled,true,'Move down cannot pass the ending condition');
  const otherwiseHeader=scene().beats.find(b=>b.conditionalBranch?.otherwise),otherwiseReturn=scene().beats.find(b=>b.payload.type==='return'&&b.owner?.branchId===otherwiseHeader.id);
  button('Delete',pick(otherwiseReturn.id).querySelector('.story-beat-menu'));panel=document.querySelector('.story-operation[aria-label="Delete Beat"]');
- lastApply=undefined;button('Delete this Beat',panel);await wait(()=>lastApply);await settle();
+ lastApply=undefined;button('Delete beat',panel);await wait(()=>lastApply);await settle();
  assert.equal(lastApply.ok,false);assert.equal(lastApply.error.code,'SCENE_INVARIANT');assert.equal(await source(path),bodiesSource);assert(panel.isConnected);button('Cancel',panel);
  stage('core bodies drive Then for Custom Code and unknown endings, the place lists and Move down, and refuse a new fallthrough');
  await saveSource(path,bodiesBefore);await reopen();assert.equal(await source(path),bodiesBefore);

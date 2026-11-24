@@ -195,7 +195,7 @@ try{
  await type(beatA.id,'Discarded A');button('Cancel',editorFor(beatA.id));await settle();
  assert.equal(marked(beatA.id),false);assert.equal(named('undo'),'Undo cancel of narration draft in beat 03');
  assert.equal(await header('undo'),'committed');assert.equal((await open(beatA.id)).value,'Discarded A');assert.equal(marked(beatA.id),true);
- await open(beatA.id);button('Delete',editorFor(beatA.id).querySelector('.story-beat-menu'));button('Delete this Beat',document.querySelector('.story-operation[aria-label="Delete Beat"]'));
+ await open(beatA.id);button('Delete',editorFor(beatA.id).querySelector('.story-beat-menu'));button('Delete beat',document.querySelector('.story-operation[aria-label="Delete Beat"]'));
  await wait(async()=>!(await source(path)).includes('Foundation continuation'),'delete');await settle();
  assert.equal(await header('undo'),'committed');assert.equal(await source(path),original,'Undo brings the beat back');
  assert.equal((await open(beatA.id)).value,beatA.payload.text,'not its discarded draft');assert.equal(marked(beatA.id),false);
@@ -209,7 +209,7 @@ try{
  const quiet=await disk();await headerSave(()=>/^Nothing saved/.test(status()));
  assert.deepEqual(await disk(),quiet,'a refused Story Save writes nothing');assert.equal(named('undo'),`Undo choice change in ${sceneName}`);
  assert.equal(await header('undo'),'committed');assert.equal(picked().value,'showNormally','a Picked options change is one step');
- assert.equal(await header('undo'),'committed');assert.equal(newBeat(),null);await wait(()=>status()==='1 unsaved beat draft. Ready to save.','Undo fixes the refusal');assert.deepEqual(await disk(),quiet);
+ assert.equal(await header('undo'),'committed');assert.equal(newBeat(),null);await wait(()=>status()==='1 unsaved beat draft.','Undo fixes the refusal');assert.deepEqual(await disk(),quiet);
  await headerSave(async()=>(await source(path)).includes('Refused save A'));assert.equal(status(),'Saved');
  assert.equal(named('undo'),'Undo narration edit in beat 03');assert.equal(await header('undo'),'committed');assert.equal(await source(path),original);
  stage('a refused Story Save keeps the drafts and their steps; Undo repairs the draft and the next Save succeeds');
