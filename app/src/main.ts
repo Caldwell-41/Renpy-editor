@@ -544,12 +544,13 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
       outcome = "committed";
       if (currentProject?.sessionId !== project.sessionId) return;
       if (step.step) storyView?.applyStep(step.step, direction);
-      revealHistoryItem(project, step.entry.item);
+      const revealed = revealHistoryItem(project, step.entry.item);
       showHistory(step.history);
       historyNotice = { text: `${direction === "undo" ? "Undone" : "Redone"}: ${step.entry.name}`, view: viewGeneration };
       showMessage(historyNotice.text);
       void refreshPersistenceStatus(project, viewGeneration);
       if (focused) document.querySelector<HTMLElement>(`[data-history="${focused}"]`)?.focus();
+      await revealed;
     } finally { transition?.release(); }
   } catch (error) {
     outcome = "refused"; errorCode = (error as { code?: string }).code;
@@ -568,9 +569,10 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
 
 // Opens the entry's workspace at its item. A missing item falls back to what
 // contains it: a beat to its scene, a screen element to its screen, then the workspace.
-function revealHistoryItem(project: OpenProject, item: HistoryItem): void {
+// Story's reveal resolves once Story shows the step's result.
+function revealHistoryItem(project: OpenProject, item: HistoryItem): Promise<void> | undefined {
   switch (item.type) {
-    case "story": showProject(project, "story", item.sceneId ? { sceneId: item.sceneId, ...(item.beatId ? { beatId: item.beatId } : {}) } : undefined); break;
+    case "story": return showProject(project, "story", item.sceneId ? { sceneId: item.sceneId, ...(item.beatId ? { beatId: item.beatId } : {}) } : undefined, true);
     case "screen": showProject(project, "screens", { path: item.path, screen: item.screen, ...(item.nodeId ? { nodeId: item.nodeId } : {}), ...(item.parentId ? { parentId: item.parentId } : {}) }); break;
     case "source": showProject(project, "source", { path: item.path }); break;
     case "prompt": openProjectSettings(project, item.action); break;
@@ -580,7 +582,7 @@ function revealHistoryItem(project: OpenProject, item: HistoryItem): void {
   }
 }
 
-function showProject(project: OpenProject, surface: ProjectSurface = "story", target?: ProjectTarget): void {
+function showProject(project: OpenProject, surface: ProjectSurface = "story", target?: ProjectTarget, keepStory = false): Promise<void> | undefined {
   const generation = beginView(project);
   const layout = document.createElement("section"); layout.className = "project-shell";
   // Below 1200 px Story opens with the icon rail and the scene list closed, so the stage keeps
@@ -626,6 +628,9 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!await allowSceneNavigation() || hasBlockingModal()) return; await requestProjectClose(project); }); sidebar.append(close);
   const workspace = document.createElement("div"); workspace.className = surface === "story" ? "scene-workspace" : surface === "source" ? "source-workspace" : surface === "branches" ? "branches-workspace" : surface === "screens" ? "screens-workspace" : "supporting-workspace";
   layout.append(sidebar);if(hasTree)layout.append(treePanel);layout.append(workspace); shell(layout);
+  // Undo and Redo keep the Story view on screen while the scene list reloads, held so
+  // nothing is typed into the old workspace. It updates and is released when the list arrives.
+  if (keepStory && surface === "story" && storyView) { workspace.replaceWith(storyView.host); tree.replaceWith(storyView.treeHost); holdStory(true); }
   runtimeWorkspace ??= new RuntimeWorkspace({ sessionId: project.sessionId, sdkVersion: project.sdkVersion,
     request: (operation, payload) => value(operation, operation.startsWith("sdk.") ? payload : { ...payload, sessionId: project.sessionId }),
     current: () => currentProject?.sessionId === project.sessionId,
@@ -645,7 +650,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   runtimeWorkspace.panel.hidden=true;
   const runtimeToggle=button("Runtime & diagnostics","text-button runtime-toggle");runtimeToggle.addEventListener("click",()=>{if(runtimeWorkspace){runtimeWorkspace.panel.hidden=!runtimeWorkspace.panel.hidden;runtimeToggle.ariaExpanded=String(!runtimeWorkspace.panel.hidden);}});document.querySelector(".app-footer")?.append(runtimeToggle);
   setStatus("Checking saved state…");
-  if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined, sceneList);
+  if (surface === "story") return renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined, sceneList);
   else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target && !("screen" in target) ? target : undefined);
   else if (surface === "screens") {
     screensWorkspace ??= new ScreensWorkspace({ resolution: project.resolution, projectId: project.projectId,
@@ -751,15 +756,24 @@ function rememberStoryScene(project: OpenProject, sceneId: string): void {
   saveLayout(storyLayoutKey(project), { sceneSelection: sceneId });
 }
 
+// A kept Story view shows while its scene list reloads, but takes no input until it arrives.
+function holdStory(held: boolean): void {
+  for (const host of storyView ? [storyView.host, storyView.treeHost] : []) {
+    if (held) { host.setAttribute("inert", ""); host.setAttribute("aria-busy", "true"); } else { host.removeAttribute("inert"); host.removeAttribute("aria-busy"); }
+  }
+}
+
 async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, project: OpenProject, generation: number, target?: SceneTarget, sceneList?: SceneList): Promise<void> {
   const token = beginCompletion(project, operationScopes.sceneLoad);
+  // Recovery, a refused target and a failed load show in the empty workspace, not the kept Story view.
+  const placeholder = (): void => { holdStory(false); if (!workspace.isConnected && storyView?.host.isConnected) { storyView.host.replaceWith(workspace); storyView.treeHost.replaceWith(tree); } };
   try {
     const persistence = await projectValue<PersistenceStatus>(project, "project.status");
     if (generation !== viewGeneration || !completionIsCurrent(token)) return;
     if (persistence === "recoveryRequired") {
       const report = await projectValue<RecoveryReport>(project, "scene.recovery");
       if (generation !== viewGeneration || !completionIsCurrent(token)) return;
-      tree.replaceChildren();
+      placeholder(); tree.replaceChildren();
       renderRecoverySurface(workspace, report, {
         status: setStatus,
         resolve: async (transactionId, resolution) => {
@@ -782,7 +796,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       const bodyMatches = !body || (body.type === "root" ? !mapped?.owner : (mapped?.owner?.groupId === body.groupId && mapped.owner.branchId === body.branchId) || (mapped?.id === body.branchId && mapped.conditionalBranch?.groupId === body.groupId));
       if (!scene || scene.sourceConflict || scene.sourceRevision !== target.expectedSourceRevision || (target.beatId && !mapped) || !bodyMatches) {
         setStatus("The mapped origin changed. Return to Branches and refresh the selection.", "error");
-        const back = button("Return to Branches"); back.addEventListener("click", () => { void requestProjectNavigation(project, "branches"); }); workspace.append(back);
+        const back = button("Return to Branches"); back.addEventListener("click", () => { void requestProjectNavigation(project, "branches"); }); placeholder(); workspace.append(back);
         return;
       }
     }
@@ -896,12 +910,12 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       },
     };
     const beatId = target?.beatId || (target?.body?.type === "branch" ? target.body.branchId : undefined);
-    if (storyView) { workspace.replaceWith(storyView.host); tree.replaceWith(storyView.treeHost); storyView.update(model, storyActions, beatId); }
+    if (storyView) { workspace.replaceWith(storyView.host); tree.replaceWith(storyView.treeHost); storyView.update(model, storyActions, beatId); holdStory(false); }
     else storyView = renderStoryView(workspace, tree, model, storyActions, beatId);
     const rendered = persistenceMessage(persistence, false);
     setStatus(rendered.text, rendered.kind, rendered.links, rendered);
   } catch (error) {
-    if (generation === viewGeneration && completionIsCurrent(token)) setStatus(message(error, "Scene workspace could not be loaded"), "error");
+    if (generation === viewGeneration && completionIsCurrent(token)) { placeholder(); setStatus(message(error, "Scene workspace could not be loaded"), "error"); }
   }
 }
 
