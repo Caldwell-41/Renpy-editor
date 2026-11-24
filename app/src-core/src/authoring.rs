@@ -440,9 +440,165 @@ pub struct AuthoringService {
     pub(crate) observed_flow: Mutex<HashMap<ProjectId, crate::scene::flow::ObservedFlow>>,
     pub(crate) project_history: Mutex<HashMap<ProjectId, crate::history::HistoryStack>>,
     pub(crate) source_sessions: Mutex<crate::source::SourceSessions>,
+    list_memo: std::sync::Arc<Mutex<RequestMemo>>,
+}
+
+/// One request's authoring list. Several services read it in one request, and each
+/// read used to hash every asset again. It is reused until a write in the request
+/// touches a file it read. Outside a request scope nothing is kept.
+#[derive(Default)]
+struct RequestMemo {
+    active: bool,
+    list: Option<ListMemo>,
+}
+
+struct ListMemo {
+    project: ProjectId,
+    project_uuid: String,
+    generation: u64,
+    metadata: AuthoringMetadata,
+}
+
+impl ListMemo {
+    fn reads(&self, path: &str) -> bool {
+        [AUTHORING_PATH, CHARACTERS_PATH, VARIABLES_PATH, ASSETS_PATH].contains(&path)
+            || path.starts_with("game/images/")
+            || path.starts_with("game/audio/")
+            || self
+                .metadata
+                .assets
+                .iter()
+                .any(|asset| asset.relative_path == path)
+    }
+}
+
+/// The declarations and folder listings an asset's status reads.
+pub(crate) struct AssetContext {
+    declarations: Vec<u8>,
+    image_inventory: Option<Vec<String>>,
+    audio_inventory: Option<Vec<String>>,
+}
+
+impl AssetContext {
+    /// An asset's status from its file's byte count and SHA-256 (`None` when the
+    /// file is missing, `Err` when it could not be read safely).
+    pub(crate) fn status(
+        &self,
+        asset: &Asset,
+        physical: Result<Option<(u64, String)>, ()>,
+    ) -> &'static str {
+        match physical {
+            Ok(None) => return "missing",
+            Ok(Some((count, sha256))) if count == asset.byte_count && sha256 == asset.sha256 => {}
+            Ok(Some(_)) => return "changed",
+            Err(()) => return "unsafe",
+        }
+        if asset.kind == AssetKind::Font {
+            return "available";
+        }
+        let Ok(contract) = validate_asset_contract(asset) else {
+            return "unsafe";
+        };
+        if requires_explicit_declaration(asset) {
+            return if asset_declaration(asset)
+                .is_ok_and(|statement| declaration_exists(&self.declarations, &statement))
+            {
+                "available"
+            } else {
+                "compatibilityRequired"
+            };
+        }
+        let inventory = if contract.namespace == DiscoveryNamespace::Image {
+            self.image_inventory.as_ref()
+        } else {
+            self.audio_inventory.as_ref()
+        };
+        let Some(inventory) = inventory else {
+            return "unsafe";
+        };
+        let owners = inventory
+            .iter()
+            .filter(|path| {
+                let name = if contract.namespace == DiscoveryNamespace::Image {
+                    automatic_image_name(path)
+                } else {
+                    automatic_audio_name(path)
+                };
+                name.as_deref() == Some(contract.recorded_name.as_str())
+            })
+            .count();
+        if contract.automatic_name == contract.recorded_name && owners == 1 {
+            "available"
+        } else {
+            "unsafe"
+        }
+    }
+}
+
+/// Keeps one request's authoring list until it is dropped.
+pub(crate) struct RequestScope(std::sync::Arc<Mutex<RequestMemo>>);
+
+impl Drop for RequestScope {
+    fn drop(&mut self) {
+        if let Ok(mut memo) = self.0.lock() {
+            *memo = RequestMemo::default();
+        }
+    }
 }
 
 impl AuthoringService {
+    /// Starts a request: until the scope drops, list() reuses its result while no
+    /// write in the request touches a file it read.
+    pub(crate) fn request_scope(&self) -> RequestScope {
+        if let Ok(mut memo) = self.list_memo.lock() {
+            *memo = RequestMemo {
+                active: true,
+                list: None,
+            };
+        }
+        RequestScope(self.list_memo.clone())
+    }
+
+    fn remembered_list(
+        &self,
+        project: &ProjectId,
+        project_uuid: &str,
+    ) -> Option<AuthoringMetadata> {
+        let mut memo = self.list_memo.lock().ok()?;
+        let generation = self.transactions.write_generation();
+        let entry = memo
+            .list
+            .as_mut()
+            .filter(|entry| entry.project == *project && entry.project_uuid == project_uuid)?;
+        if entry.generation != generation {
+            let written = self.transactions.written_since(entry.generation)?;
+            if written.iter().any(|path| entry.reads(path)) {
+                return None;
+            }
+            entry.generation = generation;
+        }
+        Some(entry.metadata.clone())
+    }
+
+    fn remember_list(
+        &self,
+        project: &ProjectId,
+        project_uuid: &str,
+        generation: u64,
+        metadata: &AuthoringMetadata,
+    ) {
+        if let Ok(mut memo) = self.list_memo.lock() {
+            if memo.active {
+                memo.list = Some(ListMemo {
+                    project: project.clone(),
+                    project_uuid: project_uuid.to_owned(),
+                    generation,
+                    metadata: metadata.clone(),
+                });
+            }
+        }
+    }
+
     pub fn register_project(&self, root: &Path) -> Result<ProjectId, AuthoringError> {
         let id = self
             .transactions
@@ -613,11 +769,30 @@ impl AuthoringService {
         project: &ProjectId,
         project_uuid: &str,
     ) -> Result<AuthoringMetadata, AuthoringError> {
-        self.ensure_ready(project)?;
-        let (mut metadata, _) = self.load_metadata(project, project_uuid)?;
-        self.refresh_verified_source_revisions(project, &mut metadata)?;
+        if let Some(metadata) = self.remembered_list(project, project_uuid) {
+            return Ok(metadata);
+        }
+        let generation = self.transactions.write_generation();
+        let (mut metadata, stored) = self.list_without_asset_statuses(project, project_uuid)?;
         self.refresh_asset_statuses(project, &mut metadata);
+        // A project without authoring.json reads more files; it is never kept.
+        if stored {
+            self.remember_list(project, project_uuid, generation, &metadata);
+        }
         Ok(metadata)
+    }
+
+    /// The authoring list with each asset's status as last stored, and whether
+    /// authoring.json exists.
+    pub(crate) fn list_without_asset_statuses(
+        &self,
+        project: &ProjectId,
+        project_uuid: &str,
+    ) -> Result<(AuthoringMetadata, bool), AuthoringError> {
+        self.ensure_ready(project)?;
+        let (mut metadata, stored) = self.load_metadata(project, project_uuid)?;
+        self.refresh_verified_source_revisions(project, &mut metadata)?;
+        Ok((metadata, stored.is_some()))
     }
 
     pub fn create_character(
@@ -1504,88 +1679,41 @@ impl AuthoringService {
     }
 
     fn refresh_asset_statuses(&self, project: &ProjectId, metadata: &mut AuthoringMetadata) {
-        let declarations = self
-            .transactions
-            .snapshot_optional(
-                project,
-                RelativePath::new(ASSETS_PATH).expect("constant authoring path"),
-            )
-            .ok()
-            .flatten()
-            .map(|(bytes, _)| bytes)
-            .unwrap_or_default();
-        let image_inventory = self
-            .transactions
-            .inventory_files(project, "game/images")
-            .ok();
-        let audio_inventory = self
-            .transactions
-            .inventory_files(project, "game/audio")
-            .ok();
+        let context = self.asset_context(project);
         for asset in &mut metadata.assets {
-            let physical = match RelativePath::new(&asset.relative_path)
+            let physical = RelativePath::new(&asset.relative_path)
                 .map_err(|_| ())
                 .and_then(|path| {
                     self.transactions
                         .inspect_file(project, path)
                         .map_err(|_| ())
-                }) {
-                Ok(None) => "missing",
-                Ok(Some((count, revision)))
-                    if count == asset.byte_count && revision.sha256 == asset.sha256 =>
-                {
-                    "available"
-                }
-                Ok(Some(_)) => "changed",
-                Err(()) => "unsafe",
-            };
-            if physical != "available" {
-                asset.status = physical.into();
-                continue;
-            }
-            if asset.kind == AssetKind::Font {
-                asset.status = "available".into();
-                continue;
-            }
-            let Ok(contract) = validate_asset_contract(asset) else {
-                asset.status = "unsafe".into();
-                continue;
-            };
-            if requires_explicit_declaration(asset) {
-                asset.status = if asset_declaration(asset)
-                    .is_ok_and(|statement| declaration_exists(&declarations, &statement))
-                {
-                    "available".into()
-                } else {
-                    "compatibilityRequired".into()
-                };
-                continue;
-            }
-            let inventory = if contract.namespace == DiscoveryNamespace::Image {
-                image_inventory.as_ref()
-            } else {
-                audio_inventory.as_ref()
-            };
-            let Some(inventory) = inventory else {
-                asset.status = "unsafe".into();
-                continue;
-            };
-            let owners = inventory
-                .iter()
-                .filter(|path| {
-                    let name = if contract.namespace == DiscoveryNamespace::Image {
-                        automatic_image_name(path)
-                    } else {
-                        automatic_audio_name(path)
-                    };
-                    name.as_deref() == Some(contract.recorded_name.as_str())
                 })
-                .count();
-            asset.status = if contract.automatic_name == contract.recorded_name && owners == 1 {
-                "available".into()
-            } else {
-                "unsafe".into()
-            };
+                .map(|found| found.map(|(count, revision)| (count, revision.sha256)));
+            asset.status = context.status(asset, physical).into();
+        }
+    }
+
+    /// What an asset's status depends on besides its own file.
+    pub(crate) fn asset_context(&self, project: &ProjectId) -> AssetContext {
+        AssetContext {
+            declarations: self
+                .transactions
+                .snapshot_optional(
+                    project,
+                    RelativePath::new(ASSETS_PATH).expect("constant authoring path"),
+                )
+                .ok()
+                .flatten()
+                .map(|(bytes, _)| bytes)
+                .unwrap_or_default(),
+            image_inventory: self
+                .transactions
+                .inventory_files(project, "game/images")
+                .ok(),
+            audio_inventory: self
+                .transactions
+                .inventory_files(project, "game/audio")
+                .ok(),
         }
     }
 

@@ -597,6 +597,11 @@ impl LifecycleService {
             .map_err(LifecycleError::Authoring)
     }
 
+    /// Keeps the authoring list for one request; see `AuthoringService::request_scope`.
+    pub(crate) fn request_scope(&self) -> crate::authoring::RequestScope {
+        self.authoring.request_scope()
+    }
+
     pub fn authoring_select_import(
         &mut self,
         selected: &Path,

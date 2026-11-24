@@ -90,8 +90,10 @@ impl AuthoringService {
         if uuid::Uuid::parse_str(&request.asset_id).is_err() {
             return Err(MediaError::InvalidPayload);
         }
-        let authoring = self
-            .list(project, project_id)
+        // Only the requested asset is read and hashed, once; the other assets keep
+        // their stored status.
+        let (authoring, _) = self
+            .list_without_asset_statuses(project, project_id)
             .map_err(|error| match error {
                 crate::authoring::AuthoringError::RecoveryRequired => MediaError::RecoveryRequired,
                 crate::authoring::AuthoringError::SourceConflict => MediaError::SourceConflict,
@@ -102,35 +104,37 @@ impl AuthoringService {
             .iter()
             .find(|asset| asset.id == request.asset_id)
             .ok_or(MediaError::UnknownAsset)?;
-        if asset.status != "available" || asset.byte_count > MAX_PRESENTATION_BYTES {
-            return Err(if asset.byte_count > MAX_PRESENTATION_BYTES {
-                MediaError::Oversize
-            } else {
-                MediaError::UnsafeAsset
-            });
+        if asset.byte_count > MAX_PRESENTATION_BYTES {
+            return Err(MediaError::Oversize);
         }
+        let path = RelativePath::new(&asset.relative_path).map_err(|_| MediaError::UnsafeAsset)?;
+        let read = self
+            .transactions
+            .snapshot_optional(project, path)
+            .map_err(|diagnostic| match diagnostic.code {
+                crate::transaction::ErrorCode::RecoveryRequired => MediaError::RecoveryRequired,
+                crate::transaction::ErrorCode::StaleRevision
+                | crate::transaction::ErrorCode::ExpectedBytesChanged
+                | crate::transaction::ErrorCode::FileIdentityChanged => MediaError::SourceConflict,
+                _ => MediaError::UnsafeAsset,
+            })?;
+        // The same checks as the asset list: a changed, missing or undeclared asset
+        // (compatibilityRequired) is not presented.
+        let physical = Ok(read
+            .as_ref()
+            .map(|(bytes, revision)| (bytes.len() as u64, revision.sha256.clone())));
+        if self.asset_context(project).status(asset, physical) != "available" {
+            return Err(MediaError::UnsafeAsset);
+        }
+        let Some((bytes, revision)) = read else {
+            return Err(MediaError::UnsafeAsset);
+        };
         let image = matches!(
             asset.kind,
             AssetKind::Background | AssetKind::CharacterAppearance | AssetKind::UiImage
         );
         if image == matches!(request.purpose, MediaPurpose::AudioAudition) {
             return Err(MediaError::InvalidPayload);
-        }
-        let path = RelativePath::new(&asset.relative_path).map_err(|_| MediaError::UnsafeAsset)?;
-        let (bytes, revision) =
-            self.transactions
-                .snapshot(project, path)
-                .map_err(|diagnostic| match diagnostic.code {
-                    crate::transaction::ErrorCode::RecoveryRequired => MediaError::RecoveryRequired,
-                    crate::transaction::ErrorCode::StaleRevision
-                    | crate::transaction::ErrorCode::ExpectedBytesChanged
-                    | crate::transaction::ErrorCode::FileIdentityChanged => {
-                        MediaError::SourceConflict
-                    }
-                    _ => MediaError::UnsafeAsset,
-                })?;
-        if bytes.len() as u64 != asset.byte_count || revision.sha256 != asset.sha256 {
-            return Err(MediaError::SourceConflict);
         }
         if bytes.len() as u64 > MAX_PRESENTATION_BYTES {
             return Err(MediaError::Oversize);
@@ -333,6 +337,118 @@ fn validate_audio(extension: &str, bytes: &[u8]) -> Result<&'static str, MediaEr
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::lifecycle::{acceptance::ipc, LifecycleService};
+    use crate::transaction::take_revision_bytes_read;
+    use serde_json::json;
+
+    #[test]
+    fn a_request_hashes_each_asset_once_and_media_present_hashes_only_its_asset() {
+        let temporary = tempfile::tempdir().unwrap();
+        let profile = temporary.path().join("profile");
+        let mut service =
+            LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
+        let root = profile.join("synthetic-project");
+        std::fs::create_dir_all(root.join("game/audio")).unwrap();
+        service.open_path(&root).unwrap();
+        let listed = |service: &mut LifecycleService| {
+            let _ = take_revision_bytes_read();
+            ipc(service, "scene.list", json!({}));
+            take_revision_bytes_read()
+        };
+        // A Commit: scene.apply reads the list before and after its write.
+        let committed = |service: &mut LifecycleService, text: &str| {
+            let ws = ipc(service, "scene.list", json!({}));
+            let scene = ws["scenes"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|scene| {
+                    scene["beats"].as_array().unwrap().iter().any(|beat| {
+                        beat["owner"].is_null()
+                            && beat["protected"] == false
+                            && beat["payload"]["type"] == "narration"
+                    })
+                })
+                .unwrap()
+                .clone();
+            let beat = scene["beats"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|beat| {
+                    beat["owner"].is_null()
+                        && beat["protected"] == false
+                        && beat["payload"]["type"] == "narration"
+                })
+                .unwrap()
+                .clone();
+            let _ = take_revision_bytes_read();
+            ipc(
+                service,
+                "scene.apply",
+                json!({"expectedProjectRevision": ws["projectRevision"], "expectedSourceMapRevision": ws["sourceMapRevision"],
+                "command": {"type": "updateBodyBeat", "sceneId": scene["id"], "expectedSourceRevision": scene["sourceRevision"], "beatId": beat["id"],
+                    "expectedBody": {"type": "root"}, "beat": {"type": "narration", "text": text}}}),
+            );
+            take_revision_bytes_read()
+        };
+        let commit_without_assets = committed(&mut service, "Measured before");
+        let without_assets = listed(&mut service);
+        let mut ids = Vec::new();
+        for (name, bytes) in [
+            (
+                "bell",
+                &include_bytes!("../../../tests/fixtures/phase-1h/assets/bell.wav")[..],
+            ),
+            (
+                "theme",
+                &include_bytes!("../../../tests/fixtures/phase-1h/assets/theme.wav")[..],
+            ),
+        ] {
+            assert_eq!(bytes.len(), 32_044);
+            let chosen = temporary.path().join(format!("{name}.wav"));
+            std::fs::write(&chosen, bytes).unwrap();
+            let choice = service.authoring_select_import(&chosen).unwrap();
+            let model = ipc(
+                &mut service,
+                "asset.import",
+                json!({"authorityId": choice.authority_id, "kind": "music", "technicalName": name,
+                    "displayName": name, "characterId": null, "expression": null}),
+            );
+            let asset = model["assets"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|a| a["displayName"] == name)
+                .unwrap();
+            assert_eq!(asset["status"], "available");
+            ids.push(asset["id"].clone());
+        }
+        // scene.list reads the asset list through several services; each asset is hashed once.
+        let asset_bytes = listed(&mut service) - without_assets;
+        assert!(
+            (2 * 32_044..3 * 32_044).contains(&asset_bytes),
+            "scene.list hashed {asset_bytes} asset bytes"
+        );
+        // A write that touches no file the list read keeps it, so a Commit hashes each asset once.
+        let commit_asset_bytes = committed(&mut service, "Measured after") - commit_without_assets;
+        assert!(
+            (2 * 32_044..3 * 32_044).contains(&commit_asset_bytes),
+            "scene.apply hashed {commit_asset_bytes} asset bytes"
+        );
+        let _ = take_revision_bytes_read();
+        let media = ipc(
+            &mut service,
+            "media.present",
+            json!({"assetId": ids[0], "purpose": "audioAudition"}),
+        );
+        assert_eq!(media["byteCount"], 32_044);
+        let read = take_revision_bytes_read();
+        assert!(
+            (32_044..2 * 32_044).contains(&read),
+            "media.present hashed {read} bytes, not only its asset once"
+        );
+    }
 
     fn png(width: u32, height: u32) -> Vec<u8> {
         let mut bytes = vec![137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13];

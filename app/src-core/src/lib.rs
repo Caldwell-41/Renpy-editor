@@ -406,6 +406,8 @@ pub fn handle_application_request(
     smoke_enabled: bool,
     lifecycle: &mut LifecycleService,
 ) -> CoreResponse {
+    // One request reads the authoring list once, however many services ask for it.
+    let _scope = lifecycle.request_scope();
     let validated = match validate_request(&request) {
         Ok(value) => value,
         Err(response) => return response,
