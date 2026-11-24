@@ -873,6 +873,8 @@ summary:focus-visible,[tabindex="-1"]:focus-visible { outline:2px solid var(--fo
 .story-editor-tools{flex-wrap:wrap;gap:6px;margin:6px 0}
 .story-branch-editor,.story-option-editor{border-left:3px solid var(--arm,var(--border-strong));padding:2px 0 4px 10px;margin:8px 0}
 .story-option-editor .story-editor-title{color:var(--arm)}
+/* An empty option's starters are one width, wider than the longest label. They wrap as before. */
+.story-editor-empty .story-editor-tools>button{min-width:9.5rem}
 .story-editor-empty h2{font-size:15px;margin:10px 0 6px}.story-editor-empty p{margin:0;color:var(--text-secondary);font-size:12px;line-height:1.5}
 .story-effects{margin-top:12px;padding-top:8px;border-top:1px solid var(--border-normal)}
 .story-effects h3{margin:0 0 6px;font-size:12px;font-weight:600}
