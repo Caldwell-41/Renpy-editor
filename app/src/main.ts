@@ -544,13 +544,12 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
       outcome = "committed";
       if (currentProject?.sessionId !== project.sessionId) return;
       if (step.step) storyView?.applyStep(step.step, direction);
-      const revealed = revealHistoryItem(project, step.entry.item);
+      revealHistoryItem(project, step.entry.item);
       showHistory(step.history);
       historyNotice = { text: `${direction === "undo" ? "Undone" : "Redone"}: ${step.entry.name}`, view: viewGeneration };
       showMessage(historyNotice.text);
       void refreshPersistenceStatus(project, viewGeneration);
       if (focused) document.querySelector<HTMLElement>(`[data-history="${focused}"]`)?.focus();
-      await revealed;
     } finally { transition?.release(); }
   } catch (error) {
     outcome = "refused"; errorCode = (error as { code?: string }).code;
@@ -569,10 +568,9 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
 
 // Opens the entry's workspace at its item. A missing item falls back to what
 // contains it: a beat to its scene, a screen element to its screen, then the workspace.
-// Story's reveal resolves once Story shows the step's result.
-function revealHistoryItem(project: OpenProject, item: HistoryItem): Promise<void> | undefined {
+function revealHistoryItem(project: OpenProject, item: HistoryItem): void {
   switch (item.type) {
-    case "story": return showProject(project, "story", item.sceneId ? { sceneId: item.sceneId, ...(item.beatId ? { beatId: item.beatId } : {}) } : undefined, true);
+    case "story": showProject(project, "story", item.sceneId ? { sceneId: item.sceneId, ...(item.beatId ? { beatId: item.beatId } : {}) } : undefined, true); break;
     case "screen": showProject(project, "screens", { path: item.path, screen: item.screen, ...(item.nodeId ? { nodeId: item.nodeId } : {}), ...(item.parentId ? { parentId: item.parentId } : {}) }); break;
     case "source": showProject(project, "source", { path: item.path }); break;
     case "prompt": openProjectSettings(project, item.action); break;
@@ -582,7 +580,7 @@ function revealHistoryItem(project: OpenProject, item: HistoryItem): Promise<voi
   }
 }
 
-function showProject(project: OpenProject, surface: ProjectSurface = "story", target?: ProjectTarget, keepStory = false): Promise<void> | undefined {
+function showProject(project: OpenProject, surface: ProjectSurface = "story", target?: ProjectTarget, keepStory = false): void {
   const generation = beginView(project);
   const layout = document.createElement("section"); layout.className = "project-shell";
   // Below 1200 px Story opens with the icon rail and the scene list closed, so the stage keeps
@@ -650,7 +648,7 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   runtimeWorkspace.panel.hidden=true;
   const runtimeToggle=button("Runtime & diagnostics","text-button runtime-toggle");runtimeToggle.addEventListener("click",()=>{if(runtimeWorkspace){runtimeWorkspace.panel.hidden=!runtimeWorkspace.panel.hidden;runtimeToggle.ariaExpanded=String(!runtimeWorkspace.panel.hidden);}});document.querySelector(".app-footer")?.append(runtimeToggle);
   setStatus("Checking saved state…");
-  if (surface === "story") return renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined, sceneList);
+  if (surface === "story") void renderStorySurface(workspace, tree, project, generation, target && "sceneId" in target ? target : undefined, sceneList);
   else if (surface === "source") void renderSourceSurface(workspace, tree, project, generation, target && "path" in target && !("screen" in target) ? target : undefined);
   else if (surface === "screens") {
     screensWorkspace ??= new ScreensWorkspace({ resolution: project.resolution, projectId: project.projectId,

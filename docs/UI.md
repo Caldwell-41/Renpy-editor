@@ -818,8 +818,8 @@ follow ordinary navigation. Where leaving is refused, Undo does nothing and the
 input stays. Where leaving asks "Keep editing?", Undo asks too and continues only
 after Discard and leave. Beat drafts and Source drafts never block it. While a
 dialog is open, Cmd/Ctrl+Z belongs to the dialog. While Undo or Redo reloads Story,
-the Story view stays on screen but takes no input, and the step finishes once Story
-shows its result.
+the Story view stays on screen but takes no input. Another Undo or Redo may start
+before it arrives; Story then shows the latest step's result.
 
 Typing in a beat draft makes draft steps. A text step ends when focus leaves the
 field or after 2 seconds without typing. Each change to another control, such as a
