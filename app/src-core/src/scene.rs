@@ -7710,6 +7710,53 @@ mod tests {
         );
     }
 
+    #[test]
+    fn media_presentation_refuses_an_asset_changed_on_disk_as_unsafe() {
+        let mut fixture = Fixture::new(b"label scene_one:\n    return\n");
+        fixture.migrate();
+        let mut png = vec![137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13];
+        png.extend_from_slice(b"IHDR");
+        png.extend_from_slice(&1u32.to_be_bytes());
+        png.extend_from_slice(&1u32.to_be_bytes());
+        png.extend_from_slice(&[8, 6, 0, 0, 0]);
+        let selected_path = fixture.root.join("safe.png");
+        fs::write(&selected_path, &png).unwrap();
+        let selected = fixture
+            .service
+            .select_import(&fixture.project, &selected_path)
+            .unwrap();
+        let model = fixture
+            .service
+            .import_asset(
+                &fixture.project,
+                &fixture.project_id,
+                ImportAssetRequest {
+                    authority_id: selected.authority_id,
+                    kind: AssetKind::Background,
+                    technical_name: "safe".into(),
+                    display_name: "Safe".into(),
+                    character_id: None,
+                    expression: None,
+                },
+            )
+            .unwrap();
+        let asset = model.assets[0].clone();
+        png.push(0);
+        fs::write(fixture.root.join(&asset.relative_path), &png).unwrap();
+        // The asset list reports it as changed, and a changed asset is not presented.
+        assert_eq!(
+            fixture.service.media_present(
+                &fixture.project,
+                &fixture.project_id,
+                MediaRequest {
+                    asset_id: asset.id,
+                    purpose: MediaPurpose::ImagePreview
+                }
+            ),
+            Err(MediaError::UnsafeAsset)
+        );
+    }
+
     #[cfg(unix)]
     #[test]
     fn media_presentation_refuses_symlink_substitution() {
