@@ -92,13 +92,14 @@ impl AuthoringService {
         }
         // Only the requested asset is read and hashed, once; the other assets keep
         // their stored status.
-        let (authoring, _) = self
+        let authoring = self
             .list_without_asset_statuses(project, project_id)
             .map_err(|error| match error {
                 crate::authoring::AuthoringError::RecoveryRequired => MediaError::RecoveryRequired,
                 crate::authoring::AuthoringError::SourceConflict => MediaError::SourceConflict,
                 _ => MediaError::Io,
-            })?;
+            })?
+            .metadata;
         let asset = authoring
             .assets
             .iter()

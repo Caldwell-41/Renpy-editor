@@ -472,6 +472,13 @@ impl ListMemo {
     }
 }
 
+/// The authoring list before its asset statuses are refreshed.
+pub(crate) struct UnrefreshedList {
+    pub(crate) metadata: AuthoringMetadata,
+    /// Whether authoring.json exists.
+    pub(crate) stored: bool,
+}
+
 /// The declarations and folder listings an asset's status reads.
 pub(crate) struct AssetContext {
     declarations: Vec<u8>,
@@ -773,7 +780,10 @@ impl AuthoringService {
             return Ok(metadata);
         }
         let generation = self.transactions.write_generation();
-        let (mut metadata, stored) = self.list_without_asset_statuses(project, project_uuid)?;
+        let UnrefreshedList {
+            mut metadata,
+            stored,
+        } = self.list_without_asset_statuses(project, project_uuid)?;
         self.refresh_asset_statuses(project, &mut metadata);
         // A project without authoring.json reads more files; it is never kept.
         if stored {
@@ -782,17 +792,19 @@ impl AuthoringService {
         Ok(metadata)
     }
 
-    /// The authoring list with each asset's status as last stored, and whether
-    /// authoring.json exists.
+    /// The authoring list with each asset's status as last stored.
     pub(crate) fn list_without_asset_statuses(
         &self,
         project: &ProjectId,
         project_uuid: &str,
-    ) -> Result<(AuthoringMetadata, bool), AuthoringError> {
+    ) -> Result<UnrefreshedList, AuthoringError> {
         self.ensure_ready(project)?;
         let (mut metadata, stored) = self.load_metadata(project, project_uuid)?;
         self.refresh_verified_source_revisions(project, &mut metadata)?;
-        Ok((metadata, stored.is_some()))
+        Ok(UnrefreshedList {
+            metadata,
+            stored: stored.is_some(),
+        })
     }
 
     pub fn create_character(
