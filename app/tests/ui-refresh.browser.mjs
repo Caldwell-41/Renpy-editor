@@ -163,6 +163,10 @@ try {
  assert.equal(new Set(opened.tools.map(tool=>tool.top)).size,1,`scene toolbar wraps at 1100 px with both panels open: ${JSON.stringify(opened.tools)}`);
  // story-release-fixes / a-v2: Delete scene asks under the scene's row, inside the scene list, with the menu closed.
  const deletable=page.locator('.tree-scene-row').nth(2);await deletable.hover();await deletable.locator('.tree-menu > summary').click();
+ // The open ⋯ menu stays inside the scene list.
+ const menu=await deletable.locator('.tree-menu[open] > .tree-tools').evaluate(tools=>{const list=document.querySelector('.project-tree-panel'),panel=list.getBoundingClientRect(),box=tools.getBoundingClientRect();
+  return {inside:box.left>=panel.left&&box.right<=panel.right,scrolls:list.scrollWidth>list.clientWidth};});
+ assert.deepEqual(menu,{inside:true,scrolls:false},'the open scene-row ⋯ menu stays inside the scene list');
  await deletable.locator('.tree-menu').getByRole('button',{name:/^Delete scene /}).click();
  const confirmation=await page.evaluate(()=>{const list=document.querySelector('.project-tree-panel'),panel=list.getBoundingClientRect(),box=document.querySelector('.tree-scene-row + .story-scene-confirm').getBoundingClientRect(),row=document.querySelector('.tree-scene-row:has(+ .story-scene-confirm)').getBoundingClientRect();
   return {inside:box.left>=panel.left&&box.right<=panel.right,below:box.top>=row.bottom-1,openMenus:document.querySelectorAll('.tree-menu[open]').length,scrolls:list.scrollWidth>list.clientWidth};});
