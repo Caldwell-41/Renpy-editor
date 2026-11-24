@@ -8,6 +8,7 @@ import { definition as storySaveRefusal } from "./screens/story-save-refusal/def
 import { definition as headerUndo } from "./screens/header-undo/definition.ts";
 import { definition as storyCombinedStatus } from "./screens/story-combined-status/definition.ts";
 import { definition as storyCombinedEditor } from "./screens/story-combined-editor/definition.ts";
+import { definition as storyReleaseFixes } from "./screens/story-release-fixes/definition.ts";
 import { definition as source } from "./screens/source/definition.ts";
 import { definition as branches } from "./screens/branches/definition.ts";
 import { definition as lorebook } from "./screens/lorebook/definition.ts";
@@ -76,7 +77,7 @@ export const screens: readonly LabScreen[] = [{
     { id: "dossier", title: "Continuous dossier", load: () => import("./screens/characters-writing/dossier.ts") },
     { id: "board", title: "Writing board", load: () => import("./screens/characters-writing/board.ts") },
   ],
-}, ...[story, storyRevamp, storyDraftConflict, storySaveRefusal, headerUndo, storyCombinedStatus, storyCombinedEditor, source, branches, lorebook, assets, variables, welcome, newProject, settings, runtime, studioRequest, screenDesigner, canvasDrag, helpComposition, numericLayout, nestedLayout, uiImage, projectFont, sharedLook, componentsAndHelpPanel, helpDialogStory, screenInteractions, barsImagebuttons, screensArithmetic, gameUi].map(definition => ({ ...definition, approval: approvalFor(definition.id) }))];
+}, ...[story, storyRevamp, storyDraftConflict, storySaveRefusal, headerUndo, storyCombinedStatus, storyCombinedEditor, storyReleaseFixes, source, branches, lorebook, assets, variables, welcome, newProject, settings, runtime, studioRequest, screenDesigner, canvasDrag, helpComposition, numericLayout, nestedLayout, uiImage, projectFont, sharedLook, componentsAndHelpPanel, helpDialogStory, screenInteractions, barsImagebuttons, screensArithmetic, gameUi].map(definition => ({ ...definition, approval: approvalFor(definition.id) }))];
 
 for (const screen of screens) {
   for (const variant of screen.variants) revisionFor(screen.approval, variant.id);

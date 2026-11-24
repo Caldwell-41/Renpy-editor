@@ -56,17 +56,18 @@ window.__loomlightProbeEditorFor = beatId => [...document.querySelectorAll('.sto
 window.__loomlightProbeSelectBeat = beatId => {
   const columns = [...document.querySelectorAll('.story-track-column')].filter(column => column.dataset.beatId === beatId);
   const select = columns.length === 1 && columns[0].querySelector(':scope > .story-track-beat');
-  if (!select) throw Error('Unique rendered fixture Beat required');
+  if (!select) throw Error(`Unique rendered fixture Beat required; ${columns.length} rendered`);
   if (select.dataset.selected !== 'true') select.click();
 };
-// Only use for reads, idempotent preference writes, or probe checkpoint/report
-// delivery. Busy refuses before dispatch; other errors and the deadline still fail.
+// ApplicationHost refuses a request that overlaps another one with REQUEST_OVERLAP before
+// it checks out the service, so no handler ran and any request may retry. Other errors,
+// RUNTIME_BUSY from a handler while Ren'Py runs included, and the deadline still fail.
 window.__loomlightProbeRetryBusy = async (task, timeoutMs = 10000) => {
   const deadline = performance.now() + timeoutMs;
   for (;;) {
     try { return await task(); }
     catch (error) {
-      if (error.code !== 'RUNTIME_BUSY' || performance.now() >= deadline) throw error;
+      if (error.code !== 'REQUEST_OVERLAP' || performance.now() >= deadline) throw error;
       await new Promise(resolve => setTimeout(resolve, 100));
     }
   }

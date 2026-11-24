@@ -40,7 +40,7 @@ test("packaged probe constructs exactly one truthful final report", async (t) =>
           const key = `${request.operation}:${JSON.stringify(request.payload)}`;
           if (!busyRejections.has(key)) {
             busyRejections.add(key);
-            return { ok: false, error: { code: "RUNTIME_BUSY" } };
+            return { ok: false, error: { code: "REQUEST_OVERLAP" } };
           }
         }
         if (request.operation === "system.health") {

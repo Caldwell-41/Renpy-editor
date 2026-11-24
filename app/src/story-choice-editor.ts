@@ -54,7 +54,7 @@ interface OptionState { readonly key: number; readonly id?: string; text: string
 interface Saved { readonly prompt: boolean; readonly speaker: string; readonly promptText: string; readonly picked: string; readonly pickedChanged: boolean; readonly options: readonly { readonly key: number; readonly id?: string; readonly text: string; readonly policy: "hide" | "showDisabled"; readonly guardOpen: boolean; readonly builder: unknown }[] }
 
 export function buildChoiceEditor(payload: Choice, context: EditorContext, choice: ChoiceHost): BeatEditor {
-  const { model } = context, variables = model.authoring.variables;
+  const { model } = context; let variables = model.authoring.variables;
   const host = element("div", "beat-fields story-fields story-choice-editor");
   // The prompt: narration or a Character line shown with the options. Empty text is no prompt.
   let hasPrompt = !!payload.prompt;
@@ -76,7 +76,7 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
   const original = (id?: string): ChoiceOption | undefined => id === undefined ? undefined : payload.options.find(option => option.id === id);
   const newOption = (option: ChoiceOption, key = ++keys): OptionState => ({
     key, ...(option.id ? { id: option.id } : {}), text: option.text, policy: option.unavailablePolicy ?? "hide", guardOpen: false,
-    builder: buildRuleBuilder(variables, option.condition, { keyword: "if", label: "Only when", empty: "Always available", required: false, newVariable: context.newVariable, caption: option.condition?.status === "unknown" ? option.condition.source : undefined, source: () => { const beat = choice.structure()?.scene.beats.find(item => item.id === option.id); if (beat) choice.viewSource(beat); } }),
+    builder: buildRuleBuilder(variables, option.condition, { keyword: "if", label: `Option ${key}`, empty: "Always available", required: false, subject: "option", newVariable: context.newVariable, caption: option.condition?.status === "unknown" ? option.condition.source : undefined, source: () => { const beat = choice.structure()?.scene.beats.find(item => item.id === option.id); if (beat) choice.viewSource(beat); } }),
   });
   let options: OptionState[] = payload.options.map(option => newOption(option));
   if (!options.length) options.push(newOption({ text: "" }));
@@ -225,7 +225,7 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
     const policy = backingSelect(`Option ${index + 1} if false`, policyItems, option.policy);
     policy.addEventListener("change", () => { option.policy = policy.value as OptionState["policy"]; });
     const whenFalse = element("div", "story-when-false"); whenFalse.append(element("span", "story-then-label", "If false"), segmented(policy, policyItems), policy);
-    const builder = option.builder;
+    const builder = option.builder; builder.relabel(`Option ${index + 1}`);
     const close = (): void => { option.guardOpen = false; draw(); group.querySelector<HTMLElement>(".story-guard > button")?.focus(); };
     const draw = (): void => {
       group.replaceChildren();
@@ -296,6 +296,9 @@ export function buildChoiceEditor(payload: Choice, context: EditorContext, choic
   const primary = list.querySelector<HTMLElement>('input[aria-label="Choice option text"]') ?? host;
   return {
     host, controls: [promptText], primary, read, internals, focus: () => focusFirst(host),
-    refresh: () => { options.forEach((option, index) => drawStructure(option, index)); drawNone(); },
+    refresh: () => {
+      const next = context.current?.().authoring.variables; if (next) { variables = next; options.forEach(option => option.builder.refresh(next)); }
+      options.forEach((option, index) => drawStructure(option, index)); drawNone();
+    },
   };
 }

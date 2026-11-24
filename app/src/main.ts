@@ -304,16 +304,20 @@ function setStatus(message: string, kind: "normal" | "error" = "normal", links: 
 }
 async function value<T>(operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   const capturedView = viewGeneration;
-  const retryableRead = ["sdk.discover", "project.status", "source.list", "source.open", "screens.list", "screens.inspect", "screens.canvasPlan", "screens.canvasStatus", "scene.list", "authoring.list", "references.list", "prompts.list", "context.options", "flow.list", "runtime.resolveDiagnostic", "media.present", "asset.previewImport"].includes(operation);
-  for (let attempt = 0; ; attempt += 1) {
-    const requester = coreRequester;
-    const response = await requestLane.run(operation, () => requester<T>(operation, payload));
-    if (response.ok) return response.value;
-    // The host has not checked out the service for this refusal. Retry only reads;
-    // writes, trust and process starts are never replayed after an ambiguous result.
-    if (!retryableRead || response.error.code !== "RUNTIME_BUSY" || attempt >= 40 || viewGeneration !== capturedView) throw Object.assign(new Error(response.error.message), response.error);
-    await new Promise(resolve => setTimeout(resolve,25));
-  }
+  // REQUEST_OVERLAP means the host refused before checking out the service, so no handler
+  // ran and the same request, write or read, can be sent again. A native dialog request is
+  // refused this way only before its dialog opens. The retry keeps its lane turn and
+  // its payload. No other code is retried: RUNTIME_BUSY comes from a handler that ran and
+  // lasts while Ren'Py runs, and INTERNAL_ERROR may follow a write or outlast any retry.
+  const response = await requestLane.run(operation, async () => {
+    for (let attempt = 0; ; attempt += 1) {
+      const response = await coreRequester<T>(operation, payload);
+      if (response.ok || response.error.code !== "REQUEST_OVERLAP" || attempt >= 40 || viewGeneration !== capturedView) return response;
+      await new Promise(resolve => setTimeout(resolve, 25));
+    }
+  });
+  if (response.ok) return response.value;
+  throw Object.assign(new Error(response.error.message), response.error);
 }
 async function projectValue<T>(project: OpenProject, operation: Parameters<typeof desktopRequestCore>[0], payload: Readonly<Record<string, unknown>> = {}): Promise<T> {
   if (currentProject?.sessionId !== project.sessionId) throw new Error("This project view is no longer active.");
@@ -531,7 +535,12 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
     const transition = controller ? await runAuthoringOperation(project, operationScopes.sourceNavigation, () => controller.prepareTransition("navigation")) : undefined;
     if (controller && !transition) return;
     try {
-      const step = await runAuthoringOperation(project, operationScopes.history, () => projectValue<HistoryStep>(project, direction === "undo" ? "history.undo" : "history.redo"));
+      // Story's formula checks wait for this Undo or Redo and the workspace it brings.
+      const held = storyView?.historyWrite();
+      let step: HistoryStep;
+      try { step = await runAuthoringOperation(project, operationScopes.history, () => projectValue<HistoryStep>(project, direction === "undo" ? "history.undo" : "history.redo")); }
+      catch (error) { held?.(false); throw error; }
+      held?.(true);
       outcome = "committed";
       if (currentProject?.sessionId !== project.sessionId) return;
       if (step.step) storyView?.applyStep(step.step, direction);
@@ -561,7 +570,7 @@ async function runHistory(project: OpenProject, direction: HistoryDirection): Pr
 // contains it: a beat to its scene, a screen element to its screen, then the workspace.
 function revealHistoryItem(project: OpenProject, item: HistoryItem): void {
   switch (item.type) {
-    case "story": showProject(project, "story", item.sceneId ? { sceneId: item.sceneId, ...(item.beatId ? { beatId: item.beatId } : {}) } : undefined); break;
+    case "story": showProject(project, "story", item.sceneId ? { sceneId: item.sceneId, ...(item.beatId ? { beatId: item.beatId } : {}) } : undefined, true); break;
     case "screen": showProject(project, "screens", { path: item.path, screen: item.screen, ...(item.nodeId ? { nodeId: item.nodeId } : {}), ...(item.parentId ? { parentId: item.parentId } : {}) }); break;
     case "source": showProject(project, "source", { path: item.path }); break;
     case "prompt": openProjectSettings(project, item.action); break;
@@ -571,7 +580,7 @@ function revealHistoryItem(project: OpenProject, item: HistoryItem): void {
   }
 }
 
-function showProject(project: OpenProject, surface: ProjectSurface = "story", target?: ProjectTarget): void {
+function showProject(project: OpenProject, surface: ProjectSurface = "story", target?: ProjectTarget, keepStory = false): void {
   const generation = beginView(project);
   const layout = document.createElement("section"); layout.className = "project-shell";
   // Below 1200 px Story opens with the icon rail and the scene list closed, so the stage keeps
@@ -616,7 +625,11 @@ function showProject(project: OpenProject, surface: ProjectSurface = "story", ta
   if(hasTree){let width=layoutFor(layoutKey).treeWidth??230;layout.style.setProperty("--tree-width",`${width}px`);const resize=document.createElement("div");resize.className="tree-divider";resize.role="separator";resize.tabIndex=0;resize.ariaLabel="Resize scene or file list";resize.setAttribute("aria-orientation","vertical");treePanel.append(resize);const setWidth=(next:number,save=false):void=>{width=Math.max(160,Math.min(400,Math.round(next)));layout.style.setProperty("--tree-width",`${width}px`);resize.setAttribute("aria-valuenow",String(width));if(save)saveLayout(layoutKey,{treeWidth:width});};resize.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();setWidth(width+(e.key==="ArrowLeft"?-10:10),true);}});let start:number|undefined;resize.addEventListener("pointerdown",e=>{start=e.clientX-width;resize.setPointerCapture(e.pointerId);});resize.addEventListener("pointermove",e=>{if(start!==undefined)setWidth(e.clientX-start);});resize.addEventListener("pointerup",()=>{start=undefined;setWidth(width,true);});resize.addEventListener("pointercancel",()=>{start=undefined;});}
   const close = button("Close Project", "text-button close-project"); close.addEventListener("click", async () => { if (!await allowSceneNavigation() || hasBlockingModal()) return; await requestProjectClose(project); }); sidebar.append(close);
   const workspace = document.createElement("div"); workspace.className = surface === "story" ? "scene-workspace" : surface === "source" ? "source-workspace" : surface === "branches" ? "branches-workspace" : surface === "screens" ? "screens-workspace" : "supporting-workspace";
+  const kept = keepStory && surface === "story" && storyView ? { view: storyView, refocus: storyView.keepFocus() } : undefined;
   layout.append(sidebar);if(hasTree)layout.append(treePanel);layout.append(workspace); shell(layout);
+  // Undo and Redo keep the Story view on screen while the scene list reloads, held so
+  // nothing is typed into the old workspace. It updates and is released when the list arrives.
+  if (kept) { workspace.replaceWith(kept.view.host); tree.replaceWith(kept.view.treeHost); holdStory(true, kept.refocus); }
   runtimeWorkspace ??= new RuntimeWorkspace({ sessionId: project.sessionId, sdkVersion: project.sdkVersion,
     request: (operation, payload) => value(operation, operation.startsWith("sdk.") ? payload : { ...payload, sessionId: project.sessionId }),
     current: () => currentProject?.sessionId === project.sessionId,
@@ -742,15 +755,30 @@ function rememberStoryScene(project: OpenProject, sceneId: string): void {
   saveLayout(storyLayoutKey(project), { sceneSelection: sceneId });
 }
 
+let heldRefocus: (() => void) | undefined;
+
+// A kept Story view shows while its scene list reloads, but takes no input until it arrives.
+// Holding it drops focus, so its release puts focus and caret back (StoryView.keepFocus),
+// as they were when the first of several queued Undo or Redo steps held it.
+function holdStory(held: boolean, refocus?: () => void): void {
+  for (const host of storyView ? [storyView.host, storyView.treeHost] : []) {
+    if (held) { host.setAttribute("inert", ""); host.setAttribute("aria-busy", "true"); } else { host.removeAttribute("inert"); host.removeAttribute("aria-busy"); }
+  }
+  if (held) { heldRefocus ??= refocus; return; }
+  const kept = heldRefocus; heldRefocus = undefined; kept?.();
+}
+
 async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, project: OpenProject, generation: number, target?: SceneTarget, sceneList?: SceneList): Promise<void> {
   const token = beginCompletion(project, operationScopes.sceneLoad);
+  // Recovery, a refused target and a failed load show in the empty workspace, not the kept Story view.
+  const placeholder = (): void => { holdStory(false); if (!workspace.isConnected && storyView?.host.isConnected) { storyView.host.replaceWith(workspace); storyView.treeHost.replaceWith(tree); } };
   try {
     const persistence = await projectValue<PersistenceStatus>(project, "project.status");
     if (generation !== viewGeneration || !completionIsCurrent(token)) return;
     if (persistence === "recoveryRequired") {
       const report = await projectValue<RecoveryReport>(project, "scene.recovery");
       if (generation !== viewGeneration || !completionIsCurrent(token)) return;
-      tree.replaceChildren();
+      placeholder(); tree.replaceChildren();
       renderRecoverySurface(workspace, report, {
         status: setStatus,
         resolve: async (transactionId, resolution) => {
@@ -773,7 +801,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
       const bodyMatches = !body || (body.type === "root" ? !mapped?.owner : (mapped?.owner?.groupId === body.groupId && mapped.owner.branchId === body.branchId) || (mapped?.id === body.branchId && mapped.conditionalBranch?.groupId === body.groupId));
       if (!scene || scene.sourceConflict || scene.sourceRevision !== target.expectedSourceRevision || (target.beatId && !mapped) || !bodyMatches) {
         setStatus("The mapped origin changed. Return to Branches and refresh the selection.", "error");
-        const back = button("Return to Branches"); back.addEventListener("click", () => { void requestProjectNavigation(project, "branches"); }); workspace.append(back);
+        const back = button("Return to Branches"); back.addEventListener("click", () => { void requestProjectNavigation(project, "branches"); }); placeholder(); workspace.append(back);
         return;
       }
     }
@@ -845,12 +873,13 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
         expectedAuthoringRevision: expected.authoringRevision,
         command,
       }),
-      saveDrafts: async (commands, expected, drafts) => runAuthoringOperation(project, operationScopes.storySave, () => projectValue<SceneWorkspace>(project, "scene.saveDrafts", {
+      saveDrafts: async (commands, expected, drafts, beats = []) => runAuthoringOperation(project, operationScopes.storySave, () => projectValue<SceneWorkspace>(project, "scene.saveDrafts", {
         expectedProjectRevision: expected.projectRevision,
         expectedSourceMapRevision: expected.sourceMapRevision,
         expectedAuthoringRevision: expected.authoringRevision,
         commands,
         drafts,
+        ...(beats.some(beat => beat !== null) ? { historyBeats: beats } : {}),
       })),
       // A draft step writes nothing, so it takes no authoring turn; the request lane
       // still delivers it before the Commit, Save or Undo that follows.
@@ -870,7 +899,7 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
           return await projectValue<SceneWorkspace>(project, "scene.list");
         } finally { finishAuthoringCompletion(operationToken); void refreshPersistenceStatus(project, viewGeneration); }
       },
-      apply: async (command: SceneCommand, expected, drafts = []) => {
+      apply: async (command: SceneCommand, expected, drafts = [], beat?: string) => {
         const operationToken = beginAuthoringCompletion(project, command);
         if (!operationToken) throw new Error("Another persistence operation is still in progress.");
         try {
@@ -880,17 +909,18 @@ async function renderStorySurface(workspace: HTMLElement, tree: HTMLElement, pro
             expectedAuthoringRevision: expected.authoringRevision,
             command,
             ...(drafts.length ? { drafts } : {}),
+            ...(beat ? { historyBeat: beat } : {}),
           });
         } finally { finishAuthoringCompletion(operationToken); }
       },
     };
     const beatId = target?.beatId || (target?.body?.type === "branch" ? target.body.branchId : undefined);
-    if (storyView) { workspace.replaceWith(storyView.host); tree.replaceWith(storyView.treeHost); storyView.update(model, storyActions, beatId); }
+    if (storyView) { workspace.replaceWith(storyView.host); tree.replaceWith(storyView.treeHost); storyView.update(model, storyActions, beatId); holdStory(false); }
     else storyView = renderStoryView(workspace, tree, model, storyActions, beatId);
     const rendered = persistenceMessage(persistence, false);
     setStatus(rendered.text, rendered.kind, rendered.links, rendered);
   } catch (error) {
-    if (generation === viewGeneration && completionIsCurrent(token)) setStatus(message(error, "Scene workspace could not be loaded"), "error");
+    if (generation === viewGeneration && completionIsCurrent(token)) { placeholder(); setStatus(message(error, "Scene workspace could not be loaded"), "error"); }
   }
 }
 

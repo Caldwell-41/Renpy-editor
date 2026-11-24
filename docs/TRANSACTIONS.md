@@ -194,7 +194,9 @@ resolution choices that the report proves safe, requires explicit confirmation,
 revalidates after completion, and resumes authoring only from a terminal non-blocking
 state. Ambiguous records remain blocked. Advanced merge and evidence retention/pruning
 remain later work. The recovery screen stays available without executing the project
-and lists affected paths and retained evidence. Acknowledging a warning or deleting a
+and lists affected paths and retained evidence. It lists only transactions that still
+block writes; durable, rejected and cleaned ones keep their evidence on disk but need no
+choice, so resolving the last blocking one completes recovery. Acknowledging a warning or deleting a
 journal is never offered as a resolution.
 
 Phase 1B adds no renderer operation or ambient filesystem/process/network authority.
@@ -215,7 +217,15 @@ move must not be misreported as recovery-required merely because the wrong handl
 was used for the final flush.
 
 Entry/last Scene constraints, incoming Choice/Jump references, and opaque ownership
-are checked before producing a destructive proposal. Chapter order remains metadata
+are checked before producing a destructive proposal. Protected source in another
+Scene blocks a Scene delete only when it names that Scene's label as a whole name.
+Supported Jump and Call references to the Scene still block it, and so does protected
+source inside the deleted Scene, since the delete would drop it. Core does not detect
+a label built at runtime, such as one joined from strings in Python. The
+`INCOMING_REFERENCE` refusal carries `references`: `beats` lists each Jump and Call that
+goes to the Scene, and `protectedCode` lists each protected region that blocks it. Each
+entry names its Scene (`sceneId`, `sceneName`), `beatId` and payload `kind`. Story
+numbers the beat from that Scene's bodies. Undo restores a deleted Scene. Chapter order remains metadata
 organisation and does not rewrite runtime flow. A display rename changes metadata only.
 
 Every completed semantic commit returns the actual revisions and identities for all
@@ -370,11 +380,21 @@ receive detailed bounded inspection and fail closed.
 Revision verification and recovery hashing read incrementally with a 1 MiB buffer.
 Small mutation snapshots remain capped at 16 MiB, journals at 1 MiB, and recovery
 mutation count per journal at 4096. There is no 4096-journal lifetime cap: write
-readiness completely enumerates retained history with constant working memory, validates
-each terminal journal's schema/checksum without rehashing historical media, and still
-finds later corrupt or unresolved entries. An explicit recovery report remains
-output-proportional so it can describe every retained record. The 512 MiB media and
-revision-read maximum is enforced incrementally, including growing-input detection.
+readiness completely enumerates retained history, validates each terminal journal's
+schema/checksum without rehashing historical media, and still finds later corrupt or
+unresolved entries. Its working memory is one small entry per retained terminal
+journal. While a project is registered, readiness
+remembers each recovery entry it validated as terminal, with the entry folder's
+modification time and the size and modification time of both journal slots, read before
+the journal. It skips that entry until any of these changes or a slot appears or
+disappears, and then validates it again with the full anchored read. An entry that is
+not a plain folder of regular slot files is never skipped. Entries that block
+(unresolved, conflict, unreadable or invalid) are never remembered and are read on
+every check. A completed check forgets entries whose folders are gone. Remembering
+deletes nothing. An explicit
+recovery report remains output-proportional so it can describe every retained record.
+The 512 MiB media and revision-read maximum is enforced incrementally, including
+growing-input detection.
 
 Native selections retain an anchored parent directory and open the regular file
 descriptor-relative with no-follow/reparse-safe semantics before deriving size,

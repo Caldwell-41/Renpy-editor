@@ -54,6 +54,7 @@ pub(crate) fn apply(service: &LifecycleService, command: Command) -> crate::scen
     service
         .scene_apply(SceneCommandRequest {
             drafts: Vec::new(),
+            history_beat: None,
             expected_project_revision: workspace.project_revision,
             expected_source_map_revision: workspace.source_map_revision,
             expected_authoring_revision: None,
@@ -600,7 +601,8 @@ fn phase1h_authoring_continues_after_4097_terminal_journals_and_reopens() {
     assert_eq!(metadata["characters"][0]["technicalName"], "after_boundary");
     let accepted = fs::read(root.join("game/definitions/characters.rpy")).unwrap();
     assert!(String::from_utf8_lossy(&accepted).contains("define after_boundary = Character"));
-    assert!(service.scene_recovery().unwrap().items.len() > 4097);
+    // Finished transactions need no recovery choice.
+    assert!(service.scene_recovery().unwrap().items.is_empty());
     service.close().unwrap();
     service.open_path(&root).unwrap();
     assert_eq!(

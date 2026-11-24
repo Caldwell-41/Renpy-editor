@@ -26,6 +26,12 @@ export const STORY_CASES=[
  'Beat draft conflicts resolve with Discard draft or Override source',
  'Reel edits and inserts through the shared drafts and commands, and view switches keep them',
  'Writing focus keeps drafts, focus and caret, and edits, inserts and resizes through the shared commands',
+ 'Branch beat drafts stay with their branch through ordinary external edits',
+ 'Missing and mismatched condition Variables show their reason in Tracks, Branch path and the builder',
+ 'Undo of a nested beat keeps Redo when the host refuses a history read as busy',
+ 'Commit, Story Save and Undo land once when the host refuses each write as busy',
+ 'A Commit the host keeps refusing as busy keeps its input and shows a plain busy message',
+ 'A Commit the runtime refuses is sent once and keeps its input',
 ];
 const NARROW=STORY_CASES.filter((_,i)=>[0,1,2,7,8].includes(i));
 const REOPEN_CASE='Undo Redo preserves exact bytes and process reopen retains maps with session history reset';
@@ -38,20 +44,25 @@ const ownedProjectSnapshot=fixture=>{
  if(existsSync(base))visit(base);return snapshot;
 };
 
-export async function qualifyStoryController(executable,{output,caseModule,selection='full'}={}) {
+// `seed: 'example'` opens the public Story example with the named `cases` instead.
+export async function qualifyStoryController(executable,{output,caseModule,selection='full',seed,cases:chosen}={}) {
  assert(executable&&output&&caseModule,'Explicit driver, evidence output and reviewed DOM case module required');
- assert(['full','narrow'].includes(selection));
+ assert(['full','narrow'].includes(selection));assert(!seed===!chosen&&[undefined,'example'].includes(seed));
  const cases=await import(pathToFileURL(resolve(caseModule)).href);
- const required=selection==='full'?STORY_CASES:NARROW;
+ const required=chosen??(selection==='full'?STORY_CASES:NARROW);
  for(const name of required)assert.equal(typeof cases.storyCases?.[name],'function',`Required actual DOM case not implemented: ${name}`);
  const fixture=join(tmpdir(),`loomlight-phase3a-controller-${randomUUID()}`);
  assert(!existsSync(fixture));
- const evidence={selection,passed:false,cases:[],driverStarts:0,driverExits:[],cleanupComplete:false,
+ const evidence={selection,seed:seed??'source-foundation',passed:false,cases:[],driverStarts:0,driverExits:[],cleanupComplete:false,
   sdkCommands:0,credentialOperations:0,aiOperations:0,packagedUi:'not exercised',humanAcceptance:'not claimed',fixtureId:basename(fixture),ownedFixtureRemoved:false,failureSnapshotRetained:false};
  let child,session,latestWorkspace,lastMutation,saveBefore,saveAfter;
  let domSequence=0,lastEvent,caseActive=false,caseEventStart=0;
  const panelEvents=new Map(),sourceDocuments=new Map();let sourceInputEvent,sourceNavigationEvent;
  let stopFailure;let inFlight=0;let responseBarrier;
+ // Requests the native host refuses before dispatch, as it does while another request holds
+ // the service (REQUEST_OVERLAP), or that a handler refuses while Ren'Py runs (RUNTIME_BUSY).
+ const refusals=new Map();
+ const refusalMessages={REQUEST_OVERLAP:'Another request is in progress.',RUNTIME_BUSY:'Stop the runtime operation before changing these files.'};
  const transcript=[];
  const w=new Window({url:'http://tauri.localhost'});
  Object.assign(globalThis,{window:w,document:w.document,HTMLElement:w.HTMLElement,HTMLInputElement:w.HTMLInputElement,
@@ -60,7 +71,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
  document.body.innerHTML='<div id="app"></div>';
  for(const type of ['click','keydown','input','change'])document.addEventListener(type,event=>{
   const target=event.target?.closest?.('button,input,select,textarea,[role="button"]')??event.target;
-  const panel=target?.closest?.('.scene-workspace')?'story':target?.closest?.('.source-workspace')?'source':target?.closest?.('.app-header')?'header':null;
+  const panel=target?.closest?.('.scene-workspace, .story-tree')?'story':target?.closest?.('.source-workspace')?'source':target?.closest?.('.app-header')?'header':null;
   // prepareTransition retains the editor being left, never the destination row's path.
   const navigationTarget=target?.matches?.('.source-file-tree .source-file-open, .story-sidebar > .tree-item');
   const navigationActivation=type==='click'||(type==='keydown'&&['Enter',' '].includes(event.key));
@@ -119,11 +130,17 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
    assert(caseActive&&eligible&&event.sequence>caseEventStart&&(['source','header'].includes(event.panel)||(operation==='source.updateDraft'&&event.panel==='source-navigation')),
     'Source writes must originate in the current actual Source UI');
   }
+  const refused=refusals.get(operation);
+  if(refused?.times){
+   refused.times--;const code=refused.code,response={protocolVersion:1,requestId:request.requestId,ok:false,error:{code,message:refusalMessages[code]}};
+   transcript.push({request,responseOk:false,errorCode:code,refusedBeforeDispatch:true,domEvent:null});return response;
+  }
   inFlight++;let response;
   try{
    response=await child.request(request);
    assert(isCoreResponse(response,request.requestId),'Actual Host response must match the exact typed request ID');
-   if(responseBarrier&&operation==='scene.apply'&&payload.command.type===responseBarrier.command){
+   // A held response is a Scene command's, by its type, or another write's, by its operation.
+   if(responseBarrier&&(operation==='scene.apply'?payload.command.type:operation)===responseBarrier.command){
     const barrier=responseBarrier;assert(!barrier.observed,'Only one actual UI response may be held');
     assert(response.ok,'Pending lock proof requires an accepted real Host transaction');barrier.observed=true;
     await barrier.releasePromise;
@@ -139,7 +156,8 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   if(operation==='scene.list'&&response.ok)latestWorkspace=response.value;
   if(operation==='scene.apply'){
    assert.equal(payload.sessionId,session);assert(payload.expectedProjectRevision&&payload.expectedSourceMapRevision);
-   assert(payload.command.sceneId&&payload.command.expectedSourceRevision);
+   // Chapter commands and a new scene name no existing scene.
+   if(!['createChapter','renameChapter','moveChapter','deleteChapter','createScene'].includes(payload.command.type))assert(payload.command.sceneId&&payload.command.expectedSourceRevision);
    if(payload.command.type==='updateBodyBeat')assert(payload.command.beatId&&payload.command.expectedBody);
    if(payload.command.type==='insertBodyBeat')assert(payload.command.body&&payload.command.position);
    lastMutation={request,response,event};
@@ -185,12 +203,15 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   try{actionPromise=action();await wait(()=>barrier.observed);await observe();}
   finally{release();responseBarrier=undefined;await actionPromise;}
  };
+ const busy=(operation,times,code='REQUEST_OVERLAP')=>{assert(caseActive&&(reads.has(operation)||['scene.apply','scene.saveDrafts','history.undo'].includes(operation))&&times>0&&code in refusalMessages,'Only typed reads and Story writes may be refused as busy');refusals.set(operation,{times,code});};
  const raw=async request=>{
-  assert(['snapshot','externalAppend','externalRemove','externalReplace'].includes(request?.driver),'Only owned fixture controls allowed');return child.request(request);
+  assert(['snapshot','externalAppend','externalRemove','externalReplace','interruptedSave'].includes(request?.driver),'Only owned fixture controls allowed');return child.request(request);
  };
  const start=async reopen=>{
   evidence.driverStarts++;
-  child=driverProcess(executable,['--root',fixture,'--seed-evidence',join(output,'seed'),...(reopen?['--reopen']:['--retain'])]);
+  child=driverProcess(executable,['--root',fixture,'--seed-evidence',join(output,'seed'),...(reopen?['--reopen']:['--retain']),...(seed&&!reopen?['--seed',seed]:[])],
+   // Building the example through the ordinary handlers takes several seconds.
+   seed&&!reopen?{startupTimeout:120000}:{});
   const ready=await child.next();evidence.lastDriverReady=ready;assert.equal(ready.fixtureId,basename(fixture));assert.equal(ready.ready,true);assert.equal(ready.reopen,reopen);
  };
  const stop=async()=>{
@@ -225,7 +246,7 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
   assert.deepEqual(await snapshot(),beforeSelection,'Selecting a scene must not change project files');
   const selected=await call('scene.list');
   assert.equal(selected.projectRevision,opened.projectRevision);assert.deepEqual(await call('history.state'),historyBeforeSelection);
-  const context={assert,wait,click,history,enter,key,labelled,call,raw,snapshot,rpy,hashes,pendingWrite,
+  const context={assert,wait,click,history,enter,key,labelled,call,raw,snapshot,rpy,hashes,pendingWrite,busy,
    requests:()=>transcript,settle:async()=>{await new Promise(r=>setTimeout(r,0));await wait(()=>inFlight===0);await new Promise(r=>setTimeout(r,0));},
    workspace:()=>latestWorkspace,session:()=>session,lastMutation:()=>lastMutation,document,
    sourceText:(snapshot,path)=>Buffer.from(snapshot[path]).toString('utf8')};
@@ -233,14 +254,14 @@ export async function qualifyStoryController(executable,{output,caseModule,selec
    const before=await snapshot();const from=transcript.length;const beforeEvent=domSequence;
    lastMutation=undefined;lastEvent=undefined;sourceInputEvent=undefined;sourceNavigationEvent=undefined;panelEvents.clear();caseEventStart=domSequence;caseActive=true;
    // Case code owns exact expected byte/model/history assertions and actual selectors.
-   try{await cases.storyCases[name](context);await context.settle();}finally{caseActive=false;}
+   try{await cases.storyCases[name](context);await context.settle();assert(![...refusals.values()].some(r=>r.times),'Every armed busy refusal must reach the app');}finally{caseActive=false;refusals.clear();}
    const after=await snapshot();const requests=transcript.slice(from);
    assert(domSequence>beforeEvent,'A DOM scenario must operate actual application controls');
    evidence.cases.push({name,passed:true,beforeSHA256:hashes(rpy(before)),afterSHA256:hashes(rpy(after)),
     requests:requests.map(r=>r.request.requestId),sceneApplyRequests:requests.filter(r=>r.request.operation==='scene.apply').length});
    if(name===STORY_CASES[2]){saveBefore=before;saveAfter=after;}
   }
-  assert(saveBefore&&saveAfter,'One exact nested transaction required for shared history/reopen proof');
+  assert(chosen||saveBefore&&saveAfter,'One exact nested transaction required for shared history/reopen proof');
   // The DOM cases must leave their last accepted transaction undoable and restore any ordinary conflict.
   const beforeUndo=await snapshot();
   await history('undo');

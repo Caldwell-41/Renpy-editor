@@ -293,12 +293,14 @@ browser. On macOS they need scoped execution outside the agent sandbox. Add `--c
 for review screenshots.
 
 ```sh
-npm run design:check -- story-revamp combined --interaction ./screens/story-revamp/combined-check.mjs
+npm run design:check -- story-revamp combined
 npm run design:check -- story-revamp <cue-sheet|shot-reel|stage-tracks> --interaction ./screens/story-revamp/check.mjs
 ```
 
-Earlier rounds ran the combined check as a standalone script; their evidence is under
-ignored `.toolchains/story-combined/`. The initial pass covered both bottom modes,
+The combined review ended with Kris's approval of `combined-v1`, so #120 retired its
+interaction module, `combined-check.mjs`. The production Story tests and Story
+controller cases check the product's behaviour; the mock needs no gate of its own.
+Its review rounds' evidence is under ignored `.toolchains/story-combined/`. The initial pass covered both bottom modes,
 Writing focus, nested draft/context retention at three sizes, every beat editor,
 scene validation/creation, branch moves, Choice/Call destination navigation,
 enlargement, dialogs and Undo. The normal stage measures 974 x 548 at 1600 x 1000,

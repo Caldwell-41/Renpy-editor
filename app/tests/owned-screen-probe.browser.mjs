@@ -18,7 +18,7 @@ try {
     if(request.operation==='probe.runtimeUiReport')return {ok:true,protocolVersion:1,requestId:request.requestId,value:{recorded:true}};
     if(request.operation==='screens.list' && !catalogBusyRefused){
       catalogBusyRefused=true;
-      return {ok:false,protocolVersion:1,requestId:request.requestId,error:{code:'RUNTIME_BUSY',message:'Another request is in progress.'}};
+      return {ok:false,protocolVersion:1,requestId:request.requestId,error:{code:'REQUEST_OVERLAP',message:'Another request is in progress.'}};
     }
     return child.request(request);
   });

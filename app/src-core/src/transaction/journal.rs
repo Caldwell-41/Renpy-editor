@@ -35,6 +35,14 @@ pub enum JournalState {
     Cleaned,
 }
 
+impl JournalState {
+    /// Durable, rejected and cleaned transactions need no recovery; every other state
+    /// blocks writes until it is resolved.
+    pub fn is_terminal(&self) -> bool {
+        matches!(self, Self::Durable | Self::Rejected { .. } | Self::Cleaned)
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JournalMutation {
@@ -273,12 +281,7 @@ impl JournalStore {
             let store = Self { directory };
             match store.load() {
                 Ok(journal) => {
-                    let terminal = matches!(
-                        journal.state,
-                        JournalState::Durable
-                            | JournalState::Rejected { .. }
-                            | JournalState::Cleaned
-                    );
+                    let terminal = journal.state.is_terminal();
                     items.push(RecoveryItem {
                         transaction_id: journal.transaction_id.clone(),
                         code: code_for(&journal.state),
@@ -327,10 +330,16 @@ impl JournalStore {
         Ok(RecoveryReport { items })
     }
 
-    /// Completely enumerates retained history using constant working memory and
-    /// reports whether any record blocks a write. Terminal journals are checksum and
-    /// schema validated, but their historical payloads are never rehashed here.
-    pub fn blocking_code(root: &DirectoryAnchor) -> Result<Option<ErrorCode>, ErrorCode> {
+    /// Completely enumerates retained history and reports whether any record
+    /// blocks a write. Working memory is one small entry per retained terminal
+    /// journal; a completed scan forgets entries that are gone. Terminal journals are checksum and
+    /// schema validated, but their historical payloads are never rehashed here. A
+    /// journal `terminal` already validated as terminal is skipped while both of its
+    /// slots keep their size and modification time.
+    pub(crate) fn blocking_code(
+        root: &DirectoryAnchor,
+        terminal: &TerminalJournals,
+    ) -> Result<Option<ErrorCode>, ErrorCode> {
         let metadata = match root.open_child(OsStr::new(".renpy-editor"), false) {
             Ok(value) => value,
             Err(_) if root.entry_absent(OsStr::new(".renpy-editor")) == Ok(true) => {
@@ -344,19 +353,24 @@ impl JournalStore {
             Err(code) => return Err(code),
         };
         let mut blocker = None;
+        terminal.begin_scan();
         for_each_recovery_entry(&recovery, |entry_name| {
+            // Stamped before the read, so a change during the read is checked next time.
+            let stamp = entry_stamp(&recovery, &entry_name);
+            if stamp.is_some() && terminal.known(&entry_name) == stamp {
+                return Ok(());
+            }
             let code = recovery
                 .open_child(&entry_name, false)
                 .ok()
                 .and_then(|directory| Self { directory }.load().ok())
                 .map(|journal| match journal.state {
-                    JournalState::Durable
-                    | JournalState::Rejected { .. }
-                    | JournalState::Cleaned => None,
+                    ref state if state.is_terminal() => None,
                     JournalState::Conflict { .. } => Some(ErrorCode::Conflict),
                     _ => Some(ErrorCode::RecoveryRequired),
                 })
                 .unwrap_or(Some(ErrorCode::RecoveryRequired));
+            terminal.record(entry_name, stamp.filter(|_| code.is_none()));
             if let Some(code) = code {
                 if code == ErrorCode::RecoveryRequired || blocker.is_none() {
                     blocker = Some(code);
@@ -364,6 +378,7 @@ impl JournalStore {
             }
             Ok(())
         })?;
+        terminal.end_scan();
         Ok(blocker)
     }
 
@@ -490,7 +505,108 @@ fn file_name(path: &Path) -> Result<&OsStr, ErrorCode> {
     path.file_name().ok_or(ErrorCode::UnsafePath)
 }
 
+/// A recovery entry's folder modification time, and each journal slot's size and
+/// modification time (`None` when the slot is absent).
+#[derive(Clone, Copy, PartialEq)]
+struct EntryStamp {
+    directory: std::time::SystemTime,
+    slots: [Option<(u64, std::time::SystemTime)>; 2],
+}
+
+/// Stamps an entry with plain metadata reads, which cost far less than anchored
+/// opens. Anything but a real folder of regular slot files gives no stamp, so the
+/// entry takes the full anchored read, which refuses links.
+fn entry_stamp(recovery: &DirectoryAnchor, entry: &OsStr) -> Option<EntryStamp> {
+    let directory = recovery.path().join(entry);
+    let metadata = fs::symlink_metadata(&directory).ok()?;
+    if !metadata.is_dir() || path::is_link_or_reparse(&metadata) {
+        return None;
+    }
+    let mut slots = [None, None];
+    for (slot, name) in slots.iter_mut().zip(["journal.0.json", "journal.1.json"]) {
+        match fs::symlink_metadata(directory.join(name)) {
+            Ok(file) if file.is_file() && !path::is_link_or_reparse(&file) => {
+                *slot = Some((file.len(), file.modified().ok()?));
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            _ => return None,
+        }
+    }
+    Some(EntryStamp {
+        directory: metadata.modified().ok()?,
+        slots,
+    })
+}
+
+/// Recovery entries whose journal this session validated as terminal, with the
+/// stamps they had then. Write readiness skips them until a stamp changes, and a
+/// complete scan forgets entries it no longer finds. It only remembers; it never
+/// deletes a record.
+#[derive(Default)]
+pub(crate) struct TerminalJournals(std::sync::Mutex<TerminalScan>);
+
+/// Each entry keeps the number of the last scan that found it.
+#[derive(Default)]
+struct TerminalScan {
+    scan: u64,
+    entries: std::collections::HashMap<OsString, (EntryStamp, u64)>,
+}
+
+impl TerminalJournals {
+    fn begin_scan(&self) {
+        if let Ok(mut known) = self.0.lock() {
+            known.scan += 1;
+        }
+    }
+
+    /// The remembered stamp, marking the entry as found by this scan.
+    fn known(&self, entry: &OsStr) -> Option<EntryStamp> {
+        let mut known = self.0.lock().ok()?;
+        let scan = known.scan;
+        let (stamp, seen) = known.entries.get_mut(entry)?;
+        *seen = scan;
+        Some(*stamp)
+    }
+
+    /// Remembers a terminal journal's stamp, or forgets the entry.
+    fn record(&self, entry: OsString, stamp: Option<EntryStamp>) {
+        if let Ok(mut known) = self.0.lock() {
+            let scan = known.scan;
+            match stamp {
+                Some(stamp) => known.entries.insert(entry, (stamp, scan)),
+                None => known.entries.remove(&entry),
+            };
+        }
+    }
+
+    /// Forgets entries the completed scan did not find.
+    fn end_scan(&self) {
+        if let Ok(mut known) = self.0.lock() {
+            let scan = known.scan;
+            known.entries.retain(|_, (_, seen)| *seen == scan);
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn len(&self) -> usize {
+        self.0.lock().unwrap().entries.len()
+    }
+}
+
+#[cfg(test)]
+thread_local! {
+    static JOURNAL_READS: std::cell::Cell<u64> = const { std::cell::Cell::new(0) };
+}
+
+/// Journal slot reads on this thread since the last call.
+#[cfg(test)]
+pub(crate) fn take_journal_reads() -> u64 {
+    JOURNAL_READS.replace(0)
+}
+
 fn read_valid(directory: &DirectoryAnchor, name: &OsStr) -> Result<Journal, ErrorCode> {
+    #[cfg(test)]
+    JOURNAL_READS.set(JOURNAL_READS.get() + 1);
     let mut bytes = Vec::new();
     directory
         .open_file(name)?

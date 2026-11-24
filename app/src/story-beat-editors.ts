@@ -60,9 +60,13 @@ export interface EditorContext {
   readonly preview?: (payload?: BeatPayload) => void;
   /** "+ New variable…" in a rule builder's variable list. */
   readonly newVariable?: NewVariable;
+  /** The workspace Story shows now; a kept draft's lists follow it when Story shows the draft again. */
+  readonly current?: () => SceneWorkspace;
+  /** The stage beats a Transition at this beat's place animates: "02 Background · Rainy platform". */
+  readonly animates?: () => readonly string[];
 }
 
-export function requiredText(control: HTMLInputElement, name: string): string { if (!control.value.trim()) { control.focus(); throw new Error(`${name} is required.`); } return control.value.trim(); }
+export function requiredText(control: HTMLInputElement, name: string): string { if (!control.value.trim()) throw new Error(`${name} is required.`); return control.value.trim(); }
 
 const transitionItems = (none = true): ChoiceItem[] => [...none ? [{ value: "none", label: "None" }] : [], { value: "dissolve", label: "Dissolve" }, { value: "fade", label: "Fade" }];
 const placementItems: ChoiceItem[] = [{ value: "left", label: "Left" }, { value: "centre", label: "Centre" }, { value: "right", label: "Right" }];
@@ -77,7 +81,7 @@ export const narrationItem: ChoiceItem = { value: "narration", label: "Narration
 
 export function buildBeatEditor(payload: BeatPayload, context: EditorContext): BeatEditor {
   const { model } = context;
-  if (payload.type === "setVariable") return buildAssignmentEditor(model, payload, context.validate);
+  if (payload.type === "setVariable") return buildAssignmentEditor(model, payload, context.validate, context.newVariable, context.current);
   if (payload.type === "showScreen" || payload.type === "hideScreen" || payload.type === "callScreen") return buildScreenBeatEditor(payload, context.existing, context.actions);
   const host = element("div", "beat-fields story-fields"); const controls: HTMLElement[] = [];
   const hint = (text: string): HTMLElement => element("p", "story-field-hint", text);
@@ -108,7 +112,7 @@ export function buildBeatEditor(payload: BeatPayload, context: EditorContext): B
     if (model.authoring.appearances.find(item => item.id === id)?.characterId !== who.value) refuseChoice(select, `Choose one of ${name(who.value)}'s expressions.`);
     return id;
   };
-  let read: () => BeatPayload, primary: HTMLElement | undefined;
+  let read: () => BeatPayload, primary: HTMLElement | undefined, refresh: (() => void) | undefined;
   switch (payload.type) {
     case "background": {
       const asset = backingSelect("Background", assets("background"), payload.assetId);
@@ -152,24 +156,35 @@ export function buildBeatEditor(payload: BeatPayload, context: EditorContext): B
       read = () => ({ type: payload.type, assetId: requireChoice(asset) }) as BeatPayload; break;
     }
     case "stopMusic": host.append(hint("Stops the current music.")); read = () => ({ type: "stopMusic" }); break;
-    case "transition": { const fade = transition(false); host.append(hint("Applies to the next visual change.")); read = () => ({ type: "transition", transition: fade.value as "dissolve" | "fade" }); break; }
+    case "transition": {
+      // What this transition animates, from the beats above its place (story-release-fixes / a-v2).
+      const fade = transition(false), help = element("div", "story-transition-help");
+      const drawHelp = (): void => {
+        const beats = context.animates?.() ?? [], count = beats.length;
+        const list = element("ul", "story-plain-list"); for (const item of beats) list.append(element("li", "", item));
+        help.replaceChildren(element("p", "story-field-hint story-lead", count ? `This ${fade.value} animates ${count} beat${count === 1 ? "" : "s"} above it:` : `This ${fade.value} animates no beats above it.`), ...count ? [list] : [],
+          hint("A transition animates the stage beats between it and the last line, choice or transition above it. To animate a beat below, move this Transition under that beat."));
+      };
+      fade.addEventListener("change", drawHelp); drawHelp(); host.append(help); refresh = drawHelp;
+      read = () => ({ type: "transition", transition: fade.value as "dissolve" | "fade" }); break;
+    }
     case "jump": case "call": {
       const label = payload.type === "call" ? "Call destination Scene" : "Destination Scene";
       // A plain select of scenes; a missing scene stays as an unavailable row until replaced.
       const destination = backingSelect(label, model.scenes.map(scene => ({ value: scene.id, label: scene.displayName })), payload.sceneId);
       destination.hidden = false; destination.tabIndex = 0; destination.className = ""; controls.push(destination);
       host.append(labelled(label, destination));
-      const required = (): string => { if (unavailable(destination)) { destination.focus(); throw new Error("Select an available item first."); } return destination.value; };
+      const required = (): string => { if (unavailable(destination)) throw new Error("Select an available item first."); return destination.value; };
       const validate = validateField(destination, () => { required(); });
       host.append(hint(payload.type === "call" ? "Returns to the next beat. The editor preview does not run the called scene." : "Leaves this scene and does not return."));
-      read = payload.type === "call" ? () => { validate(); return { type: "call", sceneId: required(), returnLabel: payload.returnLabel }; } : () => ({ type: "jump", sceneId: required() }); break;
+      read = payload.type === "call" ? () => { validate(); return { type: "call", sceneId: required(), returnLabel: payload.returnLabel }; } : () => { validate(); return { type: "jump", sceneId: required() }; }; break;
     }
     case "repeatChoice": host.append(hint("Shows its Choice again, with its prompt. Change this with the option's Then.")); read = () => payload; break;
     case "return": host.append(hint("Returns to the caller, or the main menu. Add a beat with Jump or Return in its place to change this ending.")); read = () => ({ type: "return" }); break;
     case "customCode": case "choice": read = () => payload; break;
   }
   // Writing goes to the text; otherwise the first field to fix, or the first control.
-  return { host, controls, primary: primary ?? controls.at(-1) ?? host, read: read!, focus: () => { const invalid = host.querySelector<HTMLElement>('[aria-invalid="true"]:not([hidden])'); if (!invalid && primary) primary.focus(); else focusFirst(host); } };
+  return { host, controls, primary: primary ?? controls.at(-1) ?? host, read: read!, ...refresh ? { refresh } : {}, focus: () => { const invalid = host.querySelector<HTMLElement>('[aria-invalid="true"]:not([hidden])'); if (!invalid && primary) primary.focus(); else focusFirst(host); } };
 }
 
 

@@ -426,13 +426,17 @@ fn inserting_an_identical_screen_statement_does_not_adopt_or_replace_its_opaque_
     let opaque = before["beats"][0].clone();
     let owner = panel(&mut f, "help_panel");
     let target = resolved(&mut f, &owner);
-    // The explicit command refuses to anchor a new Beat on the opaque statement itself.
-    assert_eq!(
-        f.reject(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],
-            "expectedSourceRevision":before["sourceRevision"],"position":{"type":"before","anchor":{"type":"beat","beatId":opaque["id"]}},
-            "beat":{"type":"showScreen","target":target["binding"],"revisions":target["revisions"]}}))["error"]["code"],
-        "OPAQUE_BOUNDARY"
-    );
+    // Directly before the opaque statement, the new Beat gets its own id.
+    let anchored = f.command(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],
+        "expectedSourceRevision":before["sourceRevision"],"position":{"type":"before","anchor":{"type":"beat","beatId":opaque["id"]}},
+        "beat":{"type":"showScreen","target":target["binding"],"revisions":target["revisions"]}}));
+    let beats = &anchored["scenes"][0]["beats"];
+    assert_eq!(beats[0]["payload"]["type"], "showScreen");
+    assert_ne!(beats[0]["id"], opaque["id"]);
+    assert_eq!(beats[1]["payload"]["type"], "customCode");
+    assert_eq!(beats[1]["id"], opaque["id"]);
+    f.undo();
+    assert_eq!(f.model()["scenes"][0]["beats"], before["beats"]);
     let accepted = f.command(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],
         "expectedSourceRevision":before["sourceRevision"],"position":before["bodies"][0]["defaultPlace"],
         "beat":{"type":"showScreen","target":target["binding"],"revisions":target["revisions"]}}));
@@ -861,4 +865,31 @@ fn show_hide_beats_use_exact_source_stable_identity_one_history_entry_and_fresh_
         ipc(&mut f.service, "source.open", json!({"path":path}))["text"],
         final_source
     );
+}
+
+#[test]
+fn a_changed_branch_test_stops_renamed_screens_pairing_by_position() {
+    let mut f = Fixture::new();
+    panel(&mut f, "help_panel");
+    panel(&mut f, "other_panel");
+    let scene = f.model()["scenes"][0].clone();
+    let source = format!(
+        "label {}:\n    if True:\n        show screen help_panel\n        \"A\"\n        show screen help_panel\n    else:\n        \"B\"\n    return\n",
+        scene["technicalLabel"].as_str().unwrap()
+    );
+    f.save(&scene, &source);
+    let before = f.model()["scenes"][0]["beats"].clone();
+    // Without the test change, the two renamed statements would pair by position
+    // (`source_changes_to_multiple_screen_names_retain_each_beats_target_intent`). The
+    // changed test gives the header new bytes, so the structure no longer counts as the same.
+    let changed = source
+        .replace("if True:", "if False:")
+        .replace("show screen help_panel", "show screen other_panel");
+    f.save(&scene, &changed);
+    let after = f.model()["scenes"][0]["beats"].clone();
+    assert_eq!(after[0]["id"], before[0]["id"]);
+    for index in [1, 3] {
+        assert_eq!(before[index]["payload"]["type"], "showScreen");
+        assert_ne!(after[index]["id"], before[index]["id"]);
+    }
 }

@@ -249,7 +249,8 @@ identifies the target, and keep other machine detail in diagnostics.
   updates or clears as the value becomes valid.
 - **When a field is finished.** Validate text and number fields on blur and on an
   explicit field commit. Validate a selection when it is chosen. Enter commits only
-  where it already does; in multiline text it inserts a newline.
+  where it already does; in multiline text it inserts a newline. This check, and any
+  read for a preview, label or step name, marks the field but never moves focus.
 - **On submission.** Revalidate the whole form, including untouched and dependent
   fields. Invalid input writes and sends nothing. Keep every field, mark the errors and
   focus the first one. A disabled button alone never explains why.
@@ -302,8 +303,44 @@ Each rule picks a project variable (yes/no, whole number, decimal or text), a pr
 value. Numbers offer `= ≠ < ≤ > ≥`; yes/no and text offer equality only. One All/Any
 switch joins the rules, and each branch shows its Ren'Py line. Mixed groups and Python
 the editor cannot read stay read-only with Edit in Source; the builder never writes
-raw Python. The variable list can create a variable in place, with Undo. Story
-conditions and Choice "Only when" use the same builder.
+raw Python. A test that joins with both All and Any says "This mixes All and Any.
+The builder can't edit it. Edit it in Source." Another test the builder can't take,
+such as `trust > fare`, `3 < trust` or a bare `True`, says "The builder can't show
+this Python. Until then, edit it in Source." So does a test core reads as custom Python.
+Each shows its line and that hint in the neutral hint style. It is information, not a
+problem: it gets no `!` and no count. Screen readers name each rule's test a
+comparison. A branch or option with one rule says "If comparison", "Else if comparison"
+or "Option 2 comparison". With several rules each has its number: "If rule 1
+comparison", "Option 2 rule 2 comparison". The rule's variable list, value field and
+remove button follow the same rule: "If variable", "If value" and "Remove rule" for one
+rule, "If rule 2 value" and "Remove rule 2" for several. The names follow added and
+removed rules and an option's number after a move.
+
+A test core could not read (`story-release-fixes` / `a-v2`) keeps its line in a
+red-bordered box, with why and what to do in red under it, then Create and Edit in
+Source as they apply. Core names the variable, its type, and the comparison and other
+side it sits in; the renderer never reads the test's Python:
+
+- Missing variable: "ticket_count is not a project variable. Create it, or change this
+  line in Source." Create ticket_count… opens New variable with that name and the type
+  its comparison suggests.
+- Wrong type: "destination is text, and ≥ only compares numbers. Use = or ≠ in Source.",
+  or "trust is a whole number, and True is yes/no. Compare it with a whole number in
+  Source."
+- Out-of-range number, or a line too long: "A number in this line is out of range.
+  Change this line in Source." and "This line is too long for the builder. Shorten it
+  in Source."
+- Each of these ends "Until then, the builder can't edit this branch." ("this option"
+  in a Choice's Only when).
+
+The condition's editor lists each such branch under its summary, "Else if ticket_count
+= 2: ticket_count is not a project variable.", and marks its name with `!`. Its Tracks
+cell reads "2 branches to fix". The Branch path caption follows the open If or Else if
+and names its problem, "ticket_count = 2 · not a variable", and the branch's switch
+reads "Else if !". The list, the marks, the caption and the Tracks cell use the warning
+colour. The variable list can create a variable in place, with Undo: it ends with
+"+ New variable…", says "No variables yet." when the project has none, and selects the
+new variable. Story conditions, Choice "Only when" and Set variable use the same list.
 
 ### Arithmetic equation row
 
@@ -320,7 +357,10 @@ owns the behaviour, the decimal type and the Screens actions.
 
 The production Story equation row validates through revision-bound
 `scene.validateAssignment` and commits through the existing Story transaction.
-Core supplies result types, supported operations, limits and field diagnostics.
+A check waits for any write in flight (Story's own, "+ New variable…", Undo or Redo)
+and sends the revisions that write makes. A draft's variable list follows the
+project's variables, so a variable an Undo removed leaves it, and a chosen variable
+that left the project reads Missing Variable. Core supplies result types, supported operations, limits and field diagnostics.
 Draft feedback folds constants only; a variable-dependent draft says its current
 value is unknown. It never substitutes declaration defaults. Accepted Story state
 stays in the core model and Scene preview. Numeric suggestions support arrows,
@@ -354,12 +394,14 @@ its state. When space runs short, secondary panels collapse before the main edit
 shrinks. The footer and warning regions keep a fixed height so editing content never
 moves.
 
-The header save status sits before Undo, Redo and Save. It shows the number of
+The shared header is one 44 px row in every workspace (`story-revamp` / `combined-v1`
+and `header-v2` show 40 to 48 px). The header save status sits before Undo, Redo and Save. It shows the number of
 pending beat drafts ("5 unsaved beat drafts") as well as Saved, Saving, Unsaved Source
 draft, Conflict or Recovery required. The bottom status bar shows "Ready" and the
 "Undone: …" and "Redone: …" notices. The approved placement is `story-combined-status`
 / `header-v2`. At 560 px the header stays on one row and shows a short form, such as
-"5 unsaved" or "Nothing saved". Cmd/Ctrl+S has one shell-owned route. In Story it
+"5 unsaved" or "Nothing saved". If wider fonts leave the row short, the save status
+ends in an ellipsis and every control stays in view. Cmd/Ctrl+S has one shell-owned route. In Story it
 accepts all pending beat drafts under [Saving Story drafts](#saving-story-drafts);
 in Source it accepts the focused Source draft. Other contexts retain their existing
 Save behaviour. Pending or refused drafts never report the whole project as Saved.
@@ -425,6 +467,8 @@ covers moving, unwrapping and deleting branches.
 - Tracks has one column per beat and lanes for Beat, Background, Characters, Words,
   Sound and Flow. Reel shows beat cards in order, including the beats around a branch.
   Neither shows elapsed time, playback or keyframes.
+- The Characters lane names the character, expression and position: "Mara · Smile ·
+  Left", "Eli · Concerned", "Mara → Centre", "Hide Eli" (`story-release-fixes` / `a-v2`).
 - Writing focus hides the stage and keeps the editor and Branch path. The Branch path
   spans the top. From 900 px, Tracks or Reel sits beside the editor with one row per
   beat; Tracks keeps all six lanes and the route line runs down the left. Markers are
@@ -432,7 +476,7 @@ covers moving, unwrapping and deleting branches.
   1600 px wide and 400 px from 900 to 1200 px. Below 900 px the editor sits above
   Tracks, which shows Beat and Beat content. Writing focus has no Key, and the arrow
   keys move up and down between rows. The scene toolbar button reads "Writing focus",
-  then "Show game window".
+  then "Show stage".
 - In Writing focus from 900 px, grips on the sidebar edge and on each lane edge resize
   them by drag or by the arrow keys (Shift for larger steps). Escape cancels a drag or
   the keyboard changes, and double-click or Enter resets the default. Words fills the
@@ -452,11 +496,33 @@ covers moving, unwrapping and deleting branches.
   column moves its beat.
   The scene toolbar holds Writing focus, + Add beat and More. More holds View in
   Source, Add screen Beat, Add Condition and the Assist actions.
+  + Add beat adds after the selected beat, in that beat's own scene, branch or option,
+  and never past the place before that body's ending. A selected branch or option
+  header stands for its condition or Choice. With nothing selected, + Add beat adds at
+  the scene's default place.
 - The scene title ("Arrival ▾") opens and closes the scene list, which keeps every
-  scene and chapter action. Below 1200 px, Story opens with the icon rail and the
+  scene and chapter action. Each chapter is a heading, and ▾ or ▸ before its name
+  shows or hides its scenes. The scenes sit under a thin guide line. Collapsing a
+  chapter is view state: it sends nothing to core and lasts until Story closes. The
+  chapter's own actions stay in its ⋯ menu (`story-release-fixes` / `a-v2`).
+- Delete in a scene's menu closes the menu and asks "Delete scene "Depot"? Undo
+  restores it." under the scene's row, inside the scene list, with Cancel and Delete
+  scene. When core
+  refuses the delete with the beats and Custom Code that need the scene, the refusal
+  takes the confirmation's place under the scene's row. A header line with × reads
+  "Can't delete "Platform 4". 2 beats go to it:". One row per beat gives its scene,
+  then its number and kind, such as "The last service · 07 Jump", and opens that
+  beat. The closing line reads "Change or remove them, then delete again. Nothing
+  was deleted." When only Custom Code elsewhere names the scene's label, the header
+  ends "Custom Code may jump to it, and Loomlight can't check where it goes:" and the
+  closing line is "Change that code in Source first. Nothing was deleted." Custom Code
+  inside the scene adds "it holds Custom Code that deleting would drop". The block
+  is an alert, so the status bar does not repeat it. × or Escape closes it and returns
+  focus to the scene's name.
+- Below 1200 px, Story opens with the icon rail and the
   scene list closed. Like the scene list's other defaults, this is set when Story
   opens; resizing the window keeps the current state, and the toggles still work.
-  A 16:9 stage measures 599 × 337 at 1100 × 720.
+  A 16:9 stage measures 617 × 347 at 1100 × 720.
 - Below 900 px the scene list opens over the workspace. The workspace scrolls: stage,
   editor, Branch path, then Tracks or Reel, with the scene toolbar pinned at the top. A 16:9
   stage measures 480 × 270 at 560 × 640.
@@ -473,6 +539,11 @@ covers moving, unwrapping and deleting branches.
 
 ### Branches in a scene
 
+- Scene beats are numbered from 01. A condition's branch beats count on from its
+  number through all its branches, so condition 06 numbers its beats 06.1, 06.2 and on
+  into Else if and Otherwise. Option beats nest as Choice.option.beat: 07.2.1 is the
+  first beat of option 2 in Choice 07. Tracks, Reel, Writing focus, the Branch path,
+  the editors and the pickers show the same numbers.
 - The Branch path only switches branches. Each open condition shows its number, its
   If test and a two-way switch in its arm colours. Choice options show only their
   number unless open.
@@ -498,8 +569,10 @@ covers moving, unwrapping and deleting branches.
 - Core gives each [body](../GLOSSARY.md) its beats, body ending and insertion places.
   Story views, Add a beat and moves read them and never work them out again.
 - A body has an insertion place before each node up to its ending, and one at its end
-  when it does not end. There is none after the ending, before protected Custom Code
-  or before an Else if or Otherwise header. Jump, Repeat this Choice and Return fit
+  when it does not end. There is none after the ending, inside protected Custom Code
+  or before an Else if or Otherwise header. A place right before protected Custom Code
+  puts the new beat before the region's first line. The `+` on the beat before the
+  region says so: "Add after 03 Mara's line, before 04 Custom Code". Jump, Repeat this Choice and Return fit
   only at the end. An empty body has one insertion place, and its new beat replaces
   the `pass`.
 - Add a beat starts at the place before the body's ending, or at the end when the
@@ -512,6 +585,13 @@ covers moving, unwrapping and deleting branches.
 - When a body's ending is unknown, Story says so and never claims that the story
   continues. Authoring treats an unknown ending as one that may continue, so it
   never relies on an ending it cannot prove.
+- An edit that would let a scene ending in such Custom Code run past its end is
+  refused: "Can't add a beat here. This scene ends with Custom Code that may leave
+  it, so a beat after it could run on into the next scene. Add a Return or Jump after
+  the Custom Code first, or edit the scene in Source." Other edits read "Can't make
+  this change." in place of the first sentence. An edit that would let a scene that
+  ends run on keeps the general refusal "That operation would break a required
+  Chapter or Scene invariant."
 
 ### Beat editors
 
@@ -533,6 +613,14 @@ a beat follow `story-combined-editor` / `replace-v2`
   current path. [Story Undo](#story-undo) defines the grouping of typing into steps.
 - Staging changes are explicit beats. A dialogue line never hides a `show` or
   appearance change.
+- A Transition writes a standalone `with`, which animates the stage beats above it,
+  back to the last line, choice, transition or other interaction. Its editor lists
+  those beats ("This fade animates 2 beats above it:") and says to move the Transition
+  under a beat to animate it (`story-release-fixes` / `a-v2`). A stage beat with its
+  own transition ends the list, and a branch's first beats continue above its condition.
+  Show screen and Hide screen beats are listed too, because Ren'Py's
+  `config.transition_screens` (true by default) also animates screens shown or hidden
+  since the last interaction. Call screen is an interaction and ends the list.
 - Selecting a character or the background on the stage names the beat that set it, and
   offers to edit that beat or add a change before the current beat in the same scene,
   branch or option. It never edits the earlier beat silently.
@@ -545,11 +633,15 @@ a beat follow `story-combined-editor` / `replace-v2`
   [rule builder](#condition-rule-builder). A number field keeps what the author typed,
   including a half-entered number such as `-` or `1.`, until it is complete.
 - A condition's editor lists its branches. Each If or Else if test is a retained draft
-  with Commit test and Cancel. "+ Add Else if" and Add Otherwise add a new branch as a
+  with Commit condition and Cancel. "+ Add Else if" and Add Otherwise add a new branch as a
   draft until Add Else If or Add Otherwise. "Remove this Else if" (or Otherwise) marks
   the branch as a draft until Remove branch or Story Save; it cancels the branch's own
   unsaved test. A new condition from Add a beat is a draft
-  like a new beat, with its test and Include Otherwise.
+  like a new beat, with its test and Include Otherwise. The condition's caption counts
+  its branches and beats: "2 branches / 1 beat", "1 branch / 3 beats".
+- Delete asks first. A beat: "Delete beat 05, <its Tracks summary>? Undo restores it."
+  with Delete beat. A condition: "Delete this condition, its branches and their 3 beats?
+  Undo restores them. To keep one branch, use Unwrap." with Delete condition.
 - Add a beat is a [pick-one dialog](#pick-one-dialogs). Its details list Goes at, In
   and After for the highlighted kind, or "Replaces …" when the kind replaces an
   ending. A new beat's editor repeats those lines.
@@ -557,6 +649,18 @@ a beat follow `story-combined-editor` / `replace-v2`
   "Before …" and "End of …" positions. It opens on the beat's own location with the
   rest closed. Up and Down move, Right opens or moves in, Left closes or moves out,
   Enter selects and Escape cancels. A beat never moves into its own branches.
+- Move to leaves out the two positions that would leave the beat where it is. It opens
+  with the first remaining position after the beat in its own place chosen, or that
+  place's last position when none follows, and the summary names it
+  (`story-combined-editor` / `replace-v2`). Protected Custom Code shows in order as a
+  row that can't be chosen: "04 Custom Code · protected, stays in place". A beat may
+  move past it, and the note adds "Protected Custom Code stays where it is."
+- When protected Custom Code sits right before or after the beat, Move to opens with no
+  position chosen and says where the beat is now: "05 Eli's line is after 04 Custom
+  Code now. Choose where to move it." The beat's own place shows as a row that can't
+  be chosen, "05 Eli's line · here now", and focus starts on the position right before
+  the region, nearest the beat ("Before 04 Custom Code") (`story-release-fixes` /
+  `a-v2`).
 
 ### Beat drafts
 
@@ -570,7 +674,10 @@ incomplete or invalid input never reaches the source files. Ask before an action
 would discard a draft, including deleting its beat or closing the project.
 
 The [beat draft conflict rules](#beat-draft-conflicts) handle changes to the source
-beneath a retained draft. A beat that the author has not edited is not a draft. A
+beneath a retained draft. A beat that the author has not edited is not a draft: its
+editor shows no Cancel or Commit Beat (`story-combined-status` / `header-v2`). Escape
+asks for Cancel only while there is a draft, and that hint lasts until the editor shows
+another beat or scene. A
 condition or Choice column shows the draft marker for drafts in any of its branches,
 open or closed. Drafts show `*` in Tracks, Reel and the editor heading ("* Draft"); a
 draft that conflicts with source shows `!` in the accent colour ("! Conflict"). A beat with a draft can
@@ -614,7 +721,14 @@ A draft whose beat, insertion place or scene left source has no beat to sit unde
 It shows above the shown scene's beats with "Conflict with source" and, in place of
 source text, why there is none, for example "This beat is no longer in source." A
 beat that became protected says to edit it in Source. Only Discard draft resolves
-these drafts. A scene whose source Story cannot map has no beats to compare with. That
+these drafts. A beat draft also keeps the branch it began in. If source moves its beat
+to another branch, the draft says so (`story-release-fixes` / `a-v2`): "This beat moved
+to Otherwise in source. Your draft is still for this beat.", with the source under
+"Source, now in Otherwise" and a "Show it in Otherwise" link. Commit and Story Save
+refuse it. Discard draft keeps source; Override source saves the draft to the beat where
+it is now, through the same Override path and revision checks. An external edit that adds or removes a copy of the beat's line
+in the beat's own branch has the same result, because source no longer says which copy
+is the beat. A copy added or removed in another branch leaves the draft with its beat. A scene whose source Story cannot map has no beats to compare with. That
 happens when its file is missing or invalid, or when a Source draft of that file is
 unsaved and the file changed on disk. Its drafts are not conflicts: they show above its
 beats with their own actions, and Commit and Story Save refuse them until Story can read
@@ -655,7 +769,7 @@ A refused Story Save follows the approved `story-combined-status` design
 (`header-v2`), which places `story-save-refusal` (`marked-v1`) inside Story Combined.
 Save reveals the first failing draft in project order. The header save status reads
 "Nothing saved. 3 of 5 drafts need changes:", followed by one link per scene with its
-count of failing drafts. At 560 px the header shows "Nothing saved" and the bottom
+count of failing drafts. With one beat draft it reads "1 of 1 draft needs changes:". At 560 px the header shows "Nothing saved" and the bottom
 status bar holds the full line and links. Each link reveals that scene's first failing
 draft. A failing beat's Tracks or Reel column and its scene row show a red `!` in place
 of the draft `*`, and the column gets a red top edge and the reason as its tooltip. Reel
@@ -663,8 +777,8 @@ also shows the reason under the beat's text, in red, and "Conflict with source" 
 accent colour for a conflict. The legend adds "Needs changes". The editor heading reads
 "! Needs changes" and the reason sits under the fields. Marks appear only after a refused Save. A new beat whose body or insertion anchor is gone from source is a beat
 draft conflict. The marks and counts update as the author fixes or cancels each
-failing draft. When none fail, the status reads "5 unsaved beat drafts. Ready to
-save." The marks clear when a later Save succeeds.
+failing draft. When none fail, the status reads "5 unsaved beat drafts." The marks
+clear when a later Save succeeds.
 
 Story Save does not accept unfinished Source text. The shell coordinates acceptance
 through the existing transaction layer, with current-source validation and ordinary
@@ -690,7 +804,12 @@ Their tooltip and accessible name name the next edit and the shortcut, for examp
 "Undo button resize ⌘Z". With nothing to undo or redo, a button is dimmed, does
 nothing and reads "Nothing to undo" or "Nothing to redo". It stays in the Tab order
 (`aria-disabled`, not `disabled`). After Undo the bottom status bar reports it, for
-example "Undone: button resize", until the next edit or view.
+example "Undone: button resize", until the next edit or view. A Story edit to an existing
+beat, branch or condition names it by the number Tracks shows, as `story-combined-status`
+(`header-v2`) does: "Undone: dialogue edit in beat 06.2.1". Story sends that number with
+the command, and core puts it in the name. A beat that is not yet added, or that has
+left source, has no number, so its edits name the scene: "new dialogue draft in Arrival".
+Edits outside Story keep their names.
 
 Undo opens the edit's workspace and selects its item: the beat, screen element,
 Source file, prompt action or reference record. If the item no longer exists,
@@ -698,7 +817,10 @@ select the nearest item that contains it, or open the workspace. Undo and Redo
 follow ordinary navigation. Where leaving is refused, Undo does nothing and the
 input stays. Where leaving asks "Keep editing?", Undo asks too and continues only
 after Discard and leave. Beat drafts and Source drafts never block it. While a
-dialog is open, Cmd/Ctrl+Z belongs to the dialog.
+dialog is open, Cmd/Ctrl+Z belongs to the dialog. While Undo or Redo reloads Story,
+the Story view stays on screen but takes no input. Another Undo or Redo may start
+before it arrives; Story then shows the latest step's result. Focus and the caret in
+a beat draft field stay in that field, or in the same field of its redrawn editor.
 
 Typing in a beat draft makes draft steps. A text step ends when focus leaves the
 field or after 2 seconds without typing. Each change to another control, such as a
@@ -798,7 +920,11 @@ Save. An incomplete or invalid calculation never supplies an invented preview re
 Selecting a beat shows the scene-local state through that beat: background, visible
 characters and appearances, placement, music, simple variables and the current line or
 menu. A new Background clears characters. State the editor cannot prove is labelled
-partial or unknown, never guessed. The branches open in the Branch path are the
+partial or unknown, never guessed. A partial scene shows a banner that names the cause.
+With protected Custom Code it reads "Preview and reference certainty are partial
+because this Scene contains protected Custom Code." When the only cause is a condition
+the builder can't read, it reads "Preview and reference certainty are partial because
+the builder can't read a condition in this scene." ("2 conditions" for more). The branches open in the Branch path are the
 preview route. A condition or Choice before the selected beat with no open branch
 leaves its state unknown, and the preview continues to the selected beat. With no beat
 selected, the preview stops at the first such condition or Choice. Open branches are
@@ -933,7 +1059,14 @@ geometry. Number and resize drafts render before acceptance; canvas-only sample 
 and button states never change source. Fit and 100% scale the same composition.
 Unsupported code stays in place and marks only its region as partly visual. Story
 offers Show screen, Hide screen and Call screen for owned parameterless screens; Call
-waits for Finish interaction. The [Screens contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3b-screens.md)
+waits for Finish interaction. A new screen beat uses Goes at, In, After and ⋯ Move to…
+like other new beats, starting at the place Screens last used. When the scene changed
+after that place was picked, Goes at reads "Choose a place" and one warning block says
+"The scene changed after you picked this place in Screens. Choose where this beat
+goes." with Choose a place…. Choose a place… opens "Place the new Show screen" (or
+Hide or Call screen) with nothing chosen, the note "Puts the new beat at the chosen
+place." and a Choose button. Add Beat refuses with "Choose a place for this beat
+first." until a place is chosen (`story-release-fixes` / `a-v2`). The [Screens contract](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3b-screens.md)
 owns requirements, including its
 [creation and reuse controls](https://github.com/Caldwell-41/Renpy-editor/blob/archive/docs-ledgers-2026-11/docs/tasks/reference/phase-3b-screens.md#implemented-creation-and-reuse-controls),
 and [ADR 0021](adr/0021-separate-renpy-canvas-helper.md) owns the canvas helper.

@@ -1,18 +1,19 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { hasSceneDraft, type SceneWorkspace, type SceneBeat, type SceneCommand } from "../src/scene-ui.js";
-import { chooseIn, openGuard, optionBlocks, pickKind, press, sceneBodies, renderStoryView, selectBeat, type } from "./story-controls-fixture.js";
+import { type SceneWorkspace, type SceneBeat, type SceneCommand } from "../src/scene-ui.js";
+import { chooseIn, editorProject, openGuard, optionBlocks, pickKind, press, sceneBodies, renderStoryView, selectBeat, storyBeat, storyEditor, texts, type } from "./story-controls-fixture.js";
+import { mountStory } from "./story-dom-mount.js";
 const tick = async (): Promise<void> => { await new Promise(resolve => setTimeout(resolve, 0)); };
-function setup(beats: readonly SceneBeat[], apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision">) => Promise<SceneWorkspace>) {
-  const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });
+function setup(beats: readonly SceneBeat[], apply: (command: SceneCommand, expected: Pick<SceneWorkspace, "projectRevision" | "sourceMapRevision">) => Promise<SceneWorkspace>, steps?: string[]) {
+  const browser = new Window(); Object.assign(globalThis, { window: browser, document: browser.document, HTMLElement: browser.HTMLElement, HTMLInputElement: browser.HTMLInputElement, HTMLTextAreaElement: browser.HTMLTextAreaElement, HTMLSelectElement: browser.HTMLSelectElement, Event: browser.Event, KeyboardEvent: browser.KeyboardEvent });
   document.body.innerHTML = '<main></main><aside></aside>';
   const model: SceneWorkspace = { projectRevision: "project-open", sourceMapRevision: "map-open", entrySceneId: "one", lastOpen: { chapterId: "chapter", sceneId: "one" }, chapters: [{ id: "chapter", displayName: "Chapter", directory: "game" }],
     scenes: [{ id: "one", chapterId: "chapter", displayName: "Arrival", technicalLabel: "arrival", sourcePath: "game/arrival.rpy", sourceRevision: "source-open", sourceConflict: false, partial: false, beats, bodies: sceneBodies(beats) }, { id: "two", chapterId: "chapter", displayName: "Conversation", technicalLabel: "conversation", sourcePath: "game/conversation.rpy", sourceRevision: "other", sourceConflict: false, partial: false, beats: [], bodies: [] }],
     authoring: { characters: [], assets: [], appearances: [], variables: [{ id:"money",technicalName:"money",variableType:"decimal",defaultValue:2.5 },{ id: "trust", technicalName: "trust", variableType: "int", defaultValue: "0" }, { id: "flag", technicalName: "flag", variableType: "bool", defaultValue: true }] } };
   const host = document.querySelector<HTMLElement>("main")!; const statuses: string[] = [];
-  const dispose = renderStoryView(host, document.querySelector("aside")!, model, { apply, status: text => statuses.push(text), resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); } }).dispose;
-  return { browser, host, model, statuses, close: async () => { dispose(); await browser.happyDOM.close(); } };
+  const view = renderStoryView(host, document.querySelector("aside")!, model, { apply, status: text => statuses.push(text), ...steps ? { recordStep: async step => { steps.push(step.name); } } : {}, resolution: { width: 1280, height: 720 }, present: async () => { throw Error("No media"); } }); const dispose = view.dispose;
+  return { browser, host, model, statuses, view, close: async () => { dispose(); await browser.happyDOM.close(); } };
 }
 function click(host: ParentNode, label: string): void { const button = [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === label); assert.ok(button, label); button.click(); }
 function select(host: ParentNode, label: string, value: string): HTMLSelectElement { const control = host.querySelector<HTMLSelectElement>(`select[aria-label="${label}"]`)!; assert.ok(control, label); control.value = value; control.dispatchEvent(new Event("change", { bubbles: true })); return control; }
@@ -28,9 +29,9 @@ test("Call edit keeps label and captured envelopes; stale refusal keeps fields a
   select(s.host, "Call destination Scene", "one");
   const field = s.host.querySelector<HTMLSelectElement>('select[aria-label="Call destination Scene"]')!;
   field.disabled = true; click(s.host, "Commit Beat"); await tick();
-  assert.equal(field.disabled, true); assert.ok(field.isConnected && hasSceneDraft(s.host)); assert.equal(field.value, "one");
+  assert.equal(field.disabled, true); assert.ok(field.isConnected && s.view.hasDrafts()); assert.equal(field.value, "one");
   assert.deepEqual(writes, [{ command: { type: "updateBodyBeat", sceneId: "one", expectedSourceRevision: "source-open", beatId: "call", expectedBody: { type: "root" }, beat: { type: "call", sceneId: "one", returnLabel: "stable_return" } }, expected: { projectRevision: "project-open", sourceMapRevision: "map-open" } }]);
-  assert.match(s.statuses.at(-1)!, /Source changed/); click(s.host, "Cancel"); assert.equal(hasSceneDraft(s.host), false); await s.close();
+  assert.match(s.statuses.at(-1)!, /Source changed/); click(s.host, "Cancel"); assert.equal(s.view.hasDrafts(), false); await s.close();
 });
 
 test("missing Call destination stays visible, fails blur and submission, and never chooses first Scene", async () => {
@@ -43,16 +44,47 @@ test("missing Call destination stays visible, fails blur and submission, and nev
   await s.close();
 });
 
+test("Commit on a missing Background marks its row and focuses Change", async () => {
+  let writes = 0; const missing: SceneBeat = { id: "bg", byteStart: 10, byteEnd: 30, protected: false, payload: { type: "background", assetId: "missing", transition: "none" } };
+  const s = setup([missing, ending], async () => { writes++; return s.model; });
+  try {
+    selectBeat(s.host, "bg");
+    const row = s.host.querySelector<HTMLElement>(".story-editor .story-asset-row")!, change = row.querySelector<HTMLButtonElement>(".story-change")!;
+    click(s.host, "Commit Beat"); await tick();
+    assert.equal(writes, 0); assert.equal(row.getAttribute("aria-invalid"), "true"); assert.ok(document.activeElement === change, "Commit focuses the marked row's Change");
+  } finally { await s.close(); }
+});
+
 test("guarded Choice validates exact integer at blur/submission; IME and failed writes retain every field", async () => {
   const writes: SceneCommand[] = []; const s = setup([choice, ending], async command => { writes.push(command); throw Error("Map changed. Input retained."); });
   selectBeat(s.host, "choice");
-  const value = openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('input[aria-label="Only when rule 1 value"]')!;
+  const value = openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('input[aria-label="Option 1 value"]')!;
   assert.equal(value.value, "5");
   type(value, "9223372036854775808"); assert.equal(value.hasAttribute("aria-invalid"), false);
   value.dispatchEvent(new Event("blur")); assert.equal(value.getAttribute("aria-invalid"), "true"); click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 0); assert.equal(value.value, "9223372036854775808"); assert.equal(document.activeElement, value);
   value.dispatchEvent(new Event("compositionstart", { bubbles: true })); type(value, "9223372036854775807"); click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 0);
   value.dispatchEvent(new Event("compositionend", { bubbles: true })); value.dispatchEvent(new Event("blur")); assert.equal(value.hasAttribute("aria-invalid"), false); click(s.host, "Commit Beat"); await tick();
-  const payload = writes[0]!.beat as {options:{condition:{expression:{operator:string;right:{value:string}}}}[]}; assert.equal(payload.options[0]!.condition.expression.right.value, "9223372036854775807"); assert.equal(payload.options[0]!.condition.expression.operator, "greaterEqual"); assert.ok(value.isConnected && !value.disabled && hasSceneDraft(s.host));
+  const payload = writes[0]!.beat as {options:{condition:{expression:{operator:string;right:{value:string}}}}[]}; assert.equal(payload.options[0]!.condition.expression.right.value, "9223372036854775807"); assert.equal(payload.options[0]!.condition.expression.operator, "greaterEqual"); assert.ok(value.isConnected && !value.disabled && s.view.hasDrafts());
+  await s.close();
+});
+
+test("an option's rules are named for screen readers by its option number, which follows a move", async () => {
+  const two: SceneBeat = { ...choice, payload: { type: "choice", options: [{ text: "Ready", condition: guard }, { text: "Wait", condition: guard }] } };
+  const s = setup([two, ending], async () => { throw Error("No writes"); });
+  selectBeat(s.host, "choice");
+  const rules = openGuard(optionBlocks(s.host)[1]!);
+  const comparisons = (): (string | null)[] => [...rules.querySelectorAll("select")].map(item => item.getAttribute("aria-label")).filter(label => label?.endsWith(" comparison") ?? false);
+  // Each rule's variable list, value field and remove button, in order.
+  const named = (): (string | null)[] => [...rules.querySelectorAll(".story-rule")].flatMap(row => [row.querySelector("select")!.getAttribute("aria-label"), row.querySelector("input")?.getAttribute("aria-label") ?? null, row.querySelector('button[aria-label^="Remove"]')!.getAttribute("aria-label")]);
+  // One rule has no number; several rules are numbered, and the labels follow adds and removes.
+  assert.deepEqual(comparisons(), ["Option 2 comparison"]); assert.deepEqual(named(), ["Option 2 variable", "Option 2 value", "Remove rule"]);
+  click(rules, "+ Add rule");
+  assert.deepEqual(comparisons(), ["Option 2 rule 1 comparison", "Option 2 rule 2 comparison"]);
+  assert.deepEqual(named().slice(0, 3), ["Option 2 rule 1 variable", "Option 2 rule 1 value", "Remove rule 1"]);
+  press(optionBlocks(s.host)[1]!, "Move option 2 up");
+  assert.deepEqual(comparisons(), ["Option 1 rule 1 comparison", "Option 1 rule 2 comparison"]); assert.equal(rules.querySelector('[aria-label^="Option 2"]'), null);
+  press(rules, "Remove rule 2");
+  assert.deepEqual(comparisons(), ["Option 1 comparison"]); assert.deepEqual(named(), ["Option 1 variable", "Option 1 value", "Remove rule"]);
   await s.close();
 });
 
@@ -81,7 +113,7 @@ test("guard-only Choice edit preserves raw captions and permits explicit option 
   const s = setup([raw, ending], async command => { saved = command; throw Error("Hold input"); });
   selectBeat(s.host, "choice");
   assert.equal([...s.host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent === "+ Add option")!.disabled, false);
-  const value = openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('input[aria-label="Only when rule 1 value"]')!; type(value, "6"); click(s.host, "Commit Beat"); await tick();
+  const value = openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('input[aria-label="Option 1 value"]')!; type(value, "6"); click(s.host, "Commit Beat"); await tick();
   assert.deepEqual((saved!.beat as {options:{text:string}[]}).options.map(option => option.text), ["  Ready café 雪  ", " Neighbor "]); await s.close();
 });
 
@@ -89,7 +121,7 @@ test("unchanged pending commit blocks another draft and late disposed refusal ca
   let reject!: (error: Error) => void; const pending = new Promise<SceneWorkspace>((_, fail) => { reject = fail; });
   const s = setup([call, ending], async () => pending);
   selectBeat(s.host, "call"); click(s.host, "Commit Beat");
-  assert.equal(hasSceneDraft(s.host), true); click(s.host, "+ Add beat"); assert.equal(s.host.querySelector(".new-beat"), null);
+  assert.equal(s.view.hasDrafts(), true); click(s.host, "+ Add beat"); assert.equal(s.host.querySelector(".new-beat"), null);
   const statusCount = s.statuses.length; await s.close(); reject(Error("Late old-session refusal")); await tick(); assert.equal(s.statuses.length, statusCount);
 });
 
@@ -97,7 +129,7 @@ test("unchanged pending commit blocks another draft and late disposed refusal ca
  const writes:SceneCommand[]=[];
  const decimalChoice:SceneBeat={...choice,payload:{type:"choice",options:[{text:"Ready",condition:{status:"supported",expression:{type:"compare",operator:"greaterEqual",left:{type:"variable",variableId:"money",variableType:"decimal"},right:{type:"decimal",value:"1.25"}}}}]}};
  const s=setup([decimalChoice,ending],async command=>{writes.push(command);throw Error("Keep draft");});
- try{selectBeat(s.host, "choice");const value=openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('[aria-label="Only when rule 1 value"]')!;assert.equal(value.value,"1.25");type(value,"2.75");click(s.host,"Commit Beat");await tick();assert.equal(writes.length,1);assert.equal(value.value,"2.75");
+ try{selectBeat(s.host, "choice");const value=openGuard(optionBlocks(s.host)[0]!).querySelector<HTMLInputElement>('[aria-label="Option 1 value"]')!;assert.equal(value.value,"1.25");type(value,"2.75");click(s.host,"Commit Beat");await tick();assert.equal(writes.length,1);assert.equal(value.value,"2.75");
   const condition=(writes[0]!.beat as {options:{condition:{expression:{right:unknown}}}[]}).options[0]!.condition;assert.deepEqual(condition.expression.right,{type:"decimal",value:"2.75"});}finally{await s.close();}
  });
 
@@ -119,7 +151,7 @@ test("Preview options change only the stage: hidden, disabled, marked and unknow
     press(s.host.querySelector(".story-choice-preview")!, "Assume option 2 was picked earlier in this save");
     press(s.host.querySelector(".story-choice-preview")!, "Assume option 3's condition is true");
     assert.deepEqual(stage().map(item => item.state), ["marked", "marked", "available"]);
-    assert.equal(writes.length, 0); assert.equal(hasSceneDraft(s.host), false, "Preview options are not a draft");
+    assert.equal(writes.length, 0); assert.equal(s.view.hasDrafts(), false, "Preview options are not a draft");
   } finally { await s.close(); }
   // With nothing selectable, the stage says the story continues and records no pick.
   const hidden: SceneBeat = { ...choice, payload: { type: "choice", pickedPolicy: "hidePicked", options: [{ id: "only", text: "Only" }] } };
@@ -143,7 +175,7 @@ test("Choice prompt: + Prompt adds a narration or Character line, an empty promp
   click(s.host, "Commit Beat"); await tick(); assert.equal(writes.length, 2);
   assert.deepEqual(writes[1]!.beat, { ...choice.payload, prompt: { type: "narration", text: "Which route?" } });
   assert.ok(text.isConnected); assert.equal(text.value, "Which route?");
-  click(s.host, "Cancel"); assert.equal(hasSceneDraft(s.host), false);
+  click(s.host, "Cancel"); assert.equal(s.view.hasDrafts(), false);
   await s.close();
 });
 
@@ -176,5 +208,83 @@ test("Choice unavailable policy is per option and retained after refusal without
   assert.equal(beat.options[0]!.unavailablePolicy, "showDisabled");
   assert.equal(policy.value, "showDisabled"); assert.ok(policy.isConnected);
   assert.equal(s.host.querySelector<HTMLElement>(".story-game-choice")!.dataset.state, "unknown", "The stage never guesses the live value");
+  await s.close();
+});
+
+test("a new Choice keeps its typed Prompt in the Prompt field while option 1 is still empty", async () => {
+  const writes: SceneCommand[] = [], steps: string[] = [];
+  const s = setup([ending], async command => { writes.push(command); throw Error("Hold input"); }, steps);
+  try {
+    // Keys go to whichever field has focus, as they do for the author.
+    const keys = (text: string): void => { for (const char of text) { const field = document.activeElement as HTMLInputElement; field.value += char; field.dispatchEvent(new Event("input", { bubbles: true })); } };
+    click(s.host, "+ Add beat"); const draft = pickKind(s.host, "Choice");
+    click(draft, "+ Prompt");
+    const prompt = draft.querySelector<HTMLInputElement>('[aria-label="Prompt text"]')!;
+    prompt.focus(); keys("Hello world");
+    assert.equal(document.activeElement?.getAttribute("aria-label"), "Prompt text", "Typing stays in the Prompt"); assert.equal(prompt.value, "Hello world");
+    draft.querySelector<HTMLInputElement>('[aria-label="Choice option text"]')!.focus(); keys("One");
+    click(draft, "Add Beat"); await tick();
+    assert.ok(steps.includes("choice typing in Arrival"), "Draft steps are recorded, as in the app");
+    assert.deepEqual(writes[0]!.beat, { type: "choice", pickedPolicy: "showNormally", prompt: { type: "narration", text: "Hello world" }, options: [{ text: "One" }] });
+  } finally { await s.close(); }
+});
+
+test("the Transition editor names the stage beats it animates, back to the last line, choice or transition", async () => {
+  const s = mountStory(editorProject([
+    storyBeat("words", { type: "narration", text: "The timetable has not changed in thirty years." }),
+    storyBeat("bg", { type: "background", assetId: "platform", transition: "none" }),
+    storyBeat("music", { type: "playMusic", assetId: "night" }),
+    storyBeat("show", { type: "showCharacter", characterId: "mara", appearanceId: "mara-neutral", placement: "centre", transition: "none" }),
+    storyBeat("fade", { type: "transition", transition: "fade" }),
+    storyBeat("line", { type: "dialogue", characterId: "mara", text: "You heard the bell too?" }),
+    storyBeat("move", { type: "placement", characterId: "mara", placement: "left" }),
+    storyBeat("again", { type: "transition", transition: "dissolve" }),
+    storyBeat("faded", { type: "transition", transition: "fade" }),
+  ]));
+  const editor = selectBeat(s.host, "fade"), help = (): HTMLElement => editor.querySelector<HTMLElement>(".story-transition-help")!;
+  assert.deepEqual(texts(help(), "p, li"), ["This fade animates 2 beats above it:", "02 Background · Rainy platform", "04 Show character · Mara",
+    "A transition animates the stage beats between it and the last line, choice or transition above it. To animate a beat below, move this Transition under that beat."]);
+  // The help follows the chosen transition.
+  chooseIn(editor, "Transition", "Dissolve");
+  assert.equal(help().querySelector("p")!.textContent, "This dissolve animates 2 beats above it:");
+  // One beat, and none: a transition right after another has nothing above it to animate.
+  assert.equal(selectBeat(s.host, "again").querySelector(".story-transition-help p")!.textContent, "This dissolve animates 1 beat above it:");
+  const none = selectBeat(s.host, "faded").querySelector<HTMLElement>(".story-transition-help")!;
+  assert.equal(none.querySelector("p")!.textContent, "This fade animates no beats above it."); assert.equal(none.querySelector("li"), null);
+  await s.close();
+});
+
+test("a Transition lists the Show and Hide screen beats above it, stops at Call screen, and climbs out of an Else if", async () => {
+  const panel = { screenId: "panel-id", sourceName: "timetable" }, notice = { screenId: "notice-id", sourceName: "notice" };
+  const header = (id: string, ordinal: number): SceneBeat => storyBeat(id, { type: "customCode", source: "", reason: "Condition header" }, { protected: true, conditionalBranch: { groupId: "late", ordinal, otherwise: false, condition: { status: "supported", expression: { type: "variable", variableId: "flag", variableType: "bool" } } } });
+  const s = mountStory(editorProject([
+    storyBeat("words", { type: "narration", text: "The timetable has not changed in thirty years." }),
+    storyBeat("dialog", { type: "callScreen", target: notice }),
+    storyBeat("bg", { type: "background", assetId: "platform", transition: "none" }),
+    storyBeat("panel", { type: "showScreen", target: panel }),
+    storyBeat("hide", { type: "hideScreen", target: notice }),
+    header("if", 0), storyBeat("in-if", { type: "narration", text: "She nods." }, { owner: { groupId: "late", branchId: "if" } }),
+    header("elif", 1), storyBeat("fade", { type: "transition", transition: "fade" }, { owner: { groupId: "late", branchId: "elif" } }),
+    storyBeat("close", { type: "narration", text: "The doors close behind them." }),
+  ]));
+  const help = selectBeat(s.host, "fade", "elif").querySelector<HTMLElement>(".story-transition-help")!;
+  assert.deepEqual(texts(help, "p, li").slice(0, 4), ["This fade animates 3 beats above it:", "03 Background · Rainy platform", "04 Show screen · timetable", "05 Hide screen · notice"]);
+  await s.close();
+});
+
+test("Add a beat describes Transition by what it animates, and a new Transition names the beats above its place", async () => {
+  const s = mountStory(editorProject([
+    storyBeat("bg", { type: "background", assetId: "platform", transition: "none" }),
+    storyBeat("show", { type: "showCharacter", characterId: "mara", appearanceId: "mara-neutral", placement: "centre", transition: "dissolve" }),
+    storyBeat("hide", { type: "hideCharacter", characterId: "eli", transition: "none" }),
+  ]));
+  selectBeat(s.host, "hide"); press(s.host, "+ Add beat");
+  const dialog = s.host.querySelector<HTMLElement>(".story-add-beat")!;
+  [...dialog.querySelectorAll<HTMLButtonElement>(".story-result")].find(item => item.textContent === "Transition")!.dispatchEvent(new Event("pointerenter"));
+  assert.equal(dialog.querySelector(".story-picker-details > p")!.textContent, "Animates the stage changes above it, since the last line or choice.");
+  // A stage beat with its own transition already animated itself, so the new beat stops there.
+  const panel = pickKind(s.host, "Transition");
+  assert.deepEqual(texts(panel.querySelector(".story-transition-help")!, "li"), ["03 Hide character · Eli"]);
+  assert.equal(storyEditor(s.host).contains(panel), true);
   await s.close();
 });

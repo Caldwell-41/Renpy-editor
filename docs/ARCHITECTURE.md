@@ -296,7 +296,9 @@ file/scene while allowing unrelated scenes to remain editable when safe.
 Core's `history` module keeps the [project history](../GLOSSARY.md#language). Every
 commit records the edit's name and the item it changed. `history.draftStep` adds a
 beat draft's step, and `scene.apply` and `scene.saveDrafts` name the drafts whose
-steps they join. `history.undo` and `history.redo` are the only Undo routes, and
+steps they join. Their optional `historyBeat` and `historyBeats` give the number Story
+shows for each command's beat, such as `06.2.1`; core checks its form and names the
+entry by it. `history.undo` and `history.redo` are the only Undo routes, and
 `history.state` gives the header the next names. The shell owns the one Undo command
 ([Story Undo](UI.md#story-undo)).
 
@@ -524,8 +526,18 @@ documented vertical-clipping defect. Actual frontend/runtime qualification remai
 
 The Scene recognizer follows the same rule: supported canonical Beats retain stable
 IDs, exact byte ranges, hashes, and lexical context; unsupported regions become
-protected Custom Code. Insert, replace, remove, and reorder refuse ambiguous ownership
-or opaque crossings. Scene create/move/delete commits source, metadata, references,
+protected Custom Code. Insert, replace, remove, and reorder refuse ambiguous ownership.
+A beat may move across protected Custom Code in its body, and a place right before a
+protected region inserts before its first byte. The protected node itself never moves,
+and no place exists inside a region. When source changes outside a Story command, an ID follows its exact
+line bytes while the scene has as many copies of that line as before. When an edit adds
+or removes a copy, an ID stays only in a body (the root or one branch) that holds as many
+copies as before, on its copy there. Every other copy gets a new ID, so no copy in
+another branch takes the beat's ID. A beat also keeps its ID
+when its unchanged bytes now parse as a different kind. For example, `scene bg booth`
+is Custom Code until `booth` is imported, and then it is a Background beat with the same
+ID. A condition branch keeps its ID the same way when the variable its test names is
+created: `elif ticket_count == 2:` becomes a test the builder edits. Scene create/move/delete commits source, metadata, references,
 and only a proven corresponding obsolete `.rpyc` as one recoverable semantic change.
 
 Project creation itself is staged: validate destination safety, generate the scaffold
@@ -614,7 +626,11 @@ explicit audition controls.
 
 In Story, the branches open in the Branch path are the route. A condition or Choice
 before the selected beat with no open branch leaves its state unknown rather than
-choosing a branch. Core supplies the bodies, endings and insertion places that Tracks
+choosing a branch. A Choice's option conditions only pick which options show, so the
+stage keeps what it knew when the menu appears. Custom Code, a Call and a Call screen
+leave all state unknown, because a called screen's actions may Jump or run Python. Show
+and Hide screen keep the stage, and a shown screen leaves variables unknown, because its
+actions may set them later. Core supplies the bodies, endings and insertion places that Tracks
 and Reel lay out; the renderer works out no scene structure of its own. Both views draw
 one route from the same Story controller, with one selection and one set of beat drafts.
 Writing focus is view state in that controller too. It lays out the same editor and
@@ -791,10 +807,39 @@ a race where diagnostic polling could refuse a concurrent Source read. The held-
 regression now includes diagnostics, malformed payload/session refusal and responsive
 Stop. Diagnostic resolution alone uses the Source/transaction authority.
 
-The renderer retries only specific read requests refused with `RUNTIME_BUSY` before
-service checkout, for at most 40 retries at 25 ms. Payload/session identity never
-changes. Writes, trust grants and process starts are never replayed. This covers
-Source opening/status observations overlapping normal background read consumers.
+Two refusals look alike and differ in whether a handler ran:
+
+- `REQUEST_OVERLAP`, "Another request is in progress.": `ApplicationHost` refused
+  before checking out the service, because another request holds it. No handler ran.
+- `RUNTIME_BUSY`: a handler ran and refused because Ren'Py is running or cleaning up
+  (the runtime, transaction execution, Scene, Source and authoring gates), or because
+  a runtime request is still running. It lasts as long as that run.
+
+`dispatch::CheckoutError` names every way checkout can fail, and
+`dispatch::checkout_failure` maps it for dispatch, the Tauri side and the probes. Only
+`Overlap` becomes `REQUEST_OVERLAP`. Shutdown, a poisoned state lock and a handler
+panic become `INTERNAL_ERROR`, because a retry cannot outlast shutdown or a poisoned
+lock and a panicking handler may already have written. Native AI settings, connection
+and request paths keep their own refusal messages for an overlap and report the
+checkout error's own message otherwise.
+
+`value()` sends a request again, read or write, only while the host refuses it with
+`REQUEST_OVERLAP`, up to 40 times at 25 ms intervals, inside the request's lane turn,
+with the same payload. No other code is retried, so a `RUNTIME_BUSY` refusal reaches
+the surface at once and does not hold the lane. When the wait runs out, the surface
+shows the refusal. Commit shows "Another request is in progress. Input retained." or
+the runtime refusal with "Input retained.", without the Source advice. The retry keeps
+the header's `history.state` read from dimming Undo and Redo while core still holds the
+entries (H94), and lets Commit, Story Save and Undo overlap out-of-lane requests such
+as formula checks (H96). The probes' `__loomlightProbeRetryBusy` retries the same code.
+
+A native dialog request (`project.openPicker`, `project.chooseParent`, `sdk.browse`,
+`asset.choose*`) checks the session before the dialog opens; an overlap there is an
+ordinary `REQUEST_OVERLAP`. After the dialog closes, `ApplicationHost::complete_dialog`
+waits up to 10 s for the service with the author's choice instead of refusing, so its
+response is never `REQUEST_OVERLAP` and the app never opens the dialog again. Past the
+wait it returns `INTERNAL_ERROR`, "Another request kept the project busy, so this
+choice was not applied. Choose again."
 
 Source retention/observation, project status/flush, device preference reads/writes and
 scene/authoring/flow observations share one renderer request lane. Selection persistence
@@ -804,7 +849,9 @@ navigation uses the same service, and background observations cannot take it dur
 Save. Short runtime submissions and SDK discovery join the lane; runtime control/status
 bypass it so Stop remains responsive. Picker and unrelated surface lifetimes retain
 existing coordination. A failed
-read releases the lane. Only explicit pre-dispatch busy reads retry; no write is replayed.
+read releases the lane. Formula checks (`scene.validateAssignment`) and `scene.recovery`
+stay outside the lane. A formula check already waits for Story's writes (B10, B23), and
+`scene.recovery` runs only while recovery disables writes.
 
 Native main-window close and application quit route into the same Runtime Stop/Cancel
 and existing Source draft leave flow as Close Project. The narrow desktop-only

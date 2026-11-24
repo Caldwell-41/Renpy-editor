@@ -2,7 +2,7 @@
 //! Styling/canvas slots remain with #31/#55. No project Python is evaluated here.
 pub(crate) const PATH: &str = "game/loomlight_choice_v1.rpy";
 pub(crate) const ADAPTER: &str = "# Loomlight Choice availability adapter v1. Ren'Py 8.5.3.\nscreen _ll_choice_v1(items):\n    style_prefix \"choice\"\n\n    vbox:\n        for i in items:\n            textbutton i.caption action i.action sensitive i.kwargs.get(\"_ll_available\", True)\n";
-const TEMPLATE: &str = "screen choice(items):\n    style_prefix \"choice\"\n\n    vbox:\n        for i in items:\n            textbutton i.caption action i.action\n";
+pub(crate) const TEMPLATE: &str = "screen choice(items):\n    style_prefix \"choice\"\n\n    vbox:\n        for i in items:\n            textbutton i.caption action i.action\n";
 
 pub(crate) fn supported(source: &str) -> bool {
     let normalized = source.replace("\r\n", "\n");

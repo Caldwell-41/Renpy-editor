@@ -89,6 +89,37 @@ try {
  await page.locator('.recent-open').click();await page.getByRole('button',{name:'+ Add beat',exact:true}).waitFor();
  for(const theme of ['light','dark']){await page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);for(const surface of ['Story','Source','Branches','Characters','Assets','Variables']){await page.getByRole('button',{name:surface,exact:true}).click();await page.locator('#app-status').filter({hasText:'Saved'}).waitFor().catch(async error=>{throw new Error(`${theme}/${surface}: ${await page.locator('#app-status').textContent()}`,{cause:error});});if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.story-track-beat').nth(2).click();await page.waitForFunction(()=>[...document.querySelectorAll('.catalog-thumbnail')].every(i=>(i.getAttribute('src')&&i.complete)||i.alt==='Preview unavailable'));await page.screenshot({path:output+surface.toLowerCase()+'-'+theme+'.png'});}}
 
+ // The shared header is one row of 40 to 48 px in every workspace (combined-v1, header-v2). At
+ // 560 px it keeps one row with the save status, Undo, Redo and a refused Story Save, whose full
+ // line and scene links move to the bottom status bar.
+ const headerRow=()=>page.evaluate(()=>{const header=document.querySelector('.app-header'),box=header.getBoundingClientRect();
+  const parts=[...header.querySelectorAll('.brand,.header-project,.app-status,.app-status .status-link,button')].filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden').map(e=>{const r=e.getBoundingClientRect();return {name:e.getAttribute('aria-label')||e.textContent.trim().slice(0,24)||e.className,top:r.top,bottom:r.bottom,right:r.right};});
+  return {height:box.height,parts,oneRow:parts.every(p=>p.top>=box.top-0.5&&p.bottom<=box.bottom+0.5),overflow:document.documentElement.scrollWidth>innerWidth||parts.some(p=>p.right>box.right+0.5)};});
+ const headerHeights=[];
+ const checkHeader=async label=>{const row=await headerRow();headerHeights.push([label,row.height]);assert.ok(row.height>=40&&row.height<=48,`${label}: header is ${row.height} px`);assert.ok(row.oneRow,`${label}: header wraps ${JSON.stringify(row.parts)}`);assert.equal(row.overflow,false,`${label}: header overflows ${JSON.stringify(row.parts)}`);};
+ const sizes=[[1440,900],[1100,720],[560,640]],setTheme=theme=>page.evaluate(async theme=>{const {updatePreferences}=await import('/src/preferences.ts');await updatePreferences({theme});},theme);
+ for(const theme of ['light','dark'])for(const [width,height] of sizes)for(const surface of ['Story','Source','Variables','Branches']){
+  await setTheme(theme);await page.setViewportSize({width,height});await page.getByRole('button',{name:surface,exact:true}).click();
+  if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.story-track-column').first().waitFor();
+  await checkHeader(`${surface} ${width}x${height} ${theme}`);await page.screenshot({path:output+`header-${surface.toLowerCase()}-${width}x${height}-${theme}.png`,clip:{x:0,y:0,width,height:80}});
+ }
+ // Linux Chromium falls back to wider fonts than the Mac's. With a wide font every workspace
+ // still keeps the whole header on one row at 560 px.
+ const wide=await page.addStyleTag({content:':root{--font-ui:Verdana,"DejaVu Sans",sans-serif}'});await setTheme('light');await page.setViewportSize({width:560,height:640});
+ for(const surface of ['Story','Source','Variables','Branches']){await page.getByRole('button',{name:surface,exact:true}).click();if(surface==='Source')await page.locator('.cm-content').waitFor();if(surface==='Branches')await page.locator('.branch-node').first().waitFor();if(surface==='Story')await page.locator('.story-track-column').first().waitFor();await checkHeader(`${surface} 560x640 wide font`);}
+ await wide.evaluate(style=>style.remove());
+ await page.setViewportSize({width:1440,height:900});await page.getByRole('button',{name:'Story',exact:true}).click();
+ await page.locator('.story-track-beat[data-beat-kind=dialogue]').first().click();await page.locator('.expanded-beat textarea').first().press('End');await page.keyboard.type(' {i}');
+ await page.locator('.app-header').getByRole('button',{name:'Save',exact:true}).click();await page.locator('#app-status').filter({hasText:'Nothing saved'}).waitFor();
+ for(const theme of ['light','dark'])for(const [width,height] of sizes){
+  await setTheme(theme);await page.setViewportSize({width,height});
+  await checkHeader(`Story Save refusal ${width}x${height} ${theme}`);await page.screenshot({path:output+`header-refusal-${width}x${height}-${theme}.png`,clip:{x:0,y:0,width,height:80}});
+  const line=await page.evaluate(()=>{const visible=e=>!!e&&e.getClientRects().length>0&&getComputedStyle(e).fontSize!=='0px';const header=document.querySelector('#app-status'),footer=document.querySelector('.app-refusal');return {header:visible(header.querySelector('.status-link'))?header.textContent:getComputedStyle(header,'::before').content,footer:visible(footer)?footer.textContent:''};});
+  if(width===560)assert.deepEqual(line,{header:'"Nothing saved"',footer:'Nothing saved. 1 of 1 draft needs changes:The Apartment 1'},`560 px refusal: ${JSON.stringify(line)}`);
+  else assert.equal(line.header,'Nothing saved. 1 of 1 draft needs changes:The Apartment 1',`${width} px refusal: ${JSON.stringify(line)}`);
+ }
+ console.log('header heights',JSON.stringify(headerHeights));
+ await page.setViewportSize({width:1440,height:900});await page.locator('.expanded-beat').getByRole('button',{name:'Cancel',exact:true}).click();
 
  // Long accepted Choice captions remain reachable inside a short preview.
  await page.getByRole('button',{name:'Story',exact:true}).click();
@@ -107,12 +138,40 @@ try {
  const storyAt=async(width,height)=>{await page.setViewportSize({width,height});await page.getByRole('button',{name:'Source',exact:true}).click();await page.getByRole('button',{name:'Story',exact:true}).click();await page.locator('.story-track-column').first().waitFor();return storyLayout();};
  const laptop=await storyAt(1100,720);
  assert.equal(Math.round(laptop.nav),64,'Story opens with the icon rail below 1200 px');assert.equal(laptop.listOpen,false,'Story opens with the scene list closed below 1200 px');assert.equal(laptop.title,'false');
- assert.ok(Math.abs(laptop.stage.width-599)<=2&&Math.abs(laptop.stage.height-337)<=2,`1100 x 720 stage: ${JSON.stringify(laptop.stage)}`);
+ assert.ok(Math.abs(laptop.stage.width-617)<=2&&Math.abs(laptop.stage.height-347)<=2,`1100 x 720 stage: ${JSON.stringify(laptop.stage)}`);
  assert.deepEqual(laptop.tools.map(tool=>tool.text),['Writing focus','+ Add beat','More']);assert.equal(new Set(laptop.tools.map(tool=>tool.top)).size,1);
+ // header-v2 / compact-v2: Cancel and Commit Beat show only while the beat has a draft.
+ await page.locator('.story-track-beat[data-beat-kind=dialogue]').first().click();
+ const beatActions=page.locator('.expanded-beat > .row-actions');
+ assert.equal(await beatActions.isVisible(),false,'Commit Beat shows with no draft');
+ await page.locator('.expanded-beat textarea').first().press('End');await page.keyboard.type('!');
+ assert.equal(await beatActions.isVisible(),true,'Commit Beat hidden while the beat has a draft');
+ await beatActions.getByRole('button',{name:'Cancel',exact:true}).click();
+ assert.equal(await beatActions.isVisible(),false,'Commit Beat shows after Cancel');
+ // Writing focus fills the window whatever the scene list and navigation state.
+ const focusWidth=()=>page.evaluate(()=>({columns:getComputedStyle(document.querySelector('.project-shell')).gridTemplateColumns.split(' ').length,workspace:Math.round(document.querySelector('.scene-workspace').getBoundingClientRect().width)}));
+ for(const listOpen of [false,true]){
+  if(listOpen)await page.locator('.story-scene-toggle').click();
+  await page.getByRole('button',{name:'Writing focus',exact:true}).click();
+  assert.deepEqual(await focusWidth(),{columns:1,workspace:1100},`Writing focus at 1100 x 720 with the scene list ${listOpen?'open':'closed'}`);
+  await page.getByRole('button',{name:'Show stage',exact:true}).click();
+  if(listOpen)await page.locator('.story-scene-toggle').click();
+ }
  await page.locator('.navigation-toggle').click();await page.locator('.story-scene-toggle').click();
  const opened=await storyLayout();
  assert.equal(Math.round(opened.nav),180);assert.equal(opened.listOpen,true,'the scene title opens the scene list');assert.equal(opened.title,'true');
  assert.equal(new Set(opened.tools.map(tool=>tool.top)).size,1,`scene toolbar wraps at 1100 px with both panels open: ${JSON.stringify(opened.tools)}`);
+ // story-release-fixes / a-v2: Delete scene asks under the scene's row, inside the scene list, with the menu closed.
+ const deletable=page.locator('.tree-scene-row').nth(2);await deletable.hover();await deletable.locator('.tree-menu > summary').click();
+ // The open ⋯ menu stays inside the scene list.
+ const menu=await deletable.locator('.tree-menu[open] > .tree-tools').evaluate(tools=>{const list=document.querySelector('.project-tree-panel'),panel=list.getBoundingClientRect(),box=tools.getBoundingClientRect();
+  return {inside:box.left>=panel.left&&box.right<=panel.right,scrolls:list.scrollWidth>list.clientWidth};});
+ assert.deepEqual(menu,{inside:true,scrolls:false},'the open scene-row ⋯ menu stays inside the scene list');
+ await deletable.locator('.tree-menu').getByRole('button',{name:/^Delete scene /}).click();
+ const confirmation=await page.evaluate(()=>{const list=document.querySelector('.project-tree-panel'),panel=list.getBoundingClientRect(),box=document.querySelector('.tree-scene-row + .story-scene-confirm').getBoundingClientRect(),row=document.querySelector('.tree-scene-row:has(+ .story-scene-confirm)').getBoundingClientRect();
+  return {inside:box.left>=panel.left&&box.right<=panel.right,below:box.top>=row.bottom-1,openMenus:document.querySelectorAll('.tree-menu[open]').length,scrolls:list.scrollWidth>list.clientWidth};});
+ assert.deepEqual(confirmation,{inside:true,below:true,openMenus:0,scrolls:false},'the Delete scene confirmation sits under its row inside the scene list');
+ await page.locator('.story-scene-confirm').getByRole('button',{name:'Cancel',exact:true}).click();
  await page.locator('.story-scene-toggle').click();assert.equal((await storyLayout()).listOpen,false,'the scene title closes the scene list');
  await page.locator('.navigation-toggle').click();
  const compact=await storyAt(560,640);
@@ -234,19 +293,18 @@ try {
  assert.equal(await page.locator('.project-tree-panel').evaluate(el=>getComputedStyle(el).display),'block');
  assert.equal((await page.locator('.project-tree-panel').boundingBox()).width,treeBefore.width);
  assert.equal(await page.getByRole('button',{name:'The Apartment',exact:true}).isVisible(),true);
- await page.getByRole('button',{name:'Toggle chapter Chapter One'}).click();
+ await page.getByRole('button',{name:'Chapter One',exact:true}).click();
  assert.equal(await page.getByRole('button',{name:'The Apartment',exact:true}).isVisible(),false);
  assert.equal(await page.locator('.scene-header h1').textContent(),'The Apartment');
- await page.getByRole('button',{name:'Toggle chapter Chapter One'}).click();
+ await page.getByRole('button',{name:'Chapter One',exact:true}).click();
  await page.getByRole('button',{name:'Writing focus',exact:true}).click();
  assert.equal(await page.locator('.story-sidebar').isVisible(),false);
  assert.equal(await page.locator('.project-tree-panel').isVisible(),false);
- await page.getByRole('button',{name:'Show game window',exact:true}).click();
+ await page.getByRole('button',{name:'Show stage',exact:true}).click();
  assert.equal(await page.locator('.story-sidebar').evaluate(el=>Math.round(el.getBoundingClientRect().width)),64);
  await page.getByRole('button',{name:'Toggle navigation size'}).click();
  await page.locator('.story-track-beat').nth(3).click();
  await page.screenshot({path:output+'choice-corrections.png'});
- await page.locator('.expanded-beat>.row-actions').getByRole('button',{name:'Cancel',exact:true}).click();
  await page.getByRole('button',{name:'Assets',exact:true}).click();
  assert.equal(await page.locator('.asset-drop-target').isVisible(),true);
  await page.evaluate(()=>window.__loomlightAssetDragState(true));
@@ -332,7 +390,7 @@ try {
     try{await new Promise(resolve=>setTimeout(resolve,1200));return await visualRequest(operation,payload);}
     finally{loadingScene=false;}
    }
-   if(loadingScene&&operation==='source.list')return {protocolVersion:1,requestId:'fixture',ok:false,error:{code:'RUNTIME_BUSY',message:'Initial scene observation owns the service'}};
+   if(loadingScene&&operation==='source.list')return {protocolVersion:1,requestId:'fixture',ok:false,error:{code:'REQUEST_OVERLAP',message:'Initial scene observation owns the service'}};
    return visualRequest(operation,payload);
   };
   let preferences={schemaVersion:1,theme:'system',density:'default',sourceFontSize:14,rememberLayout:true,layouts:{}};
@@ -341,7 +399,7 @@ try {
    const response=value=>({protocolVersion:1,requestId:request.requestId,ok:true,value});
    if(request.operation==='probe.runtimeUiReport'){window.__refreshReport=request.payload;window.__busyRemaining=[...busy.values()];return response(null);}
    const remaining=busy.get(request.operation)??0;
-   if(remaining){busy.set(request.operation,remaining-1);return {protocolVersion:1,requestId:request.requestId,ok:false,error:{code:'RUNTIME_BUSY',message:'Observation overlaps draft retention'}};}
+   if(remaining){busy.set(request.operation,remaining-1);return {protocolVersion:1,requestId:request.requestId,ok:false,error:{code:'REQUEST_OVERLAP',message:'Observation overlaps draft retention'}};}
    if(request.operation==='preferences.write'){preferences=request.payload;return response(preferences);}
    if(request.operation==='preferences.read')return response(preferences);
    return {...await visualRequest(request.operation,request.payload),requestId:request.requestId};
@@ -386,7 +444,7 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
     try{await new Promise(resolve=>setTimeout(resolve,1200));return await visualRequest(operation,payload);}
     finally{held=false;}
    }
-   if(operation==='source.list'&&held){window.__earlyContention++;return {protocolVersion:1,requestId:'fixture',ok:false,error:{code:'RUNTIME_BUSY',message:'Initial observation owns service'}};}
+   if(operation==='source.list'&&held){window.__earlyContention++;return {protocolVersion:1,requestId:'fixture',ok:false,error:{code:'REQUEST_OVERLAP',message:'Initial observation owns service'}};}
    return visualRequest(operation,payload);
   };
   const {enableRichSourceEditor}=await import('/src/source-editor.ts');enableRichSourceEditor();
@@ -474,8 +532,7 @@ for key,value in [('stage','open'),('passed',False),('error','failure')]:
  await restore.click();assert.equal(await hide.evaluate(e=>document.activeElement===e&&e.checkVisibility()),true);
  await audit.locator('.story-track-beat').nth(3).click();
  await hide.click();await audit.getByRole('button',{name:'Writing focus',exact:true}).click();await audit.locator('.expanded-beat').scrollIntoViewIfNeeded();await audit.screenshot({path:output+'audit-fixed-choice-compact.png'});
- await audit.getByRole('button',{name:'Show game window',exact:true}).click();await audit.setViewportSize({width:1440,height:900});
- await audit.locator('.expanded-beat > .row-actions').getByRole('button',{name:'Cancel',exact:true}).click();
+ await audit.getByRole('button',{name:'Show stage',exact:true}).click();await audit.setViewportSize({width:1440,height:900});
  // Alt+Arrow on a Tracks column moves the beat to the next core-listed place; Undo puts it back.
  await audit.locator('.story-track-column[data-beat-id="background"] > .story-track-beat').focus();await audit.keyboard.press('Alt+ArrowRight');
  await audit.waitForFunction(()=>document.querySelectorAll('.story-track-column')[1]?.dataset.beatId==='background'&&document.activeElement?.closest('.story-track-column')?.dataset.beatId==='background');

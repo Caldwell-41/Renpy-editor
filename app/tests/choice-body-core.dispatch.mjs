@@ -338,8 +338,8 @@ try {
  promptEditor=await editChoice(pickedId);button('Remove option 3',promptEditor.querySelectorAll('.story-option')[2]);await applied(promptEditor,'Commit Beat');
  const transferOnly=await source(path),sharedAnchor=scene().beats.find(b=>b.payload.text==='Shared once'),finalReturn=scene().beats.at(-1);
  for(const anchor of [sharedAnchor,finalReturn]){
-  // Add a beat starts before the scene's Return; Move to lists every scene place.
-  draft=addBeat('narration');assert.equal(draft.querySelector('.story-where dd').textContent,`Before ${beatNumber(finalReturn.id)} Return`);
+  // With the scene's Return selected, + Add beat starts before it; Move to lists every scene place.
+  column(finalReturn.id).querySelector('.story-track-beat').click();await settle();draft=addBeat('narration');assert.equal(draft.querySelector('.story-where dd').textContent,`Before ${beatNumber(finalReturn.id)} Return`);
   {const tree=placeTree(draft);assert.deepEqual(positionsIn(tree),[`Before ${beatNumber(pickedId)} Choice`,`Before ${beatNumber(sharedAnchor.id)} Narration`,`Before ${beatNumber(finalReturn.id)} Return`]);tree.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));}
   await placeBefore(draft,anchor.id);enter(draft.querySelector('textarea'),'Exhaustion insertion');await applied(draft,'Add Beat');
   const inserted=scene().beats.find(b=>b.payload.text==='Exhaustion insertion');assert(inserted&&!inserted.owner);assert.equal(lastApply.ok,true);
@@ -374,9 +374,9 @@ try {
  assert(then.classList.contains('story-then-replaced'));assert.equal(block.querySelector('.story-outcome'),null,'no Then menu when Custom Code ends the option');
  assert.equal(then.querySelector('.story-ending').textContent,'Ends with Custom Code: return "good"');assert(!then.textContent.includes('Continue after the Choice'));
  assert([...then.querySelectorAll('button')].some(b=>b.textContent==='Edit in Source'&&!b.disabled));
- // + Beat goes before the ending: no place before Custom Code or after the ending.
+ // + Beat goes before the ending: protected Custom Code has a place before it (B8), the ending has none after it.
  button('+ Beat',block);draft=kind('narration');
- {const tree=placeTree(draft);assert.deepEqual(positionsIn(tree),[`Before ${beatNumber(scene().beats.find(b=>b.payload.text==='Before code').id)} Narration`],'no place before Custom Code or after the ending');tree.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));}
+ {const tree=placeTree(draft);assert.deepEqual(positionsIn(tree),[`Before ${beatNumber(scene().beats.find(b=>b.payload.text==='Before code').id)} Narration`,`Before ${beatNumber(codeEnding.id)} Custom Code`],'a place before Custom Code, none after the ending');tree.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));}
  button('Cancel',draft);
  // Ending unknown sits on the Custom Code beat that causes it; Then stays editable.
  block=option(unknownOption.id);assert.equal(block.querySelector('.story-beat-note').textContent,'Ending unknown: Custom Code can leave this option');
@@ -390,7 +390,7 @@ try {
  assert.equal([...pick(endingMenu.id).querySelectorAll('.story-beat-menu button')].find(item=>item.textContent==='Move down').disabled,true,'Move down cannot pass the ending condition');
  const otherwiseHeader=scene().beats.find(b=>b.conditionalBranch?.otherwise),otherwiseReturn=scene().beats.find(b=>b.payload.type==='return'&&b.owner?.branchId===otherwiseHeader.id);
  button('Delete',pick(otherwiseReturn.id).querySelector('.story-beat-menu'));panel=document.querySelector('.story-operation[aria-label="Delete Beat"]');
- lastApply=undefined;button('Delete this Beat',panel);await wait(()=>lastApply);await settle();
+ lastApply=undefined;button('Delete beat',panel);await wait(()=>lastApply);await settle();
  assert.equal(lastApply.ok,false);assert.equal(lastApply.error.code,'SCENE_INVARIANT');assert.equal(await source(path),bodiesSource);assert(panel.isConnected);button('Cancel',panel);
  stage('core bodies drive Then for Custom Code and unknown endings, the place lists and Move down, and refuse a new fallthrough');
  await saveSource(path,bodiesBefore);await reopen();assert.equal(await source(path),bodiesBefore);

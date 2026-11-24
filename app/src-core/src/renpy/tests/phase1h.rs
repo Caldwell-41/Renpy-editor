@@ -325,6 +325,7 @@ fn run_integrated_gate(temporary: &tempfile::TempDir) {
     assert!(matches!(
         service.scene_apply(SceneCommandRequest {
             drafts: Vec::new(),
+            history_beat: None,
             expected_project_revision: deleted.project_revision,
             expected_source_map_revision: deleted.source_map_revision,
             expected_authoring_revision: None,
@@ -334,7 +335,7 @@ fn run_integrated_gate(temporary: &tempfile::TempDir) {
             }
         }),
         Err(crate::lifecycle::LifecycleError::Scene(
-            crate::scene::SceneError::ReferenceBlocked
+            crate::scene::SceneError::IncomingReferences(_)
         ))
     ));
     service.history_undo().unwrap();

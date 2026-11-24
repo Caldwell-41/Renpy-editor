@@ -9,7 +9,7 @@ import {driverProcess} from './phase2-driver-process.mjs';
 import {buildPanelCreationForm} from '../dist-tests/src/screen-panels.js';
 import {ScreenText} from '../dist-tests/src/screen-text.js';
 import {ScreenLayoutEditor} from '../dist-tests/src/screen-layout.js';
-import {hasSceneDraft,renderStoryView} from '../dist-tests/src/scene-ui.js';
+import {renderStoryView} from '../dist-tests/src/scene-ui.js';
 const output=resolve(process.env.DIALOG_CORE_UI_OUTPUT??`target/dialog-core-${randomUUID()}`);await mkdir(output,{recursive:true});
 const scratch=join(await realpath(output),`loomlight-help-controller-dialog-${randomUUID()}`);
 const child=driverProcess(resolve(process.env.CARGO_TARGET_DIR??'target',`debug/examples/help-controller-driver${process.platform==='win32'?'.exe':''}`),[scratch]);
@@ -26,6 +26,14 @@ async function wait(check,label){const end=Date.now()+5000;while(!check()){if(Da
 const source=async path=>(await call('source.open',{path})).text;
 async function saveSource(path,text){const base=await call('source.open',{path});const draft=await call('source.updateDraft',{path,expectedBaseRevision:base.baseRevision,text,selectionStart:0,selectionEnd:0});return call('source.save',{path,expectedBaseRevision:draft.baseRevision,expectedDraftVersion:draft.draftVersion});}
 async function history(type){return call(`history.${type}`);}
+// A new screen beat's place: Goes at, chosen through Choose a place… or ⋯ Move to… (story-release-fixes / a-v2).
+const goesAt=draft=>draft.querySelector('.story-where dd').textContent;
+async function place(host,draft,label){
+ const shown=text=>[...draft.querySelectorAll('button')].find(b=>b.textContent===text&&!b.closest('[hidden]'));
+ const choose=shown('Choose a place…');if(choose)choose.click();else{draft.querySelector('.story-beat-menu > summary').click();shown('Move to…').click();}
+ const places=host.querySelector('.story-move');const item=[...places.querySelectorAll('[role=treeitem]')].find(i=>i.textContent.slice(1)===label);assert(item,label);item.click();
+ button(places,choose?'Choose':'Move').click();await wait(()=>!places.isConnected,'Move to '+label);
+}
 async function mountStory(sceneId){storyView?.dispose();document.body.replaceChildren();const model=await call('scene.list');model.lastOpen={chapterId:model.scenes.find(s=>s.id===sceneId).chapterId,sceneId};const host=document.createElement('main'),tree=document.createElement('aside');host.className='scene-workspace';document.body.append(host,tree);
  storyView=renderStoryView(host,tree,model,{resolution:{width:1280,height:720},status:m=>messages.push(m),present:async()=>{throw Error('No media');},screenHintKind:'dialog',screenInsertion:insertion,rememberScreenInsertion:value=>{insertion=structuredClone(value);},screenCatalog:()=>call('screens.list'),resolveScreenTarget:binding=>call('screens.resolveTarget',{binding}),apply:(command,expected)=>call('scene.apply',{expectedProjectRevision:expected.projectRevision,expectedSourceMapRevision:expected.sourceMapRevision,command})});return host;}
 async function newCall(host){button(host,'Add screen Beat').click();const draft=host.querySelector('.new-beat');await wait(()=>/Dialog ready/.test(draft.textContent),'Dialog picker');return draft;}
@@ -39,21 +47,21 @@ try{
  await history('undo');assert(!(await call('screens.list')).owned.some(s=>s.id===owner.id));await history('redo');assert.equal(await source(owner.path),dialogSource);creation.dispose();creation.element.remove();result.stages.push('actual Dialog Help form -> one-step create Undo/Redo');
  let model=await call('scene.list');model=await call('scene.apply',{expectedProjectRevision:model.projectRevision,expectedSourceMapRevision:model.sourceMapRevision,command:{type:'createScene',chapterId:model.chapters[0].id,displayName:'Dialog UI proof'}});let scene=model.scenes.find(s=>s.displayName==='Dialog UI proof');
  await saveSource(scene.sourcePath,`label ${scene.technicalLabel}:\n    "Before"\n    "Following"\n    return\n`);const before=await source(scene.sourcePath);
- let host=await mountStory(scene.id),draft=await newCall(host);model=await call('scene.list');scene=model.scenes.find(s=>s.id===scene.id);const following=scene.beats.find(b=>b.payload.text==='Following');const placement=draft.querySelector('[aria-label="Insert before"]');placement.value=following.id;placement.dispatchEvent(new Event('change',{bubbles:true}));
- assert.equal(hasSceneDraft(host),false);assert.equal(await storyView.settle(),true);const pendingInsertion=structuredClone(insertion);
+ let host=await mountStory(scene.id),draft=await newCall(host);model=await call('scene.list');scene=model.scenes.find(s=>s.id===scene.id);await place(host,draft,'Before 02 Narration');
+ assert.equal(storyView.hasOpenForm(),false);assert.equal(await storyView.settle(),true);const pendingInsertion=structuredClone(insertion);
  storyView.dispose();storyView=undefined;document.body.replaceChildren();await call('screens.inspect',{path:owner.path});host=await mountStory(scene.id);draft=await newCall(host);
- assert.equal(draft.querySelector('[aria-label="Insert before"]').value,following.id);assert.deepEqual(insertion,pendingInsertion);assert.equal(hasSceneDraft(host),false);assert.equal(await source(scene.sourcePath),before);
+ assert.equal(goesAt(draft),'Before 02 Narration');assert.deepEqual(insertion,pendingInsertion);assert.equal(storyView.hasOpenForm(),false);assert.equal(await source(scene.sourcePath),before);
  const afterNavigation=await call('scene.list');assert.equal(afterNavigation.projectRevision,model.projectRevision);assert.equal(afterNavigation.sourceMapRevision,model.sourceMapRevision);
  result.stages.push('pending placement -> navigation settlement -> Screens inspection -> remounted Story, no source/history write');
  button(draft,'Add Beat').click();await wait(()=>!draft.isConnected,'Call accepted');
  const accepted=before.replace('    "Following"','    call screen guide_dialog\n    "Following"');assert.equal(await source(scene.sourcePath),accepted);
  const acceptedInsertion=structuredClone(insertion),terminal=scene.beats.find(b=>b.payload.type==='return');
- for(const exit of ['cancel','escape']){draft=await newCall(host);const location=draft.querySelector('[aria-label="Insert before"]');assert.equal(location.value,following.id);location.value=terminal.id;location.dispatchEvent(new Event('change',{bubbles:true}));if(exit==='cancel')button(draft,'Cancel').click();else location.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));assert(!draft.isConnected);assert.deepEqual(insertion,acceptedInsertion);assert.equal(await source(scene.sourcePath),accepted);}
+ for(const exit of ['cancel','escape']){draft=await newCall(host);assert.equal(goesAt(draft),'Before 03 Narration');await place(host,draft,'Before 04 Return');if(exit==='cancel')button(draft,'Cancel').click();else draft.querySelector('select').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));assert(!draft.isConnected);assert.deepEqual(insertion,acceptedInsertion);assert.equal(await source(scene.sourcePath),accepted);}
  result.stages.push('accepted Call placement -> later Cancel/Escape retains accepted handoff and Source');
  model=await call('scene.list');const callBeat=model.scenes.find(s=>s.id===scene.id).beats.find(b=>b.payload.type==='callScreen');assert.equal(callBeat.payload.target.screenId,owner.id);assert.equal(callBeat.screenEffects.finishesInteraction,true);
  host.querySelector(`.story-track-column[data-beat-id="${callBeat.id}"] > .story-track-beat`).click();await wait(()=>/Dialog ready/.test(host.querySelector('[data-beat-type="callScreen"]')?.textContent??''),'existing Call');const editor=host.querySelector('[data-beat-type="callScreen"]');button(editor,'Commit Beat').click();await wait(()=>!editor.isConnected,'no-op Call');await history('undo');assert.equal(await source(scene.sourcePath),before);await history('redo');assert.equal(await source(scene.sourcePath),accepted);result.stages.push('actual Call at selected anchor -> no-op -> one-step Undo/Redo');
  host=await mountStory(scene.id);draft=await newCall(host);button(draft,'Cancel').click();assert(!draft.isConnected);assert.equal(await source(scene.sourcePath),accepted);
- draft=await newCall(host);const originalPosition=draft.querySelector('[aria-label="Insert before"]').value;await saveSource(owner.path,dialogSource+'# accepted external appearance change\n');const count=messages.length;button(draft,'Add Beat').click();await wait(()=>messages.length>count,'stale target refusal');assert(draft.isConnected);assert.equal(draft.querySelector('[aria-label="Insert before"]').value,originalPosition);assert.equal(await source(scene.sourcePath),accepted);button(draft,'Cancel').click();result.stages.push('Cancel unchanged and stale Call keeps picker/location');
+ draft=await newCall(host);const originalPosition=goesAt(draft);await saveSource(owner.path,dialogSource+'# accepted external appearance change\n');const count=messages.length;button(draft,'Add Beat').click();await wait(()=>messages.length>count,'stale target refusal');assert(draft.isConnected);assert.equal(goesAt(draft),originalPosition);assert.equal(await source(scene.sourcePath),accepted);button(draft,'Cancel').click();result.stages.push('Cancel unchanged and stale Call keeps picker/location');
  const doc=await call('screens.inspect',{path:owner.path});const added=await call('screens.compose',{screenId:owner.id,expectedRevision:doc.revision,command:{type:'add',parentId:owner.rootId,kind:'textbutton',text:'Finish'}});const node=added.document.screens[0].nodes.find(n=>n.id===added.selectedId);assert.deepEqual(node.actions,[]);const base=await source(owner.path);
  const card=document.createElement('section');document.body.append(card);const view={document:added.document,screenId:owner.id,screenName:owner.name,nodes:added.document.screens[0].nodes,selected:node,step:'design',busy:false};
  const target=await call('screens.resolveTarget',{binding:{screenId:owner.id,sourceName:owner.name}});
@@ -71,17 +79,17 @@ try{
  await saveSource(singleScene.sourcePath,singleBefore+'# accepted comment-only Source edit\n');
  const commented=await source(singleScene.sourcePath);
  singleHost=await mountStory(singleScene.id);singleDraft=await newCall(singleHost);
- let singlePosition=singleDraft.querySelector('[aria-label="Insert before"]');
- const terminalOption=[...singlePosition.options].find(option=>/^Before \d+ Return$/.test(option.textContent));assert(terminalOption);
- assert.notEqual(singlePosition.value,terminalOption.value,'Stale insertion must require an actual selectable position change');
+ // The comment-only edit changed the scene, so the retained place must be chosen again.
+ assert.equal(goesAt(singleDraft),'Choose a place','Stale insertion must require an actual place choice');
  const refusedAt=messages.length;button(singleDraft,'Add Beat').click();await wait(()=>messages.length>refusedAt,'stale sole-position refusal');
+ assert.equal(messages.at(-1),'Choose a place for this beat first.');
  assert(singleDraft.isConnected);assert.equal(await source(singleScene.sourcePath),commented);assert.deepEqual(insertion,retained);
- singlePosition.value=terminalOption.value;singlePosition.dispatchEvent(new Event('change',{bubbles:true}));button(singleDraft,'Cancel').click();
+ await place(singleHost,singleDraft,'Before 01 Return');button(singleDraft,'Cancel').click();
  assert.deepEqual(insertion,retained);assert.equal(await source(singleScene.sourcePath),commented);
- singleDraft=await newCall(singleHost);singlePosition=singleDraft.querySelector('[aria-label="Insert before"]');assert.notEqual(singlePosition.value,terminalOption.value);
- singlePosition.value=terminalOption.value;singlePosition.dispatchEvent(new Event('change',{bubbles:true}));button(singleDraft,'Add Beat').click();await wait(()=>!singleDraft.isConnected,'confirmed sole-position Call');
+ singleDraft=await newCall(singleHost);assert.equal(goesAt(singleDraft),'Choose a place');
+ await place(singleHost,singleDraft,'Before 01 Return');button(singleDraft,'Add Beat').click();await wait(()=>!singleDraft.isConnected,'confirmed sole-position Call');
  const singleAccepted=commented.replace('    return','    call screen guide_dialog\n    return');assert.equal(await source(singleScene.sourcePath),singleAccepted);
- const singleAcceptedScene=(await call('scene.list')).scenes.find(s=>s.id===singleScene.id);assert.equal(insertion.expectedSourceRevision,singleAcceptedScene.sourceRevision);assert.deepEqual(insertion.position,{type:'before',anchor:{type:'beat',beatId:terminalOption.value}});
+ const singleAcceptedScene=(await call('scene.list')).scenes.find(s=>s.id===singleScene.id);assert.equal(insertion.expectedSourceRevision,singleAcceptedScene.sourceRevision);assert.deepEqual(insertion.position,{type:'before',anchor:{type:'beat',beatId:singleAcceptedScene.beats.find(b=>b.payload.type==='return').id}});
  await history('undo');assert.equal(await source(singleScene.sourcePath),commented);await history('redo');assert.equal(await source(singleScene.sourcePath),singleAccepted);
  insertion=acceptedInsertion;result.stages.push('stale sole-position recovery requires real selection, Cancel restores intent, accepted Call has one-step Undo/Redo');
  await saveSource(owner.path,finished.replace('screen guide_dialog():','screen renamed_dialog():'));await call('project.close');session=undefined;const currentRecent=(await call('project.listRecent')).find(r=>r.projectId===projectId);assert(currentRecent);session=(await call('project.openRecent',{recentId:currentRecent.id})).sessionId;model=await call('scene.list');const reopened=model.scenes.find(s=>s.id===scene.id).beats.find(b=>b.id===callBeat.id);assert.equal(reopened.protected,true);assert.equal(reopened.payload.target.screenId,owner.id);assert.equal(reopened.payload.target.sourceName,'guide_dialog');assert.equal(await source(scene.sourcePath),accepted);assert.equal(await source(entry.sourcePath),opaque);result.stages.push('renamed Dialog -> reopen keeps protected Call identity and opaque neighbor bytes');result.passed=true;

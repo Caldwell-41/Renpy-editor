@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { hasSceneDraft, type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
+import { type SceneActions, type SceneCommand, type SceneWorkspace, type ScreenInsertion } from "../src/scene-ui.js";
 import type { ResolvedScreenTarget, ScreenCatalog, ScreenTargetBinding } from "../src/screen-contracts.js";
-import { selectBeat, storyEditor, storyFixture, renderStoryView } from "./story-controls-fixture.js";
+import { choosePlace, editorProject, placeRows, press, selectBeat, storyBeat, storyEditor, storyFixture, renderStoryView, texts } from "./story-controls-fixture.js";
+import { mountStory } from "./story-dom-mount.js";
 
 const binding: ScreenTargetBinding = { screenId: "panel-id", sourceName: "help_panel" };
 const revisions = { source: "panel-source", sourceMap: "map", inventory: "inventory", effects: "effect" };
@@ -30,6 +31,7 @@ function setup(overrides: Partial<SceneActions> = {}, model = fixture()) {
   });
   return { host, view, commands, resolutions, messages, close: async () => { view.dispose(); await browser.happyDOM.close(); } };
 }
+const goesAt = (draft: HTMLElement): string => draft.querySelector(".story-where dd")!.textContent!;
 // + Add beat opens Add a beat; picking a screen kind opens its new beat draft.
 function openNew(host: HTMLElement, type: string) {
   button(host, "+ Add beat").click();
@@ -162,14 +164,13 @@ test("Call screen chooses only dialogs and retains the selected insertion anchor
   const s=setup({screenCatalog:async()=>({...catalog,owned:[...catalog.owned,{...catalog.owned[2]!,id:dialogBinding.screenId,name:dialogBinding.sourceName,kind:"dialog"}]}),resolveScreenTarget:async()=>dialogTarget});
   const draft=openNew(s.host,"callScreen");await tick();
   const picker=draft.querySelector<HTMLSelectElement>('[aria-label="Dialog screen"]');assert.ok(picker);assert.deepEqual([...picker.options].map(o=>o.value),[dialogBinding.screenId]);
-  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]');assert.ok(position);assert(![...position.options].some(o=>o.textContent==="End of body"));
-  position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
+  await choosePlace(s.host,draft,"Before 01 Narration");
   // The pending column in Tracks sits at the chosen place.
   const marker=s.host.querySelector(".story-track-pending");assert.ok(marker);assert.equal(marker.nextElementSibling?.getAttribute("data-beat-id"),"line");assert.match(marker.textContent!,/call screen/);
   button(draft,"Add Beat").click();await tick();
   assert.deepEqual(s.commands[0]!.body,{type:"root"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});
   assert.deepEqual(s.commands[0]!.beat,{type:"callScreen",target:dialogBinding,revisions});
-  assert.equal(position.value,"line");assert.ok(draft.isConnected);assert.match(s.messages.at(-1)!,/Input retained/);
+  assert.equal(goesAt(draft),"Before 01 Narration");assert.ok(draft.isConnected);assert.match(s.messages.at(-1)!,/Input retained/);
   await s.close();
 });
 
@@ -185,9 +186,9 @@ test("retained screen insertion offers a selectable recovery from a changed Scen
   const model=fixture(),scene=model.scenes[0]!,remembered:unknown[]=[];
   const dialogBinding={screenId:"dialog-id",sourceName:"help_dialog"};const dialogTarget:ResolvedScreenTarget={...target,binding:dialogBinding,kind:"dialog",blocking:true,effects:{...target.effects,unknown:false}};
   const s=setup({screenHint:dialogBinding,screenHintKind:"dialog",screenInsertion:{sceneId:scene.id,body:mode==="body"?{type:"branch",groupId:"removed-group",branchId:"removed-branch"}:{type:"root"},position:{type:"before",anchor:{type:"beat",beatId:mode==="missing"?"removed":"line"}},expectedSourceRevision:mode==="changed"?"old":scene.sourceRevision},rememberScreenInsertion:value=>remembered.push(value),screenCatalog:async()=>({...catalog,owned:[{...catalog.owned[2]!,id:dialogBinding.screenId,name:dialogBinding.sourceName,kind:"dialog"}]}),resolveScreenTarget:async()=>dialogTarget},model);
-  const draft=openNew(s.host,"callScreen");await tick();button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,0);assert.equal(remembered.length,0);assert.ok(draft.isConnected);
-  if(mode==="body"){const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;assert.notEqual(body.value,"root");body.value="root";body.dispatchEvent(new Event("change",{bubbles:true}));}
-  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;if(mode!=="body")assert.notEqual(position.value,"line","Recovery must offer a real selection change");position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,1);assert.equal((remembered.at(-1) as {expectedSourceRevision:string}).expectedSourceRevision,scene.sourceRevision);await s.close();
+  const draft=openNew(s.host,"callScreen");await tick();assert.equal(goesAt(draft),"Choose a place");
+  button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,0);assert.equal(remembered.length,0);assert.ok(draft.isConnected);
+  await choosePlace(s.host,draft,"Before 01 Narration");button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,1);assert.equal((remembered.at(-1) as {expectedSourceRevision:string}).expectedSourceRevision,scene.sourceRevision);await s.close();
  }
 });
 
@@ -203,8 +204,7 @@ test("screen insertion keeps existing nested body ownership",async()=>{
   {id:"branch",byteStart:10,byteEnd:20,protected:false,conditionalBranch:{groupId:"group",otherwise:false,condition:{status:"supported",expression:{type:"bool",value:true}}},payload:{type:"customCode",source:"if True:",reason:"Condition"}},
   {...scene.beats[0]!,owner:{groupId:"group",branchId:"branch"}},scene.beats[1]!
  ]}]};const s=setup({},model);const draft=openNew(s.host,"showScreen");await tick();
- const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="branch";body.dispatchEvent(new Event("change",{bubbles:true}));
- const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));button(draft,"Add Beat").click();await tick();
+ await choosePlace(s.host,draft,"Before 01.1 Narration","If True");button(draft,"Add Beat").click();await tick();
  assert.deepEqual(s.commands[0]!.body,{type:"branch",groupId:"group",branchId:"branch"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"line"}});assert.equal(s.host.querySelector(".story-track-pending")!.previousElementSibling?.getAttribute("data-branch-id"),"branch");button(draft,"Cancel").click();assert.equal(s.host.querySelector(".story-track-pending"),null);await s.close();
 });
 
@@ -219,7 +219,7 @@ test("Cancel and Escape return focus to the visible Story draft opener",async()=
    if(entry!=="screen")s.host.querySelector<HTMLButtonElement>('.story-add-beat [data-insert-kind="showScreen"]')!.click();
    const draft=s.host.querySelector<HTMLElement>(".new-beat")!;assert.equal(draft.dataset.beatType,"showScreen");
    if(exit==="cancel"){const cancel=button(draft,"Cancel");cancel.focus();cancel.click();}
-   else{const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.focus();position.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));}
+   else{const picker=draft.querySelector<HTMLSelectElement>('[aria-label="Panel screen"]')!;picker.focus();picker.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));}
    // The screen opener sits under the closed More menu, so focus returns to More.
    const restored=entry==="screen"?s.host.querySelector(".story-more > summary"):[...s.host.querySelectorAll<HTMLButtonElement>("button")].find(item=>item.textContent===caption||item.getAttribute("aria-label")===caption);
    assert.ok(document.activeElement===restored,`${entry} ${exit} must restore the recreated opener`);
@@ -238,10 +238,8 @@ test("Cancel and Escape restore the captured insertion context after a refused s
   const s=setup({screenInsertion:context==="default"?undefined:original,rememberScreenInsertion:value=>{remembered=structuredClone(value);}},model);
   try{
    button(s.host,"Add screen Beat").click();await tick();const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
-   if(context==="unavailable nested"){
-    const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="root";body.dispatchEvent(new Event("change",{bubbles:true}));
-   }
-   const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
+   assert.equal(goesAt(draft),context==="unavailable nested"?"Choose a place":"Before 02 Return");
+   await choosePlace(s.host,draft,"Before 01 Narration");const position=draft.querySelector<HTMLSelectElement>('[aria-label="Panel screen"]')!;
    button(draft,"Add Beat").click();await tick();
    assert.deepEqual(remembered.position,{type:"before",anchor:{type:"beat",beatId:"line"}},"Refusal must retain the pending position");
    assert.ok(draft.isConnected);
@@ -265,10 +263,8 @@ test("pending screen placement survives workspace navigation without becoming un
   const first=setup({...actions,screenInsertion:insertion},model);first.host.classList.add("scene-workspace");
   try{
    button(first.host,"Add screen Beat").click();await tick();const draft=first.host.querySelector<HTMLElement>(".new-beat")!;
-   if(nested){const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="branch";body.dispatchEvent(new Event("change",{bubbles:true}));}
-   const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";
-   for(const event of ["input","change"])position.dispatchEvent(new Event(event,{bubbles:true}));
-   assert.equal(hasSceneDraft(first.host),false,"Already retained navigation context must not block leaving Story");
+   if(nested)await choosePlace(first.host,draft,"Before 01.1 Narration","If True");else await choosePlace(first.host,draft,"Before 01 Narration");
+   assert.equal(first.view.hasOpenForm(),false,"Already retained navigation context must not block leaving Story");
    assert.equal(await first.view.settle(),true);
    assert.deepEqual(insertion.body,nested?{type:"branch",groupId:"group",branchId:"branch"}:{type:"root"});
    assert.deepEqual(insertion.position,{type:"before",anchor:{type:"beat",beatId:"line"}});assert.equal(first.commands.length,0);
@@ -276,9 +272,8 @@ test("pending screen placement survives workspace navigation without becoming un
   const returned=setup({...actions,screenInsertion:insertion},model);returned.host.classList.add("scene-workspace");
   try{
    button(returned.host,"Add screen Beat").click();await tick();const draft=returned.host.querySelector<HTMLElement>(".new-beat")!;
-   assert.equal(draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!.value,nested?"branch":"root");
-   assert.equal(draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!.value,"line");
-   assert.equal(hasSceneDraft(returned.host),false);assert.equal(returned.commands.length,0);
+   assert.equal(goesAt(draft),nested?"Before 01.1 Narration":"Before 01 Narration");
+   assert.equal(returned.view.hasOpenForm(),false);assert.equal(returned.commands.length,0);
   }finally{await returned.close();}
  }
 });
@@ -290,9 +285,9 @@ test("retained placement does not clear payload edits or a refused Add",async()=
    button(s.host,"Add screen Beat").click();await tick();const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
    if(edited==="payload"){const type=draft.querySelector<HTMLSelectElement>("select")!;type.value="showScreen";type.dispatchEvent(new Event("change",{bubbles:true}));await tick();}
    else{button(draft,"Add Beat").click();await tick();}
-   const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
-   assert.equal(hasSceneDraft(s.host),true);assert.equal(await s.view.settle(),true);assert.equal(s.view.hasDrafts(),true);
-   button(draft,"Cancel").click();assert.equal(hasSceneDraft(s.host),false);assert.equal(s.view.hasDrafts(),false);
+   await choosePlace(s.host,draft,"Before 01 Narration");
+   assert.equal(await s.view.settle(),true);assert.equal(s.view.hasDrafts(),true);
+   button(draft,"Cancel").click();assert.equal(s.view.hasDrafts(),false);
   }finally{await s.close();}
  }
 });
@@ -305,12 +300,11 @@ test("incomplete placement stays in its retained new beat draft",async()=>{
  const s=setup({screenHintKind:"dialog",screenInsertion:original,rememberScreenInsertion:value=>{insertion=structuredClone(value);}},model);s.host.classList.add("scene-workspace");
  try{
   button(s.host,"Add screen Beat").click();await tick();const draft=s.host.querySelector<HTMLElement>(".new-beat")!;
-  const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.dispatchEvent(new Event("change",{bubbles:true}));
-  assert.equal(draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!.value,"");
-  assert.deepEqual(insertion,original);assert.equal(hasSceneDraft(s.host),true);assert.equal(await s.view.settle(),true);assert.equal(s.view.hasDrafts(),true);
+  assert.equal(goesAt(draft),"Choose a place");
+  assert.deepEqual(insertion,original);assert.equal(await s.view.settle(),true);assert.equal(s.view.hasDrafts(),true);
   if(next==="confirm placement"){
-   const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
-   assert.equal(hasSceneDraft(s.host),false);assert.equal(await s.view.settle(),true);assert.equal(insertion.expectedSourceRevision,scene.sourceRevision);
+   await choosePlace(s.host,draft,"Before 01 Narration");
+   assert.equal(await s.view.settle(),true);assert.equal(insertion.expectedSourceRevision,scene.sourceRevision);
   }else{
    // An ordinary beat elsewhere is not blocked by the screen draft's incomplete placement.
    s.host.querySelector<HTMLButtonElement>('[data-beat-opener="after:line"]')!.click();s.host.querySelector<HTMLButtonElement>('.story-add-beat [data-insert-kind="narration"]')!.click();
@@ -334,8 +328,7 @@ test("accepted screen insertion remembers its nested location at the accepted re
  const s=setup({rememberScreenInsertion:value=>{remembered=structuredClone(value);},apply:async()=>({...model,scenes:[{...model.scenes[0]!,sourceRevision:"accepted-source"}]})},model);
  try{
   const draft=openNew(s.host,"showScreen");await tick();
-  const body=draft.querySelector<HTMLSelectElement>('[aria-label="Insert in"]')!;body.value="branch";body.dispatchEvent(new Event("change",{bubbles:true}));
-  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
+  await choosePlace(s.host,draft,"Before 01.1 Narration","If True");
   button(draft,"Add Beat").click();await tick();
   assert.equal(draft.isConnected,false);
   assert.deepEqual(remembered,{sceneId:scene.id,body:{type:"branch",groupId:"group",branchId:"branch"},position:{type:"before",anchor:{type:"beat",beatId:"line"}},expectedSourceRevision:"accepted-source"});
@@ -352,12 +345,12 @@ test("later screen drafts and cancellation retain the last accepted placement an
   const s=setup({screenInsertion:original,rememberScreenInsertion:value=>{remembered=structuredClone(value);},screenCatalog:async()=>({...catalog,owned:[...catalog.owned,{...catalog.owned[2]!,id:dialogBinding.screenId,name:dialogBinding.sourceName,kind:"dialog"}]}),resolveScreenTarget:async value=>value.screenId===dialogBinding.screenId?dialogTarget:target,apply:async()=>{writes++;return {...model,scenes:[{...scene,sourceRevision:"accepted-source"}]};}},model);
   const open=async()=>{const draft=openNew(s.host,type);await tick();return draft;};
   try{
-   const first=await open(),position=first.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));button(first,"Add Beat").click();await tick();
+   const first=await open();await choosePlace(s.host,first,"Before 01 Narration");button(first,"Add Beat").click();await tick();
    assert.equal(first.isConnected,false);const accepted=structuredClone(remembered);assert.equal(accepted.expectedSourceRevision,"accepted-source");
-   const second=await open(),nextPosition=second.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;
-   assert.equal(nextPosition.value,"line","The next draft must open at the accepted placement");assert.doesNotMatch(second.textContent!,/original insertion Scene changed/);
-   nextPosition.value="end";nextPosition.dispatchEvent(new Event("change",{bubbles:true}));
-   if(exit==="cancel")button(second,"Cancel").click();else nextPosition.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));
+   const second=await open();
+   assert.equal(goesAt(second),"Before 01 Narration","The next draft must open at the accepted placement");assert.equal(second.querySelector<HTMLElement>(".story-place-note")!.hidden,true);
+   await choosePlace(s.host,second,"Before 02 Return");
+   if(exit==="cancel")button(second,"Cancel").click();else second.querySelector("select")!.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}));
    assert.deepEqual(remembered,accepted,"Cancellation must preserve the latest accepted context for Screens handoff");assert.equal(writes,1);assert.deepEqual(original.position,{type:"before",anchor:{type:"beat",beatId:"end"}});
   }finally{await s.close();}
  }
@@ -370,8 +363,8 @@ test("a deleted insertion Scene retains intent and allows an explicit replacemen
  try{
   button(s.host,"Add screen Beat").click();await tick();
   const draft=s.host.querySelector<HTMLElement>(".new-beat");assert.ok(draft,"A missing original Scene must expose location recovery");
-  button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,0);assert.equal(remembered.length,0);assert.match(draft.textContent!,/original insertion Scene is unavailable/i);
-  const position=draft.querySelector<HTMLSelectElement>('[aria-label="Insert before"]')!;position.value="line";position.dispatchEvent(new Event("change",{bubbles:true}));
+  button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,0);assert.equal(remembered.length,0);assert.equal(goesAt(draft),"Choose a place");
+  await choosePlace(s.host,draft,"Before 01 Narration");
   button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,1);assert.equal(s.commands[0]!.sceneId,scene.id);assert.deepEqual(s.commands[0]!.position,insertion.position);assert.equal((remembered.at(-1) as {sceneId:string}).sceneId,scene.id);assert.equal(insertion.sceneId,"deleted-scene");
  }finally{await s.close();}
 });
@@ -386,4 +379,55 @@ test("a deleted screen insertion Scene does not block ordinary Add Beat",async()
   button(draft,"Add Beat").click();await tick();assert.equal(s.commands.length,1);assert.deepEqual(s.commands[0]!.beat,{type:"narration",text:"A replacement line."});assert.deepEqual(s.commands[0]!.body,{type:"root"});assert.deepEqual(s.commands[0]!.position,{type:"before",anchor:{type:"beat",beatId:"end"}});
  }finally{await s.close();}
  }
+});
+
+/** A Story with one owned panel screen, for screen beats. */
+function withScreens(model: SceneWorkspace, extra: Partial<SceneActions> = {}) {
+  const binding = { screenId: "panel-id", sourceName: "timetable" }, revisions = { source: "panel-source", sourceMap: "map", inventory: "inventory", effects: "effect" };
+  return mountStory(model, { screenCatalog: async () => ({ projectRevision: "project", sourceMapRevision: "map", inventoryRevision: "inventory", owned: [{ id: binding.screenId, name: binding.sourceName, path: "game/ui/timetable.rpy", rootId: "root", kind: "panel", resolved: true, sourceRevision: revisions.source }] }),
+    resolveScreenTarget: async () => ({ binding, kind: "panel", blocking: false, canShowHide: true, path: "game/ui/timetable.rpy", rootId: "root", revisions, effects: { revision: "effect", unknown: false, shownScreens: [], assignedVariables: [], hiddenScreens: [], finishesInteraction: false, dependencies: [] } }), ...extra });
+}
+
+const screenScene = (): SceneWorkspace => editorProject([storyBeat("words", { type: "narration", text: "The timetable has not changed in thirty years." }), storyBeat("line", { type: "dialogue", characterId: "mara", text: "You heard the bell too?" }), storyBeat("close", { type: "narration", text: "The doors close behind them." })]);
+
+test("a new screen beat uses Goes at, In and After, and ⋯ Move to…, like other beats", async () => {
+  const model = screenScene(), scene = model.scenes[0]!;
+  const s = withScreens(model, { screenInsertion: { sceneId: "one", body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "close" } }, expectedSourceRevision: scene.sourceRevision } });
+  press(s.host, "Add screen Beat"); await tick();
+  const panel = s.host.querySelector<HTMLElement>(".new-beat")!;
+  assert.deepEqual(placeRows(panel), ["Goes at", "Before 03 Narration", "In", "The last service", "After", "02 Mara's line"]);
+  await choosePlace(s.host, panel, "Before 02 Mara's line");
+  assert.deepEqual(placeRows(panel), ["Goes at", "Before 02 Mara's line", "In", "The last service", "After", "01 Narration"]);
+  press(panel, "Add Beat"); await tick();
+  assert.deepEqual(s.calls.at(-1), { type: "insertBodyBeat", sceneId: "one", expectedSourceRevision: scene.sourceRevision, body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "line" } }, beat: { type: "showScreen", target: { screenId: "panel-id", sourceName: "timetable" }, revisions: { source: "panel-source", sourceMap: "map", inventory: "inventory", effects: "effect" } } });
+  await s.close();
+});
+
+test("a place picked in Screens that changed reads Choose a place, and Add Beat refuses until one is chosen", async () => {
+  const s = withScreens(screenScene(), { screenInsertion: { sceneId: "one", body: { type: "root" }, position: { type: "before", anchor: { type: "beat", beatId: "gone" } }, expectedSourceRevision: "older" } });
+  press(s.host, "Add screen Beat"); await tick();
+  const panel = s.host.querySelector<HTMLElement>(".new-beat")!;
+  assert.deepEqual(placeRows(panel), ["Goes at", "Choose a place", "In", "The last service"]);
+  assert.equal(panel.querySelector(".story-place-note > p")!.textContent, "The scene changed after you picked this place in Screens. Choose where this beat goes.");
+  assert.ok(panel.querySelector(".story-where-warn")); assert.equal(panel.querySelector<HTMLElement>(".story-beat-menu")!.hidden, true);
+  press(panel, "Add Beat"); await tick();
+  assert.deepEqual(s.calls, []); assert.equal(s.status.at(-1), "Choose a place for this beat first.");
+  // Choose a place… opens the place tree with nothing chosen.
+  press(panel, "Choose a place…");
+  const dialog = s.host.querySelector<HTMLElement>(".story-move")!;
+  assert.equal(dialog.getAttribute("aria-label"), "Place the new Show screen"); assert.equal(dialog.querySelector("h2")!.textContent, "Place the new Show screen");
+  assert.equal(dialog.querySelector(".story-dialog-note")!.textContent, "Puts the new beat at the chosen place.");
+  assert.equal(dialog.querySelector('[aria-selected="true"]'), null); assert.equal(dialog.querySelector(".story-summary")!.textContent, "Choose where this beat goes.");
+  assert.deepEqual(texts(dialog, ".story-dialog-actions button"), ["Cancel", "Choose"]);
+  // The place tree and a picked place read Goes at, as a-v2 names them; ⋯ Move to… keeps Move to.
+  assert.equal(dialog.querySelector("[role=tree]")!.getAttribute("aria-label"), "Goes at");
+  [...dialog.querySelectorAll<HTMLElement>("[role=treeitem]")].find(node => node.textContent!.slice(1) === "Before 03 Narration")!.click();
+  assert.equal(dialog.querySelector(".story-summary")!.textContent, "Goes at The last service · Before 03 Narration");
+  press(dialog, "Cancel");
+  await choosePlace(s.host, panel, "Before 03 Narration");
+  assert.deepEqual(placeRows(panel), ["Goes at", "Before 03 Narration", "In", "The last service", "After", "02 Mara's line"]);
+  assert.equal(panel.querySelector<HTMLElement>(".story-place-note")!.hidden, true);
+  press(panel, "Add Beat"); await tick();
+  assert.deepEqual(s.calls.length, 1);
+  await s.close();
 });

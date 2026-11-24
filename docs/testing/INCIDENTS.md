@@ -1375,3 +1375,110 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   5 of 5. Without the delay, the fixed fixture passed 10 of 10 runs on macOS.
 - **Evidence:** issue #170, Linux runs [42371963578](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42371963578)
   and [42372623332](https://github.com/Caldwell-41/Renpy-editor/actions/runs/42372623332).
+
+## H94. Header Redo stays disabled after Undo while core still has the redo entry
+
+- **Class/search:** product, demonstrated on Windows native and reproduced in real
+  Chromium with real core; `source-foundation`, "Header redo is unavailable",
+  "Header undo is unavailable", `refreshHistory`, `history.state`, `RUNTIME_BUSY`,
+  `retryableRead`, `with_service`.
+- **Cause:** the native host refuses a request with `RUNTIME_BUSY` while another one
+  holds the service. The runtime probe reads `source.open` while the app reads
+  `history.state` after Undo. The app retried busy reads only from a list that left
+  out `history.state`, so `refreshHistory` showed an empty history and dimmed Undo and
+  Redo until the next write. Core still had the redo entry, and no draft step was
+  recorded. Slower Windows IPC made the overlap more likely, so the Mac passed.
+- **Correction:** `value()` retries `history.state`, `project.listRecent`,
+  `scene.recovery` and `scene.validateAssignment` on `RUNTIME_BUSY`, like the other
+  reads. The source-foundation probe's failure report now includes core's
+  `history.state` and the header buttons' state.
+- **Regression:** the Story case "Undo of a nested beat keeps Redo when the host
+  refuses a history read as busy" refuses the app's next two `history.state` reads.
+- **Verification:** the native probe ran in Chromium against real core, with each
+  overlapping request refused as busy and 10 ms of added latency. Before the fix,
+  9 of 15 runs failed with "Header redo is unavailable" or "Header undo is
+  unavailable". After it, none of 8 runs did.
+- **Evidence:** issue #120, PR #185.
+
+## H95. Source-foundation probe selects the redone beat before Story renders
+
+- **Class/search:** harness readiness, probe; `source-foundation`, `retained-draft`,
+  "Unique rendered fixture Beat required", `__loomlightProbeSelectBeat`, Redo,
+  "Checking saved state…".
+- **Cause:** after Redo the app reopens Story, which loads the scene and then reveals
+  and selects the edited child. The probe waited only for the source bytes, so with
+  slower IPC it selected the child while Story still showed no Tracks columns. The
+  product is correct.
+- **Correction:** the retained-draft stage waits until Story shows the child's editor,
+  then selects it. The helper's error now says how many matching columns it found.
+- **Regression:** the source-foundation probe itself.
+- **Verification:** the probe scripts ran in Chromium at 1280 px against real core
+  through the help-controller driver, with 50 ms added each way per request. Before the
+  fix, 6 of 6 runs without busy refusals failed at this stage; after it, none of 6 did.
+  With every overlapping request refused as busy, the probe's own writes
+  (`source.updateDraft`, the owner-rejection `scene.apply`) could still be refused.
+  `dff481a4` made every probe request retry an overlap refusal, which fixed that.
+- **Evidence:** issue #120, PR #185.
+
+## H96. Commit, Story Save and Undo fail when the host is busy
+
+- **Class/search:** product, shown in a Chromium bridge against real core; the native
+  trigger is likely but not shown. `RUNTIME_BUSY`, `REQUEST_OVERLAP`, "Another request
+  is in progress.", "Input retained. If this source structure cannot be moved safely,
+  edit it in Source.", "Nothing saved. Another request is in progress. Drafts
+  retained.", `value()`, `checkout_failure`, `CheckoutError`, `complete_dialog`,
+  `INTERNAL_ERROR`. Same host refusal as H94.
+- **Cause:** `ApplicationHost` refuses a request that overlaps another one before the
+  handler runs. Formula checks, `scene.recovery`, project reads, `ai.*` calls and the
+  native AI credential check run outside the request lane, so they can hold the service
+  while Commit, Story Save or Undo arrives. `value()` retried only a list of reads, so
+  each write failed and did nothing. Commit also added the Source advice to the busy
+  message. The host also mapped shutdown, a handler panic and a poisoned lock to the
+  busy refusal, although a panicking request may have written.
+- **First correction (`acccc62a`), withdrawn:** `value()` retried every `RUNTIME_BUSY`.
+  That code also carries refusals from handlers that ran while Ren'Py runs, which last
+  as long as the run, so a runtime refusal held the lane for about 1 to 2 s and queued
+  Source typing behind it. Native dialog completion mapped an overlap to the same code
+  after the dialog had closed, so the app sent `project.openPicker`, `sdk.browse`,
+  `project.chooseParent` or `asset.choose*` again and the picker reopened, up to 41
+  times.
+- **Correction:** the checkout refusal has its own code, `REQUEST_OVERLAP`, from
+  `dispatch::CheckoutError::Overlap`. `RUNTIME_BUSY` stays for handler and runtime
+  refusals, and the app and the probes retry only `REQUEST_OVERLAP`. Shutdown, a
+  poisoned lock and a panic return `INTERNAL_ERROR`, also on the runtime request path
+  while the host closes. `complete_dialog` waits for the service with the chosen path
+  instead of refusing, and past its wait returns `INTERNAL_ERROR` with "Choose again."
+  Native AI paths no longer call shutdown or a panic busy. A busy Commit says
+  "Another request is in progress. Input retained."
+- **Regression:** the Story controller cases "Commit, Story Save and Undo land once when
+  the host refuses each write as busy", "A Commit the host keeps refusing as busy keeps
+  its input and shows a plain busy message" and "A Commit the runtime refuses is sent
+  once and keeps its input"; `dialog-refusal.dom.test.ts`; `dispatch::tests` for the
+  overlap, the panic, the poisoned lock and dialog completion;
+  `runtime_tests::requests_after_shutdown_are_internal_errors_and_never_overlaps`;
+  the probe retry test in `native-probe-driver.test.ts`.
+- **Verification:** before the first correction, the first case failed with the Commit
+  message above. Before this correction, the runtime case's Commit was sent again and
+  saved, the dialog test sent `project.openPicker` twice for one click, and dialog
+  completion during a 200 ms overlap ran the choice zero times. After it, all of them
+  pass.
+- **Evidence:** issue #120, PR #185.
+
+## H97. The old-probe collision in `ui-refresh-retention` stops reproducing
+
+- **Class/search:** harness, Chromium fixture bridge; `ui-refresh-retention.browser.mjs`,
+  `original-collision`, `report.passed` true, `test:source-browser`.
+- **Symptom:** the check that the pre-settlement probe fails passed instead. It failed
+  in the full `npm run test:source-browser` chain 3 of 3 times and passed alone, at
+  the head of the #120 final batch.
+- **Cause:** the collision depended on timing. The fixture refused the probe's draft
+  write only while a direct `source.list` read was in flight, and each retry could land
+  in a gap between reads. Story now loads a known background on open (L4), which moved
+  the draft write a few milliseconds. With L4 reverted the chain passed.
+- **Correction:** the fixture's draft write waits, at most 300 ms, for a direct probe
+  read, and refuses every retry once the probe has read before the draft was retained.
+  The settled probe reads only after retention, so it is unaffected.
+- **Regression:** the test itself.
+- **Verification:** after the correction, 6 of 6 runs alone and 2 of 2 full chains
+  passed, with `original-collision` failing as designed.
+- **Evidence:** issue #120, PR #185.

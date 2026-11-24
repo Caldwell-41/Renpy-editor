@@ -55,7 +55,7 @@ fn smoke_report_disposition(
     is_smoke_report: bool,
     response: &CoreResponse,
 ) -> SmokeReportDisposition {
-    if !smoke_enabled || !is_smoke_report || response.error_code() == Some("RUNTIME_BUSY") {
+    if !smoke_enabled || !is_smoke_report || response.error_code() == Some("REQUEST_OVERLAP") {
         SmokeReportDisposition::Ignore
     } else if response.is_success() {
         SmokeReportDisposition::Accepted
@@ -757,19 +757,22 @@ fn core_request(
                     "Payload does not match the operation schema.",
                 ));
             }
-            let before = host
-                .with_service(|service| {
-                    if asset {
-                        service.require_session(session_id.as_ref().unwrap())?;
-                    }
-                    Ok::<_, loomlight_core::lifecycle::LifecycleError>(
-                        service.current().map(|p| p.session_id),
-                    )
-                })
-                .map_err(|_| "Another request is in progress.")?;
-            let before = match before {
-                Ok(session) => session,
-                Err(error) => return Ok(loomlight_core::lifecycle_failure(request_id, error)),
+            // A refusal here comes before the dialog opens, so the app may send it again.
+            let before = match host.with_service(|service| {
+                if asset {
+                    service.require_session(session_id.as_ref().unwrap())?;
+                }
+                Ok::<_, loomlight_core::lifecycle::LifecycleError>(
+                    service.current().map(|p| p.session_id),
+                )
+            }) {
+                Ok(Ok(session)) => session,
+                Ok(Err(error)) => return Ok(loomlight_core::lifecycle_failure(request_id, error)),
+                Err(error) => {
+                    return Ok(loomlight_core::dispatch::checkout_failure(
+                        request_id, error,
+                    ))
+                }
             };
             // Native UI never owns the lifecycle service while waiting for a choice.
             if operation == "asset.chooseImports" {
@@ -780,26 +783,18 @@ fn core_request(
                         &["png", "jpg", "jpeg", "webp", "ogg", "mp3", "wav", "flac"],
                     )
                     .pick_files();
-                return Ok(host
-                    .complete_dialog(request_id.clone(), before, |service| {
-                        let Some(paths) = paths else {
-                            return CoreResponse::success(
-                                request_id.clone(),
-                                json!({"choices":[],"cancelled":true}),
-                            );
-                        };
-                        CoreResponse::success(
+                return Ok(host.complete_dialog(request_id.clone(), before, |service| {
+                    let Some(paths) = paths else {
+                        return CoreResponse::success(
                             request_id.clone(),
-                            register_import_batch(service, &paths),
-                        )
-                    })
-                    .unwrap_or_else(|_| {
-                        CoreResponse::failure(
-                            request_id,
-                            "RUNTIME_BUSY",
-                            "Another request is in progress.",
-                        )
-                    }));
+                            json!({"choices":[],"cancelled":true}),
+                        );
+                    };
+                    CoreResponse::success(
+                        request_id.clone(),
+                        register_import_batch(service, &paths),
+                    )
+                }));
             }
             let path = match operation.as_str() {
                 "asset.chooseFont" => rfd::FileDialog::new()
@@ -850,13 +845,6 @@ fn core_request(
                     Ok(value) => CoreResponse::success(request_id.clone(), value),
                     Err(error) => loomlight_core::lifecycle_failure(request_id.clone(), error),
                 }
-            })
-            .unwrap_or_else(|_| {
-                CoreResponse::failure(
-                    request_id,
-                    "RUNTIME_BUSY",
-                    "Another request is in progress.",
-                )
             })
         } else {
             if matches!(operation.as_str(), "sdk.install" | "project.create") {
@@ -1327,7 +1315,7 @@ fn main() {
                                         Some(register_import_batch(service, &paths))
                                     }) {
                                         Ok(Some(batch)) => { let _ = main.eval(format!("window.__loomlightReceiveAssets?.({}, {})", json!(session), batch)); }
-                                        Err(_) => { let _ = main.eval(format!("window.__loomlightReceiveAssets?.({}, {})", json!(session), json!({"choices":[],"errors":["Wait for the current operation to finish, then drop the files again."]}))); }
+                                        Err(error) => { let _ = main.eval(format!("window.__loomlightReceiveAssets?.({}, {})", json!(session), json!({"choices":[],"errors":[error.busy_or("Wait for the current operation to finish, then drop the files again.")]}))); }
                                         Ok(None) => {} // Session changed; no grants created.
                                     }
                                 });
@@ -1398,8 +1386,11 @@ mod tests {
             "INVALID_PAYLOAD",
             "Payload does not match the operation schema.",
         );
-        let busy =
-            CoreResponse::failure("busy".to_owned(), "RUNTIME_BUSY", "Busy before dispatch.");
+        let busy = CoreResponse::failure(
+            "busy".to_owned(),
+            "REQUEST_OVERLAP",
+            "Busy before dispatch.",
+        );
 
         assert_eq!(
             smoke_report_disposition(true, true, &accepted),

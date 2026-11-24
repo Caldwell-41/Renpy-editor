@@ -175,6 +175,9 @@ pub struct CoreError {
     message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     action_index: Option<usize>,
+    /// The beats and protected source that refuse a Scene delete.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    references: Option<Box<scene::IncomingReferences>>,
 }
 
 #[derive(Debug, Serialize)]
@@ -210,6 +213,7 @@ impl CoreResponse {
                 code,
                 message: message.into(),
                 action_index: None,
+                references: None,
             }),
         }
     }
@@ -402,6 +406,8 @@ pub fn handle_application_request(
     smoke_enabled: bool,
     lifecycle: &mut LifecycleService,
 ) -> CoreResponse {
+    // One request reads the authoring list once, however many services ask for it.
+    let _scope = lifecycle.request_scope();
     let validated = match validate_request(&request) {
         Ok(value) => value,
         Err(response) => return response,
@@ -1264,15 +1270,24 @@ fn media_failure(request_id: String, error: media::MediaError) -> CoreResponse {
 
 fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
     use scene::SceneError::*;
-    if let Indexed { index, cause } = error {
-        let mut response = scene_failure(request_id, *cause);
+    // Context around a cause: the cause's response, with the draft index or the references added.
+    let (error, index, references) = match error {
+        Indexed { index, cause } => (*cause, Some(index), None),
+        IncomingReferences(references) => (ReferenceBlocked, None, Some(references)),
+        error => (error, None, None),
+    };
+    if index.is_some() || references.is_some() {
+        let mut response = scene_failure(request_id, error);
         if let Some(error) = &mut response.error {
-            error.action_index = Some(index);
+            error.action_index = index.or(error.action_index);
+            error.references = references.or(error.references.take());
         }
         return response;
     }
     let (code, message) = match error {
-        Indexed { .. } => unreachable!("action context handled above"),
+        Indexed { .. } | IncomingReferences(_) => {
+            unreachable!("context handled above")
+        }
         RuntimeBusy => ("RUNTIME_BUSY", "Stop the runtime operation before changing these files."),
         InvalidPayload => ("INVALID_PAYLOAD", "The Scene operation is invalid."),
         MissingArithmeticTarget => ("MISSING_ARITHMETIC_TARGET", "variableId: Choose an existing variable."),
@@ -1327,6 +1342,14 @@ fn scene_failure(request_id: String, error: scene::SceneError) -> CoreResponse {
         InvariantBlocked => (
             "SCENE_INVARIANT",
             "That operation would break a required Chapter or Scene invariant.",
+        ),
+        CustomCodeEnding { adds_beat: true } => (
+            "CUSTOM_CODE_ENDING",
+            "Can't add a beat here. This scene ends with Custom Code that may leave it, so a beat after it could run on into the next scene. Add a Return or Jump after the Custom Code first, or edit the scene in Source.",
+        ),
+        CustomCodeEnding { adds_beat: false } => (
+            "CUSTOM_CODE_ENDING",
+            "Can't make this change. This scene ends with Custom Code that may leave it, so a beat after it could run on into the next scene. Add a Return or Jump after the Custom Code first, or edit the scene in Source.",
         ),
         OpaqueBoundary => (
             "OPAQUE_BOUNDARY",

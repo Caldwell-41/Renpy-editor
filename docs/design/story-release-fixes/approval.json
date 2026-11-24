@@ -1,0 +1,292 @@
+{
+ "schemaVersion": 1,
+ "screenId": "story-release-fixes",
+ "currentApproved": "a-v2",
+ "revisions": [
+  {
+   "id": "a-v1",
+   "variantId": "a",
+   "approval": null
+  },
+  {
+   "id": "b-v1",
+   "variantId": "b",
+   "approval": null
+  },
+  {
+   "id": "a-v2",
+   "variantId": "a-v2",
+   "approval": {
+    "date": "2026-11-14",
+    "decision": "Kris reviewed every item of the a-v1 and b-v1 drafts in the lab, asked for changes that went into a-v2, and approved the combined revision on screen with \"Yes do it\". Approve a-v2, named \"Story release fixes combined\", with the recorded source, captures and behaviour. Item decisions: diagnostics A with changes (\"Within the choice area I prefer the error highlighting of B with its red, can we apply that to A?\"; \"2 is the best I think update the Av2\"; \"Yes to both\"); set-variable approved (\"Yes to both\"); protected A; move-protected B; delete-scene A with changes (\"I like A but it looks a little sloppy\"; \"Can we make the hierarchy after Chapter 1 more clear?\"; \"Yes approved\"); transition B with reworded help (\"Can you refine the text in b more it's unclear\"; \"Yes\"); transition-add approved with the mock's line (\"use the mocks line\"); moved-draft A; screen-beat approved; screen-beat-changed approved with spacing refined (\"Yes good\"); tracks-summary approved.",
+    "reason": null,
+    "supersedes": null,
+    "source": {
+     "commit": "27a14ba9b406027a6c505a4eed54910792488b7c",
+     "fingerprint": "07be94ea19add3958f4795233e26ffde822d56e14c45071dba375c5180a55f82"
+    },
+    "captures": [
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-diagnostics-dark-wide.png",
+      "sha256": "8b85812c1a9baa5e6f159967defa3142cc17f03bb13b8337ede755378216d23c",
+      "state": "diagnostics",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-set-variable-dark-wide.png",
+      "sha256": "395a6157f01052809f4e23862cda38859aab05ae5ec365ef218b10d3b6e39c66",
+      "state": "set-variable",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-protected-dark-wide.png",
+      "sha256": "dfc2416d6bd751e61ea95d285466b8ac5010ecf27617efed2e7d085fdb3ca8c7",
+      "state": "protected",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-move-protected-dark-wide.png",
+      "sha256": "76e99aaee98861170f83d64a2bf862eb4a216da4ecbad08f19fc1903b977aa09",
+      "state": "move-protected",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-delete-scene-dark-wide.png",
+      "sha256": "b4111f33cd7e61a903a15f5ca776d2a6fba2fba2755b1e0093bc626f82c3ea26",
+      "state": "delete-scene",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-transition-dark-wide.png",
+      "sha256": "9801aba07d8dddbcd2d0e5c7139b543115f85d73a28d4b68de1fa9367cc04925",
+      "state": "transition",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-transition-add-dark-wide.png",
+      "sha256": "3d5b369f229696adbece40cc79a0843705536296e0be089fb0ae20e8c744960c",
+      "state": "transition-add",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-moved-draft-dark-wide.png",
+      "sha256": "638840df17f746542debcd86ecc0bbe73ee45de504197ee1b54c29dab8ed549e",
+      "state": "moved-draft",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-screen-beat-dark-wide.png",
+      "sha256": "a36f1f74367e040266101db27f5d1aa07cd4db1ea1971ad2377d47a6368a0b0a",
+      "state": "screen-beat",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-screen-beat-changed-dark-wide.png",
+      "sha256": "4a739a4129fc42f9801c3506947af77a07c5ca27a63f88775d6f63221713ecf8",
+      "state": "screen-beat-changed",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-tracks-summary-dark-wide.png",
+      "sha256": "fc541b2b012d00af1f705b8347a451e76718c767735e8736e8d1642444a143f8",
+      "state": "tracks-summary",
+      "theme": "dark",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-diagnostics-dark-compact.png",
+      "sha256": "350715f145c425d0fd640e5cc0ba289b253009267e2636e8cc1c456599307ea9",
+      "state": "diagnostics",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-set-variable-dark-compact.png",
+      "sha256": "70a67710e6d024a062bff23cb1db0828cec0ae9b4f9be780e4de21665701c5be",
+      "state": "set-variable",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-protected-dark-compact.png",
+      "sha256": "f126ea5ee3b83ab21d440ec668628d662e9b4109c3bcfe972f0c4b96d0bcbf21",
+      "state": "protected",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-move-protected-dark-compact.png",
+      "sha256": "1333f3c46582ad548fe0e0a110dd0ffb19dd994a22da67a380ecb1f16f9345b6",
+      "state": "move-protected",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-delete-scene-dark-compact.png",
+      "sha256": "804cc0855b60c4272f16375e9e35daefc3c5f6cdda2bd270527fb7289afed1dc",
+      "state": "delete-scene",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-transition-dark-compact.png",
+      "sha256": "46d34ab70b77ca087625e3fe4073a07869e1a7fb87075c74acc7ebcadf7ed405",
+      "state": "transition",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-transition-add-dark-compact.png",
+      "sha256": "dca8087c8f13ee306c9b87c64971b5980ac047e6b5edaaf6b7ee9860a14533c6",
+      "state": "transition-add",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-moved-draft-dark-compact.png",
+      "sha256": "91019732fbc8174f25d473e40f2404fc8a3fc9f9e9c06dfaa32895ebb6218ff6",
+      "state": "moved-draft",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-screen-beat-dark-compact.png",
+      "sha256": "bb847f1676df04bd15a11ff7a195fe86676b4d9dac0d320e558ad7da1879e2e9",
+      "state": "screen-beat",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-screen-beat-changed-dark-compact.png",
+      "sha256": "83ea210d2ff20fb76f9dfbb26add7111692a0426031dc047f23261db695d706e",
+      "state": "screen-beat-changed",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-tracks-summary-dark-compact.png",
+      "sha256": "e0fcf9885ba3b7417791de66087b96e49fd50883464c7778b80c9c36436350ed",
+      "state": "tracks-summary",
+      "theme": "dark",
+      "width": 560,
+      "height": 640,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-diagnostics-branches-light-wide.png",
+      "sha256": "d7a2034dd172c4533f6a8405439dd4f32bc970c69230b6d85d76109729a7ba22",
+      "state": "diagnostics",
+      "theme": "light",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-move-protected-light-wide.png",
+      "sha256": "ab867de6ca096dca2137f03824aaeba01afa8b0656d7e90ee0d1ecf4f2b84d1c",
+      "state": "move-protected",
+      "theme": "light",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-delete-scene-light-wide.png",
+      "sha256": "a2b50fbe055eeb690245a1b039b81409c242b0c14f1cb9ef6c1d70d991f93c81",
+      "state": "delete-scene",
+      "theme": "light",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-transition-light-wide.png",
+      "sha256": "88eaee21d37dc92f716fbd1f126770173310d12d8ed3ef429c902614ede4d394",
+      "state": "transition",
+      "theme": "light",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     },
+     {
+      "path": "docs/design/story-release-fixes/captures/a-v2/a-v2-screen-beat-changed-light-wide.png",
+      "sha256": "71bcd5128195224f6bc9a3f288341cd821d665ee35539b5ebe7ed81c820a76ba",
+      "state": "screen-beat-changed",
+      "theme": "light",
+      "width": 1100,
+      "height": 720,
+      "scale": 1
+     }
+    ],
+    "behaviour": [
+     "D2/B5: a condition branch whose test the builder cannot show keeps its source line in a red-bordered box, with the reason and next step in red under it: \"ticket_count is not a project variable. Create it, or change this line in Source. Until then, the builder can't edit this branch.\" and \"destination is text, and ≥ only compares numbers. Use = or ≠ in Source. Until then, the builder can't edit this branch.\" Create ticket_count… opens the shared New variable dialog; Edit in Source opens Source. The inspector summary lists each broken branch with its reason, and the Tracks cell reads \"2 branches to fix\". The summary, the ! marks and the Tracks cell stay in the warning colour.",
+     "B9: the Set variable list ends with \"+ New variable…\", says \"No variables yet.\" when empty, and selects the new variable after Create variable.",
+     "B8: the column + on the beat before protected Custom Code adds right before the region. Move to lists \"Before 09 Custom Code\", preselects nothing, says \"10 Eli's line is after 09 Custom Code now. Choose where to move it.\", and shows two rows that can't be chosen: \"09 Custom Code · protected, stays in place\" and \"10 Eli's line · here now\".",
+     "B4: the scene delete refusal replaces the confirmation in the scene list under the scene's row: a header line with a close ×, the referring beats as aligned scene and beat rows that each open that beat, then \"Change or remove them, then delete again. Nothing was deleted.\" The scene list groups scenes under collapsible chapter headings with a guide line.",
+     "B14: the Transition editor help reads \"This fade animates 2 beats above it:\" (or \"This dissolve…\"), lists those beats, then \"A transition animates the stage beats between it and the last line, choice or transition above it. To animate a beat below, move this Transition under that beat.\" Add a beat describes Transition as \"Animates the stage changes above it, since the last line or choice.\"",
+     "D1: a draft whose beat moved branch says \"This beat moved to Otherwise in source. Your draft is still for this beat.\" with Discard draft and Override source; Override source saves the draft to the beat where it is now.",
+     "B13: Show, Hide and Call screen use Goes at, In, After and Move to… like other new beats. When the place picked in Screens changed, Goes at reads \"Choose a place\" and one warning block holds \"The scene changed after you picked this place in Screens. Choose where this beat goes.\" and Choose a place…; Add Beat refuses until a place is chosen.",
+     "B18: the Tracks Characters lane names character, expression and position: \"Mara · Smile · Left\", \"Eli · Concerned\", \"Mara → Centre\", \"Hide Eli\"."
+    ],
+    "deviations": [
+     "The chapter headings and guide line in the scene list change the approved Story Combined v1 scene list (story-revamp / combined-v1), not only the delete refusal.",
+     "The inspector line in the tracks-summary state (\"Tracks names the character, expression and position…\") explains the mock and is not product copy.",
+     "Production copy outside this study still says \"test\": Add a beat describes Condition as \"Branches on a test, then the story continues.\" and the condition editor says \"Add a rule to give this branch a test.\" Review suggested \"Branches on a variable, then the story continues.\" and \"Add a rule to this branch.\"; these were not mocked or approved here.",
+     "The B14 Transition help list and the D2 field errors are fixed sample text; the product must compute the animated beats and the problems from the scene."
+    ]
+   }
+  }
+ ]
+}

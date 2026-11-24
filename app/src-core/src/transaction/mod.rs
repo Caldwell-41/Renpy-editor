@@ -267,6 +267,8 @@ struct ApprovedProject {
     root: PathBuf,
     identity: FileIdentity,
     anchor: Arc<platform::DirectoryAnchor>,
+    /// Journals validated as terminal while this project is registered.
+    terminal_journals: Arc<journal::TerminalJournals>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -295,6 +297,7 @@ impl FaultInjector for NoFault {
 pub struct TransactionService {
     projects: Mutex<HashMap<ProjectId, ApprovedProject>>,
     serial: Mutex<()>,
+    writes: Mutex<WriteLog>,
     executions: Mutex<HashMap<ProjectId, Arc<ExecutionGate>>>,
     execution_consent: Mutex<HashMap<ProjectId, ExecutionManifest>>,
     /// Counts project root validations, which bound the file system work of a read.
@@ -302,7 +305,61 @@ pub struct TransactionService {
     pub(crate) root_validations: std::sync::atomic::AtomicUsize,
 }
 
+/// The most recent writes through the service, so a reader in the same request can
+/// tell whether a file it read has been written since. A write that may have changed
+/// any file, such as recovery, is recorded without paths.
+#[derive(Default)]
+struct WriteLog {
+    generation: u64,
+    recent: std::collections::VecDeque<(u64, Option<Vec<String>>)>,
+}
+
+const WRITE_LOG_LIMIT: usize = 64;
+
 impl TransactionService {
+    fn record_write(&self, paths: Option<Vec<String>>) {
+        if let Ok(mut log) = self.writes.lock() {
+            log.generation += 1;
+            let generation = log.generation;
+            log.recent.push_back((generation, paths));
+            if log.recent.len() > WRITE_LOG_LIMIT {
+                log.recent.pop_front();
+            }
+        }
+    }
+
+    /// Recovery and new folders may change any file a reader has seen.
+    fn record_write_anywhere(&self) {
+        self.record_write(None);
+    }
+
+    /// Counts writes through this service.
+    pub(crate) fn write_generation(&self) -> u64 {
+        self.writes
+            .lock()
+            .map(|log| log.generation)
+            .unwrap_or(u64::MAX)
+    }
+
+    /// The paths written after `generation`, or `None` when a write since then may
+    /// have changed any file or the log no longer reaches back that far.
+    pub(crate) fn written_since(&self, generation: u64) -> Option<Vec<String>> {
+        let log = self.writes.lock().ok()?;
+        if generation > log.generation {
+            return None;
+        }
+        let newer = log.recent.iter().filter(|(at, _)| *at > generation);
+        if newer.clone().count() as u64 != log.generation - generation {
+            return None;
+        }
+        newer
+            .map(|(_, paths)| paths.clone())
+            .try_fold(Vec::new(), |mut all, paths| {
+                all.extend(paths?);
+                Some(all)
+            })
+    }
+
     /// Trusted-core registration only. This is intentionally not wired to IPC; Phase
     /// 1C owns user root approval and lifecycle.
     pub fn register_trusted_project(&self, root: &Path) -> Result<ProjectId, PublicDiagnostic> {
@@ -340,6 +397,7 @@ impl TransactionService {
                     root,
                     identity,
                     anchor: Arc::new(anchor),
+                    terminal_journals: Arc::default(),
                 },
             );
         Ok(id)
@@ -411,6 +469,32 @@ impl TransactionService {
 
     #[allow(clippy::too_many_arguments)]
     pub fn commit_streaming_import_with_injector<I: FaultInjector>(
+        &self,
+        project: &ProjectId,
+        destination: RelativePath,
+        source: &mut File,
+        expected_len: u64,
+        expected_sha256: &str,
+        companions: Vec<FileMutation>,
+        injector: &mut I,
+    ) -> CommitOutcome {
+        let mut paths = vec![destination.as_str().to_owned()];
+        paths.extend(companions.iter().map(|m| m.path.as_str().to_owned()));
+        let outcome = self.commit_streaming_import_unrecorded(
+            project,
+            destination,
+            source,
+            expected_len,
+            expected_sha256,
+            companions,
+            injector,
+        );
+        self.record_write(matches!(outcome, CommitOutcome::Committed { .. }).then_some(paths));
+        outcome
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn commit_streaming_import_unrecorded<I: FaultInjector>(
         &self,
         project: &ProjectId,
         destination: RelativePath,
@@ -1024,6 +1108,7 @@ impl TransactionService {
             .serial
             .lock()
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
+        self.record_write_anywhere();
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
         if blocking_recovery_code(&approved).is_some() {
@@ -1055,6 +1140,22 @@ impl TransactionService {
     }
 
     pub fn commit_with_injector<I: FaultInjector>(
+        &self,
+        project: &ProjectId,
+        proposal: TransactionProposal,
+        injector: &mut I,
+    ) -> CommitOutcome {
+        let paths = proposal
+            .mutations
+            .iter()
+            .map(|m| m.path.as_str().to_owned())
+            .collect();
+        let outcome = self.commit_unrecorded(project, proposal, injector);
+        self.record_write(matches!(outcome, CommitOutcome::Committed { .. }).then_some(paths));
+        outcome
+    }
+
+    fn commit_unrecorded<I: FaultInjector>(
         &self,
         project: &ProjectId,
         proposal: TransactionProposal,
@@ -1448,6 +1549,7 @@ impl TransactionService {
             Ok(value) => value,
             Err(_) => return recovery_scan_failure(ErrorCode::IoFailure),
         };
+        self.record_write_anywhere();
         let approved = match self.approved(project) {
             Ok(value) => value,
             Err(_) => return RecoveryReport::default(),
@@ -1467,6 +1569,7 @@ impl TransactionService {
             .serial
             .lock()
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
+        self.record_write_anywhere();
         if !valid_internal_id(transaction_id, "tx") {
             return Err(PublicDiagnostic::new(ErrorCode::InvalidProposal, None));
         }
@@ -1506,6 +1609,7 @@ impl TransactionService {
             .serial
             .lock()
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
+        self.record_write_anywhere();
         if !valid_internal_id(transaction_id, "tx") {
             return Err(PublicDiagnostic::new(ErrorCode::InvalidProposal, None));
         }
@@ -1678,6 +1782,8 @@ fn read_resolved(
         identity_for_file(&file).map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
     let bytes = read_bytes_bounded(&mut file, maximum.min(MAX_MUTATION_BYTES))
         .map_err(|code| PublicDiagnostic::new(code, None))?;
+    #[cfg(test)]
+    REVISION_BYTES_READ.set(REVISION_BYTES_READ.get().saturating_add(bytes.len() as u64));
     let sha256 = sha256(&bytes);
     Ok((bytes, Revision { sha256, identity }))
 }
@@ -1737,8 +1843,10 @@ fn hash_revision_reader(
     Ok((count, hex::encode(digest.finalize())))
 }
 
+/// Bytes hashed for a revision on this thread since the last call: file inspections
+/// and snapshots.
 #[cfg(test)]
-fn take_revision_bytes_read() -> u64 {
+pub(crate) fn take_revision_bytes_read() -> u64 {
     REVISION_BYTES_READ.replace(0)
 }
 
@@ -1763,7 +1871,8 @@ fn scan_recovery(approved: &ApprovedProject) -> RecoveryReport {
 }
 
 fn blocking_recovery_code(approved: &ApprovedProject) -> Option<ErrorCode> {
-    JournalStore::blocking_code(&approved.anchor).unwrap_or(Some(ErrorCode::RecoveryRequired))
+    JournalStore::blocking_code(&approved.anchor, &approved.terminal_journals)
+        .unwrap_or(Some(ErrorCode::RecoveryRequired))
 }
 
 fn recovery_scan_failure(code: ErrorCode) -> RecoveryReport {

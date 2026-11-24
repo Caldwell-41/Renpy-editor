@@ -18,7 +18,6 @@ struct Counts {
     saved_callee: bool,
     safe_edit_qualified: bool,
     loaded_return: bool,
-    structural_condition_qualified: bool,
     storage_isolated: bool,
 }
 
@@ -46,7 +45,6 @@ fn phase3a_conditions_calls_sdk_gate() {
             "acceptedSourceUnchanged": counts.source_unchanged,
             "savedCallee": counts.saved_callee, "safeEditQualified": counts.safe_edit_qualified,
             "loadedReturn": counts.loaded_return,
-            "structuralConditionQualified": counts.structural_condition_qualified,
             "storageIsolated": counts.storage_isolated
         })
     );
@@ -154,156 +152,53 @@ fn import_scaffold(
     }
 }
 
-fn scene(service: &mut LifecycleService, name: &str) -> Value {
-    let model = ipc(service, "scene.list", json!({}));
-    let model = ipc(
-        service,
-        "scene.apply",
-        json!({"expectedProjectRevision": model["projectRevision"], "expectedSourceMapRevision": model["sourceMapRevision"], "command": {"type": "createScene", "chapterId": model["chapters"][0]["id"], "displayName": name}}),
-    );
-    model["scenes"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|s| s["displayName"] == name)
-        .unwrap()
-        .clone()
+/// The public Story example (lifecycle/story_example.rs), open, with the scenes and
+/// Calls this gate plays. The routine preflight below opens the same project, so a
+/// builder change that breaks the gate also breaks a routine test (docs/TESTING.md).
+struct Phase3aExample {
+    service: LifecycleService,
+    root: PathBuf,
+    entry: Value,
+    b: Value,
+    entry_call: Value,
+    b_call: Value,
 }
 
-fn insert_call(
-    service: &mut LifecycleService,
-    root: &Path,
-    scene_id: &Value,
-    target: &Value,
-    anchor_text: &str,
-) -> Value {
-    let model = ipc(service, "scene.list", json!({}));
-    let scene = model["scenes"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|s| &s["id"] == scene_id)
-        .unwrap();
-    let anchor = scene["beats"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|b| b["payload"]["text"] == anchor_text)
-        .unwrap();
-    let path = root.join(scene["sourcePath"].as_str().unwrap());
-    let before = fs::read(&path).unwrap();
-    let accepted = ipc(
-        service,
-        "scene.apply",
-        json!({"expectedProjectRevision": model["projectRevision"], "expectedSourceMapRevision": model["sourceMapRevision"], "command": {
-            "type":"insertBodyBeat","body":{"type":"root"}, "sceneId": scene_id, "expectedSourceRevision": scene["sourceRevision"], "position":{"type":"before","anchor":{"type":"beat","beatId":anchor["id"]}},
-            "beat": {"type": "call", "sceneId": target["id"], "returnLabel": null}
-        }}),
-    );
-    let current = accepted["scenes"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|s| &s["id"] == scene_id)
-        .unwrap();
-    let beats = current["beats"].as_array().unwrap();
-    let call_index = beats
-        .iter()
-        .position(|b| b["payload"]["type"] == "call")
-        .unwrap();
-    let call = &beats[call_index];
-    assert_eq!(call["payload"]["sceneId"], target["id"]);
-    assert_eq!(
-        beats[call_index + 1]["id"],
-        anchor["id"],
-        "Call must return to the explicit following Beat"
-    );
-    let return_label = call["payload"]["returnLabel"].as_str().unwrap();
-    let suffix = return_label
-        .strip_prefix("_ll_call_")
-        .expect("generated stable return label");
-    assert!(suffix.len() == 32 && suffix.bytes().all(|b| b.is_ascii_hexdigit()));
-    let anchor_source = format!("    \"{anchor_text}\"\n");
-    let offset = before
-        .windows(anchor_source.len())
-        .position(|w| w == anchor_source.as_bytes())
-        .unwrap();
-    let inserted = format!(
-        "    call {} from {return_label}\n",
-        target["technicalLabel"].as_str().unwrap()
-    );
-    assert_eq!(
-        fs::read(path).unwrap(),
-        [&before[..offset], inserted.as_bytes(), &before[offset..]].concat(),
-        "authored Call inserts one exact source line"
-    );
-    call.clone()
-}
-
-fn author_guarded_choice(service: &mut LifecycleService, root: &Path, scene_id: &Value) {
-    let definitions = ipc(service, "authoring.list", json!({}));
-    let variable = |name: &str| {
-        definitions["variables"]
+fn open_example(profile: &Path) -> Phase3aExample {
+    let repository = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let mut service =
+        LifecycleService::prepare_story_example_probe(profile.to_owned(), &repository).unwrap();
+    let root = profile.join("synthetic-project");
+    service.open_path(&root).unwrap();
+    let model = ipc(&mut service, "scene.list", json!({}));
+    let scene = |name: &str| {
+        model["scenes"]
             .as_array()
             .unwrap()
             .iter()
-            .find(|v| v["technicalName"] == name)
-            .unwrap()["id"]
+            .find(|s| s["displayName"] == name)
+            .unwrap()
             .clone()
     };
-    let model = ipc(service, "scene.list", json!({}));
-    let scene = model["scenes"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|s| &s["id"] == scene_id)
-        .unwrap();
-    let choice = scene["beats"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|b| b["payload"]["type"] == "choice")
-        .unwrap();
-    let mut options = choice["payload"]["options"].clone();
-    let guard = json!({"status":"supported","expression":{"type":"and",
-        "left":{"type":"compare","operator":"greaterEqual","left":{"type":"variable","variableId":variable("trust"),"variableType":"int"},"right":{"type":"int","value":"5"}},
-        "right":{"type":"compare","operator":"equal","left":{"type":"variable","variableId":variable("mood"),"variableType":"string"},"right":{"type":"string","value":"ready"}}
-    }});
-    options[0]["condition"] = guard.clone();
-    let path = root.join(scene["sourcePath"].as_str().unwrap());
-    let before = fs::read_to_string(&path).unwrap();
-    let accepted = ipc(
+    let call = |scene: &Value| {
+        scene["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["type"] == "call")
+            .unwrap()
+            .clone()
+    };
+    let (entry, b) = (scene("Platform"), scene("Called scene"));
+    assert_eq!(entry["id"], model["entrySceneId"]);
+    Phase3aExample {
+        entry_call: call(&entry),
+        b_call: call(&b),
         service,
-        "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],"expectedSourceMapRevision":model["sourceMapRevision"],"command":{
-            "type":"updateBodyBeat","expectedBody":{"type":"root"},"sceneId":scene_id,"expectedSourceRevision":scene["sourceRevision"],"beatId":choice["id"],"beat":{"type":"choice","options":options}
-        }}),
-    );
-    let current = accepted["scenes"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|s| &s["id"] == scene_id)
-        .unwrap();
-    let current_choice = current["beats"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|b| b["id"] == choice["id"])
-        .unwrap();
-    assert_eq!(current_choice["payload"]["options"][0]["condition"], guard);
-    assert_eq!(
-        current_choice["payload"]["options"][1],
-        choice["payload"]["options"][1]
-    );
-    let old = "\"Ready route\" if trust >= 5:";
-    let new = "\"Ready route\" if ((trust >= 5) and (mood == \"ready\")):";
-    assert_eq!(before.matches(old).count(), 1);
-    assert_eq!(
-        fs::read_to_string(path).unwrap(),
-        before.replacen(old, new, 1),
-        "guarded Choice changes only its condition expression"
-    );
+        root,
+        entry,
+        b,
+    }
 }
 
 fn set_variable(service: &mut LifecycleService, name: &str, value: Value) {
@@ -357,181 +252,6 @@ fn copy_game(source: &Path, target: &Path) {
             fs::copy(entry.path(), destination).unwrap();
         }
     }
-}
-
-fn create_story_variables(service: &mut LifecycleService) {
-    for (name, kind, value) in [
-        ("trust", "int", json!("5")),
-        ("mood", "string", json!("ready")),
-        ("precision", "int", json!("9007199254740993")),
-    ] {
-        ipc(
-            service,
-            "variable.create",
-            json!({"technicalName": name, "variableType": kind, "defaultValue": value}),
-        );
-    }
-}
-
-fn condition_source(entry_label: &str, high_label: &str, low_label: &str) -> String {
-    let source = format!("label {}:\n    # exact opaque neighbor and nested source survive visual edit\n    python:\n        opaque_neighbor = \"kept\"\n    if flag:\n        if trust >= 5 and mood == \"ready\" and precision == 9007199254740993:\n            # nested comment retained café 雪\n            bec \"Deep original\"\n        elif trust == 4:\n            bec \"Boundary branch\"\n        else:\n            bec \"Other nested branch\"\n    else:\n        bec \"Low branch\"\n    \"Caller resumed\"\n    menu:\n        \"Ready route\" if trust >= 5:\n            jump {}\n        \"Low route\" if trust >= 0 and trust < 5:\n            jump {}\n    \"Nothing available\"\n    return\n", entry_label, high_label, low_label);
-    source
-}
-
-fn edit_nested_dialogue(
-    service: &mut LifecycleService,
-    root: &Path,
-    entry_id: &str,
-    source: &str,
-) -> (Vec<u8>, Vec<u8>) {
-    let before_spawns = process_spawn_count_for_test();
-    let initial = ipc(service, "scene.list", json!({}));
-    let entry = initial["scenes"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|s| s["id"] == entry_id)
-        .unwrap();
-    let source_path = entry["sourcePath"].as_str().unwrap().to_owned();
-    save(service, &source_path, source);
-    let accepted_before = fs::read(root.join(&source_path)).unwrap();
-    let model = ipc(service, "scene.list", json!({}));
-    let entry = model["scenes"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|s| s["id"] == entry_id)
-        .unwrap();
-    let branches = entry["beats"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .filter(|b| {
-            b["conditionalBranch"].is_object() && b["conditionalBranch"]["choiceOption"] != true
-        })
-        .collect::<Vec<_>>();
-    assert_eq!(
-        branches.len(),
-        5,
-        "all outer/nested ordered branches are source-mapped"
-    );
-    for branch in branches
-        .iter()
-        .filter(|b| b["conditionalBranch"]["otherwise"] == false)
-    {
-        assert_eq!(
-            branch["conditionalBranch"]["condition"]["status"], "supported",
-            "typed condition must be known to core"
-        );
-    }
-    let child = entry["beats"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|b| b["payload"]["text"] == "Deep original")
-        .unwrap();
-    assert!(
-        child["owner"].is_object(),
-        "nested child must have immediate owner"
-    );
-    ipc(
-        service,
-        "scene.apply",
-        json!({"expectedProjectRevision": model["projectRevision"], "expectedSourceMapRevision": model["sourceMapRevision"], "command": {"type":"updateBodyBeat","sceneId":entry_id,"expectedSourceRevision":entry["sourceRevision"],"beatId":child["id"],"expectedBody":{"type":"branch","groupId":child["owner"]["groupId"],"branchId":child["owner"]["branchId"]},"beat":{"type":"dialogue","characterId":child["payload"]["characterId"],"text":"Edited deep café 雪"}}}),
-    );
-    let produced = fs::read(root.join(entry["sourcePath"].as_str().unwrap())).unwrap();
-    let before_text = std::str::from_utf8(&accepted_before).unwrap();
-    assert_eq!(before_text.matches("bec \"Deep original\"").count(), 1);
-    assert_eq!(
-        produced,
-        before_text
-            .replacen("bec \"Deep original\"", "bec \"Edited deep café 雪\"", 1)
-            .as_bytes(),
-        "visual edit preserves BOM and touches only the nested dialogue"
-    );
-    assert_eq!(
-        process_spawn_count_for_test(),
-        before_spawns,
-        "source save/read/nested edit must execute zero SDK commands"
-    );
-    (accepted_before, produced)
-}
-
-fn author_root_condition(
-    service: &mut LifecycleService,
-    root: &Path,
-    entry_id: &str,
-) -> (Vec<u8>, Vec<u8>, Value) {
-    let before_spawns = process_spawn_count_for_test();
-    let model = ipc(service, "scene.list", json!({}));
-    let entry = model["scenes"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|s| s["id"] == entry_id)
-        .unwrap();
-    let header = entry["beats"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|beat| beat["owner"].is_null() && beat["conditionalBranch"]["ordinal"] == 0)
-        .unwrap();
-    let flag = model["authoring"]["variables"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|v| v["technicalName"] == "flag")
-        .unwrap();
-    let path = entry["sourcePath"].as_str().unwrap();
-    let before = fs::read(root.join(path)).unwrap();
-    let old = "    if flag:\n";
-    let new = "    if (flag == True):\n";
-    let text = std::str::from_utf8(&before).unwrap();
-    assert_eq!(text.matches(old).count(), 1);
-    let condition = json!({"status":"supported","expression":{"type":"compare","operator":"equal",
-        "left":{"type":"variable","variableId":flag["id"],"variableType":"bool"},"right":{"type":"bool","value":true}}});
-    let after_model = ipc(
-        service,
-        "scene.apply",
-        json!({"expectedProjectRevision":model["projectRevision"],
-        "expectedSourceMapRevision":model["sourceMapRevision"],"command":{"type":"updateConditionBranch",
-        "sceneId":entry_id,"expectedSourceRevision":entry["sourceRevision"],"groupId":header["conditionalBranch"]["groupId"],
-        "branchId":header["id"],"expectedBody":{"type":"root"},"condition":condition}}),
-    );
-    let after = fs::read(root.join(path)).unwrap();
-    assert_eq!(
-        after,
-        text.replacen(old, new, 1).as_bytes(),
-        "new condition emitter must touch only the qualified root header"
-    );
-    assert!(after.starts_with(&[0xef, 0xbb, 0xbf]));
-    let after_entry = after_model["scenes"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|s| s["id"] == entry_id)
-        .unwrap();
-    let after_header = after_entry["beats"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|beat| beat["id"] == header["id"])
-        .unwrap();
-    assert_eq!(after_header["conditionalBranch"]["condition"], condition);
-    assert_eq!(
-        after_header["conditionalBranch"]["groupId"],
-        header["conditionalBranch"]["groupId"]
-    );
-    assert_eq!(
-        process_spawn_count_for_test(),
-        before_spawns,
-        "structural header authoring must execute zero SDK commands"
-    );
-    let receipt = json!({"operation":"updateConditionBranch","path":path,"groupId":header["conditionalBranch"]["groupId"],
-        "branchId":header["id"],"oldHeader":old,"newHeader":new,"expectedBody":{"type":"root"},
-        "beforeSHA256":format!("{:x}",Sha256::digest(&before)),"afterSHA256":format!("{:x}",Sha256::digest(&after)),
-        "bomPreserved":true,"allOtherBytesPreserved":true,"passed":true});
-    (before, after, receipt)
 }
 
 fn runtime_driver(
@@ -738,11 +458,15 @@ fn phase3a_sdk_fixture_source_save_preserves_bom() {
     let temporary = tempfile::tempdir().unwrap();
     let profile = temporary.path().join("profile");
     let before_spawns = process_spawn_count_for_test();
-    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
-    let root = profile.join("synthetic-project");
-    service.open_path(&root).unwrap();
-    let entry_id = service.current().unwrap().scene_id.clone();
-    // Generated SDK files can carry a BOM while the destination starts empty without one.
+    let Phase3aExample {
+        mut service,
+        root,
+        entry,
+        b,
+        entry_call,
+        b_call,
+    } = open_example(&profile);
+    // Generated SDK files can carry a BOM while the destination has none.
     let before_imports = sources(&root);
     let mut expected_imports = before_imports.clone();
     let scaffold_evidence = temporary.path().join("scaffold-evidence");
@@ -757,7 +481,7 @@ fn phase3a_sdk_fixture_source_save_preserves_bom() {
             "# synthetic SDK options\ndefine config.name = \"fixture\"\n",
         ),
     ] {
-        assert!(before_imports[Path::new(path)].is_empty());
+        assert!(!before_imports[Path::new(path)].starts_with(&[0xef, 0xbb, 0xbf]));
         import_scaffold(&mut service, &root, Some(&scaffold_evidence), path, text);
         expected_imports.insert(
             PathBuf::from(path),
@@ -817,58 +541,7 @@ fn phase3a_sdk_fixture_source_save_preserves_bom() {
         std::panic::catch_unwind(|| source_editor_text("\u{feff}\u{feff}# transport\n", true))
             .is_err()
     );
-    create_story_variables(&mut service);
-    let high = scene(&mut service, "High ending");
-    let low = scene(&mut service, "Low ending");
-    let model = ipc(&mut service, "scene.list", json!({}));
-    let entry = model["scenes"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|s| s["id"] == entry_id)
-        .unwrap();
-    let source = condition_source(
-        entry["technicalLabel"].as_str().unwrap(),
-        high["technicalLabel"].as_str().unwrap(),
-        low["technicalLabel"].as_str().unwrap(),
-    );
-    let (before, after) = edit_nested_dialogue(&mut service, &root, &entry_id, &source);
-    assert!(before.starts_with(&[0xef, 0xbb, 0xbf]));
-    assert!(after.starts_with(&[0xef, 0xbb, 0xbf]));
-    let (_, condition_bytes, receipt) = author_root_condition(&mut service, &root, &entry_id);
-    assert_eq!(receipt["operation"], "updateConditionBranch");
-    assert!(std::str::from_utf8(&condition_bytes)
-        .unwrap()
-        .contains("    if (flag == True):\n"));
     // Exercise the same BOM-bearing caller-save path as the final SDK load proof, with no SDK.
-    let b = scene(&mut service, "Preflight callee");
-    let c = scene(&mut service, "Preflight deepest callee");
-    save(
-        &mut service,
-        b["sourcePath"].as_str().unwrap(),
-        &format!(
-            "label {}:\n    \"Preflight B entry\"\n    \"Preflight B resumed\"\n    return\n",
-            b["technicalLabel"].as_str().unwrap()
-        ),
-    );
-    save(
-        &mut service,
-        c["sourcePath"].as_str().unwrap(),
-        &format!(
-            "label {}:\n    \"Preflight C entry\"\n    return\n",
-            c["technicalLabel"].as_str().unwrap()
-        ),
-    );
-    let entry_id_value = json!(entry_id);
-    let b_call = insert_call(&mut service, &root, &b["id"], &c, "Preflight B resumed");
-    let entry_call = insert_call(&mut service, &root, &entry_id_value, &b, "Caller resumed");
-    let model = ipc(&mut service, "scene.list", json!({}));
-    let entry = model["scenes"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|item| item["id"] == entry_id_value)
-        .unwrap();
     let path = entry["sourcePath"].as_str().unwrap();
     let all_before = sources(&root);
     let before_caller = fs::read(root.join(path)).unwrap();
@@ -1047,14 +720,25 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
     );
     counts.version_checks = process_spawn_count_for_test() - adapter_start;
     let sdk = sdk_setup("install/version", installed, evidence.as_deref());
-    // Project creation's implicit starter compile/lint is qualified separately.
-    // Use the existing zero-execution service fixture, then generate standard GUI
-    // scaffolding once so this gate spends its only compile/lint on accepted 3A source.
+    // Project creation's implicit starter compile/lint is qualified separately. Build
+    // the public Story example through ordinary service IPC with zero execution, then
+    // import standard GUI scaffolding once so this gate spends its only compile/lint on
+    // the accepted example source.
     let profile = temporary.path().join("editor-profile");
-    let mut service = LifecycleService::prepare_source_foundation_probe(profile.clone()).unwrap();
-    let root = profile.join("synthetic-project");
-    service.open_path(&root).unwrap();
-    let entry_id = service.current().unwrap().scene_id;
+    let no_execution = process_spawn_count_for_test();
+    let Phase3aExample {
+        mut service,
+        root,
+        entry,
+        b,
+        entry_call,
+        b_call,
+    } = open_example(&profile);
+    assert_eq!(
+        process_spawn_count_for_test(),
+        no_execution,
+        "building the example must execute zero SDK commands"
+    );
     let scaffold = temporary.path().join("standard-gui");
     counts.gui_generations += 1;
     let gui_start = process_spawn_count_for_test();
@@ -1071,84 +755,16 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
         );
     }
     copy_game(&scaffold.join("game/gui"), &root.join("game/gui"));
-    create_story_variables(&mut service);
-    let b = scene(&mut service, "Called scene");
-    let c = scene(&mut service, "Nested called scene");
-    let high = scene(&mut service, "High ending");
-    let low = scene(&mut service, "Low ending");
-    let model = ipc(&mut service, "scene.list", json!({}));
-    let entry = model["scenes"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|s| s["id"] == entry_id)
-        .unwrap()
-        .clone();
-    let label = |s: &Value| s["technicalLabel"].as_str().unwrap().to_owned();
-    save(
-        &mut service,
-        c["sourcePath"].as_str().unwrap(),
-        &format!("label {}:\n    \"C entry\"\n    return\n", label(&c)),
-    );
-    save(
-        &mut service,
-        b["sourcePath"].as_str().unwrap(),
-        &format!(
-            "label {}:\n    \"B entry\"\n    \"B resumed\"\n    return\n",
-            label(&b)
-        ),
-    );
-    save(
-        &mut service,
-        high["sourcePath"].as_str().unwrap(),
-        &format!("label {}:\n    \"High ending\"\n    return\n", label(&high)),
-    );
-    save(
-        &mut service,
-        low["sourcePath"].as_str().unwrap(),
-        &format!("label {}:\n    \"Low ending\"\n    return\n", label(&low)),
-    );
-    let source = condition_source(&label(&entry), &label(&high), &label(&low));
-    let (accepted_before, produced) = edit_nested_dialogue(&mut service, &root, &entry_id, &source);
-    let (condition_before, condition_accepted, condition_receipt) =
-        author_root_condition(&mut service, &root, &entry_id);
-    counts.structural_condition_qualified = true;
-    println!("phase-3a-sdk-structural-condition: {condition_receipt}");
-    if let Some(path) = &evidence {
-        fs::write(
-            path.join("structural-condition-before.rpy"),
-            &condition_before,
-        )
-        .unwrap();
-        fs::write(
-            path.join("structural-condition-accepted.rpy"),
-            &condition_accepted,
-        )
-        .unwrap();
-        fs::write(
-            path.join("structural-condition.json"),
-            serde_json::to_vec_pretty(&condition_receipt).unwrap(),
-        )
-        .unwrap();
-    }
-    let no_execution = process_spawn_count_for_test();
-    let b_call = insert_call(&mut service, &root, &b["id"], &c, "B resumed");
-    let entry_call = insert_call(&mut service, &root, &json!(entry_id), &b, "Caller resumed");
-    assert_ne!(
-        b_call["payload"]["returnLabel"],
-        entry_call["payload"]["returnLabel"]
-    );
-    author_guarded_choice(&mut service, &root, &json!(entry_id));
-    assert_eq!(
-        process_spawn_count_for_test(),
-        no_execution,
-        "authored calls must execute zero SDK commands"
-    );
     let accepted = ipc(&mut service, "scene.list", json!({}));
     let flow = ipc(&mut service, "flow.list", json!({}));
     for (scene_id, call, target, continuation) in [
-        (&b["id"], &b_call, &c["id"], "B resumed"),
-        (&json!(entry_id), &entry_call, &b["id"], "Caller resumed"),
+        (
+            &b["id"],
+            &b_call,
+            &b_call["payload"]["sceneId"],
+            "B resumed",
+        ),
+        (&entry["id"], &entry_call, &b["id"], "Caller resumed"),
     ] {
         let scene = accepted["scenes"]
             .as_array()
@@ -1180,8 +796,6 @@ fn run(temporary: &tempfile::TempDir, counts: &mut Counts) {
         "lossless accepted source/model reopen"
     );
     if let Some(path) = &evidence {
-        fs::write(path.join("nested-before.rpy"), &accepted_before).unwrap();
-        fs::write(path.join("nested-accepted.rpy"), &produced).unwrap();
         fs::write(
             path.join("calls-accepted-entry.rpy"),
             fs::read(root.join(entry["sourcePath"].as_str().unwrap())).unwrap(),

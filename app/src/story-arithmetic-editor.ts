@@ -1,4 +1,7 @@
 import { formulaCompletionRange } from "./formula-editing.ts";
+import type { NewVariable } from "./story-condition-editor.ts";
+import { choose } from "./story-editor-controls.ts";
+import { typeName, typePhrase, variableMenu } from "./story-new-variable.ts";
 import type { AssignmentDraftValidation, ArithmeticUnknown, BeatPayload, IntegerAdjustment, SceneWorkspace } from "./scene-ui.ts";
 
 type SetVariable = Extract<BeatPayload, { type: "setVariable" }>;
@@ -21,7 +24,6 @@ const reasons: Record<ArithmeticUnknown, string> = {
   unobservedCurrentValue: "Current value unknown. Declaration defaults are not current Story values.",
   unsupportedControlFlow: "Current value unknown after code or unevaluated flow.",
 };
-const typeName = (type: string): string => type === "int" ? "whole number" : type;
 function node<K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text = ""): HTMLElementTagNameMap[K] {
   const element = document.createElement(tag); element.className = className; element.textContent = text; return element;
 }
@@ -36,13 +38,28 @@ export function assignmentCaption(payload: SetVariable, variables: SceneWorkspac
 }
 
 /** Only presents core inspection. Formula text never runs or evaluates in the renderer. */
-export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariable, validate?: ValidateAssignment) {
-  const host = node("div", "beat-fields story-arithmetic-editor"), variable = node("select"); variable.setAttribute("aria-label", "Variable");
+export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariable, validate?: ValidateAssignment, newVariable?: NewVariable, current?: () => SceneWorkspace) {
+  // The variable list writes a hidden select; "+ New variable…" creates one and selects it (story-release-fixes / a-v2).
+  const host = node("div", "beat-fields story-arithmetic-editor"), variable = node("select", "story-backing"); variable.setAttribute("aria-label", "Variable"); variable.hidden = true; variable.tabIndex = -1;
   let variables = model.authoring.variables;
-  for (const v of variables) { const option = node("option", "", `${v.technicalName} · ${typeName(v.variableType)}`); option.value = v.id; variable.append(option); }
-  if (!variables.some(v => v.id === payload.variableId)) { const missing = node("option", "", "Missing Variable"); missing.value = payload.variableId; variable.prepend(missing); }
-  variable.value = payload.variableId;
-  const editor = node("div"); host.append(field("Variable", variable), editor);
+  const addOption = (v: (typeof variables)[number]): void => { const option = node("option", "", `${v.technicalName} · ${typeName(v.variableType)}`); option.value = v.id; variable.append(option); };
+  // The project's variables, and a chosen one that is not among them as Missing Variable.
+  const listVariables = (chosen: string): void => {
+    variable.replaceChildren(); variables.forEach(addOption);
+    if (chosen && !variables.some(v => v.id === chosen)) { const missing = node("option", "", "Missing Variable"); missing.value = chosen; variable.prepend(missing); }
+    variable.value = chosen;
+  };
+  listVariables(payload.variableId);
+  const picker = variableMenu(variable, { label: "Variable", variables: () => variables, ...newVariable ? { create: (opener: HTMLElement) => {
+    void newVariable(opener).then(created => {
+      if (!created || !host.isConnected) return;
+      variables = [...variables.filter(v => v.id !== created.id), created]; addOption(created);
+      variable.value = ""; choose(variable, created.id); opener.focus();
+    });
+  } } : {} });
+  // The select comes first, so `[aria-label="Variable"]` names it rather than the list.
+  const chooser = node("div", "field compact-field"); chooser.append(node("span", "", "Variable"), variable, picker.menu);
+  const editor = node("div"); host.append(chooser, editor);
   const drafts = new Map<string, { operation: IntegerAdjustment["operation"]; text: string }>();
   let operation: IntegerAdjustment["operation"] = typeof payload.value === "object" ? payload.value.operation : "assign";
   let text = typeof payload.value === "object" ? payload.value.operand : String(payload.value);
@@ -61,7 +78,7 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
     const target = variables.find(v => v.id === variable.value);
     if (!target || target.variableType === "bool" || target.variableType === "string") {
       if (target?.variableType === "bool") { const choice = node("select"); for (const value of ["false", "true"]) { const option = node("option", "", value === "true" ? "True" : "False"); option.value = value; choice.append(option); } choice.value = text === "true" ? "true" : "false"; primary = choice; }
-      else { primary = node("input"); primary.value = text; }
+      else { primary = node("input"); primary.value = text; if (!variable.value) { primary.disabled = true; primary.placeholder = "Choose a variable first"; } }
       primary.setAttribute("aria-label", "Value"); primary.addEventListener("input", () => text = primary.value); primary.addEventListener("change", () => text = primary.value);
       controls.push(primary); editor.append(field("Value", primary)); return;
     }
@@ -114,7 +131,7 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
         if (own !== generation || !host.isConnected) return;
         variables = result.variables; capabilities = result.capabilities; operationMenu(); feedback.replaceChildren();
         const inferred = result.assignment.inferredResultType;
-        if (inferred) feedback.append(node("p", "story-formula-type", `Gives a ${typeName(inferred)}${target!.variableType === "decimal" && inferred === "int" ? ", stored as a decimal" : ""}.`));
+        if (inferred) feedback.append(node("p", "story-formula-type", `Gives ${typePhrase(inferred)}${target!.variableType === "decimal" && inferred === "int" ? ", stored as a decimal" : ""}.`));
         for (const diagnostic of result.assignment.diagnostics) {
           if (result.support === "refused" && !showErrors) continue;
           feedback.append(node("p", result.support === "refused" ? "story-formula-problem" : "story-formula-unknown", reasons[diagnostic.reason]));
@@ -145,6 +162,16 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
     operationMenu(); menu.append(summary, list); equation.append(node("span", "story-equation-target", target.technicalName), menu, formula, suggestions);
     controls.push(formula); const calculation = node("div", "field compact-field"); calculation.append(node("span", "", "Calculation"), equation); editor.append(calculation, feedback, code); sourceCaption(); schedule();
   }
+  // Story shows a kept draft again: its list follows the project's variables now, so a
+  // variable an Undo removed leaves the list, and a chosen one shows as Missing Variable.
+  const refresh = (): void => {
+    const next = current?.().authoring.variables; if (!next) return;
+    const kind = (list: typeof variables): string | undefined => list.find(v => v.id === variable.value)?.variableType;
+    const shape = (list: typeof variables): string => JSON.stringify(list.map(v => [v.id, v.technicalName, v.variableType]));
+    if (shape(next) === shape(variables)) return;
+    const changed = kind(next) !== kind(variables); variables = next;
+    listVariables(variable.value); picker.draw(); if (changed) rebuild();
+  };
   variable.addEventListener("change", () => { drafts.set(editor.dataset.variableId ?? payload.variableId, { operation, text }); const draft = drafts.get(variable.value); operation = draft?.operation ?? "assign"; text = draft?.text ?? ""; editor.dataset.variableId = variable.value; rebuild(); });
   rebuild();
   // Draft-step Undo restores the variable, the chosen change and the text kept for each variable.
@@ -152,9 +179,9 @@ export function buildAssignmentEditor(model: SceneWorkspace, payload: SetVariabl
     capture: () => ({ variable: variable.value, operation, text, drafts: new Map(drafts) }),
     restore: (saved: unknown) => {
       const kept = saved as { variable: string; operation: IntegerAdjustment["operation"]; text: string; drafts: typeof drafts };
-      variable.value = kept.variable; editor.dataset.variableId = kept.variable; operation = kept.operation; text = kept.text;
+      variable.value = kept.variable; editor.dataset.variableId = kept.variable; operation = kept.operation; text = kept.text; picker.draw();
       drafts.clear(); kept.drafts.forEach((value, key) => drafts.set(key, value)); rebuild();
     },
   };
-  return { host, controls, get primary() { return primary; }, read: () => { finishField(); return read(); }, focus: () => primary.focus(), internals };
+  return { host, controls, get primary() { return primary; }, read: () => { finishField(); return read(); }, focus: () => primary.focus(), internals, refresh };
 }

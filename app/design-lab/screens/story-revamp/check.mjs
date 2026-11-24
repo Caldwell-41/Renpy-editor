@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 
 export default async function check({ page, open }) {
-  // The harness checks one selected layout; run once per reference layout. combined-check.mjs covers the combined mock.
+  // The harness checks one selected layout; run once per reference layout.
   const variant = new URL(page.url()).searchParams.get('variant');
   assert.ok(['cue-sheet', 'shot-reel', 'stage-tracks'].includes(variant), 'Select a reference layout for this check.');
   await open({ variant, state: 'empty', theme: 'dark', viewport: 'wide' });

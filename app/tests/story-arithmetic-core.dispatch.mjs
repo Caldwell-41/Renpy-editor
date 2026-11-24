@@ -45,22 +45,30 @@ const selected=()=>document.querySelector('.story-editor[data-editor-for]');
 const column=id=>document.querySelector(`.story-track-column[data-beat-id="${id}"]`);
 async function selectBeat(id){column(id).querySelector('.story-track-beat').click();await settle();assert(selected()?.dataset.editorFor===id);}
 const formula=()=>selected().querySelector('[aria-label="Formula"]');
+async function openScene(name){[...document.querySelectorAll('.tree-scene-open')].find(b=>b.textContent===name).click();await wait(()=>document.querySelector('.tree-scene-row.selected .tree-scene-open')?.textContent===name);await settle();}
 async function commit(){lastApply=undefined;button('Commit Beat',selected());await wait(()=>lastApply);await settle();return lastApply;}
 try{
  assert.equal((await child.next()).ready,true);const recent=(await call('project.listRecent'))[0];const opened=await call('project.openRecent',{recentId:recent.id});
  for(const [technicalName,variableType,defaultValue] of [['trust','int','99'],['bonus','int','7'],['money','decimal',99.5],['arith_flag','bool',false],['arith_title','string','literal']])await call('variable.create',{technicalName,variableType,defaultValue});
  const initial=await call('scene.list'),entry=initial.scenes.find(s=>s.id===initial.entrySceneId);const path=entry.sourcePath;
- const fixture=(await readFile(new URL('../../tests/fixtures/arithmetic-96/story.rpy',import.meta.url),'utf8')).replace('ENTRY_LABEL',entry.technicalLabel).replace('    $ money = 9.5','    $ money = -0.0\n    $ money = 1.0\n    $ money = 9.5');
+ const fixture=(await readFile(new URL('../../tests/fixtures/arithmetic-96/story.rpy',import.meta.url),'utf8')).replace('ENTRY_LABEL',entry.technicalLabel).replace('    $ money = 9.5','    $ money = -0.0\n    $ money = 1.0\n    $ money = 4.50\n    $ money = 9.5');
+ // A second scene to leave and return to with a retained formula draft.
+ await call('scene.apply',{expectedProjectRevision:initial.projectRevision,expectedSourceMapRevision:initial.sourceMapRevision,command:{type:'createScene',chapterId:initial.chapters[0].id,displayName:'Elsewhere'}});
  await saveSource(path,fixture);await call('project.close');session=undefined;
  document.body.innerHTML='<div id="app"></div>';const {startApplication}=await import('../dist-tests/src/main.js');startApplication(requester);
  await wait(()=>document.querySelector('.recent-open')&&!document.querySelector('.recent-open').disabled);document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.story-track-column'));await settle();
- assert.equal(await source(path),fixture,'opening imported arithmetic preserves exact source');
+ await openScene(entry.displayName);assert.equal(await source(path),fixture,'opening imported arithmetic preserves exact source');
  const scene=()=>workspace.scenes.find(s=>s.id===entry.id),numeric=()=>scene().beats.filter(b=>b.payload.type==='setVariable');
- const signedZero=numeric().find(b=>b.payload.value==='-0.0');assert(signedZero);await selectBeat(signedZero.id);assert.equal(formula().value,'-0.0');assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture);assert.equal((await call('history.state')).undo,null);
- const literal=numeric().find(b=>b.payload.value===1);assert(literal);
- await selectBeat(literal.id);assert.equal(formula().value,'1');assert.equal((await call('history.state')).undo,null);
+ const signedZero=numeric().find(b=>b.payload.value?.operand==='-0.0');assert(signedZero);await selectBeat(signedZero.id);assert.equal(formula().value,'-0.0');assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture);assert.equal((await call('history.state')).undo,null);
+ const literal=numeric().find(b=>b.payload.value?.operand==='1.0');assert(literal);
+ await selectBeat(literal.id);assert.equal(formula().value,'1.0');assert.equal((await call('history.state')).undo,null);
  assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture,'unchanged decimal literal preserves bytes');assert.equal((await call('history.state')).undo,null,'unchanged decimal literal adds no history');
  stage('unchanged decimal literal commits through actual Story controls without source or history changes');
+ // B22: an imported decimal shows as written, with its trailing zero, in Tracks, the Formula and the source line.
+ const imported=numeric().find(b=>b.payload.value?.operand==='4.50');assert(imported);assert.match(column(imported.id).textContent,/money = 4\.50/);
+ await selectBeat(imported.id);assert.equal(formula().value,'4.50');await settle();assert.equal(selected().querySelector('.story-assignment-source').textContent,'$ money = 4.50');
+ assert.equal((await commit()).ok,true);assert.equal(await source(path),fixture,'an unchanged written decimal keeps its bytes');
+ stage('an imported decimal such as 4.50 shows as written in Tracks, the Formula and the source line');
  const compound=numeric().find(b=>b.payload.value?.operation==='add'),decimal=numeric().find(b=>b.payload.value?.operand==='money / 2');assert(compound&&decimal);
  await selectBeat(compound.id);assert.equal(formula().value,'(bonus + 2) * 3');assert.match(selected().textContent,/Current value unknown/);assert(!selected().textContent.includes('Draft result 99'));assert.match(column(compound.id).textContent,/trust/);
  assert.equal(lastValidation.ok,true);assert.equal(lastValidation.value.assignment.inferredResultType,'int');assert.equal(lastValidation.value.assignment.state.status,'unknown');
@@ -80,7 +88,7 @@ try{
  enter(formula(),'4 / 2');await settle();assert.match(selected().textContent,/gives a decimal/);assert.equal((await commit()).ok,false);assert.equal(lastApply.error.code,'ARITHMETIC_TARGET_TYPE');assert.equal(formula().value,'4 / 2');button('Cancel',selected());await settle();
  stage('invalid and incompatible formulas retain exact input, field diagnostics and accepted source');
  await selectBeat(compound.id);enter(formula(),'bon');await settle();const input=formula();input.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true}));assert.equal(input.value,'bonus');assert(document.activeElement===input,"Suggestion must retain input focus");
- enter(input,'(bonus + 3) * 2');button('Writing focus');assert(formula()===input,"Writing focus must retain the same formula control");assert.equal(input.value,'(bonus + 3) * 2');button('Show game window');assert(formula()===input,"Writing focus must retain the same formula control");button('Cancel',selected());await settle();assert.equal(await source(path),accepted);
+ enter(input,'(bonus + 3) * 2');button('Writing focus');assert(formula()===input,"Writing focus must retain the same formula control");assert.equal(input.value,'(bonus + 3) * 2');button('Show stage');assert(formula()===input,"Writing focus must retain the same formula control");button('Cancel',selected());await settle();assert.equal(await source(path),accepted);
  const protectedBeat=scene().beats.find(b=>b.payload.type==='customCode'&&b.payload.source.includes('max('));assert(protectedBeat?.protected);await selectBeat(protectedBeat.id);assert.match(selected().textContent,/unsupported|protected|function/i);button('Edit in Source',selected());await wait(()=>document.querySelector('.source-editor'));assert(document.querySelector('.source-editor').value.includes('max(0, trust - 1)'));
  button('Story');await wait(()=>document.querySelector('.story-track-column'));await settle();
  stage('keyboard numeric suggestions, focus and Writing focus retain draft; Cancel writes nothing; protected import navigates to real Source');
@@ -116,6 +124,37 @@ try{
  assert.equal((await historyStep('undo')).ok,true);assert.equal(await source(path),literalSource);assert.equal((await historyStep('redo')).ok,true);assert.equal(await source(path),finalSource);
  button('Close Project');await wait(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.story-track-column'));await settle();assert.equal(await source(path),finalSource);assert(scene().beats.some(b=>b.id===inserted.id&&b.owner?.branchId===inserted.owner.branchId));
  stage('nested formula insertion validates and commits its captured branch/position; exact shared history and reopen retain it');
+ // B22: a decimal keeps the author's written form, such as the trailing zero in 4.50.
+ const written=numeric().find(b=>b.payload.variableId===workspace.authoring.variables.find(v=>v.technicalName==='money').id&&!b.owner&&b.payload.value?.operand==='9.5');assert(written);
+ await selectBeat(written.id);assert.equal(formula().value,'9.5');enter(formula(),'4.50');assert.equal((await commit()).ok,true);
+ const trailing=await source(path);assert(trailing.includes('    $ money = 4.50\n'),trailing);
+ await selectBeat(written.id);assert.equal(formula().value,'4.50','Set variable shows the decimal as written');await settle();assert.equal(selected().querySelector('.story-assignment-source').textContent,'$ money = 4.50');assert.match(column(written.id).textContent,/money = 4\.50/);
+ assert.equal((await commit()).ok,true);assert.equal(await source(path),trailing,'an unchanged written decimal keeps its bytes');
+ button('Close Project');await wait(()=>document.querySelector('.recent-open'));document.querySelector('.recent-open').click();await wait(()=>document.querySelector('.story-track-column'));await settle();
+ await selectBeat(written.id);assert.equal(formula().value,'4.50','reopen keeps the written decimal');
+ button('Cancel',selected());await settle();
+ stage('a written decimal such as 4.50 keeps its text through Commit, the editor, Tracks and reopen');
+ // A formula in the If branch keeps its draft, caret, focus, selection and Branch path through Tracks, Reel and Writing focus.
+ const nested=numeric().find(b=>b.owner&&b.payload.value?.operation==='add'&&b.payload.value.operand==='1');assert(nested);
+ const segment=()=>document.querySelector(`.story-branch-segment[data-branch-id="${nested.owner.branchId}"]`);
+ const view=name=>{document.querySelector(`.story-view-option[data-view="${name}"]`).click();assert.equal(document.querySelector(`.story-view-option[data-view="${name}"]`).getAttribute('aria-pressed'),'true');};
+ const applies=()=>result.transcript.filter(t=>t.request.operation==='scene.apply').length;
+ segment().click();await settle();await selectBeat(nested.id);assert.equal(segment().ariaPressed,'true','the Branch path presses If flag');assert.equal(formula().value,'1');
+ const field=formula(),nestedSource=await source(path),sent=applies();enter(field,'bonus + 4');await settle();field.setSelectionRange(2,5);
+ const kept=where=>{assert(formula()===field,`${where} keeps the same Formula`);assert.equal(field.value,'bonus + 4');assert.equal(field.getAttribute('aria-invalid'),null);
+  assert.deepEqual([field.selectionStart,field.selectionEnd],[2,5],`${where} keeps the caret`);assert(document.activeElement===field,`${where} keeps focus in the Formula, not ${document.activeElement?.outerHTML.slice(0,120)}`);
+  assert.equal(column(nested.id).querySelector('.story-track-beat').dataset.selected,'true',`${where} keeps the selection`);assert.equal(segment().ariaPressed,'true',`${where} keeps the If branch`);};
+ view('reel');assert(document.querySelector('.story-reel'));kept('Reel');button('Writing focus');kept('Writing focus');button('Show stage');kept('Leaving Writing focus');view('tracks');kept('Tracks');
+ // An invalid formula stays, marked, through Reel, another scene and Source, and writes nothing.
+ enter(field,'bonus +');field.dispatchEvent(new Event('blur'));await settle();assert.equal(field.getAttribute('aria-invalid'),'true');const problem=selected().querySelector('.story-formula-problem')?.textContent;assert(problem,'the invalid formula shows its problem');
+ view('reel');await openScene('Elsewhere');button('Source');await wait(()=>document.querySelector('.source-workspace'));await settle();button('Story');await wait(()=>document.querySelector('.tree-scene-open'));await settle();
+ await openScene(entry.displayName);view('tracks');assert.equal(column(nested.id).dataset.beatDraft,'true');if(selected()?.dataset.editorFor!==nested.id)await selectBeat(nested.id);
+ assert.equal(formula().value,'bonus +');assert.equal(formula().getAttribute('aria-invalid'),'true');assert.equal(selected().querySelector('.story-formula-problem')?.textContent,problem);
+ assert.equal(applies(),sent,'drafts send no scene.apply');assert.equal(await source(path),nestedSource);
+ // Fixed, the formula commits into the If branch with only its own line changed.
+ enter(formula(),'bonus + 4');assert.equal((await commit()).ok,true);const line='        $ trust += 1  # nested arithmetic\n';assert.equal(nestedSource.split(line).length,2);
+ assert.equal(await source(path),nestedSource.replace(line,'        $ trust += bonus + 4  # nested arithmetic\n'));assert.deepEqual(numeric().find(b=>b.id===nested.id).owner,nested.owner);
+ stage('a formula in the If branch keeps its draft, caret, focus, selection and Branch path through Reel and Writing focus; an invalid one survives Reel, another scene and Source unsent, then commits into the branch');
  await selectBeat(decimal.id);
  result.sourceSHA256=hash(await source(path));await writeFile(join(output,'accepted.rpy'),await source(path));button('Cancel',selected());button('Close Project');await wait(()=>document.querySelector('.recent-open'));result.passed=true;
 }catch(error){result.failure={message:error.message,stack:error.stack};result.dom=document.body.innerHTML;throw error;}

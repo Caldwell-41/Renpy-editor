@@ -1173,6 +1173,26 @@ fn runtime_service_switch_cancel_stop_shutdown_drop_and_closed_pipe_descendants(
 }
 
 #[test]
+fn requests_after_shutdown_are_internal_errors_and_never_overlaps() {
+    let temp = tempfile::tempdir().unwrap();
+    let root = temp.path().join("project");
+    make_openable_project(&root, "Closing");
+    let mut service = LifecycleService::new(temp.path().join("state")).unwrap();
+    let session = service.open_path(&root).unwrap().session_id;
+    let host = crate::dispatch::ApplicationHost::new(service);
+    host.shutdown();
+    let prepare =
+        json!({"sessionId":session,"kind":"validate","revisionChoice":"saved","sdkId":"sdk"});
+    for (operation, payload) in [
+        ("runtime.prepare", prepare),
+        ("project.status", json!({"sessionId":session})),
+    ] {
+        let refused = host_call(&host, &session, operation, payload);
+        assert_eq!(refused["error"]["code"], "INTERNAL_ERROR", "{refused}");
+    }
+}
+
+#[test]
 fn runtime_dialog_completion_cannot_mutate_replacement_session() {
     let temp = tempfile::tempdir().unwrap();
     let first = temp.path().join("first");
@@ -1187,12 +1207,10 @@ fn runtime_dialog_completion_cannot_mutate_replacement_session() {
         .with_service(|service| service.open_path(&second).unwrap().session_id)
         .unwrap();
     let mut invoked = false;
-    let response = host
-        .complete_dialog("dialog-result".into(), Some(before), |_| {
-            invoked = true;
-            crate::CoreResponse::success("dialog-result".into(), json!({}))
-        })
-        .unwrap();
+    let response = host.complete_dialog("dialog-result".into(), Some(before), |_| {
+        invoked = true;
+        crate::CoreResponse::success("dialog-result".into(), json!({}))
+    });
     assert!(!invoked);
     assert_eq!(
         serde_json::to_value(response).unwrap()["error"]["code"],

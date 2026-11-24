@@ -327,35 +327,6 @@ pub(super) fn parse_menu(
         },
     ))
 }
-pub(super) fn validate_conditional_completion(
-    bytes: &[u8],
-    scene: &SceneMetadata,
-    loaded: &Loaded,
-) -> Result<(), SceneError> {
-    let (_, beats) = build_mapping(
-        scene,
-        bytes,
-        &sha256(bytes),
-        None,
-        &[],
-        Some((
-            &loaded.project,
-            &loaded.authoring,
-            &loaded.source_map.owned_screens,
-        )),
-    )?;
-    if beats.iter().any(|b| {
-        matches!(
-            b.payload,
-            BeatPayload::Call { .. } | BeatPayload::Choice { .. }
-        )
-    }) && bodies::root_may_continue(bytes, &beats)?
-    {
-        return Err(SceneError::InvariantBlocked);
-    }
-    Ok(())
-}
-
 /// Called only after the entire old projection has passed its versioned byte/hash
 /// verification. Retained records are extensions, never live patch authority.
 pub(super) fn refine_legacy_ids(
@@ -392,6 +363,55 @@ pub(super) fn refine_legacy_ids(
                 forced.push(("choice".into(), hash, whole.id.clone(), Some(parsed.start)));
                 continue;
             }
+        }
+        // v15 makes an unsupported block one Custom Code beat. Its first line's row
+        // keeps the ID and holds the others, as a refined Choice does. Older builds
+        // also read lines inside a top-level block as beats, such as dialogue in
+        // `init python:` or an If in a screen; those rows fold too. A Choice row
+        // refuses, because folding it would turn a supported menu into protected code.
+        if matches!(parsed.payload, BeatPayload::CustomCode { .. }) {
+            let rows: Vec<_> = old
+                .beats
+                .iter()
+                .filter(|m| {
+                    m.byte_start as usize >= parsed.start && m.byte_end as usize <= parsed.end
+                })
+                .cloned()
+                .collect();
+            let Some(first) = rows.first() else {
+                continue;
+            };
+            if first.byte_start as usize != parsed.start
+                || rows
+                    .last()
+                    .is_none_or(|m| m.byte_end as usize != parsed.end)
+                || rows
+                    .windows(2)
+                    .any(|pair| pair[0].byte_end != pair[1].byte_start)
+                || rows.iter().any(|row| row.kind == "choice")
+            {
+                return Err(SceneError::InvalidMetadata);
+            }
+            let header = old
+                .beats
+                .iter_mut()
+                .find(|m| m.id == first.id)
+                .ok_or(SceneError::InvalidMetadata)?;
+            if header.extra.contains_key("refinedChildMappings") {
+                return Err(SceneError::InvalidMetadata);
+            }
+            header.extra.insert(
+                "refinedChildMappings".into(),
+                serde_json::to_value(&rows[1..]).map_err(|_| SceneError::InvalidMetadata)?,
+            );
+            covered.extend(rows.iter().map(|row| row.id.clone()));
+            forced.push((
+                "customCode".into(),
+                hash,
+                first.id.clone(),
+                Some(parsed.start),
+            ));
+            continue;
         }
         if !matches!(parsed.payload, BeatPayload::Choice { .. }) {
             continue;
@@ -749,6 +769,47 @@ mod tests {
             assert_eq!(fs::read(&map_path).unwrap(), before_map);
         }
     }
+    #[test]
+    fn decimal_tests_keep_the_authors_trailing_zero() {
+        let mut f = Fixture::new();
+        let created = ipc(
+            &mut f.service,
+            "variable.create",
+            json!({"technicalName":"fare","variableType":"decimal","defaultValue":2.5}),
+        );
+        let fare = created["variables"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|v| v["technicalName"] == "fare")
+            .unwrap()["id"]
+            .clone();
+        let test = json!({"status":"supported","expression":{"type":"compare","operator":"greaterEqual",
+            "left":{"type":"variable","variableId":fare,"variableType":"decimal"},"right":{"type":"decimal","value":"2.40"}}});
+        let scene = f.model()["scenes"][0].clone();
+        let place = scene["bodies"][0]["defaultPlace"].clone();
+        let inserted = f.command(json!({"type":"insertBodyBeat","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":place,
+            "beat":{"type":"choice","options":[{"text":"Pay","condition":test}]}}));
+        let scene = inserted["scenes"][0].clone();
+        let place = scene["bodies"][0]["defaultPlace"].clone();
+        f.command(json!({"type":"insertCondition","body":{"type":"root"},"sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"],"position":place,
+            "condition":test,"otherwise":false}));
+        let source =
+            fs::read_to_string(f.root.join(scene["sourcePath"].as_str().unwrap())).unwrap();
+        assert!(source.contains("\"Pay\" if (fare >= 2.40):"), "{source}");
+        assert!(source.contains("    if (fare >= 2.40):"), "{source}");
+        f.service.close().unwrap();
+        f.service.open_path(&f.root).unwrap();
+        let beats = f.model()["scenes"][0]["beats"].clone();
+        let choice = beats
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["type"] == "choice")
+            .unwrap();
+        assert_eq!(choice["payload"]["options"][0]["condition"], test);
+        f.service.close().unwrap();
+    }
 }
 
 #[cfg(test)]
@@ -1085,6 +1146,96 @@ mod boundary_tests {
             f.service.close().unwrap();
         }
     }
+
+    fn found(scene: &Value, kind: &str) -> Value {
+        scene["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["type"] == kind)
+            .unwrap()
+            .clone()
+    }
+    fn delete(f: &mut Fixture, name: &str) -> Value {
+        let w = f.model();
+        let scene = w["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["displayName"] == name)
+            .unwrap()
+            .clone();
+        let refused = f.reject(json!({"type":"deleteScene","sceneId":scene["id"],"expectedSourceRevision":scene["sourceRevision"]}));
+        assert_eq!(refused["error"]["code"], "INCOMING_REFERENCE");
+        refused["error"]["references"].clone()
+    }
+
+    #[test]
+    fn a_refused_scene_delete_names_each_jump_and_call_that_goes_to_it() {
+        let mut f = Fixture::new();
+        let target = f.scene("Platform 4");
+        let morning = f.scene("Morning at the depot");
+        let root = f.model()["scenes"][0].clone();
+        let label = target["technicalLabel"].as_str().unwrap();
+        f.save(
+            &root,
+            &format!(
+                "label {}:\n    \"Hello\"\n    menu:\n        \"Go\":\n            jump {label}\n    return\n",
+                root["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        f.save(
+            &morning,
+            &format!(
+                "label {}:\n    call {label} from back_here\n    return\n",
+                morning["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let w = f.model();
+        let root = w["scenes"][0].clone();
+        let morning = w["scenes"][2].clone();
+        let jump = found(&root, "jump");
+        let call = found(&morning, "call");
+        assert_eq!(
+            delete(&mut f, "Platform 4"),
+            json!({
+                "beats": [
+                    {"sceneId":root["id"],"sceneName":root["displayName"],"beatId":jump["id"],"kind":"jump"},
+                    {"sceneId":morning["id"],"sceneName":"Morning at the depot","beatId":call["id"],"kind":"call"},
+                ],
+                "protectedCode": [],
+            })
+        );
+        f.service.close().unwrap();
+    }
+
+    #[test]
+    fn a_refused_scene_delete_names_protected_code_that_names_its_label() {
+        let mut f = Fixture::new();
+        let target = f.scene("Depot yard");
+        let root = f.model()["scenes"][0].clone();
+        f.save(
+            &root,
+            &format!(
+                "label {}:\n    \"Hello\"\n    $ renpy.jump(\"{}\")\n    return\n",
+                root["technicalLabel"].as_str().unwrap(),
+                target["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let root = f.model()["scenes"][0].clone();
+        let code = found(&root, "customCode");
+        assert_eq!(code["protected"], true);
+        assert_eq!(
+            delete(&mut f, "Depot yard"),
+            json!({
+                "beats": [],
+                "protectedCode": [
+                    {"sceneId":root["id"],"sceneName":root["displayName"],"beatId":code["id"],"kind":"customCode"},
+                ],
+            })
+        );
+        f.service.close().unwrap();
+    }
 }
 
 #[cfg(test)]
@@ -1412,6 +1563,41 @@ mod structural_review_tests {
     fn root(f: &mut Fixture) -> Value {
         f.model()["scenes"][0].clone()
     }
+    /// A scene that already falls off its end is not a new fallthrough: its beats stay
+    /// editable, with a Choice or a Call in it too.
+    #[test]
+    fn a_scene_that_already_continues_keeps_its_beats_editable() {
+        let mut f = Fixture::new();
+        let a = root(&mut f);
+        let callee = f.scene("Callee");
+        f.save(
+            &a,
+            &format!(
+                "label {}:\n    \"Before\"\n    call {} from _ll_call_7f3a\n    menu:\n        \"Go\":\n            pass\n    \"After\"\n",
+                a["technicalLabel"].as_str().unwrap(),
+                callee["technicalLabel"].as_str().unwrap()
+            ),
+        );
+        let a = root(&mut f);
+        let before = a["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["payload"]["text"] == "Before")
+            .unwrap();
+        let next = f.command(json!({"type":"updateBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"beatId":before["id"],"expectedBody":{"type":"root"},"beat":{"type":"narration","text":"Edited"}}));
+        let edited = next["scenes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["id"] == a["id"])
+            .unwrap();
+        assert!(edited["beats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|b| b["payload"]["text"] == "Edited"));
+    }
     #[test]
     fn phase3a_body_new_fallthrough_and_opaque_root_end_refuse() {
         let mut f = Fixture::new();
@@ -1462,23 +1648,33 @@ mod structural_review_tests {
             ),
         );
         let a = root(&mut f);
-        let opaque = a["beats"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|b| b["payload"]["text"] == "Opaque Python")
-            .unwrap();
-        assert_eq!(f.reject(json!({"type":"updateBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"beatId":opaque["id"],"expectedBody":{"type":"root"},"beat":{"type":"narration","text":"Lost"}}))["error"]["code"], "SCENE_INVARIANT");
+        // A later top-level block is one protected beat; its lines are never beats.
+        let block = |a: &Value, header: &str| {
+            let beats = a["beats"].as_array().unwrap();
+            assert!(beats.iter().all(
+                |b| b["conditionalBranch"].is_null() && b["payload"]["text"] != "Opaque Python"
+            ));
+            beats
+                .iter()
+                .find(|b| {
+                    b["payload"]["source"]
+                        .as_str()
+                        .is_some_and(|s| s.starts_with(header))
+                })
+                .unwrap()
+                .clone()
+        };
+        let opaque = block(&a, "init python:\n    \"Opaque Python\"");
+        assert_eq!(opaque["protected"], true);
+        f.reject(json!({"type":"updateBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"beatId":opaque["id"],"expectedBody":{"type":"root"},"beat":{"type":"narration","text":"Lost"}}));
         f.save(&a, &format!("label {}:\n    \"Known\"\n    return\nscreen custom():\n    if flag:\n        text \"Opaque\"\n", a["technicalLabel"].as_str().unwrap()));
         let a = root(&mut f);
-        let header = a["beats"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|b| !b["conditionalBranch"].is_null())
-            .unwrap();
-        assert_eq!(f.reject(json!({"type":"insertBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"body":{"type":"branch","groupId":header["conditionalBranch"]["groupId"],"branchId":header["id"]},"position":{"type":"end"},"beat":{"type":"narration","text":"Lost"}}))["error"]["code"], "OPAQUE_BOUNDARY");
-        assert_eq!(f.reject(json!({"type":"insertBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"body":{"type":"root"},"position":{"type":"before","anchor":{"type":"condition","groupId":header["conditionalBranch"]["groupId"]}},"beat":{"type":"narration","text":"Lost"}}))["error"]["code"], "SCENE_INVARIANT");
+        let screen = block(
+            &a,
+            "screen custom():\n    if flag:\n        text \"Opaque\"",
+        );
+        assert_eq!(screen["protected"], true);
+        f.reject(json!({"type":"insertBodyBeat","sceneId":a["id"],"expectedSourceRevision":a["sourceRevision"],"body":{"type":"root"},"position":{"type":"before","anchor":{"type":"beat","beatId":screen["id"]}},"beat":{"type":"narration","text":"Lost"}}));
         // A qualified earlier Scene edit still preserves the later screen bytes.
         let known = a["beats"]
             .as_array()
@@ -1612,7 +1808,7 @@ mod choice_body_tests {
             9,
         )
         .unwrap();
-        let physical = map.scene_mappings[0].beats.clone();
+        let physical = per_line_rows(&map.scene_mappings[0].beats, &bytes);
         map.schema_version = 9;
         map.scene_mappings[0].beats = parsed
             .iter()
@@ -1673,13 +1869,17 @@ mod choice_body_tests {
             .any(|b| b["conditionalBranch"]["condition"]["status"] == "unknown"));
         let new = SourceMapMetadata::read_bytes(&fs::read(&map_path).unwrap(), &project.project_id)
             .unwrap();
+        // A block's later lines are kept with its first line (v15).
+        let saved = String::from_utf8(fs::read(&map_path).unwrap()).unwrap();
         for b in old {
-            let retained = new.scene_mappings[0]
-                .beats
-                .iter()
-                .find(|n| n.id == b.id)
-                .unwrap();
-            assert_eq!(retained.extra, b.extra);
+            match new.scene_mappings[0].beats.iter().find(|n| n.id == b.id) {
+                Some(retained) => {
+                    let mut extra = retained.extra.clone();
+                    extra.remove("refinedChildMappings");
+                    assert_eq!(extra, b.extra);
+                }
+                None => assert!(saved.contains(&b.id)),
+            }
         }
         let accepted_map = fs::read(&map_path).unwrap();
         f.service.close().unwrap();

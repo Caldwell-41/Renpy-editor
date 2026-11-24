@@ -2213,7 +2213,8 @@ fn owned_screen_metadata_migration_and_noop_reopen_preserve_source_and_extras() 
     service.open_path(&root).unwrap();
     service.close().unwrap();
     let map_path = root.join(".renpy-editor/source-map.json");
-    let mut old: Value = serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
+    let current: Value = serde_json::from_slice(&fs::read(&map_path).unwrap()).unwrap();
+    let mut old = crate::scene::per_line_map(&root, current.clone());
     old["schemaVersion"] = json!(5);
     old.as_object_mut().unwrap().remove("ownedScreens");
     old["unknownExtension"] = json!({"unchanged":[1,"two"]});
@@ -2231,7 +2232,12 @@ fn owned_screen_metadata_migration_and_noop_reopen_preserve_source_and_extras() 
         json!(crate::metadata::SOURCE_MAP_SCHEMA_VERSION)
     );
     assert_eq!(migrated["unknownExtension"], old["unknownExtension"]);
-    assert_eq!(migrated["sceneMappings"], old["sceneMappings"]);
+    // Scene rows return to the current shape; a block keeps its old line rows.
+    let mut scenes = migrated["sceneMappings"].clone();
+    for beat in scenes[0]["beats"].as_array_mut().unwrap() {
+        beat.as_object_mut().unwrap().remove("refinedChildMappings");
+    }
+    assert_eq!(scenes, current["sceneMappings"]);
     assert_eq!(fs::read(root.join(PATH)).unwrap(), FIXTURE.as_bytes());
     assert_eq!(fs::read(root.join("game/script.rpy")).unwrap(), script);
     service.close().unwrap();

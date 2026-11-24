@@ -131,10 +131,26 @@ export interface CoreRequest {
   readonly payload: Readonly<Record<string, unknown>>;
 }
 
+/** A beat by Scene and ID. `kind` is its payload type, such as "jump", "call" or "customCode". */
+export interface ReferringBeat {
+  readonly sceneId: string;
+  readonly sceneName: string;
+  readonly beatId: string;
+  readonly kind: string;
+}
+
+/** What refuses a Scene delete (INCOMING_REFERENCE): supported Jump and Call beats that go to
+ *  it, and protected source that names its label or sits in the Scene itself. */
+export interface IncomingReferences {
+  readonly beats: readonly ReferringBeat[];
+  readonly protectedCode: readonly ReferringBeat[];
+}
+
 export interface CoreError {
   readonly actionIndex?: number;
   readonly code: string;
   readonly message: string;
+  readonly references?: IncomingReferences;
 }
 
 export type CoreResponse<T = unknown> =
@@ -178,9 +194,24 @@ export function isCoreResponse(value: unknown, expectedRequestId?: string): valu
   if (value.ok !== false || !hasExactKeys(value, ["protocolVersion", "requestId", "ok", "error"]) || !isRecord(value.error)) {
     return false;
   }
-  return (hasExactKeys(value.error, ["code", "message"]) || (hasExactKeys(value.error, ["code", "message", "actionIndex"]) && Number.isInteger(value.error.actionIndex) && (value.error.actionIndex as number) >= 0 && (value.error.actionIndex as number) < MAX_ACTION_INDEX))
-    && typeof value.error.code === "string"
-    && typeof value.error.message === "string";
+  const error = value.error;
+  return Object.keys(error).every(key => ["code", "message", "actionIndex", "references"].includes(key))
+    && (!("actionIndex" in error) || (Number.isInteger(error.actionIndex) && (error.actionIndex as number) >= 0 && (error.actionIndex as number) < MAX_ACTION_INDEX))
+    && (!("references" in error) || isIncomingReferences(error.references))
+    && typeof error.code === "string"
+    && typeof error.message === "string";
+}
+
+function isReferringBeat(value: unknown): boolean {
+  return isRecord(value) && hasExactKeys(value, ["sceneId", "sceneName", "beatId", "kind"])
+    && typeof value.sceneId === "string" && typeof value.sceneName === "string"
+    && typeof value.beatId === "string" && typeof value.kind === "string";
+}
+
+function isIncomingReferences(value: unknown): boolean {
+  return isRecord(value) && hasExactKeys(value, ["beats", "protectedCode"])
+    && Array.isArray(value.beats) && value.beats.every(isReferringBeat)
+    && Array.isArray(value.protectedCode) && value.protectedCode.every(isReferringBeat);
 }
 
 export function createRequest(operation: CoreOperation, payload: Readonly<Record<string, unknown>> = {}): CoreRequest {

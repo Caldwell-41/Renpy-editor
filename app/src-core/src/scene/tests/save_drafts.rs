@@ -65,6 +65,7 @@ fn save_drafts(
             expected_source_map_revision: ws.source_map_revision.clone(),
             expected_authoring_revision: None,
             commands,
+            history_beats: Vec::new(),
         },
     )
 }
@@ -319,6 +320,60 @@ fn story_save_reports_a_missing_insertion_place_as_a_beat_draft_conflict() {
     }
 }
 
+/// Story names a beat edit by the number Tracks shows: "narration edit in beat 02".
+#[test]
+fn a_beat_edit_is_named_by_the_beat_number_story_sends() {
+    let (f, ws) = two_scenes();
+    let first = &ws.scenes[0];
+    let apply = |ws: &SceneWorkspace, command: SceneCommand, beat: Option<&str>| {
+        f.service.scene_apply(
+            &f.project,
+            &f.project_id,
+            SceneCommandRequest {
+                expected_project_revision: ws.project_revision.clone(),
+                expected_source_map_revision: ws.source_map_revision.clone(),
+                expected_authoring_revision: None,
+                command,
+                drafts: Vec::new(),
+                history_beat: beat.map(Into::into),
+            },
+        )
+    };
+    let long = format!("01{}", ".1".repeat(40));
+    for bad in ["", "beat 2", "2", "02.", "02..1", &long] {
+        assert_eq!(
+            apply(&ws, update(first, 1, "Bad"), Some(bad)).map(|_| ()),
+            Err(SceneError::InvalidPayload),
+            "{bad:?}"
+        );
+    }
+    let ws = apply(&ws, update(first, 1, "Named"), Some("02")).unwrap();
+    assert_eq!(f.history().undo.unwrap().name, "narration edit in beat 02");
+    // Story Save names each saved beat the same way; a beat with no number keeps its scene.
+    let first = &ws.scenes[0];
+    let other = ws.scenes.iter().find(|s| s.id != first.id).unwrap();
+    f.service
+        .scene_save_drafts(
+            &f.project,
+            &f.project_id,
+            SceneSaveDraftsRequest {
+                drafts: Vec::new(),
+                expected_project_revision: ws.project_revision.clone(),
+                expected_source_map_revision: ws.source_map_revision.clone(),
+                expected_authoring_revision: None,
+                commands: vec![update(other, 0, "Unnamed"), update(first, 0, "Saved")],
+                history_beats: vec![None, Some("01.2.1".into())],
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        f.history().undo.unwrap().name,
+        "narration edit in beat 01.2.1"
+    );
+    f.undo().unwrap();
+    assert_eq!(f.history().undo.unwrap().name, "narration edit in Scene 2");
+}
+
 #[test]
 fn commit_joins_its_draft_steps_into_one_entry_on_top() {
     let f = Fixture::new(b"label scene_one:\n    \"First\"\n    \"Second\"\n    return\n");
@@ -350,6 +405,7 @@ fn commit_joins_its_draft_steps_into_one_entry_on_top() {
                 expected_authoring_revision: None,
                 command,
                 drafts,
+                history_beat: None,
             },
         )
     };

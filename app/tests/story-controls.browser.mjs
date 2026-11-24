@@ -161,7 +161,33 @@ try{
  const reel=await page.evaluate(()=>[...document.querySelectorAll('.story-reel .story-track-column')].slice(0,2).map(node=>node.getBoundingClientRect().top));assert(reel[1]>reel[0],'Reel cards are rows');
  await page.screenshot({path:`${output}/focus-1100x720-reel.png`});await view('tracks');
  await text.focus();await text.evaluate(field=>field.setSelectionRange(2,5));
- await page.getByRole('button',{name:'Show game window',exact:true}).click();assert(await page.locator('.story-stage').isVisible());await keeps('leaving');
+ await page.getByRole('button',{name:'Show stage',exact:true}).click();assert(await page.locator('.story-stage').isVisible());await keeps('leaving');
+ // A new Choice's Prompt takes what the author types while option 1 is still empty:
+ // leaving an empty field and previewing the draft mark it, but never pull focus back to it.
+ await mount({width:1280,height:720});
+ await page.getByRole('button',{name:'+ Add beat',exact:true}).click();await page.getByRole('dialog',{name:'Add a beat'}).getByRole('option',{name:'Choice',exact:true}).click();
+ const editorPanel=page.locator('.story-editor'),prompt=editorPanel.locator('input[aria-label="Prompt text"]'),firstOption=editorPanel.locator('input[aria-label="Choice option text"]').first();
+ await editorPanel.getByRole('button',{name:'Add a prompt shown with the options'}).click();
+ assert(await prompt.evaluate(field=>document.activeElement===field),'+ Prompt focuses the Prompt');
+ await firstOption.click();await prompt.click();await page.keyboard.type('Hello');
+ assert.deepEqual([await prompt.inputValue(),await firstOption.inputValue()],['Hello',''],'typing goes to the Prompt, not option 1');
+ assert(await prompt.evaluate(field=>document.activeElement===field),'the Prompt keeps focus');
+ await editorPanel.getByRole('button',{name:'Cancel',exact:true}).click();
+ // An empty option's starter buttons are one width, at every size.
+ await page.evaluate(async()=>{
+  window.storyDispose?.();document.querySelector('main').replaceChildren();document.querySelector('aside').replaceChildren();
+  const {renderStoryView,editorFixture,selectBeat}=await import('/tests/story-controls-fixture.ts');const model=editorFixture(),scene=model.scenes[0];
+  const beats=scene.beats.filter(b=>b.owner?.branchId!=='opt2');beats.splice(beats.findIndex(b=>b.id==='opt2')+1,0,{id:'opt2-pass',byteStart:0,byteEnd:0,protected:true,structuralPlaceholder:true,owner:{groupId:'menu',branchId:'opt2'},payload:{type:'customCode',source:'        pass',reason:'Empty branch'}});
+  window.storyDispose=renderStoryView(document.querySelector('main'),document.querySelector('aside'),{...model,scenes:[{...scene,beats},...model.scenes.slice(1)]},{apply:async()=>{throw Error('Capture fixture refuses writes');},status:()=>{},resolution:{width:1280,height:720},present:async()=>{throw Error('No media');}}).dispose;
+  selectBeat(document.querySelector('main'),'opt2','opt2');
+ });
+ for(const [width,height] of [[1440,900],[1100,720],[560,640]]){
+  await page.setViewportSize({width,height});
+  const widths=await page.locator('.story-editor-empty .story-editor-tools button').evaluateAll(buttons=>buttons.map(button=>[button.textContent,Math.round(button.getBoundingClientRect().width*10)/10]));
+  assert.deepEqual(widths.map(([label])=>label),['Write dialogue','Write narration','Add background'],`${width}: the starters`);
+  assert.equal(new Set(widths.map(([,size])=>size)).size,1,`${width}: equal starter widths ${JSON.stringify(widths)}`);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,`${width}: no page overflow`);
+ }
  assert.deepEqual(errors,[]);passed=true;console.log(JSON.stringify({passed:true,captures:results.length,runtimeErrors:errors.length}));
 }catch(error){failure=String(error);throw error;
 }finally{

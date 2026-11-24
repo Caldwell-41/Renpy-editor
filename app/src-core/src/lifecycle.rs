@@ -3,6 +3,7 @@ pub(crate) mod acceptance;
 pub mod runtime;
 pub use crate::renpy::runtime::canvas::CanvasShutdown;
 mod runtime_probe;
+mod story_example;
 use crate::ai_credentials::Records;
 use crate::{
     authoring::{
@@ -594,6 +595,11 @@ impl LifecycleService {
         self.authoring
             .update_variable(&authority, &project_id, request)
             .map_err(LifecycleError::Authoring)
+    }
+
+    /// Keeps the authoring list for one request; see `AuthoringService::request_scope`.
+    pub(crate) fn request_scope(&self) -> crate::authoring::RequestScope {
+        self.authoring.request_scope()
     }
 
     pub fn authoring_select_import(
@@ -2713,6 +2719,7 @@ mod tests {
         service
             .scene_apply(SceneCommandRequest {
                 drafts: Vec::new(),
+                history_beat: None,
                 expected_project_revision: workspace.project_revision.clone(),
                 expected_source_map_revision: workspace.source_map_revision.clone(),
                 expected_authoring_revision: None,
