@@ -38,8 +38,12 @@ try{
    const {enableRichSourceEditor}=await import('/src/source-editor.ts');enableRichSourceEditor();
    const {startApplication}=await import('/src/main.ts');startApplication(async(operation,payload={})=>{
     if(operation==='source.updateDraft'&&String(payload.text).includes('Native editor check')){
+     // The draft write waits, at most 300 ms, for a direct probe read. A probe that read
+     // before the draft was retained overlaps every retry of it, whatever else the app
+     // is loading, so the outcome does not depend on timing.
+     const until=Date.now()+300;while(!window.__retentionEvidence.directReads&&Date.now()<until)await new Promise(r=>setTimeout(r,5));
      await new Promise(r=>setTimeout(r,70));
-     if(held||mode==='corrected-refusal'){
+     if(held||window.__retentionEvidence.directReads||mode==='corrected-refusal'){
       window.__retentionEvidence.refusals++;
       return {protocolVersion:1,requestId:'fixture',ok:false,error:{code:'REQUEST_OVERLAP',message:'Draft write refused before dispatch'}};
      }

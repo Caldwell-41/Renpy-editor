@@ -1463,3 +1463,22 @@ describe historical fixes; they do not claim fresh execution or reopen frozen ru
   completion during a 200 ms overlap ran the choice zero times. After it, all of them
   pass.
 - **Evidence:** issue #120, PR #185.
+
+## H97. The old-probe collision in `ui-refresh-retention` stops reproducing
+
+- **Class/search:** harness, Chromium fixture bridge; `ui-refresh-retention.browser.mjs`,
+  `original-collision`, `report.passed` true, `test:source-browser`.
+- **Symptom:** the check that the pre-settlement probe fails passed instead. It failed
+  in the full `npm run test:source-browser` chain 3 of 3 times and passed alone, at
+  the head of the #120 final batch.
+- **Cause:** the collision depended on timing. The fixture refused the probe's draft
+  write only while a direct `source.list` read was in flight, and each retry could land
+  in a gap between reads. Story now loads a known background on open (L4), which moved
+  the draft write a few milliseconds. With L4 reverted the chain passed.
+- **Correction:** the fixture's draft write waits, at most 300 ms, for a direct probe
+  read, and refuses every retry once the probe has read before the draft was retained.
+  The settled probe reads only after retention, so it is unaffected.
+- **Regression:** the test itself.
+- **Verification:** after the correction, 6 of 6 runs alone and 2 of 2 full chains
+  passed, with `original-collision` failing as designed.
+- **Evidence:** issue #120, PR #185.
