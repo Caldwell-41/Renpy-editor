@@ -295,10 +295,11 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
     } else if (beat.owner && beat.id !== throughBeatId) continue;
     lastVisitedBeatId = beat.id;
     if (beat.structuralPlaceholder) continue;
-    // A Call may change anything before it returns. A Choice's option conditions only pick
-    // which options show, and its options are followed like any other branch. Show and Hide
-    // screen leave the stage as it was; a shown screen's actions may set variables later.
-    if (payload.type === "customCode" || payload.type === "call") {
+    // A Call, or a called screen's actions, may change anything before it returns. A Choice's
+    // option conditions only pick which options show, and its options are followed like any
+    // other branch. Show and Hide screen leave the stage as it was; a shown screen's actions
+    // may set variables later.
+    if (payload.type === "customCode" || payload.type === "call" || payload.type === "callScreen") {
       forget(beat);
       if (payload.type === "customCode") { if (manualBranches && beat.conditionalBranch && !passClosed) break; continue; }
     }
@@ -332,7 +333,8 @@ export function deriveScenePreview(scene: SceneDocument, throughBeatId?: string,
       case "repeatChoice": overlay = { kind: "repeatChoice", text: "Repeat this Choice. Live availability is unknown.", beatId: beat.id }; break;
       case "return": overlay = { kind: "return", text: "Return to caller or main menu", beatId: beat.id }; break;
       case "playSfx": case "transition": break;
-      case "showScreen": case "callScreen": variables = {}; variablesUnknown = true; if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id); break;
+      case "callScreen": break;
+      case "showScreen": variables = {}; variablesUnknown = true; if (!unknownBeatIds.includes(beat.id)) unknownBeatIds.push(beat.id); break;
       case "hideScreen": break;
     }
     if (payload.type === "choice") {

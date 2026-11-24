@@ -627,9 +627,10 @@ explicit audition controls.
 In Story, the branches open in the Branch path are the route. A condition or Choice
 before the selected beat with no open branch leaves its state unknown rather than
 choosing a branch. A Choice's option conditions only pick which options show, so the
-stage keeps what it knew when the menu appears. Custom Code and a Call leave all state
-unknown. Show and Hide screen keep the stage, and a shown or called screen leaves
-variables unknown, because its actions may set them later. Core supplies the bodies, endings and insertion places that Tracks
+stage keeps what it knew when the menu appears. Custom Code, a Call and a Call screen
+leave all state unknown, because a called screen's actions may Jump or run Python. Show
+and Hide screen keep the stage, and a shown screen leaves variables unknown, because its
+actions may set them later. Core supplies the bodies, endings and insertion places that Tracks
 and Reel lay out; the renderer works out no scene structure of its own. Both views draw
 one route from the same Story controller, with one selection and one set of beat drafts.
 Writing focus is view state in that controller too. It lays out the same editor and

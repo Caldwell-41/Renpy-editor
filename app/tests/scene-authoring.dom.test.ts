@@ -377,7 +377,7 @@ test("closeout: Add change here retains selected Beat anchor", async () => {
   assert.deepEqual(calls.at(-1)?.position, { type: "before", anchor: { type: "beat", beatId: "dialogue" } });
 });
 
-test("a guarded Choice and screen beats keep the stage they don't change; a Call still leaves it unknown", () => {
+test("a guarded Choice and Show and Hide screen keep the stage they don't change; a Call or Call screen still leaves it unknown", () => {
   const scene = sceneModel().scenes[0]!, target = { screenId: "panel", sourceName: "help_panel" };
   const beats: SceneBeat[] = [
     { id: "bg", byteStart: 0, byteEnd: 10, protected: false, payload: { type: "background", assetId: "bg", transition: "none" } },
@@ -399,6 +399,10 @@ test("a guarded Choice and screen beats keep the stage they don't change; a Call
   // After a Call the called scene may have changed anything.
   const called = deriveScenePreview({ ...scene, beats: [...beats.slice(0, 4), { id: "call", byteStart: 40, byteEnd: 50, protected: false, payload: { type: "call", sceneId: "two", returnLabel: "back" } }] });
   assert.deepEqual([called.background, called.backgroundUnknown, called.charactersUnknown, called.musicUnknown, called.variablesUnknown], [undefined, true, true, true, true]);
+  // A called screen's actions may Jump or run Python before it returns.
+  const calledScreen = deriveScenePreview({ ...scene, beats: [...beats.slice(0, 4), { id: "call-panel", byteStart: 40, byteEnd: 50, protected: false, payload: { type: "callScreen", target } }] });
+  assert.deepEqual([calledScreen.background, calledScreen.backgroundUnknown, calledScreen.charactersUnknown, calledScreen.music, calledScreen.musicUnknown, calledScreen.variablesUnknown], [undefined, true, true, undefined, true, true]);
+  assert.deepEqual(calledScreen.unknownBeatIds, ["call-panel"]);
 });
 
 test("Background resolves default-layer uncertainty after Custom Code without clearing music or variable uncertainty", () => {
