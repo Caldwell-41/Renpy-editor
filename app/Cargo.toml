@@ -1,3 +1,10 @@
 [workspace]
 members = ["src-core", "src-tauri"]
 resolver = "2"
+
+# Debug builds optimize dependencies (hashing, JSON, image decoding), so a debug app
+# runs near release speed. Loomlight's own crates keep the dev profile with debug
+# assertions and overflow checks, and build scripts still see PROFILE=debug, so the
+# signing gate in src-tauri/build.rs is unchanged.
+[profile.dev.package."*"]
+opt-level = 3
