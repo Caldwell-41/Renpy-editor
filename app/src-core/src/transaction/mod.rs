@@ -328,6 +328,11 @@ impl TransactionService {
         }
     }
 
+    /// Recovery and new folders may change any file a reader has seen.
+    fn record_write_anywhere(&self) {
+        self.record_write(None);
+    }
+
     /// Counts writes through this service.
     pub(crate) fn write_generation(&self) -> u64 {
         self.writes
@@ -1103,8 +1108,7 @@ impl TransactionService {
             .serial
             .lock()
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
-        // Recovery and new folders may change any file a reader has seen.
-        self.record_write(None);
+        self.record_write_anywhere();
         let approved = self.approved(project)?;
         self.validate_root(&approved)?;
         if blocking_recovery_code(&approved).is_some() {
@@ -1545,8 +1549,7 @@ impl TransactionService {
             Ok(value) => value,
             Err(_) => return recovery_scan_failure(ErrorCode::IoFailure),
         };
-        // Recovery and new folders may change any file a reader has seen.
-        self.record_write(None);
+        self.record_write_anywhere();
         let approved = match self.approved(project) {
             Ok(value) => value,
             Err(_) => return RecoveryReport::default(),
@@ -1566,8 +1569,7 @@ impl TransactionService {
             .serial
             .lock()
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
-        // Recovery and new folders may change any file a reader has seen.
-        self.record_write(None);
+        self.record_write_anywhere();
         if !valid_internal_id(transaction_id, "tx") {
             return Err(PublicDiagnostic::new(ErrorCode::InvalidProposal, None));
         }
@@ -1607,8 +1609,7 @@ impl TransactionService {
             .serial
             .lock()
             .map_err(|_| PublicDiagnostic::new(ErrorCode::IoFailure, None))?;
-        // Recovery and new folders may change any file a reader has seen.
-        self.record_write(None);
+        self.record_write_anywhere();
         if !valid_internal_id(transaction_id, "tx") {
             return Err(PublicDiagnostic::new(ErrorCode::InvalidProposal, None));
         }
