@@ -377,6 +377,30 @@ test("closeout: Add change here retains selected Beat anchor", async () => {
   assert.deepEqual(calls.at(-1)?.position, { type: "before", anchor: { type: "beat", beatId: "dialogue" } });
 });
 
+test("a guarded Choice and screen beats keep the stage they don't change; a Call still leaves it unknown", () => {
+  const scene = sceneModel().scenes[0]!, target = { screenId: "panel", sourceName: "help_panel" };
+  const beats: SceneBeat[] = [
+    { id: "bg", byteStart: 0, byteEnd: 10, protected: false, payload: { type: "background", assetId: "bg", transition: "none" } },
+    { id: "show", byteStart: 10, byteEnd: 20, protected: false, payload: { type: "showCharacter", characterId: "alice", appearanceId: "alice-happy", placement: "left", transition: "none" } },
+    { id: "music", byteStart: 20, byteEnd: 30, protected: false, payload: { type: "playMusic", assetId: "theme" } },
+    { id: "set", byteStart: 30, byteEnd: 40, protected: false, payload: { type: "setVariable", variableId: "trust", value: "3" } },
+    { id: "hide-panel", byteStart: 40, byteEnd: 50, protected: false, payload: { type: "hideScreen", target } },
+    { id: "guarded", byteStart: 50, byteEnd: 60, protected: false, payload: { type: "choice", options: [{ text: "Ask", condition: { status: "supported", expression: { type: "variable", variableId: "trust", variableType: "int" } } }, { text: "Leave" }] } },
+  ];
+  // With no beat selected the preview stops at the Choice, before any option runs.
+  const atChoice = deriveScenePreview({ ...scene, beats });
+  assert.equal(atChoice.throughBeatId, "guarded"); assert.equal(atChoice.overlay?.kind, "choice");
+  assert.deepEqual([atChoice.background?.beatId, atChoice.backgroundUnknown, atChoice.characters.map(item => item.characterId), atChoice.charactersUnknown, atChoice.music?.beatId, atChoice.musicUnknown], ["bg", false, ["alice"], false, "music", false]);
+  assert.deepEqual([atChoice.variables.trust?.value, atChoice.variablesUnknown], ["3", false]);
+  // A shown screen's actions may set variables later; the stage itself is unchanged.
+  const shown = deriveScenePreview({ ...scene, beats: [...beats.slice(0, 4), { id: "show-panel", byteStart: 40, byteEnd: 50, protected: false, payload: { type: "showScreen", target } }] });
+  assert.deepEqual([shown.background?.beatId, shown.characters.length, shown.music?.beatId, shown.variablesUnknown, shown.variables.trust], ["bg", 1, "music", true, undefined]);
+  assert.deepEqual(shown.unknownBeatIds, ["show-panel"]);
+  // After a Call the called scene may have changed anything.
+  const called = deriveScenePreview({ ...scene, beats: [...beats.slice(0, 4), { id: "call", byteStart: 40, byteEnd: 50, protected: false, payload: { type: "call", sceneId: "two", returnLabel: "back" } }] });
+  assert.deepEqual([called.background, called.backgroundUnknown, called.charactersUnknown, called.musicUnknown, called.variablesUnknown], [undefined, true, true, true, true]);
+});
+
 test("Background resolves default-layer uncertainty after Custom Code without clearing music or variable uncertainty", () => {
   const scene = sceneModel().scenes[0]!;
   const actual = deriveScenePreview({ ...scene, beats: [
