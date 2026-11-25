@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "screenId": "game-ui-theme-creation",
+  "currentApproved": null,
+  "revisions": [
+    { "id": "create-step-v1", "variantId": "create-step", "approval": null },
+    { "id": "create-config-v1", "variantId": "create-config", "approval": null },
+    { "id": "create-review-v1", "variantId": "create-review", "approval": null }
+  ]
+}
