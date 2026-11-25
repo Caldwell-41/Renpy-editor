@@ -1,8 +1,82 @@
 {
   "schemaVersion": 1,
   "screenId": "game-ui-themes",
-  "currentApproved": null,
+  "currentApproved": "board-v1",
   "revisions": [
-    { "id": "board-v1", "variantId": "board", "approval": null }
+    {
+      "id": "board-v1",
+      "variantId": "board",
+      "approval": {
+        "date": "2026-11-25",
+        "decision": "Kris approved the theme board for #215: screen game-ui-themes / board, revision board-v1. On 2026-11-23 he chose to ship all seven themes (Ren'Py default, Lantern, Harbor, Paper, Signal, Hollow, Sweet) with no value changes of his own, and the 11 OFL font families (\"1 - yes, 2 - no, 3 - yes\"). He asked for a council review of three rounds (Claude Opus 5.5 and GPT-6.2 Sol scored 8 and 7.5, then 8.5 and 8.5, then 9 and 9); the round-three fixes were applied without a fourth review, as he chose. On 2026-11-25 he accepted the theme value changes the review made for contrast (\"yes to 1 and 2\") and asked that this approval be recorded. The decision is recorded in issue #215.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "fe2500437026b12c4169f5174f75a08245ef5770",
+          "fingerprint": "37a67daa3f9aa4f507d1c768967366bb32f56f6ad21960a9bef8b1e792499ae8"
+        },
+        "captures": [
+          {
+            "path": "docs/design/game-ui-themes/captures/board-v1-idle-dark-wide.png",
+            "sha256": "bde6ea85b7c6cc901fe76240e90ac03e486f78ea1ff9bbc6809452fbd02bf591",
+            "state": "idle",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-themes/captures/board-v1-hover-dark-wide.png",
+            "sha256": "13df01cb7b13e65344a6578b685141bdd51da9c0e6eb8de8d341547c992b583d",
+            "state": "hover",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-themes/captures/board-v1-large-dark-wide.png",
+            "sha256": "042f65b3a2acec7dbb2bd4281a546a41e5e4027136a117d44b71b908233af85d",
+            "state": "large",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-themes/captures/board-v1-values-dark-wide.png",
+            "sha256": "b91f3cd4fe00409e99859993700b3469d2f41408539ecac66179826091018124",
+            "state": "values",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-themes/captures/board-v1-fonts-dark-wide.png",
+            "sha256": "8146f539e8abbd89e900c476d2ff156cf393ba3bfec0d52e04baa0adc2750f73",
+            "state": "fonts",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Seven themes, each drawn on six stock screens of Ren'Py 8.5.3 at 1280 x 720 (Title screen, Dialogue box, Choices, Save and load, Options, Confirm prompt) in the stock layout, because a theme never sets a position or an outer size.",
+          "Every value a theme sets is in themes.ts and in the Values table: the three colors, the five text types and the Version color, the Button, Box and Bar looks, the four screen transitions and the hover animation, and the stock look groups with own values.",
+          "Each theme draws the dialogue box as a full-width bar, and keeps the stock padding on it so the dialogue text does not move.",
+          "Paper and Sweet give the Name box a dark fill, because each character has its own name color.",
+          "The dim behind the confirm prompt is the stock picture, black at 60 %, under every theme.",
+          "Contrast fixes from the review: Sweet Accent #c2255c, idle and quick text #7d6383, slider thumb #241528, Option buttons Corners 8; Harbor Option buttons Corners 8; Hollow idle and quick text #857b6f, hover and Version #e0483c, hovered choice fill 92 %; Paper idle and quick text #6a5e52, Version #9a3c2a.",
+          "The Fonts table lists the 11 shipped families with their files, size, scripts, copyright notice and reserved name, and DejaVu Sans, which comes with Ren'Py; the specimens load the shipped files, and DejaVu Sans loads from the SDK."
+        ],
+        "deviations": [
+          "A browser drawing stands in for the hidden Ren'Py process; text metrics and line heights differ slightly from Ren'Py's.",
+          "Sweet's pink line along the top of the dialogue box is a hard shadow above a full-width box; it depends on the shadow correction of #202, which has no SDK run.",
+          "The sample uses one speaker name color, #f0b35b."
+        ]
+      }
+    }
   ]
 }

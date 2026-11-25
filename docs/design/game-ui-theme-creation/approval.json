@@ -1,10 +1,60 @@
 {
   "schemaVersion": 1,
   "screenId": "game-ui-theme-creation",
-  "currentApproved": null,
+  "currentApproved": "create-config-v1",
   "revisions": [
-    { "id": "create-step-v1", "variantId": "create-step", "approval": null },
-    { "id": "create-config-v1", "variantId": "create-config", "approval": null },
-    { "id": "create-review-v1", "variantId": "create-review", "approval": null }
+    {
+      "id": "create-step-v1",
+      "variantId": "create-step",
+      "approval": null
+    },
+    {
+      "id": "create-config-v1",
+      "variantId": "create-config",
+      "approval": {
+        "date": "2026-11-25",
+        "decision": "Kris approved Creation B for #215: screen game-ui-theme-creation / create-config, revision create-config-v1. On 2026-11-23 he chose layout B over A and C (\"4 - agree\") and Ren'Py default as the theme selected first (\"5 - default\"). He asked for a council review of three rounds (Claude Opus 5.5 and GPT-6.2 Sol scored 8 and 7.5, then 8.5 and 8.5, then 9 and 9); the round-three fixes were applied without a fourth review, as he chose. On 2026-11-25 he asked that this approval be recorded (\"yes to 1 and 2\"). The decision is recorded in issue #215.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "fe2500437026b12c4169f5174f75a08245ef5770",
+          "fingerprint": "37a67daa3f9aa4f507d1c768967366bb32f56f6ad21960a9bef8b1e792499ae8"
+        },
+        "captures": [
+          {
+            "path": "docs/design/game-ui-theme-creation/captures/create-config-v1-idle-dark-wide.png",
+            "sha256": "7b56c85a96c6e1fd42842ae33b665006c4f13d6fbad16b58b572aeea11c7571c",
+            "state": "idle",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-theme-creation/captures/create-config-v1-hover-dark-wide.png",
+            "sha256": "b9177f0c402dbd573fe788c3b6e5a12d294d79d60dc12c739409211ab69a6dd0",
+            "state": "hover",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Step 3 of 4, Game configuration, of the production New Project wizard, drawn with its markup and styles: the resolution preset with Custom, the ratio preview, then a Look field with the seven theme title screens in a grid of four columns, Ren'Py default selected first.",
+          "Below the grid, the selected theme's dialogue box, its name and use, the fonts it copies into game/fonts/ with their license files, and a line that the look can change later on the Game-wide look page.",
+          "No step is added. The wizard panel scrolls, and keeps its scroll position when the author selects a different theme."
+        ],
+        "deviations": [
+          "Production's .wizard-panel does not scroll at 1100 x 720; the mock adds align-self:stretch and min-height:0, which production needs when it builds this step.",
+          "The pictures are browser drawings of the stock title screen and dialogue box."
+        ]
+      }
+    },
+    {
+      "id": "create-review-v1",
+      "variantId": "create-review",
+      "approval": null
+    }
   ]
 }
