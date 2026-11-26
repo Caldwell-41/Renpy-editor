@@ -3,7 +3,10 @@
   "screenId": "game-ui-templates",
   "currentApproved": null,
   "revisions": [
-    { "id": "board-v1", "variantId": "board", "approval": null },
-    { "id": "sheet-v1", "variantId": "sheet", "approval": null }
+    {
+      "id": "board-v1",
+      "variantId": "board",
+      "approval": null
+    }
   ]
 }

@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 const pages = { title: 4, say: 3, choice: 3, history: 3 };
 export default async function ({ page, open, capture }) {
   const shots = process.env.TEMPLATE_SHOTS;
-  if (/variant=board/.test(page.url())) {
+  if (/screen=game-ui-templates/.test(page.url())) {
     for (const [id, count] of Object.entries(pages)) {
       await open({ state: id, viewport: 'wide', theme: 'dark' });
       assert.equal(await page.locator('.tp-row').count(), 7);

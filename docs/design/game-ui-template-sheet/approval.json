@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "screenId": "game-ui-template-sheet",
+  "currentApproved": null,
+  "revisions": [
+    {
+      "id": "sheet-v1",
+      "variantId": "sheet",
+      "approval": null
+    }
+  ]
+}
