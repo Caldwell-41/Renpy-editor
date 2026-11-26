@@ -18,7 +18,7 @@
         "captures": [
           {
             "path": "docs/design/game-ui-template-sheet/captures/sheet-v1-title-dark-wide.png",
-            "sha256": "488a24209a66676f3facb22c1cee7e52a1cf965c73d790f627f8850557facbc7",
+            "sha256": "1bdd3cfa3a4e59c73ce5645f01f2213686218e4bfb3a7103963114d6d1a9c309",
             "state": "title",
             "theme": "dark",
             "width": 1100,
@@ -27,7 +27,7 @@
           },
           {
             "path": "docs/design/game-ui-template-sheet/captures/sheet-v1-custom-dark-wide.png",
-            "sha256": "dea7f4cde8ca6493a59dae240aab23208bf2881363e2387e4b82dbd55b580e1b",
+            "sha256": "efa22df96f2f4863921d1addb43f4dbf80d210db72a4606c3758a3427adb8c00",
             "state": "custom",
             "theme": "dark",
             "width": 1100,
@@ -36,7 +36,7 @@
           },
           {
             "path": "docs/design/game-ui-template-sheet/captures/sheet-v1-confirm-dark-wide.png",
-            "sha256": "832c747d38465b78fc3a13f461f66c4393049412294e07f330f386107f67d2ee",
+            "sha256": "02b6d51fabb1de1d051efecf86dc94ccc4c67ff0bacfe38a003f1e953395d013",
             "state": "confirm",
             "theme": "dark",
             "width": 1100,

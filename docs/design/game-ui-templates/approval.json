@@ -27,7 +27,7 @@
           },
           {
             "path": "docs/design/game-ui-templates/captures/board-v1-say-dark-wide.png",
-            "sha256": "858ddc9e680327a79a5af048874d632f4122f3ca0ccfce467e32983cccf69f0c",
+            "sha256": "31635c7e5a6f4a961a316f2cbf564c94d109f7006e7a10adb2984c41d68e8bac",
             "state": "say",
             "theme": "dark",
             "width": 1100,
@@ -36,7 +36,7 @@
           },
           {
             "path": "docs/design/game-ui-templates/captures/board-v1-choice-dark-wide.png",
-            "sha256": "79fc70c6e945c9af85f46c01d76a1ff692694bec92bdc677abf40f5d152d2f18",
+            "sha256": "916711261d1fbf11e386798a9517d9b915dc543a4eaec1cf5f57a3cfc33403f7",
             "state": "choice",
             "theme": "dark",
             "width": 1100,
@@ -45,7 +45,7 @@
           },
           {
             "path": "docs/design/game-ui-templates/captures/board-v1-history-dark-wide.png",
-            "sha256": "34392add2186291121bdeb8efa4f9db0d1b85a315798de367f09fa540d67cd1e",
+            "sha256": "e2e5a2051555c8165437250fa001bc87aba068cb0c1d8418ee7a3c8babde6ff5",
             "state": "history",
             "theme": "dark",
             "width": 1100,
