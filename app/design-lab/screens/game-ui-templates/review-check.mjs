@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 // PROTOTYPE proof for #222. Draws each template large with each theme, and walks the sheet through
 // a template choice, "Custom" and the question. Set TEMPLATE_SHOTS to a folder to save each large picture.
 // Retire it when Kris has chosen.
-const pages = { title: 4, say: 4, choice: 3, save: 2, history: 3 };
+const pages = { title: 4, say: 3, choice: 3, history: 3 };
 export default async function ({ page, open, capture }) {
   const shots = process.env.TEMPLATE_SHOTS;
   if (/variant=board/.test(page.url())) {

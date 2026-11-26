@@ -2,7 +2,7 @@
 // A template is a set of values for the layout settings of one settings page (#204, #210).
 // Numbers are pixels of a 1280 x 720 project, before Loomlight scales them.
 
-export type PageId = 'title' | 'say' | 'choice' | 'save' | 'history';
+export type PageId = 'title' | 'say' | 'choice' | 'history';
 export type Value = string | number | boolean;
 export type Values = Record<string, Value>;
 /** `isNew` marks a setting that #210 does not have. A template needs it, so the settings page must get it. */
@@ -65,12 +65,9 @@ export const pages: readonly Page[] = [
       stock('A bar across the bottom. The text is a column in the middle and the name is above its left end.'),
       { id: 'centered', name: 'Centered', what: 'The same bar. The name and each line of text are centered.',
         values: { 'text.align': 'Center', 'name.x': 640, 'name.align': 'Center' } },
-      { id: 'wide', name: 'Wide text', what: 'The same bar. The text uses almost the full width, so a long line needs fewer rows.',
-        values: { 'text.x': 90, 'text.width': 1100, 'name.x': 70 },
-        doubt: "The stock picture fades out over 268 px at each side, so with the Ren'Py default theme the ends of the text have a weak backing." },
       { id: 'floating', name: 'Floating', what: 'A box with space on each side and below. The quick menu is under the box.',
         values: { 'box.width': 1040, 'box.height': 168, 'box.below': 40, 'text.x': 44, 'text.y': 62, 'text.width': 952, 'name.x': 44, 'name.y': 14 },
-        doubt: 'The quick menu is on the scene and not on the box. Paper and Sweet color the quick buttons for a light box, so they are hard to read. A theme draws the dialogue box as a bar, so the box is square until the author sets Corners.' },
+        doubt: 'A theme draws the dialogue box as a bar, so the box is square until the author sets Corners. The quick menu is on the scene, so Paper and Sweet give the quick buttons a box of their own.' },
     ],
   },
   {
@@ -90,26 +87,6 @@ export const pages: readonly Page[] = [
       { id: 'side', name: 'Left side', what: 'A narrow list at the left with left-aligned text. The character in the middle stays in view.',
         values: { 'list.y': 285, 'list.align': 'Left', 'list.x': 50, 'list.gap': 10, 'button.width': 560, 'button.text': 'Left' },
         doubt: "The stock button picture has 100 px of padding at each side, so with the Ren'Py default theme the text starts 100 px from the edge of the button." },
-    ],
-  },
-  {
-    id: 'save', title: 'Save and load',
-    settings: [
-      s('slot.cols', 'Save slots', 'Columns', 'gui.file_slot_cols', 3),
-      s('slot.rows', 'Save slots', 'Rows', 'gui.file_slot_rows', 2),
-      s('slot.gap', 'Save slots', 'Gap', 'gui.slot_spacing', 10),
-      s('slot.width', 'Save slots', 'Slot width', 'gui.slot_button_width', 276),
-      s('slot.height', 'Save slots', 'Slot height', 'gui.slot_button_height', 206),
-      s('slot.picture', 'Save slots', 'Picture width', 'config.thumbnail_width, config.thumbnail_height', 256),
-      s('slot.text', 'Save slots', 'Text align', 'gui.slot_button_text_xalign', 'Center'),
-      s('slot.time', 'Save slots', 'Show the save time', 'if gui.show_slot_time:', true),
-      s('page.gap', 'Page buttons', 'Gap', 'gui.page_spacing', 0),
-    ],
-    templates: [
-      stock('Six slots in three columns and two rows.'),
-      { id: 'eight', name: '4 × 2', what: 'Eight smaller slots in four columns and two rows.',
-        values: { 'slot.cols': 4, 'slot.width': 226, 'slot.picture': 206 },
-        doubt: 'The page area fixes the size of the grid, and the picture cannot sit beside the text without a change to screen code. The gain over two number settings is small.' },
     ],
   },
   {
@@ -142,6 +119,7 @@ export const without: readonly [page: string, why: string][] = [
   ['Game-wide look', 'It has themes. A theme sets no layout.'],
   ['Quick menu', 'Its layout is four settings: shown, Bottom or Top, an alignment and a gap. A template would repeat them.'],
   ['Pause menu', 'Each of its settings also changes Save and load, Options, History, About and Help, and a template changes its own screen only. "Menu side" waits for a later version, so the possible layouts differ only in widths.'],
+  ['Save and load', 'The page area fixes the size of the grid, and the picture cannot sit beside the text without a change to screen code. Columns and Rows are two number settings.'],
   ['Options', 'Its layout settings are widths and gaps. The arrangement of the rows is screen code.'],
   ['Confirm prompt', 'It has one layout setting, the text alignment of the buttons.'],
 ];

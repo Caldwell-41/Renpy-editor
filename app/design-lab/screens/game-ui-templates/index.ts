@@ -22,7 +22,7 @@ export function mountTemplates(host: HTMLElement, context: LabContext, variant: 
   const doc = Object.fromEntries(pages.map(p => [p.id, stockOf(p)])) as Record<PageId, Values>;
   let theme = 'lantern', open = variant === 'sheet', ask: Template | null = null, last = '';
   /** One hand edit, so the page's layout is equal to no template. */
-  const nudge: Record<PageId, [key: string, value: number]> = { title: ['nav.gap', 9], say: ['box.height', 200], choice: ['list.gap', 16], save: ['slot.gap', 14], history: ['entry.gap', 6] };
+  const nudge: Record<PageId, [key: string, value: number]> = { title: ['nav.gap', 9], say: ['box.height', 200], choice: ['list.gap', 16], history: ['entry.gap', 6] };
   const byHand = () => { const [key, value] = nudge[page.id]; doc[page.id] = { ...doc[page.id], [key]: value }; last = `${page.settings.find(x => x.key === key)!.label} set to ${value} by hand`; };
   if (context.state === 'custom' || context.state === 'confirm') byHand();
   if (context.state === 'confirm') ask = page.templates[1]!;

@@ -4,7 +4,7 @@
 import platform from '../story-revamp/art/bg-rainy-platform.webp';
 import dawn from '../story-revamp/art/bg-station-dawn.webp';
 import mara from '../story-revamp/art/mara-neutral.webp';
-import { color, font, menuColor, shade, type Box, type Fill, type Paint, type Theme } from '../game-ui-themes/themes.ts';
+import { color, font, menuColor, type Box, type Fill, type Paint, type Theme } from '../game-ui-themes/themes.ts';
 import type { PageId, Values } from './templates.ts';
 
 export type Sample = { line: 'short' | 'long'; titleBg: 'menu' | 'picture'; choices: '3' | '5' };
@@ -58,7 +58,10 @@ export function draw(t: Theme, page: PageId, v: Values, s: Sample): string {
     const nb = t.groups.namebox;
     const size = `${w['name.width'] === 'Fit' ? '' : `width:${u(Number(w['name.width']))};`}${w['name.height'] === 'Fit' ? '' : `height:${u(Number(w['name.height']))};`}`;
     const name = speaker ? `<div class="gp-name" style="left:${u(Number(w['name.x']))};top:${u(Number(w['name.y']))};translate:-${pct[String(w['name.align'])]}% 0;${size}font-family:${font(t, T.name.font).css};font-size:${u(T.name.size)};color:#f0b35b;${nb === 'none' ? `padding:${u(5)}` : boxCss(t, nb)}">${speaker}</div>` : '';
-    const quick = ['Back', 'History', 'Skip', 'Auto', 'Save', 'Q.Save', 'Q.Load', 'Prefs'].map(label => `<span style="color:${color(t, t.groups.quick.idle)}">${label}</span>`).join('');
+    // Proposed for #222: Paper and Sweet give the Quick buttons look group a drawn box, Panel at 90 %, so the buttons
+    // are readable on the scene when a template moves the dialogue box off them. The stock padding is 10 4 10 0.
+    const quickBox = t.id === 'paper' ? `background:${rgba(t.panel, 90)};` : t.id === 'sweet' ? `background:${rgba(t.panel, 90)};border-radius:999px;` : '';
+    const quick = ['Back', 'History', 'Skip', 'Auto', 'Save', 'Q.Save', 'Q.Load', 'Prefs'].map(label => `<span style="${quickBox}padding:${u(4)} ${u(10)} 0;color:${color(t, t.groups.quick.idle)}">${label}</span>`).join('');
     return `<div class="gp-window" style="width:${full ? '100%' : u(Number(w['box.width']))};height:${u(height)};${pos}"><div class="gp-fill" style="${look}"></div>${name}
       <div class="gp-dialogue" style="left:${u(Number(w['text.x']))};top:${u(Number(w['text.y']))};width:${u(Number(w['text.width']))};text-align:${cssAlign(w['text.align'])};${textCss(t, T.dialogue.font, T.dialogue.size, T.dialogue.color)}">${text}</div></div>
       <div class="gp-quick" style="${iface(14)}">${quick}</div>`;
@@ -102,19 +105,6 @@ export function draw(t: Theme, page: PageId, v: Values, s: Sample): string {
       };
       const a = pct[String(v['list.align'])]!;
       return `${scene}<div class="gp-choices" style="left:calc(${a}% + ${u(n('list.x'))});top:${u(n('list.y'))};translate:-${a}% -50%;gap:${u(n('list.gap'))}">${items.map(one).join('')}</div>${say('What should I do?', null, stockSay)}`;
-    },
-    save: () => {
-      const g = t.groups.slot, cols = n('slot.cols'), rows = n('slot.rows'), pw = n('slot.picture'), ph = Math.round(pw * 9 / 16);
-      const slot = (i: number) => {
-        const used = i < 2;
-        const thumb = used ? `background-image:url(${i ? dawn : platform})` : g === 'stock' ? `background:${shade(t.accent, 0.4)}` : '';
-        const time = v['slot.time'] ? (used ? `Saturday, November 14 2026, 23:4${i}` : 'empty slot') : '';
-        return `<div class="gp-slot" style="width:${u(n('slot.width'))};height:${u(n('slot.height'))};${g === 'stock' ? `padding:${u(10)}` : boxCss(t, g)}"><div class="gp-thumb" style="width:${u(pw)};height:${u(ph)};${thumb}"></div><span style="${iface(14)};color:${color(t, t.groups.slotText)};text-align:${cssAlign(v['slot.text'])}">${time}</span></div>`;
-      };
-      const pages = ['&lt;', 'A', 'Q', ...Array.from({ length: 9 }, (_, i) => String(i + 1)), '&gt;'].map(label => button(label, label === '1' ? 'selected' : 'idle', `padding:${u(4)} ${u(10)}`)).join('');
-      return gameMenu('Save', 'Save', `<div class="gp-page-name" style="${textCss(t, T.heading.font, T.heading.size, T.heading.color)}">Page 1</div>
-        <div class="gp-slots" style="grid-template-columns:repeat(${cols}, auto);gap:${u(n('slot.gap'))}">${Array.from({ length: cols * rows }, (_, i) => slot(i)).join('')}</div>
-        <div class="gp-pages"><div style="gap:${u(n('page.gap'))}">${pages}</div>${button('Upload Sync', 'idle', `padding:${u(4)} ${u(10)}`)}</div>`);
     },
     history: () => {
       const entries: [who: string | null, tint: string, what: string][] = [

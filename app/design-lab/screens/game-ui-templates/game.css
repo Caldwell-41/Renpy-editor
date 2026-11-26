@@ -18,7 +18,7 @@
 .gp-fill { position:absolute; inset:0; }
 .gp-name { position:absolute; line-height:1.15; white-space:nowrap; }
 .gp-dialogue { position:absolute; }
-.gp-quick { position:absolute; left:50%; bottom:0; translate:-50% 0; display:flex; gap:calc(20cqw / 12.8); padding-bottom:calc(2cqw / 12.8); white-space:nowrap; }
+.gp-quick { position:absolute; left:50%; bottom:0; translate:-50% 0; display:flex; white-space:nowrap; }
 .gp-choices { position:absolute; display:flex; flex-direction:column; }
 
 /* The stock game menu (screens.rpy, screen game_menu): navigation at x 40, content from x 320 and y 130. */
@@ -28,14 +28,6 @@
 .gp-return { align-self:end; margin-bottom:calc(30cqw / 12.8); }
 .gp-menu-title { position:absolute; left:calc(50cqw / 12.8); top:0; height:calc(120cqw / 12.8); display:flex; align-items:center; line-height:1; }
 .gp-menu-body { position:absolute; left:calc(320cqw / 12.8); right:calc(20cqw / 12.8); top:calc(130cqw / 12.8); bottom:calc(30cqw / 12.8); overflow:hidden; }
-
-.gp-page-name { position:absolute; left:50%; top:0; translate:-50% 0; padding:calc(3cqw / 12.8) calc(50cqw / 12.8); line-height:1.2; white-space:nowrap; }
-.gp-slots { position:absolute; left:50%; top:50%; translate:-50% -50%; display:grid; }
-.gp-slot { display:flex; flex-direction:column; align-items:center; gap:calc(4cqw / 12.8); overflow:hidden; }
-.gp-slot span { align-self:stretch; line-height:1.2; }
-.gp-thumb { flex:none; background-position:center; background-size:cover; }
-.gp-pages { position:absolute; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; }
-.gp-pages>div { display:flex; }
 
 .gp-history { display:flex; flex-direction:column; }
 .gp-entry { position:relative; flex:none; }

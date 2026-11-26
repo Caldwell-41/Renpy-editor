@@ -6,7 +6,6 @@ export const definition: Omit<LabScreen, 'approval'> = {
     { id: 'title', title: 'Title screen' },
     { id: 'say', title: 'Dialogue box' },
     { id: 'choice', title: 'Choices' },
-    { id: 'save', title: 'Save and load' },
     { id: 'history', title: 'History' },
     { id: 'large', title: 'Board: one picture large' },
     { id: 'custom', title: 'Sheet: the layout is Custom' },
