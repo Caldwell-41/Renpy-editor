@@ -1,0 +1,42 @@
+/* PROTOTYPE for #222: the sample game at 1280 x 720. Each length is pixels / 12.8 in cqw.
+   Positions that a layout setting owns are inline styles in game.ts. Shadows and gradients belong to the game's themes. */
+.gp-stage { container-type:inline-size; aspect-ratio:16/9; position:relative; overflow:hidden; background:#000; }
+.gp { position:absolute; inset:0; overflow:hidden; line-height:1.3; user-select:none; -webkit-user-select:none; }
+.gp * { box-sizing:border-box; }
+.gp p { margin:0; }
+.gp-bg { position:absolute; inset:0; background-size:cover; background-position:center; }
+.gp-sprite { position:absolute; left:50%; bottom:calc(-90cqw / 12.8); height:calc(640cqw / 12.8); translate:-50% 0; pointer-events:none; }
+.gp-btn { display:block; line-height:1.25; white-space:nowrap; }
+.gp-accent-line { position:absolute; width:calc(3cqw / 12.8); }
+
+.gp-panel { position:absolute; left:0; top:0; bottom:0; }
+.gp-grid { display:grid; }
+.gp-title { display:flex; flex-direction:column; max-width:calc(800cqw / 12.8); white-space:nowrap; }
+.gp-title b { font-weight:inherit; line-height:1.1; }
+
+.gp-window { position:absolute; left:50%; }
+.gp-fill { position:absolute; inset:0; }
+.gp-name { position:absolute; line-height:1.15; white-space:nowrap; }
+.gp-dialogue { position:absolute; }
+.gp-quick { position:absolute; left:50%; bottom:0; translate:-50% 0; display:flex; gap:calc(20cqw / 12.8); padding-bottom:calc(2cqw / 12.8); white-space:nowrap; }
+.gp-choices { position:absolute; display:flex; flex-direction:column; }
+
+/* The stock game menu (screens.rpy, screen game_menu): navigation at x 40, content from x 320 and y 130. */
+.gp-navcol { position:absolute; left:calc(40cqw / 12.8); top:0; bottom:0; display:grid; }
+.gp-nav, .gp-return { grid-area:1 / 1; display:flex; flex-direction:column; gap:calc(4cqw / 12.8); }
+.gp-nav { align-self:center; }
+.gp-return { align-self:end; margin-bottom:calc(30cqw / 12.8); }
+.gp-menu-title { position:absolute; left:calc(50cqw / 12.8); top:0; height:calc(120cqw / 12.8); display:flex; align-items:center; line-height:1; }
+.gp-menu-body { position:absolute; left:calc(320cqw / 12.8); right:calc(20cqw / 12.8); top:calc(130cqw / 12.8); bottom:calc(30cqw / 12.8); overflow:hidden; }
+
+.gp-page-name { position:absolute; left:50%; top:0; translate:-50% 0; padding:calc(3cqw / 12.8) calc(50cqw / 12.8); line-height:1.2; white-space:nowrap; }
+.gp-slots { position:absolute; left:50%; top:50%; translate:-50% -50%; display:grid; }
+.gp-slot { display:flex; flex-direction:column; align-items:center; gap:calc(4cqw / 12.8); overflow:hidden; }
+.gp-slot span { align-self:stretch; line-height:1.2; }
+.gp-thumb { flex:none; background-position:center; background-size:cover; }
+.gp-pages { position:absolute; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; }
+.gp-pages>div { display:flex; }
+
+.gp-history { display:flex; flex-direction:column; }
+.gp-entry { position:relative; flex:none; }
+.gp-who { position:absolute; line-height:1.2; white-space:nowrap; }

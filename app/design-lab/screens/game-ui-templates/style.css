@@ -1,0 +1,73 @@
+/* PROTOTYPE for #222: Loomlight's own chrome around the sample game. Production colour tokens. */
+.tp-shell { height:100%; display:flex; flex-direction:column; overflow:hidden; font:13px/1.4 var(--font-ui); color:var(--text-primary); background:var(--surface-app); }
+.tp-shell :is(h2, h3, p) { margin:0; }
+.tp-shell h2 { font-size:14px; font-weight:650; }
+.tp-shell h3 { font-size:13px; font-weight:650; }
+.tp-shell code { font:11px var(--font-source, ui-monospace, monospace); color:var(--text-secondary); }
+.tp-shell :is(button, select) { font:inherit; color:var(--text-primary); background:var(--surface-raised); border:1px solid var(--border-strong); border-radius:3px; padding:2px 8px; min-height:24px; cursor:pointer; }
+.tp-shell button:hover { background:var(--surface-hover); }
+.tp-shell button[aria-pressed=true] { background:var(--accent-subtle); border-color:var(--accent-primary); }
+.tp-shell :is(button, select):focus-visible { outline:2px solid var(--focus-ring); outline-offset:2px; }
+.tp-shell button.tp-primary { color:var(--on-accent); background:var(--accent-primary); border-color:var(--accent-primary); font-weight:600; }
+.tp-quiet { color:var(--text-secondary); }
+
+.tp-proto { flex:none; display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; padding:4px 12px; border-bottom:1px dashed var(--border-strong); font-size:11px; color:var(--text-secondary); }
+.tp-proto strong { color:var(--text-primary); font-weight:600; }
+.tp-seg { display:inline-flex; align-items:center; gap:2px; }
+.tp-seg b { font-weight:500; margin-right:4px; }
+.tp-shell :is(.tp-proto, .tp-large-bar) :is(button, select) { min-height:20px; padding:0 6px; font-size:11px; }
+
+/* Board */
+.tp-scroll { flex:1; min-height:0; overflow:auto; padding:0 12px 24px; }
+.tp-scroll>section { margin-top:14px; }
+.tp-h { display:flex; align-items:baseline; gap:12px; padding:4px 0 6px; border-bottom:1px solid var(--border-normal); }
+.tp-grid { display:grid; grid-template-columns:104px repeat(var(--cols), minmax(0, 1fr)); gap:8px; }
+.tp-head { position:sticky; top:0; z-index:2; padding:8px 0 6px; background:var(--surface-app); border-bottom:1px solid var(--border-normal); font-size:12px; }
+.tp-head p { color:var(--text-secondary); }
+.tp-head .tp-doubt { color:var(--status-warning, var(--text-primary)); }
+.tp-row { padding:6px 0; border-bottom:1px solid var(--border-normal); align-items:start; }
+.tp-shell button.tp-thumb { display:block; padding:0; border:1px solid var(--border-normal); border-radius:0; background:#000; min-height:0; }
+.tp-shell button.tp-thumb:hover { border-color:var(--accent-primary); }
+.tp-large { position:sticky; top:0; z-index:3; padding:8px 0; background:var(--surface-app); border-bottom:1px solid var(--border-strong); }
+.tp-large-bar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:6px; }
+.tp-large-bar h3 { min-width:110px; text-align:center; }
+.tp-large-bar [data-close] { margin-left:auto; }
+.tp-large .gp-stage { width:min(100%, calc((100vh - 190px) * 16 / 9)); margin:0 auto; }
+
+.tp-values { border-collapse:collapse; width:100%; font-size:12px; }
+.tp-values :is(th, td) { padding:4px 6px; border-bottom:1px solid var(--border-normal); text-align:left; vertical-align:top; font-weight:400; }
+.tp-values thead th { background:var(--surface-panel); font-weight:600; }
+.tp-values tbody th { white-space:nowrap; color:var(--text-secondary); }
+.tp-values .tp-group th { padding-top:10px; color:var(--text-primary); font-weight:600; border-bottom-color:var(--border-strong); }
+.tp-values em { font-style:normal; color:var(--accent-primary); }
+.tp-values .tp-set { font-weight:600; }
+
+/* The template row and its sheet, after the approved layout: a 280 px panel at the right of the canvas. */
+.tp-work { position:relative; flex:1; min-height:0; display:grid; grid-template-columns:minmax(0, 1fr) 280px; }
+.tp-canvas { min-width:0; display:flex; flex-direction:column; justify-content:center; gap:6px; padding:12px 14px; container-type:size; }
+.tp-canvas .gp-stage { width:min(100%, calc((100cqh - 30px) * 16 / 9)); margin:0 auto; }
+.tp-canvas p { text-align:center; font-size:12px; }
+.tp-panel { min-height:0; display:grid; grid-template-rows:auto auto minmax(0, 1fr); background:var(--surface-panel); border-left:1px solid var(--border-normal); }
+.tp-panel-head { padding:8px 12px; border-bottom:1px solid var(--border-normal); }
+.tp-template { position:relative; padding:8px 12px; border-bottom:1px solid var(--border-normal); }
+.tp-shell button.tp-template-button { width:100%; display:flex; align-items:center; gap:10px; padding:0; text-align:left; background:none; border-color:transparent; }
+.tp-shell button.tp-template-button:hover { background:var(--surface-hover); }
+.tp-template-thumb { width:84px; flex:none; border:1px solid var(--border-strong); pointer-events:none; }
+.tp-template-text { flex:1; min-width:0; display:grid; }
+.tp-template-text .tp-quiet { font-size:11px; }
+/* Floating layers. Only these carry a shadow. */
+.tp-pop { position:absolute; right:12px; top:calc(100% - 4px); z-index:5; width:max-content; padding:10px 12px 12px; background:var(--surface-raised); border:1px solid var(--border-strong); box-shadow:0 8px 24px rgb(0 0 0 / .45); }
+.tp-pop p { margin:2px 0 8px; font-size:12px; }
+.tp-tiles { display:grid; grid-auto-flow:column; grid-auto-columns:150px; gap:8px; }
+.tp-shell button.tp-tile { display:grid; gap:4px; padding:0; text-align:left; background:none; border:0; border-radius:0; font-size:12px; }
+.tp-tile .gp-stage { border:1px solid var(--border-strong); }
+.tp-shell button.tp-tile:hover .gp-stage { border-color:var(--accent-primary); }
+.tp-shell button.tp-tile[aria-pressed=true] { background:none; color:var(--accent-primary); font-weight:600; }
+.tp-tile[aria-pressed=true] .gp-stage { border-color:var(--accent-primary); box-shadow:0 2px 0 var(--accent-primary); }
+.tp-ask { position:absolute; left:50%; top:38%; translate:-50% -50%; z-index:6; width:360px; padding:14px 16px; background:var(--surface-raised); border:1px solid var(--border-strong); box-shadow:0 8px 24px rgb(0 0 0 / .45); }
+.tp-ask div { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
+.tp-settings { min-height:0; overflow:auto; padding:4px 12px 12px; }
+.tp-set-group { padding:8px 0; border-bottom:1px solid var(--border-normal); }
+.tp-set-group h3 { margin-bottom:4px; }
+.tp-field { display:grid; grid-template-columns:minmax(0, 1fr) auto; gap:8px; padding:1px 0; font-size:12px; }
+.tp-field span:first-child { color:var(--text-secondary); }
