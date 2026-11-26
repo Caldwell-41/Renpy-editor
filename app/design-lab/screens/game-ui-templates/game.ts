@@ -31,6 +31,7 @@ function boxCss(t: Theme, b: Box, over?: Partial<Box>, opts: { pad?: boolean } =
 const textCss = (t: Theme, f: string, size: number, c: string) => `font-family:${font(t, f).css};font-size:${u(size)};color:${color(t, c)}`;
 const pct = { Left: 0, Center: 50, Right: 100, Top: 0, Bottom: 100 } as Record<string, number>;
 const cssAlign = (v: unknown) => String(v).toLowerCase();
+// gui.text_properties gives a text the anchor of its alignment, so the dialogue text sits at X by that anchor, as the name box does.
 /** Ren'Py's xalign and yalign with an offset: the same point of the element and of the screen, then moved. */
 const place = (align: unknown, vertical: unknown, x: unknown, y: unknown) => { const a = pct[String(align)]!, v = pct[String(vertical)]!; return `position:absolute;left:calc(${a}% + ${u(Number(x))});top:calc(${v}% + ${u(Number(y))});translate:-${a}% -${v}%`; };
 
@@ -63,7 +64,7 @@ export function draw(t: Theme, page: PageId, v: Values, s: Sample): string {
     const quickBox = t.id === 'paper' ? `background:${rgba(t.panel, 90)};` : t.id === 'sweet' ? `background:${rgba(t.panel, 90)};border-radius:999px;` : '';
     const quick = ['Back', 'History', 'Skip', 'Auto', 'Save', 'Q.Save', 'Q.Load', 'Prefs'].map(label => `<span style="${quickBox}padding:${u(4)} ${u(10)} 0;color:${color(t, t.groups.quick.idle)}">${label}</span>`).join('');
     return `<div class="gp-window" style="width:${full ? '100%' : u(Number(w['box.width']))};height:${u(height)};${pos}"><div class="gp-fill" style="${look}"></div>${name}
-      <div class="gp-dialogue" style="left:${u(Number(w['text.x']))};top:${u(Number(w['text.y']))};width:${u(Number(w['text.width']))};text-align:${cssAlign(w['text.align'])};${textCss(t, T.dialogue.font, T.dialogue.size, T.dialogue.color)}">${text}</div></div>
+      <div class="gp-dialogue" style="left:${u(Number(w['text.x']))};translate:-${pct[String(w['text.align'])]}% 0;top:${u(Number(w['text.y']))};width:${u(Number(w['text.width']))};text-align:${cssAlign(w['text.align'])};${textCss(t, T.dialogue.font, T.dialogue.size, T.dialogue.color)}">${text}</div></div>
       <div class="gp-quick" style="${iface(14)}">${quick}</div>`;
   }
   const stockSay: Values = { 'box.width': 'Full', 'box.height': 185, 'box.position': 'Bottom', 'box.below': 0, 'text.x': 268, 'text.y': 50, 'text.width': 744, 'text.align': 'Left', 'name.x': 240, 'name.y': 0, 'name.align': 'Left', 'name.width': 'Fit', 'name.height': 'Fit' };
@@ -90,7 +91,7 @@ export function draw(t: Theme, page: PageId, v: Values, s: Sample): string {
       const nav = ['Start', 'Load', 'Preferences', 'About', 'Help', 'Quit'].map(label => button(label, 'idle', `text-align:${cssAlign(v['nav.text'])}`)).join('');
       const title = v['title.show'] ? `<div class="gp-title" style="${place(v['title.align'], v['title.vertical'], v['title.x'], v['title.y'])};align-items:${{ Left: 'flex-start', Center: 'center', Right: 'flex-end' }[String(v['title.align'])]};text-align:${cssAlign(v['title.align'])}"><b style="${textCss(t, T.title.font, T.title.size, T.title.color)}">The Last Tram</b><small style="${iface()};color:${color(t, T.version)}">1.0</small></div>` : '';
       return `<div class="gp-bg" style="${bg}"></div>${panel}
-        <div class="gp-grid" style="${place(v['nav.align'], v['nav.vertical'], v['nav.x'], v['nav.y'])};gap:${u(n('nav.gap'))};${row ? 'grid-auto-flow:column;grid-auto-columns:1fr' : ''}">${nav}</div>${title}`;
+        <div class="gp-grid" style="${place(v['nav.align'], v['nav.vertical'], v['nav.x'], v['nav.y'])};gap:${u(n('nav.gap'))};${row ? 'grid-template-columns:repeat(6, 1fr)' : ''}">${nav}</div>${title}`;
     },
     say: () => `${scene}${say(lines[s.line], 'Mara', v)}`,
     choice: () => {
@@ -118,7 +119,7 @@ export function draw(t: Theme, page: PageId, v: Values, s: Sample): string {
       ];
       const fit = v['entry.height'] === 'Fit', a = pct[String(v['name.align'])]!;
       // screen history: a fixed with yfit. The name and the line each have a position in it (screens.rpy, style history_*).
-      const one = ([who, tint, what]: typeof entries[number]) => `<div class="gp-entry" style="${fit ? '' : `height:${u(n('entry.height'))};`}">
+      const one = ([who, tint, what]: typeof entries[number]) => `<div class="gp-entry" style="${fit ? `min-height:${u(who ? n('name.y') + T.heading.size * 1.2 : 0)};` : `height:${u(n('entry.height'))};`}">
         ${who ? `<span class="gp-who" style="left:${u(n('name.x'))};top:${u(n('name.y'))};translate:-${a}% 0;width:${u(n('name.width'))};text-align:${cssAlign(v['name.align'])};font-family:${font(t, T.heading.font).css};font-size:${u(T.heading.size)};color:${tint}">${who}</span>` : ''}
         <p style="margin-left:${u(n('line.x'))};padding-top:${u(n('line.y'))};width:${u(n('line.width'))};text-align:${cssAlign(v['line.align'])};${iface()};color:${color(t, I.color)}">${what}</p></div>`;
       return gameMenu('History', 'History', `<div class="gp-history" style="gap:${u(n('entry.gap'))}">${entries.map(one).join('')}</div>`);

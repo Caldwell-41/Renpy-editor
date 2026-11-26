@@ -48,10 +48,10 @@ export function mountTemplates(host: HTMLElement, context: LabContext, variant: 
     })() : '';
     const groups = [...new Set(page.settings.map(x => x.group))];
     const values = `<table class="tp-values"><thead><tr><th>Setting</th><th>Writes</th>${page.templates.map(t => `<th>${t.name}</th>`).join('')}</tr></thead><tbody>
-      ${groups.map(group => `<tr class="tp-group"><th colspan="${cols + 2}">${group}</th></tr>${page.settings.filter(x => x.group === group).map(x => `<tr><th>${x.label}${x.isNew ? ' <em>new setting</em>' : ''}</th><td><code>${x.writes}</code></td>${page.templates.map(t => x.key in t.values && t.values[x.key] !== x.stock ? `<td class="tp-set">${show(t.values[x.key]!)}</td>` : `<td class="tp-quiet">${show(x.stock)}</td>`).join('')}</tr>`).join('')}`).join('')}</tbody></table>`;
+      ${groups.map(group => `<tr class="tp-group"><th colspan="${cols + 2}">${group}</th></tr>${page.settings.filter(x => x.group === group).map(x => `<tr><th>${x.label}${x.isNew ? ' <em>new setting</em>' : ''}</th><td><code>${x.writes}</code></td>${x.free ? `<td class="tp-quiet" colspan="${cols}">No template sets it. A template leaves the author's value.</td>` : page.templates.map(t => x.key in t.values && t.values[x.key] !== x.stock ? `<td class="tp-set">${show(t.values[x.key]!)}</td>` : `<td class="tp-quiet">${show(x.stock)}</td>`).join('')}</tr>`).join('')}`).join('')}</tbody></table>`;
     const fresh = pages.flatMap(p => p.settings.filter(x => x.isNew).map(x => `<tr><th>${p.title}</th><td>${x.group} · ${x.label}</td><td><code>${x.writes}</code></td><td>${show(x.stock)}</td><td>${p.templates.filter(t => x.key in t.values).map(t => t.name).join(', ')}</td></tr>`)).join('');
     return `${proto('')}<div class="tp-scroll">${big}
-      <section><div class="tp-h"><h2>${page.title} · ${cols} templates</h2><span class="tp-quiet">One row for each theme. Select a picture to show it large.</span></div>${head}${themes.map(row).join('')}</section>
+      <section><div class="tp-h"><h2>${page.title} · ${cols} templates</h2><span class="tp-quiet">One row for each theme. Select a picture to show it large.${page.note ? ` ${page.note}` : ''}</span></div>${head}${themes.map(row).join('')}</section>
       <section id="tp-values"><div class="tp-h"><h2>Values</h2><span class="tp-quiet">Each layout setting of the ${page.title} page. A bright value differs from the stock value.</span></div>${values}</section>
       <section><div class="tp-h"><h2>Settings that the templates need and the pages do not have</h2></div><table class="tp-values"><thead><tr><th>Page</th><th>Setting</th><th>Writes</th><th>Stock value</th><th>Templates that set it</th></tr></thead><tbody>${fresh}</tbody></table></section>
       <section><div class="tp-h"><h2>Pages with no template</h2></div><table class="tp-values"><tbody>${without.map(([name, why]) => `<tr><th>${name}</th><td>${why}</td></tr>`).join('')}</tbody></table></section></div>`;
@@ -60,9 +60,9 @@ export function mountTemplates(host: HTMLElement, context: LabContext, variant: 
   // ---- layout: the template row and its sheet ----
   function sheet() {
     const t = themeById(theme), v = doc[page.id], now = inUse(page, v);
-    const tiles = page.templates.map(x => `<button type="button" class="tp-tile" data-template="${x.id}" aria-pressed="${x === now}">${stage(t, valuesOf(page, x))}<span>${x.name}</span></button>`).join('');
+    const tiles = page.templates.map(x => `<button type="button" class="tp-tile" data-template="${x.id}" aria-pressed="${x === now}">${stage(t, valuesOf(page, x, v))}<span>${x.name}</span></button>`).join('');
     const pop = open ? `<div class="tp-pop" role="dialog" aria-label="Template"><h3>Template</h3><p class="tp-quiet">A template replaces this screen's layout settings.${now ? '' : ' The layout of this screen is your own.'}</p><div class="tp-tiles">${tiles}</div></div>` : '';
-    const question = ask ? `<div class="tp-ask" role="alertdialog" aria-label="Apply the template"><p>This screen's layout is not one of the templates. This template replaces it. Apply it?</p><div><button type="button" data-ask="no">Cancel</button><button type="button" class="tp-primary" data-ask="yes">Apply "${ask.name}"</button></div></div>` : '';
+    const question = ask ? `<div class="tp-veil" data-ask="no"></div><div class="tp-ask" role="alertdialog" aria-label="Apply the template"><p>This screen's layout is not one of the templates. This template replaces it. Apply it?</p><div><button type="button" data-ask="no">Cancel</button><button type="button" class="tp-primary" data-ask="yes">Apply "${ask.name}"</button></div></div>` : '';
     const groups = [...new Set(page.settings.map(x => x.group))];
     const list = groups.map(group => `<section class="tp-set-group"><h3>${group}</h3>${page.settings.filter(x => x.group === group).map(x => `<div class="tp-field"><span>${x.label}</span><span>${show(v[x.key]!)}</span></div>`).join('')}</section>`).join('');
     const extra = `<label class="tp-seg"><b>Theme</b><select data-theme-pick>${themes.map(x => `<option value="${x.id}" ${x.id === theme ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>
@@ -80,14 +80,14 @@ export function mountTemplates(host: HTMLElement, context: LabContext, variant: 
     if (scroll) scroll.scrollTop = keep;
     host.querySelector<HTMLElement>('.tp-ask .tp-primary')?.focus();
   }
-  function apply(x: Template) { doc[page.id] = valuesOf(page, x); last = `${page.title} template "${x.name}" · one change, one Undo step`; open = false; ask = null; }
+  function apply(x: Template) { doc[page.id] = valuesOf(page, x, doc[page.id]); last = `${page.title} template "${x.name}" · one change, one Undo step`; open = false; ask = null; }
   function stepLarge(by: number) {
     if (!large) return;
     const i = page.templates.findIndex(x => x.id === large!.template);
     large = { ...large, template: page.templates[(i + by + page.templates.length) % page.templates.length]!.id };
   }
   function onClick(event: Event) {
-    const target = (event.target as HTMLElement).closest<HTMLElement>('button');
+    const target = (event.target as HTMLElement).closest<HTMLElement>('button, .tp-veil');
     if (!target) return;
     const d = target.dataset;
     if (d.sample) (sample as Record<string, string>)[d.sample] = d.value!;

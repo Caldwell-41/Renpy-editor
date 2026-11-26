@@ -56,15 +56,17 @@
 .tp-template-text { flex:1; min-width:0; display:grid; }
 .tp-template-text .tp-quiet { font-size:11px; }
 /* Floating layers. Only these carry a shadow. */
-.tp-pop { position:absolute; right:12px; top:calc(100% - 4px); z-index:5; width:max-content; padding:10px 12px 12px; background:var(--surface-raised); border:1px solid var(--border-strong); box-shadow:0 8px 24px rgb(0 0 0 / .45); }
+.tp-pop { position:absolute; right:12px; top:calc(100% - 4px); z-index:5; width:max-content; max-width:calc(100vw - 24px); padding:10px 12px 12px; background:var(--surface-raised); border:1px solid var(--border-strong); box-shadow:0 8px 24px rgb(0 0 0 / .45); }
 .tp-pop p { margin:2px 0 8px; font-size:12px; }
-.tp-tiles { display:grid; grid-auto-flow:column; grid-auto-columns:150px; gap:8px; }
+.tp-tiles { display:grid; grid-template-columns:repeat(auto-fit, 150px); gap:8px; max-width:calc(4 * 150px + 3 * 8px); }
 .tp-shell button.tp-tile { display:grid; gap:4px; padding:0; text-align:left; background:none; border:0; border-radius:0; font-size:12px; }
 .tp-tile .gp-stage { border:1px solid var(--border-strong); }
 .tp-shell button.tp-tile:hover .gp-stage { border-color:var(--accent-primary); }
 .tp-shell button.tp-tile[aria-pressed=true] { background:none; color:var(--accent-primary); font-weight:600; }
 .tp-tile[aria-pressed=true] .gp-stage { border-color:var(--accent-primary); box-shadow:0 2px 0 var(--accent-primary); }
-.tp-ask { position:absolute; left:50%; top:38%; translate:-50% -50%; z-index:6; width:360px; padding:14px 16px; background:var(--surface-raised); border:1px solid var(--border-strong); box-shadow:0 8px 24px rgb(0 0 0 / .45); }
+/* The question blocks the sheet and the page until the author answers. */
+.tp-veil { position:absolute; inset:0; z-index:6; background:rgb(0 0 0 / .35); }
+.tp-ask { position:absolute; left:50%; top:38%; translate:-50% -50%; z-index:7; width:360px; padding:14px 16px; background:var(--surface-raised); border:1px solid var(--border-strong); box-shadow:0 8px 24px rgb(0 0 0 / .45); }
 .tp-ask div { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
 .tp-settings { min-height:0; overflow:auto; padding:4px 12px 12px; }
 .tp-set-group { padding:8px 0; border-bottom:1px solid var(--border-normal); }
