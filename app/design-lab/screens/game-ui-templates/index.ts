@@ -33,7 +33,7 @@ export function mountTemplates(host: HTMLElement, context: LabContext, variant: 
     : page.id === 'say' ? seg('line', 'Line', [['short', 'Short'], ['long', 'Long']])
     : page.id === 'choice' ? seg('choices', 'Choices', [['3', '3'], ['5', '5']]) : '';
   const tabs = () => `<span class="tp-seg" role="group" aria-label="Settings page"><b>Page</b>${pages.map(p => `<button type="button" data-page="${p.id}" aria-pressed="${p.id === page.id}">${p.title}</button>`).join('')}</span>`;
-  const proto = (extra: string) => `<div class="tp-proto"><strong>Prototype · #222</strong><span>Sample game at 1280 × 720. A browser drawing stands in for Ren'Py. Nothing is saved.</span>${tabs()}${samples()}${extra}</div>`;
+  const proto = (extra: string) => `<div class="tp-proto"${ask ? ' inert' : ''}><strong>Prototype · #222</strong><span>Sample game at 1280 × 720. A browser drawing stands in for Ren'Py. Nothing is saved.</span>${tabs()}${samples()}${extra}</div>`;
 
   // ---- layout: board ----
   function board() {
@@ -67,10 +67,10 @@ export function mountTemplates(host: HTMLElement, context: LabContext, variant: 
     const list = groups.map(group => `<section class="tp-set-group"><h3>${group}</h3>${page.settings.filter(x => x.group === group).map(x => `<div class="tp-field"><span>${x.label}</span><span>${show(v[x.key]!)}</span></div>`).join('')}</section>`).join('');
     const extra = `<label class="tp-seg"><b>Theme</b><select data-theme-pick>${themes.map(x => `<option value="${x.id}" ${x.id === theme ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>
       <button type="button" data-hand>Change one setting by hand</button>`;
-    return `${proto(extra)}<div class="tp-work"><main class="tp-canvas">${stage(t, v)}<p class="tp-quiet">${last || 'No change yet.'}</p></main>
+    return `${proto(extra)}<div class="tp-work"${ask ? ' inert' : ''}><main class="tp-canvas">${stage(t, v)}<p class="tp-quiet">${last || 'No change yet.'}</p></main>
       <aside class="tp-panel" aria-label="Settings"><div class="tp-panel-head"><h2>${page.title}</h2></div>
         <div class="tp-template"><button type="button" class="tp-template-button" data-open aria-expanded="${open}"><span class="tp-template-thumb">${stage(t, v)}</span><span class="tp-template-text"><span class="tp-quiet">Template</span><span>${now ? now.name : 'Custom'}</span></span><span aria-hidden="true">▾</span></button>${pop}</div>
-        <div class="tp-settings">${list}</div></aside>${question}</div>`;
+        <div class="tp-settings">${list}</div></aside></div>${question}`;
   }
 
   function render() {
@@ -99,7 +99,7 @@ export function mountTemplates(host: HTMLElement, context: LabContext, variant: 
     else if ('hand' in d) byHand();
     // A layout equal to a template changes with no question. A layout of the author's own asks first (#204, point 13).
     else if (d.template) { const x = page.templates.find(item => item.id === d.template)!; if (inUse(page, doc[page.id])) apply(x); else ask = x; }
-    else if (d.ask) { if (d.ask === 'yes' && ask) apply(ask); else ask = null; }
+    else if (d.ask) { const tile = ask?.id; if (d.ask === 'yes' && ask) apply(ask); else ask = null; render(); if (d.ask === 'no' && tile) host.querySelector<HTMLElement>(`[data-template="${tile}"]`)?.focus(); return; }
     else return;
     render();
   }
@@ -109,7 +109,7 @@ export function mountTemplates(host: HTMLElement, context: LabContext, variant: 
   }
   function onKey(event: KeyboardEvent) {
     if ((event.target as HTMLElement).closest('input, textarea, select, [contenteditable]')) return;
-    if (event.key === 'Escape' && (ask || open || large)) { if (ask) ask = null; else if (large) large = null; else open = false; render(); return; }
+    if (event.key === 'Escape' && (ask || open || large)) { if (ask) { const tile = ask.id; ask = null; render(); host.querySelector<HTMLElement>(`[data-template="${tile}"]`)?.focus(); return; } else if (large) large = null; else open = false; render(); return; }
     if (large && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) { stepLarge(event.key === 'ArrowRight' ? 1 : -1); event.preventDefault(); render(); }
   }
   render();

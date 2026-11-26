@@ -1,5 +1,5 @@
 /* PROTOTYPE for #222: Loomlight's own chrome around the sample game. Production colour tokens. */
-.tp-shell { height:100%; display:flex; flex-direction:column; overflow:hidden; font:13px/1.4 var(--font-ui); color:var(--text-primary); background:var(--surface-app); }
+.tp-shell { position:relative; height:100%; display:flex; flex-direction:column; overflow:hidden; font:13px/1.4 var(--font-ui); color:var(--text-primary); background:var(--surface-app); }
 .tp-shell :is(h2, h3, p) { margin:0; }
 .tp-shell h2 { font-size:14px; font-weight:650; }
 .tp-shell h3 { font-size:13px; font-weight:650; }

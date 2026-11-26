@@ -60,11 +60,11 @@ export function draw(t: Theme, page: PageId, v: Values, s: Sample): string {
     const size = `${w['name.width'] === 'Fit' ? '' : `width:${u(Number(w['name.width']))};`}${w['name.height'] === 'Fit' ? '' : `height:${u(Number(w['name.height']))};`}`;
     const name = speaker ? `<div class="gp-name" style="left:${u(Number(w['name.x']))};top:${u(Number(w['name.y']))};translate:-${pct[String(w['name.align'])]}% 0;${size}font-family:${font(t, T.name.font).css};font-size:${u(T.name.size)};color:#f0b35b;${nb === 'none' ? `padding:${u(5)}` : boxCss(t, nb)}">${speaker}</div>` : '';
     const quick = ['Back', 'History', 'Skip', 'Auto', 'Save', 'Q.Save', 'Q.Load', 'Prefs'].map(label => `<span style="padding:${u(4)} ${u(10)} 0;color:${color(t, t.groups.quick.idle)}">${label}</span>`).join('');
-    return `<div class="gp-window" style="width:${full ? '100%' : u(Number(w['box.width']))};height:${u(height)};${pos}"><div class="gp-fill" style="${look}"></div>${name}
-      <div class="gp-dialogue" style="left:${u(Number(w['text.x']))};translate:-${pct[String(w['text.align'])]}% 0;top:${u(Number(w['text.y']))};width:${u(Number(w['text.width']))};text-align:${cssAlign(w['text.align'])};${textCss(t, T.dialogue.font, T.dialogue.size, T.dialogue.color)}">${text}</div></div>
+    return `<div class="gp-window" style="width:${full ? '100%' : u(Number(w['box.width']))};height:${u(height)};${pos}">${w['box.show'] === false ? '' : `<div class="gp-fill" style="${look}"></div>`}${name}
+      <div class="gp-dialogue" style="left:${u(Number(w['text.x']))};translate:-${pct[String(w['text.align'])]}% 0;top:${u(Number(w['text.y']))};width:${u(Number(w['text.width']))};text-align:${cssAlign(w['text.align'])};${w['text.align'] === 'Center' ? 'text-wrap:balance;' : ''}${textCss(t, T.dialogue.font, T.dialogue.size, T.dialogue.color)}">${text}</div></div>
       <div class="gp-quick" style="${iface(14)}">${quick}</div>`;
   }
-  const stockSay: Values = { 'box.width': 'Full', 'box.height': 185, 'box.position': 'Bottom', 'text.x': 268, 'text.y': 50, 'text.width': 744, 'text.align': 'Left', 'name.x': 240, 'name.y': 0, 'name.align': 'Left', 'name.width': 'Fit', 'name.height': 'Fit' };
+  const stockSay: Values = { 'box.width': 'Full', 'box.height': 185, 'box.position': 'Bottom', 'text.x': 268, 'text.y': 50, 'text.width': 744, 'text.align': 'Left', 'name.x': 240, 'name.y': 0, 'name.align': 'Left', 'name.width': 'Fit', 'name.height': 'Fit', 'box.show': true };
 
   /** The stock game menu, which a template of Save and load or History does not change. */
   function gameMenu(title: string, current: string, body: string) {
@@ -116,6 +116,11 @@ export function draw(t: Theme, page: PageId, v: Values, s: Sample): string {
         ['Conductor', '#8fc7ff', 'Suit yourself.'],
         ['Mara', '#f0b35b', 'How long until it comes?'],
         ['Conductor', '#8fc7ff', 'Nobody has asked me that in years.'],
+        ['Peggy', '#c9a0e8', 'He says that to everyone. Eleven minutes, if the points hold.'],
+        [null, '', 'A bell rings twice somewhere down the line.'],
+        ['Mara', '#f0b35b', 'Thank you. Do you wait here every night?'],
+        ['Peggy', '#c9a0e8', 'Only when it rains.'],
+        ['Conductor', '#8fc7ff', 'Stand back from the edge, both of you.'],
       ];
       const fit = v['entry.height'] === 'Fit', a = pct[String(v['name.align'])]!;
       // screen history: a fixed with yfit. The name and the line each have a position in it (screens.rpy, style history_*).

@@ -20,7 +20,7 @@ export const pages: readonly Page[] = [
     id: 'title', title: 'Title screen',
     settings: [
       s('panel.show', 'Menu panel', 'Show the menu panel', 'if gui.show_main_menu_panel:', true),
-      s('panel.side', 'Menu panel', 'Side', 'xalign, yalign, xfill and yfill in style main_menu_frame', 'Left', true),
+      s('panel.side', 'Menu panel', 'Side', 'xalign, yalign, xsize, ysize, xfill and yfill in style main_menu_frame', 'Left', true),
       s('panel.size', 'Menu panel', 'Size', 'xsize in style main_menu_frame, or ysize when Side is Bottom', 280),
       s('nav.arrange', 'Menu buttons', 'Arrange', 'gui.title_navigation_*', 'Column'),
       s('nav.align', 'Menu buttons', 'Align', 'gui.title_navigation_*', 'Left'),
@@ -37,18 +37,18 @@ export const pages: readonly Page[] = [
     ],
     templates: [
       stock('A panel at the left with the buttons in a column. The title is at the bottom right.'),
-      { id: 'right', name: 'Right column', what: 'The stock layout with its sides exchanged. The panel and the buttons are at the right, and the title is at the bottom left.',
+      { id: 'right', name: 'Right column', what: 'The stock layout with its sides swapped. The panel and the buttons are at the right, and the title is at the bottom left.',
         values: { 'panel.side': 'Right', 'nav.align': 'Right', 'nav.x': -40, 'nav.text': 'Right', 'title.align': 'Left', 'title.x': 20 },
         doubt: 'With a stock panel picture, Loomlight draws the panel again.' },
-      { id: 'row', name: 'Bottom row', what: 'The panel is a bar across the bottom with the buttons in one row. The title is above the middle.',
-        values: { 'panel.side': 'Bottom', 'panel.size': 96, 'nav.arrange': 'Row', 'nav.align': 'Center', 'nav.vertical': 'Bottom', 'nav.x': 0, 'nav.y': -28, 'nav.gap': 12, 'nav.text': 'Center', 'title.align': 'Center', 'title.vertical': 'Center', 'title.x': 0, 'title.y': -70 },
-        doubt: 'With a stock panel picture, Loomlight draws the panel again.' },
+      { id: 'row', name: 'Bottom row', what: 'The panel is a bar across the bottom with the buttons in one row. The title is at the top, so the middle of the picture stays clear.',
+        values: { 'panel.side': 'Bottom', 'panel.size': 96, 'nav.arrange': 'Row', 'nav.align': 'Center', 'nav.vertical': 'Bottom', 'nav.x': 0, 'nav.y': -28, 'nav.gap': 12, 'nav.text': 'Center', 'title.align': 'Center', 'title.vertical': 'Top', 'title.x': 0, 'title.y': 70 },
+        doubt: 'With a stock panel picture, Loomlight draws the panel again. The row does not wrap, so with more buttons or long words it can be wider than the screen.' },
     ],
   },
   {
     id: 'say', title: 'Dialogue box', note: 'Each template also changes Text input, as the settings of this page do.',
     settings: [
-      { ...s('box.show', 'Dialogue box', 'Show the box', 'gui.show_textbox', true), free: true },
+      { ...s('box.show', 'Dialogue box', 'Show the box', 'gui.show_textbox, and background None in screen say and screen input', true), free: true },
       s('box.width', 'Dialogue box', 'Width', 'xfill and xsize in style window', 'Full', true),
       s('box.height', 'Dialogue box', 'Height', 'gui.textbox_height', 185),
       s('box.position', 'Dialogue box', 'Position', 'gui.textbox_yalign', 'Bottom'),
@@ -68,7 +68,7 @@ export const pages: readonly Page[] = [
         values: { 'text.x': 640, 'text.align': 'Center', 'name.x': 640, 'name.align': 'Center' } },
       { id: 'narrow', name: 'Narrow box', what: 'A box with space at each side, on the bottom edge. The text uses the width of the box, and the quick menu stays on the box.',
         values: { 'box.width': 1040, 'text.x': 44, 'text.width': 952, 'name.x': 44 },
-        doubt: 'With a stock box picture, Loomlight draws the box again, and the Game-wide look then shows "Custom". A theme draws the dialogue box as a bar, so the box is square until the author sets Corners.' },
+        doubt: 'With a stock box picture, Loomlight draws the box again. A theme draws the dialogue box as a bar, so the box is square until the author sets Corners. A quick menu that the author aligns Left or Right is partly off the box.' },
     ],
   },
   {
@@ -109,8 +109,8 @@ export const pages: readonly Page[] = [
       { id: 'compact', name: 'Compact', what: 'Each entry is as high as its text, so the screen shows more lines. The name stays at the left.',
         values: { 'entry.height': 'Fit', 'entry.gap': 14 } },
       { id: 'above', name: 'Names above', what: 'The name is above the line, and the line uses the full width.',
-        values: { 'entry.height': 'Fit', 'entry.gap': 16, 'name.x': 0, 'name.width': 600, 'name.align': 'Left', 'line.x': 0, 'line.y': 40, 'line.width': 900 },
-        doubt: 'The line has a fixed Y, so a line with no speaker has an empty 40 px above it.' },
+        values: { 'entry.height': 'Fit', 'entry.gap': 16, 'name.x': 0, 'name.width': 600, 'name.align': 'Left', 'line.x': 0, 'line.y': 44, 'line.width': 900 },
+        doubt: 'The line has a fixed Y, so a line with no speaker has an empty 44 px above it.' },
     ],
   },
 ];
