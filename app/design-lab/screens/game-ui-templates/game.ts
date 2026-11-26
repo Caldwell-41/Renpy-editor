@@ -55,19 +55,16 @@ export function draw(t: Theme, page: PageId, v: Values, s: Sample): string {
     const look = g !== 'stock' ? boxCss(t, g, undefined, { pad: false })
       : stockSize ? `background:linear-gradient(to right, transparent, ${rgba(t.panel, 80)} ${u(268)}, ${rgba(t.panel, 80)} calc(100% - ${u(268)}), transparent);-webkit-mask:linear-gradient(transparent, #000 ${u(5)})`
       : `background:${rgba(t.panel, 80)}`;
-    const pos = w['box.position'] === 'Top' ? 'top:0;translate:-50% 0' : w['box.position'] === 'Center' ? 'top:50%;translate:-50% -50%' : `bottom:${u(Number(w['box.below']))};translate:-50% 0`;
+    const pos = w['box.position'] === 'Top' ? 'top:0;translate:-50% 0' : w['box.position'] === 'Center' ? 'top:50%;translate:-50% -50%' : 'bottom:0;translate:-50% 0';
     const nb = t.groups.namebox;
     const size = `${w['name.width'] === 'Fit' ? '' : `width:${u(Number(w['name.width']))};`}${w['name.height'] === 'Fit' ? '' : `height:${u(Number(w['name.height']))};`}`;
     const name = speaker ? `<div class="gp-name" style="left:${u(Number(w['name.x']))};top:${u(Number(w['name.y']))};translate:-${pct[String(w['name.align'])]}% 0;${size}font-family:${font(t, T.name.font).css};font-size:${u(T.name.size)};color:#f0b35b;${nb === 'none' ? `padding:${u(5)}` : boxCss(t, nb)}">${speaker}</div>` : '';
-    // Proposed for #222: Paper and Sweet give the Quick buttons look group a drawn box, Panel at 90 %, so the buttons
-    // are readable on the scene when a template moves the dialogue box off them. The stock padding is 10 4 10 0.
-    const quickBox = t.id === 'paper' ? `background:${rgba(t.panel, 90)};` : t.id === 'sweet' ? `background:${rgba(t.panel, 90)};border-radius:999px;` : '';
-    const quick = ['Back', 'History', 'Skip', 'Auto', 'Save', 'Q.Save', 'Q.Load', 'Prefs'].map(label => `<span style="${quickBox}padding:${u(4)} ${u(10)} 0;color:${color(t, t.groups.quick.idle)}">${label}</span>`).join('');
+    const quick = ['Back', 'History', 'Skip', 'Auto', 'Save', 'Q.Save', 'Q.Load', 'Prefs'].map(label => `<span style="padding:${u(4)} ${u(10)} 0;color:${color(t, t.groups.quick.idle)}">${label}</span>`).join('');
     return `<div class="gp-window" style="width:${full ? '100%' : u(Number(w['box.width']))};height:${u(height)};${pos}"><div class="gp-fill" style="${look}"></div>${name}
       <div class="gp-dialogue" style="left:${u(Number(w['text.x']))};translate:-${pct[String(w['text.align'])]}% 0;top:${u(Number(w['text.y']))};width:${u(Number(w['text.width']))};text-align:${cssAlign(w['text.align'])};${textCss(t, T.dialogue.font, T.dialogue.size, T.dialogue.color)}">${text}</div></div>
       <div class="gp-quick" style="${iface(14)}">${quick}</div>`;
   }
-  const stockSay: Values = { 'box.width': 'Full', 'box.height': 185, 'box.position': 'Bottom', 'box.below': 0, 'text.x': 268, 'text.y': 50, 'text.width': 744, 'text.align': 'Left', 'name.x': 240, 'name.y': 0, 'name.align': 'Left', 'name.width': 'Fit', 'name.height': 'Fit' };
+  const stockSay: Values = { 'box.width': 'Full', 'box.height': 185, 'box.position': 'Bottom', 'text.x': 268, 'text.y': 50, 'text.width': 744, 'text.align': 'Left', 'name.x': 240, 'name.y': 0, 'name.align': 'Left', 'name.width': 'Fit', 'name.height': 'Fit' };
 
   /** The stock game menu, which a template of Save and load or History does not change. */
   function gameMenu(title: string, current: string, body: string) {
@@ -83,9 +80,12 @@ export function draw(t: Theme, page: PageId, v: Values, s: Sample): string {
   const screens: Record<PageId, () => string> = {
     title: () => {
       const bg = s.titleBg === 'picture' ? `background-image:url(${dawn})` : `background:${menuColor(t)}`;
-      const width = n('panel.width');
+      const size = n('panel.size'), side = String(v['panel.side']);
       const box = t.groups.menuPanel === 'stock' ? `background:${rgba(t.panel, 80)}` : boxCss(t, t.groups.menuPanel, undefined, { pad: false });
-      const panel = v['panel.show'] ? `<div class="gp-panel" style="width:${u(width)};${box}"></div>${t.groups.accentLine ? `<i class="gp-accent-line" style="background:${t.accent};left:${u(width - 3)};top:0;height:100%"></i>` : ''}` : '';
+      // The panel fills one side of the screen. The accent line is on its inner edge.
+      const at = side === 'Bottom' ? `left:0;right:0;bottom:0;height:${u(size)}` : `${side === 'Right' ? 'right' : 'left'}:0;top:0;bottom:0;width:${u(size)}`;
+      const line = side === 'Bottom' ? `left:0;width:100%;bottom:${u(size - 3)};height:${u(3)}` : `${side === 'Right' ? 'right' : 'left'}:${u(size - 3)};top:0;height:100%`;
+      const panel = v['panel.show'] ? `<div class="gp-panel" style="${at};${box}"></div>${t.groups.accentLine ? `<i class="gp-accent-line" style="background:${t.accent};${line}"></i>` : ''}` : '';
       const row = v['nav.arrange'] === 'Row';
       // size_group "navigation": each button is as wide as the widest one, in a column and in a row.
       const nav = ['Start', 'Load', 'Preferences', 'About', 'Help', 'Quit'].map(label => button(label, 'idle', `text-align:${cssAlign(v['nav.text'])}`)).join('');

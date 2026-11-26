@@ -12,9 +12,9 @@ export default async function ({ page, open, capture }) {
   assert.match(await page.locator('.tp-template-text').innerText(), /Custom/);
   await page.locator('[data-open]').click();
   await capture('sheet-custom');
-  await page.locator('[data-template=center]').click();
+  await page.locator('[data-template=right]').click();
   assert.equal(await page.locator('.tp-ask').count(), 1, 'a layout of the author\'s own asks first');
   await capture('sheet-question');
   await page.locator('[data-ask=yes]').click();
-  assert.match(await page.locator('.tp-template-text').innerText(), /Centered/);
+  assert.match(await page.locator('.tp-template-text').innerText(), /Right column/);
 }

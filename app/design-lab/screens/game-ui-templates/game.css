@@ -9,7 +9,7 @@
 .gp-btn { display:block; line-height:1.25; white-space:nowrap; }
 .gp-accent-line { position:absolute; width:calc(3cqw / 12.8); }
 
-.gp-panel { position:absolute; left:0; top:0; bottom:0; }
+.gp-panel { position:absolute; }
 .gp-grid { display:grid; width:max-content; }
 .gp-title { display:flex; flex-direction:column; max-width:calc(800cqw / 12.8); white-space:nowrap; }
 .gp-title b { font-weight:inherit; line-height:1.1; }

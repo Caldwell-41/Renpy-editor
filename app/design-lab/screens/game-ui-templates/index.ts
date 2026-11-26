@@ -17,7 +17,7 @@ export function mountTemplates(host: HTMLElement, context: LabContext, variant: 
   document.documentElement.dataset.theme = context.theme;
   const sample: Sample = { line: 'short', titleBg: 'menu', choices: '3' };
   let page: Page = pageById(pages.some(p => p.id === context.state) ? context.state : 'title');
-  let large: { theme: string; template: string } | null = context.state === 'large' ? { theme: 'lantern', template: 'center' } : null;
+  let large: { theme: string; template: string } | null = context.state === 'large' ? { theme: 'lantern', template: 'row' } : null;
   // Sheet variant: the layout values of each page, the theme of the project, and the open layers.
   const doc = Object.fromEntries(pages.map(p => [p.id, stockOf(p)])) as Record<PageId, Values>;
   let theme = 'lantern', open = variant === 'sheet', ask: Template | null = null, last = '';
@@ -38,7 +38,7 @@ export function mountTemplates(host: HTMLElement, context: LabContext, variant: 
   // ---- layout: board ----
   function board() {
     const cols = page.templates.length;
-    const head = `<div class="tp-grid tp-head" style="--cols:${cols}"><span></span>${page.templates.map((t, i) => `<div><h3>${i + 1}. ${t.name}</h3><p>${t.what}</p>${t.doubt ? `<p class="tp-doubt">Doubt. ${t.doubt}</p>` : ''}</div>`).join('')}</div>`;
+    const head = `<div class="tp-grid tp-head" style="--cols:${cols}"><span></span>${page.templates.map((t, i) => `<div><h3>${i + 1}. ${t.name}</h3><p>${t.what}</p>${t.doubt ? `<p class="tp-doubt">Note. ${t.doubt}</p>` : ''}</div>`).join('')}</div>`;
     const row = (t: Theme) => `<div class="tp-grid tp-row" style="--cols:${cols}"><h3>${t.name}</h3>${page.templates.map(x => `<button type="button" class="tp-thumb" data-large="${t.id}:${x.id}" aria-label="${x.name} with ${t.name}, show large">${stage(t, valuesOf(page, x))}</button>`).join('')}</div>`;
     const big = large ? (() => {
       const t = themeById(large.theme), x = page.templates.find(item => item.id === large!.template) ?? page.templates[0]!;
