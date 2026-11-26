@@ -1,12 +1,72 @@
 {
   "schemaVersion": 1,
   "screenId": "game-ui-templates",
-  "currentApproved": null,
+  "currentApproved": "board-v1",
   "revisions": [
     {
       "id": "board-v1",
       "variantId": "board",
-      "approval": null
+      "approval": {
+        "date": "2026-11-26",
+        "decision": "Kris approved the template board for #222: screen game-ui-templates / board, revision board-v1. On 2026-11-26 he agreed to drop Wide text and 4 x 2 and to name the stock template \"Ren'Py default\" (\"I agree with all four recommendations\"). After council round one he chose a \"Side\" setting for the Menu panel, which drops Centered for the title screen, and a Narrow box with no space below in place of Floating (\"Option A for both\"). After round two he agreed that a theme's \"Stock picture\" is equal to the drawn box near the stock look when the layout makes the picture not fit, and he kept the title contrast and the speaker name in Centered as known limits (\"I agree with the rule change. I side with you for the disagreements.\"). He asked for a council review of two rounds (Claude Opus 5.5 and GPT-6.2 Sol scored 6 and 6.5, then 7.5 and 7.5); the round-two fixes were applied without a third review, as he chose (\"You can stop here\"). The decision is recorded in issue #222.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "1d54dd9c5e84dfbb8270f7f99c53240963affbba",
+          "fingerprint": "358634836869611fafc1828f566b5e72e32565abeead2b6ce640f33a66f8c22d"
+        },
+        "captures": [
+          {
+            "path": "docs/design/game-ui-templates/captures/board-v1-title-dark-wide.png",
+            "sha256": "bce0d07f27ccec976caf4ba9005bca3177ae0c3fe723bdccf10b94b68933ed70",
+            "state": "title",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-templates/captures/board-v1-say-dark-wide.png",
+            "sha256": "858ddc9e680327a79a5af048874d632f4122f3ca0ccfce467e32983cccf69f0c",
+            "state": "say",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-templates/captures/board-v1-choice-dark-wide.png",
+            "sha256": "79fc70c6e945c9af85f46c01d76a1ff692694bec92bdc677abf40f5d152d2f18",
+            "state": "choice",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-templates/captures/board-v1-history-dark-wide.png",
+            "sha256": "34392add2186291121bdeb8efa4f9db0d1b85a315798de367f09fa540d67cd1e",
+            "state": "history",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "Twelve templates on four settings pages: Title screen (Ren'Py default, Right column, Bottom row), Dialogue box (Ren'Py default, Centered, Narrow box), Choices (Ren'Py default, Compact, Left side) and History (Ren'Py default, Compact, Names above). Each one is drawn with each of the seven themes.",
+          "The Game-wide look, Quick menu, Pause menu, Save and load, Options and Confirm prompt pages have no template.",
+          "Every value a template sets is in templates.ts and in the Values table. A template sets layout settings only. No template sets \"Show the box\" or \"Show the title and version\"; a template leaves the author's value, and the \"Custom\" test does not read them.",
+          "Four settings are new: Dialogue box Width, Menu panel Side (Left, Right, Bottom) with Width renamed to Size, Text align for the title screen's menu buttons, and Offset X for the choice list.",
+          "Centered sets Dialogue text X to 640, because Ren'Py places a centered text by its middle.",
+          "A stock picture that a size or position change makes wrong is drawn as a box near the stock look, Panel at 80 %. No approved theme changes."
+        ],
+        "deviations": [
+          "A browser drawing stands in for the hidden Ren'Py process; text metrics and line heights differ slightly from Ren'Py's.",
+          "No template has an SDK run. The new settings and the title screen's own menu layout are hypotheses until the build tree runs them.",
+          "Known limits that Kris accepted: the Narrow box is square in each theme until the author sets Corners; with Names above, a line with no speaker has an empty 44 px above it; the stock choice button keeps 100 px of padding at each side; the game title has no backing on an author's picture; in Centered the speaker name is over the middle of the scene, which Harbor and Hollow do not back; Bottom row does not wrap, so more buttons or long words can make it wider than the screen."
+        ]
+      }
     }
   ]
 }

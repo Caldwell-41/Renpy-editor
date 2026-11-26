@@ -1,12 +1,62 @@
 {
   "schemaVersion": 1,
   "screenId": "game-ui-template-sheet",
-  "currentApproved": null,
+  "currentApproved": "sheet-v1",
   "revisions": [
     {
       "id": "sheet-v1",
       "variantId": "sheet",
-      "approval": null
+      "approval": {
+        "date": "2026-11-26",
+        "decision": "Kris approved the template row and sheet for #222: screen game-ui-template-sheet / sheet, revision sheet-v1, together with the template board on 2026-11-26. He asked for a council review of two rounds (Claude Opus 5.5 and GPT-6.2 Sol scored 6 and 6.5, then 7.5 and 7.5); the round-two fixes were applied without a third review, as he chose (\"You can stop here\"). It refines the template row and sheet of game-ui / blend-v2 and does not replace that approval. The decision is recorded in issue #222.",
+        "reason": null,
+        "supersedes": null,
+        "source": {
+          "commit": "1d54dd9c5e84dfbb8270f7f99c53240963affbba",
+          "fingerprint": "358634836869611fafc1828f566b5e72e32565abeead2b6ce640f33a66f8c22d"
+        },
+        "captures": [
+          {
+            "path": "docs/design/game-ui-template-sheet/captures/sheet-v1-title-dark-wide.png",
+            "sha256": "488a24209a66676f3facb22c1cee7e52a1cf965c73d790f627f8850557facbc7",
+            "state": "title",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-template-sheet/captures/sheet-v1-custom-dark-wide.png",
+            "sha256": "dea7f4cde8ca6493a59dae240aab23208bf2881363e2387e4b82dbd55b580e1b",
+            "state": "custom",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          },
+          {
+            "path": "docs/design/game-ui-template-sheet/captures/sheet-v1-confirm-dark-wide.png",
+            "sha256": "832c747d38465b78fc3a13f461f66c4393049412294e07f330f386107f67d2ee",
+            "state": "confirm",
+            "theme": "dark",
+            "width": 1100,
+            "height": 720,
+            "scale": 1
+          }
+        ],
+        "behaviour": [
+          "The sheet shows one live picture for each template of the page, drawn with the project's theme. \"Ren'Py default\" is first, and the others follow from the smallest change to the largest.",
+          "The row names the template whose values are equal to the page's layout values. In each other case it shows \"Custom\", and no tile is selected.",
+          "A choice closes the sheet and is one change. When the layout is Custom, Loomlight asks first: \"This screen's layout is not one of the templates. This template replaces it. Apply it?\" with Cancel and Apply. The question blocks the page, and Cancel returns focus to the tile.",
+          "A template keeps the author's value of an on/off setting that no template sets."
+        ],
+        "deviations": [
+          "A browser drawing stands in for the hidden Ren'Py process; text metrics and line heights differ slightly from Ren'Py's.",
+          "No template has an SDK run. The new settings and the title screen's own menu layout are hypotheses until the build tree runs them.",
+          "The panel under the row lists the layout values as text, not as the approved controls of game-ui / blend-v2.",
+          "\"Change one setting by hand\" and the Theme menu are prototype controls."
+        ]
+      }
     }
   ]
 }
